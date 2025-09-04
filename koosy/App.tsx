@@ -1,4 +1,4 @@
-import * as React from 'react';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './screens/Homescreen';
@@ -7,6 +7,8 @@ import BiensScreen from './screens/BiensScreen';
 import TachesScreen from './screens/TachesScreen';
 import CalendrierScreen from './screens/CalendrierScreen';
 import CarteScreen from './screens/CarteScreen';
+import SplashScreen from './components/SplashScreen';
+import React, { useState, useEffect } from 'react';
 
 
 
@@ -15,6 +17,23 @@ import CarteScreen from './screens/CarteScreen';
 const Tab = createBottomTabNavigator();
 
 export default function App() {
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    // Simule le chargement (ex: 2 secondes)
+    const timer = setTimeout(() => setIsLoading(false), 2000);
+    return () => clearTimeout(timer);
+  }, []);
+
+
+
+
+
+
+  if (isLoading) {
+    return <SplashScreen />;
+  }
+
   return (
     <NavigationContainer>
       <Tab.Navigator>
@@ -28,3 +47,4 @@ export default function App() {
     </NavigationContainer>
   );
 }
+
