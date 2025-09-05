@@ -1,9 +1,11 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
+import { useTheme } from '../contexts/ThemeContext';
 
 const SplashScreen = () => {
     const rotateAnim = useRef(new Animated.Value(0)).current;
+    const { colors } = useTheme();
 
     useEffect(() => {
         Animated.loop(
@@ -21,12 +23,12 @@ const SplashScreen = () => {
     });
 
     return (
-        <View style={styles.container}>
+        <View style={[styles.container, { backgroundColor: colors.background }]}> 
             <Animated.View style={{ transform: [{ rotate }] }}>
-                <FontAwesome5 name="key" size={80} color="#007AFF" />
+                <FontAwesome5 name="key" size={80} color={colors.primary} />
             </Animated.View>
-            <Text style={styles.text}>Koosy</Text>
-            <Text style={styles.subtext}>Gestion de biens simplifiée</Text>
+            <Text style={[styles.text, { color: colors.primary }]}>Koosy</Text>
+            <Text style={[styles.subtext, { color: colors.textSecondary }]}>Gestion de biens simplifiée</Text>
         </View>
     );
 };
@@ -34,20 +36,20 @@ const SplashScreen = () => {
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f5f6fa',
         justifyContent: 'center',
         alignItems: 'center',
+        // backgroundColor: colors.background, // Utilisé dans le composant
     },
     text: {
         fontSize: 28,
         fontWeight: 'bold',
-        color: '#007AFF',
         marginBottom: 10,
         marginTop: 30,
+        // color: colors.primary, // Utilisé dans le composant
     },
     subtext: {
         fontSize: 16,
-        color: '#333',
+        // color: colors.textSecondary, // Utilisé dans le composant
     },
 });
 

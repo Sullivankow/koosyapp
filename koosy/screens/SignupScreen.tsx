@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { useTheme } from '../contexts/ThemeContext';
 
 type SignupScreenProps = {
     onSignupSuccess?: () => void;
@@ -10,6 +11,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const { colors } = useTheme();
 
     const handleSignup = () => {
         // Ici tu ajoutes la logique d'inscription et de paiement
@@ -18,32 +20,35 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Inscription</Text>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <Text style={[styles.title, { color: colors.primary }]}>Inscription</Text>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                 placeholder="Email"
+                placeholderTextColor={colors.textSecondary}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
             />
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                 placeholder="Mot de passe"
+                placeholderTextColor={colors.textSecondary}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
             />
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                 placeholder="Confirmer le mot de passe"
+                placeholderTextColor={colors.textSecondary}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
             />
-            <Button title="S'inscrire" onPress={handleSignup} />
-            <Button title="Retour" onPress={onBack} color="#007AFF" />
+            <Button title="S'inscrire" onPress={handleSignup} color={colors.primary} />
+            <Button title="Retour" onPress={onBack} color={colors.secondary} />
         </View>
     );
 };
@@ -54,23 +59,24 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        backgroundColor: '#F5F6FA',
+        // backgroundColor: colors.background, // Utilisé dans le composant
     },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 30,
-        color: '#007AFF',
+        // color: colors.primary, // Utilisé dans le composant
     },
     input: {
         width: '100%',
         height: 40,
-        borderColor: '#ECECEC',
         borderWidth: 1,
         borderRadius: 8,
         marginBottom: 15,
         paddingHorizontal: 10,
-        backgroundColor: '#fff',
+        // backgroundColor: colors.surface, // Utilisé dans le composant
+        // borderColor: colors.border, // Utilisé dans le composant
+        // color: colors.text, // Utilisé dans le composant
     },
 });
 

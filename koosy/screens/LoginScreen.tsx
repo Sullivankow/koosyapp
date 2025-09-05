@@ -73,30 +73,31 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
         alignItems: 'center',
         padding: 20,
-        backgroundColor: '#F5F6FA',
+        // backgroundColor: colors.background, // Utilisé dans le composant
     },
     title: {
         fontSize: 28,
         fontWeight: 'bold',
         marginBottom: 30,
-        color: '#007AFF',
+        // color: colors.primary, // Utilisé dans le composant
     },
     input: {
         width: '100%',
         height: 40,
-        borderColor: '#ECECEC',
         borderWidth: 1,
         borderRadius: 8,
         marginBottom: 15,
         paddingHorizontal: 10,
-        backgroundColor: '#fff',
+        // backgroundColor: colors.surface, // Utilisé dans le composant
+        // borderColor: colors.border, // Utilisé dans le composant
+        // color: colors.text, // Utilisé dans le composant
     },
     linksContainer: {
         marginTop: 20,
         alignItems: 'center',
     },
     link: {
-        color: '#007AFF',
+        // color: colors.primary, // Utilisé dans le composant
         fontSize: 16,
         marginTop: 10,
         textDecorationLine: 'underline',
