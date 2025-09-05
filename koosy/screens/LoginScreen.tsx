@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Switch } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
 
 
@@ -9,7 +10,7 @@ import { useTheme } from '../contexts/ThemeContext';
 
 
 type LoginScreenProps = {
-    onLogin?: () => void;
+    onLogin?: (email?: string, password?: string) => void;
     onSignup?: () => void;
     onForgotPassword?: () => void;
 };
@@ -17,13 +18,36 @@ type LoginScreenProps = {
 const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPassword }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [rememberMe, setRememberMe] = useState(false);
     const { colors, isDarkMode, toggleTheme } = useTheme();
 
     // Ici tu ajouteras la logique de paiement/validation
-    const handleLogin = () => {
-        // Vérifie les infos, effectue le paiement, etc.
-        // Si tout est OK :
-        onLogin?.();
+    // Regex email simple
+    const isEmailValid = (val: string) =>
+        /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/.test(val.trim());
+
+    useEffect(() => {
+        // Récupère les identifiants mémorisés si existants
+        AsyncStorage.getItem('koosy_login').then(data => {
+            if (data) {
+                try {
+                    const { email, password } = JSON.parse(data);
+                    setEmail(email);
+                    setPassword(password);
+                    setRememberMe(true);
+                } catch { }
+            }
+        });
+    }, []);
+
+    const handleLogin = async () => {
+        if (!email.trim() || !password.trim() || !isEmailValid(email)) return;
+        if (rememberMe) {
+            await AsyncStorage.setItem('koosy_login', JSON.stringify({ email, password }));
+        } else {
+            await AsyncStorage.removeItem('koosy_login');
+        }
+        onLogin?.(email, password);
     };
 
     return (
@@ -46,7 +70,23 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
                 onChangeText={setPassword}
                 secureTextEntry
             />
-            <Button title="Se connecter" onPress={handleLogin} color={colors.primary} />
+            <View style={{ width: '100%', marginBottom: 10 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+                    <Switch
+                        value={rememberMe}
+                        onValueChange={setRememberMe}
+                        trackColor={{ false: colors.border, true: colors.primary }}
+                        thumbColor={rememberMe ? colors.primary : colors.surface}
+                    />
+                    <Text style={{ marginLeft: 8, color: colors.text }}>Mémoriser mes identifiants</Text>
+                </View>
+                <Button
+                    title="Se connecter"
+                    onPress={handleLogin}
+                    color={colors.primary}
+                    disabled={!email.trim() || !password.trim() || !isEmailValid(email)}
+                />
+            </View>
 
             <View style={styles.linksContainer}>
                 <TouchableOpacity onPress={onSignup}>

@@ -3,7 +3,7 @@ import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 
 type SignupScreenProps = {
-    onSignupSuccess?: () => void;
+    onSignupSuccess?: (email?: string, password?: string) => void;
     onBack?: () => void;
 };
 
@@ -13,10 +13,16 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
     const [confirmPassword, setConfirmPassword] = useState('');
     const { colors } = useTheme();
 
+    // Regex email simple
+    const isEmailValid = (val: string) =>
+        /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/.test(val.trim());
+
     const handleSignup = () => {
-        // Ici tu ajoutes la logique d'inscription et de paiement
-        // Si tout est OK :
-        onSignupSuccess?.();
+        if (!email.trim() || !password.trim() || !isEmailValid(email) || password !== confirmPassword) {
+            alert("Veuillez remplir tous les champs correctement.");
+            return;
+        }
+        onSignupSuccess?.(email, password);
     };
 
     return (
@@ -47,7 +53,12 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
                 onChangeText={setConfirmPassword}
                 secureTextEntry
             />
-            <Button title="S'inscrire" onPress={handleSignup} color={colors.primary} />
+            <Button
+                title="S'inscrire"
+                onPress={handleSignup}
+                color={colors.primary}
+                disabled={!email.trim() || !password.trim() || !isEmailValid(email) || password !== confirmPassword}
+            />
             <Button title="Retour" onPress={onBack} color={colors.secondary} />
         </View>
     );
