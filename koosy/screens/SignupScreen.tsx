@@ -14,7 +14,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
     const handleSignup = () => {
         // Ici tu ajoutes la logique d'inscription et de paiement
         // Si tout est OK :
-        onSignupSuccess && onSignupSuccess();
+        onSignupSuccess?.();
     };
 
     return (

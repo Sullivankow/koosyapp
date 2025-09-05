@@ -11,6 +11,7 @@ import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import React, { useState, useEffect } from 'react';
 import { View, Text, Button } from 'react-native';
+import { ThemeProvider } from './contexts/ThemeContext';
 
 const Tab = createBottomTabNavigator();
 
@@ -61,16 +62,22 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
-      <Tab.Navigator>
-        <Tab.Screen name="Accueil" component={HomeScreen} />
-        <Tab.Screen name="Biens" component={BiensScreen} />
-        <Tab.Screen name="Tâches" component={TachesScreen} />
-        <Tab.Screen name="Calendrier" component={CalendrierScreen} />
-        <Tab.Screen name="Carte" component={CarteScreen} />
-        <Tab.Screen name="Locataire" component={LocatairesScreen} />
-      </Tab.Navigator>
-    </NavigationContainer>
+    <ThemeProvider>
+      <NavigationContainer>
+        <Tab.Navigator>
+          <Tab.Screen
+            name="Accueil"
+            children={() => <HomeScreen onLogout={() => setIsLoggedIn(false)} />}
+          />
+
+          <Tab.Screen name="Biens" component={BiensScreen} />
+          <Tab.Screen name="Tâches" component={TachesScreen} />
+          <Tab.Screen name="Calendrier" component={CalendrierScreen} />
+          <Tab.Screen name="Carte" component={CarteScreen} />
+          <Tab.Screen name="Locataire" component={LocatairesScreen} />
+        </Tab.Navigator>
+      </NavigationContainer>
+    </ThemeProvider>
   );
 }
 

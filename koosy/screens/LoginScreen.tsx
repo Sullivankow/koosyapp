@@ -1,5 +1,12 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from 'react-native';
+import { useTheme } from '../contexts/ThemeContext';
+
+
+
+
+
+
 
 type LoginScreenProps = {
     onLogin?: () => void;
@@ -10,6 +17,7 @@ type LoginScreenProps = {
 const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPassword }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const { colors, isDarkMode, toggleTheme } = useTheme();
 
     // Ici tu ajouteras la logique de paiement/validation
     const handleLogin = () => {
@@ -19,32 +27,41 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.title}>Connexion</Text>
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
+            <Text style={[styles.title, { color: colors.primary }]}>Connexion</Text>
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                 placeholder="Email"
+                placeholderTextColor={colors.textSecondary}
                 value={email}
                 onChangeText={setEmail}
                 keyboardType="email-address"
                 autoCapitalize="none"
             />
             <TextInput
-                style={styles.input}
+                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                 placeholder="Mot de passe"
+                placeholderTextColor={colors.textSecondary}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
             />
-            <Button title="Se connecter" onPress={handleLogin} />
+            <Button title="Se connecter" onPress={handleLogin} color={colors.primary} />
 
             <View style={styles.linksContainer}>
                 <TouchableOpacity onPress={onSignup}>
-                    <Text style={styles.link}>Pas encore inscrit ?</Text>
+                    <Text style={[styles.link, { color: colors.primary }]}>Pas encore inscrit ?</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={onForgotPassword}>
-                    <Text style={styles.link}>Mot de passe oublié ?</Text>
+                    <Text style={[styles.link, { color: colors.primary }]}>Mot de passe oublié ?</Text>
                 </TouchableOpacity>
+            </View>
+            <View style={{ marginTop: 30 }}>
+                <Button
+                    title={isDarkMode ? 'Mode clair' : 'Mode sombre'}
+                    onPress={toggleTheme}
+                    color={colors.secondary}
+                />
             </View>
         </View>
     );
