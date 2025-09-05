@@ -23,7 +23,7 @@ const SplashScreen = () => {
     });
 
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}> 
+        <View style={[styles.container, { backgroundColor: colors.background }]}>
             <Animated.View style={{ transform: [{ rotate }] }}>
                 <FontAwesome5 name="key" size={80} color={colors.primary} />
             </Animated.View>

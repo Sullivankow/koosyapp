@@ -5,7 +5,7 @@ import { useTheme } from '../contexts/ThemeContext';
 function TachesScreen() {
   const { colors } = useTheme();
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}> 
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <Text style={[styles.text, { color: colors.text }]}>TachesScreen</Text>
     </View>
   );
