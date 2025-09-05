@@ -10,6 +10,7 @@ import SplashScreen from './components/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import React, { useState, useEffect } from 'react';
+import { getSession, saveSession, clearSession, generateToken } from './utils/session';
 import { View, Text, Button } from 'react-native';
 import { ThemeProvider } from './contexts/ThemeContext';
 
@@ -21,30 +22,39 @@ export default function App() {
   const [showSignup, setShowSignup] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
+
   useEffect(() => {
-    // Simule le chargement (ex: 2 secondes)
-    const timer = setTimeout(() => setIsLoading(false), 2000);
+    // Simule le chargement (ex: 1.2 secondes)
+    const timer = setTimeout(async () => {
+      const sess = await getSession();
+      if (sess?.token) {
+        // setSession(sess); // supprimé
+        setIsLoggedIn(true);
+      }
+      setIsLoading(false);
+    }, 1200);
     return () => clearTimeout(timer);
   }, []);
 
-  if (isLoading) {
-    return <SplashScreen />;
-  }
+  if (isLoading) return <SplashScreen />;
 
+  // Auth flow
   if (!isLoggedIn) {
     if (showSignup) {
       return (
         <SignupScreen
-          onSignupSuccess={() => {
+          onSignupSuccess={async (email?: string) => {
             setShowSignup(false);
-            setIsLoggedIn(true); // Connecte l'utilisateur après inscription
+            const token = generateToken();
+            await saveSession(email || '', token);
+
+            setIsLoggedIn(true);
           }}
           onBack={() => setShowSignup(false)}
         />
       );
     }
     if (showForgotPassword) {
-      // Remplace ceci par ton composant de réinitialisation
       return (
         <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
           <Text style={{ fontSize: 22, marginBottom: 20 }}>Mot de passe oublié (à créer)</Text>
@@ -54,22 +64,39 @@ export default function App() {
     }
     return (
       <LoginScreen
-        onLogin={() => setIsLoggedIn(true)}
+        onLogin={async (email?: string) => {
+          const sess = await getSession();
+          if (sess?.token && sess?.email === email) {
+            // setSession(sess); // supprimé
+            setIsLoggedIn(true);
+          } else {
+            const token = generateToken();
+            await saveSession(email || '', token);
+
+            setIsLoggedIn(true);
+          }
+        }}
         onSignup={() => setShowSignup(true)}
         onForgotPassword={() => setShowForgotPassword(true)}
       />
     );
   }
 
+  // App principale
   return (
     <ThemeProvider>
       <NavigationContainer>
         <Tab.Navigator>
-          <Tab.Screen
-            name="Accueil"
-            children={() => <HomeScreen onLogout={() => setIsLoggedIn(false)} />}
-          />
-
+          <Tab.Screen name="Accueil">
+            {() => (
+              <HomeScreen
+                onLogout={async () => {
+                  await clearSession();
+                  setIsLoggedIn(false);
+                }}
+              />
+            )}
+          </Tab.Screen>
           <Tab.Screen name="Biens" component={BiensScreen} />
           <Tab.Screen name="Tâches" component={TachesScreen} />
           <Tab.Screen name="Calendrier" component={CalendrierScreen} />
