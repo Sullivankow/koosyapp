@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './screens/Homescreen';
@@ -9,6 +8,8 @@ import CalendrierScreen from './screens/CalendrierScreen';
 import CarteScreen from './screens/CarteScreen';
 import SplashScreen from './components/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
+import SignupScreen from './screens/SignupScreen';
+import React, { useState, useEffect } from 'react';
 import { View, Text, Button } from 'react-native';
 
 const Tab = createBottomTabNavigator();
@@ -31,12 +32,14 @@ export default function App() {
 
   if (!isLoggedIn) {
     if (showSignup) {
-      // Remplace ceci par ton composant d'inscription
       return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ fontSize: 22, marginBottom: 20 }}>Page d'inscription (à créer)</Text>
-          <Button title="Retour" onPress={() => setShowSignup(false)} />
-        </View>
+        <SignupScreen
+          onSignupSuccess={() => {
+            setShowSignup(false);
+            setIsLoggedIn(true); // Connecte l'utilisateur après inscription
+          }}
+          onBack={() => setShowSignup(false)}
+        />
       );
     }
     if (showForgotPassword) {
