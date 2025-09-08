@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal, Dimensions } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Bien } from '../models/models';
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 // Mock de 4 biens avec plusieurs photos
 const MOCK_BIENS: Bien[] = [
@@ -103,124 +104,125 @@ const MOCK_BIENS: Bien[] = [
 ];
 
 const BiensScreen: React.FC = () => {
+  // Formatage date française
+  const formatDateFR = (dateStr?: string) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr || '';
+    return d.toLocaleDateString('fr-FR');
+  };
   const { colors } = useTheme();
   const [biens, setBiens] = useState<Bien[]>(MOCK_BIENS);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
+  // carouselIndex inutilisé, supprimé
 
-  // Actions
-  const handleAjouterBien = () => {
-    alert('Ajouter un bien (à implémenter)');
-  };
-  const handleModifierBien = (bien: Bien) => {
-    alert(`Modifier le bien : ${bien.nom}`);
-  };
-  const handleSupprimerBien = (bienId: string) => {
-    setBiens(biens.filter(b => b.id !== bienId));
-  };
-  const handleVoirMap = (bien: Bien) => {
-    alert(`Voir la carte pour : ${bien.nom}`);
-  };
-  const handlePhotoPress = (photo: any) => {
-    setSelectedPhoto(photo);
-    setModalVisible(true);
-  };
+  // Actions principales
+  const handleAjouterBien = () => alert('Ajouter un bien (à implémenter)');
+  const handleModifierBien = (bien: Bien) => alert(`Modifier le bien : ${bien.nom}`);
+  const handleSupprimerBien = (bienId: string) => setBiens(biens.filter(b => b.id !== bienId));
+  const handleVoirMap = (bien: Bien) => alert(`Voir la carte pour : ${bien.nom}`);
+  const handlePhotoPress = (photo: any) => { setSelectedPhoto(photo); setModalVisible(true); };
+
+  // Carrousel photos
+  const renderCarousel = (photos: any[]) => (
+    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.carousel}>
+      {photos.map((photo, idx) => (
+        <TouchableOpacity key={idx} onPress={() => handlePhotoPress(photo)}>
+          <Image source={photo} style={styles.carouselPhoto} resizeMode="cover" />
+        </TouchableOpacity>
+      ))}
+    </ScrollView>
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}>
-      <View style={styles.headerRow}>
-        <Text style={[styles.title, { color: colors.primary }]}>Liste des biens</Text>
+      {/* Header sticky */}
+      <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}>
+        <Text style={[styles.title, { color: colors.text }]}>Mes biens</Text>
         <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={handleAjouterBien}>
           <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
-          <Text style={[styles.addText, { color: colors.surface }]}>Ajouter</Text>
         </TouchableOpacity>
       </View>
       <FlatList
         data={biens}
         keyExtractor={item => item.id}
-        contentContainerStyle={{ paddingBottom: 30 }}
+        contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
         renderItem={({ item }) => (
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
-            {/* Photos du bien */}
-            {item.photos && item.photos.length > 0 && (
-              <View style={styles.photoContainer}>
-                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-                  {item.photos.map((photo, idx) => {
-                    let source;
-                    if (typeof photo === 'string') {
-                      source = { uri: photo };
-                    } else {
-                      source = photo;
-                    }
-                    return (
-                      <TouchableOpacity key={idx} style={styles.photoWrapper} onPress={() => handlePhotoPress(source)}>
-                        <Image source={source} style={styles.photo} resizeMode="cover" />
-                      </TouchableOpacity>
-                    );
-                  })}
-                </ScrollView>
-              </View>
-            )}
-            <View style={styles.cardHeader}>
-              <Text style={[styles.cardTitle, { color: colors.primary }]}>{item.nom}</Text>
-              <TouchableOpacity onPress={() => handleVoirMap(item)}>
-                <MaterialCommunityIcons name="map-marker" size={24} color={colors.accent} />
-              </TouchableOpacity>
+            {item.photos && item.photos.length > 0 && renderCarousel(item.photos)}
+            <View style={styles.infoGrid}>
+              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Type</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.type}</Text></View>
+              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Superficie</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.superficie} m²</Text></View>
+              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Pièces</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.pieces}</Text></View>
+              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Statut</Text><Text style={[styles.infoValue, { color: colors.accent }]}>{item.statut}</Text></View>
             </View>
-            <Text style={[styles.cardAddress, { color: colors.textSecondary }]}>{item.adresse}</Text>
-            <Text style={{ color: colors.text }}>Type : {item.type} | {item.pieces} pièces | {item.superficie} m²</Text>
-            <Text style={{ color: colors.textSecondary, marginTop: 2 }}>Propriétaire : {item.proprio.nom} ({item.proprio.email})</Text>
-            {/* Locataires actuels */}
-            {item.locataires.length > 0 ? (
-              <View style={styles.sectionRow}>
-                <FontAwesome5 name="user-friends" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
-                <Text style={{ color: colors.text, fontWeight: 'bold' }}> :</Text>
-                <View style={{ marginLeft: 8 }}>
-                  {item.locataires.map(loc => (
-                    <Text key={loc.id} style={{ color: colors.text }}>
-                      {loc.nom} ({loc.email})
-                      {' '}du {loc.dateArrivee} au {loc.dateDepart}
-                    </Text>
-                  ))}
-                </View>
+            {/* Propriétaire */}
+            <View style={styles.proprioBox}>
+              <View style={styles.avatarCircle}>
+                <FontAwesome5 name="user-tie" size={18} color={colors.secondary} />
               </View>
-            ) : (
-              <Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucun locataire actuellement</Text>
-            )}
-            {/* Tâches à faire */}
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{item.proprio.nom}</Text>
+                <Text style={{ color: colors.textSecondary }}>{item.proprio.email}</Text>
+                <Text style={{ color: colors.textSecondary }}>{item.proprio.telephone}</Text>
+              </View>
+            </View>
+            {/* Locataires */}
+            <View style={styles.sectionRow}>
+              <FontAwesome5 name="user-friends" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
+              <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 6 }}>Locataires :</Text>
+              <View style={styles.chipsRow}>
+                {item.locataires.length > 0 ? item.locataires.map(loc => (
+                  <View key={loc.id} style={[styles.chip, { backgroundColor: colors.primary + '22', borderColor: colors.primary }]}>
+                    <FontAwesome5 name="user" size={14} color={colors.primary} style={{ marginRight: 4 }} />
+                    <View>
+                      <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 13 }}>{loc.nom}</Text>
+                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{formatDateFR(loc.dateArrivee)} → {formatDateFR(loc.dateDepart)}</Text>
+                    </View>
+                  </View>
+                )) : <Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucun locataire</Text>}
+              </View>
+            </View>
+            {/* Tâches */}
             <View style={styles.sectionRow}>
               <MaterialCommunityIcons name="clipboard-list" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
-              <Text style={{ color: colors.text, fontWeight: 'bold' }}> :</Text>
-              <View style={{ marginLeft: 8 }}>
+              <Text style={{ color: colors.text, fontWeight: 'bold' }}>Tâches :</Text>
+              <View style={styles.timeline}>
                 {item.taches.length > 0 ? item.taches.map(tache => (
-                  <Text key={tache.id} style={{ color: colors.text }}>
-                    {tache.titre} ({tache.statut}) {tache.dateEcheance ? `- échéance : ${tache.dateEcheance}` : ''}
-                  </Text>
+                  <View key={tache.id} style={styles.timelineItem}>
+                    <MaterialCommunityIcons name="circle" size={10} color={tache.statut === 'à faire' ? colors.error : colors.accent} style={{ marginRight: 6 }} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ color: colors.text, fontWeight: '500' }}>{tache.titre}</Text>
+                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{tache.statut} {tache.dateEcheance ? `- ${formatDateFR(tache.dateEcheance)}` : ''}</Text>
+                    </View>
+                  </View>
                 )) : <Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune tâche</Text>}
               </View>
             </View>
-            {/* Actions modifier/supprimer */}
-            <View style={styles.actionRow}>
-              <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]} onPress={() => handleModifierBien(item)}>
-                <MaterialCommunityIcons name="pencil" size={18} color={colors.surface} />
-                <Text style={[styles.actionText, { color: colors.surface }]}>Modifier</Text>
+            {/* Actions */}
+            <View style={styles.floatingActions}>
+              <TouchableOpacity style={[styles.fab, { backgroundColor: colors.secondary }]} onPress={() => handleModifierBien(item)}>
+                <MaterialCommunityIcons name="pencil" size={20} color={colors.surface} />
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.error }]} onPress={() => handleSupprimerBien(item.id)}>
-                <MaterialCommunityIcons name="delete" size={18} color={colors.surface} />
-                <Text style={[styles.actionText, { color: colors.surface }]}>Supprimer</Text>
+              <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={() => handleSupprimerBien(item.id)}>
+                <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.fab, { backgroundColor: colors.accent }]} onPress={() => handleVoirMap(item)}>
+                <MaterialCommunityIcons name="map-marker" size={20} color={colors.surface} />
               </TouchableOpacity>
             </View>
           </View>
         )}
       />
-      {/* Modale d’agrandissement de photo */}
+      {/* Modale photo */}
       <Modal visible={modalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
-          {/* Bouton de fermeture */}
+          {/* Fermer */}
           <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
             <MaterialCommunityIcons name="close" size={32} color="#fff" />
           </TouchableOpacity>
-          {/* Image agrandie */}
+          {/* Image */}
           {selectedPhoto && (
             <Image source={selectedPhoto} style={styles.modalPhoto} resizeMode="contain" />
           )}
@@ -233,85 +235,141 @@ const BiensScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    padding: 0,
   },
-  headerRow: {
+  headerSticky: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderColor: '#eee',
+    // position: 'sticky', // Non supporté RN
+    // top: 0,
+    zIndex: 10,
   },
   title: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
   },
   addBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 8,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-  },
-  addText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    marginLeft: 6,
-  },
-  card: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 16,
+    borderRadius: 24,
+    paddingVertical: 8,
+    paddingHorizontal: 18,
     elevation: 2,
   },
-  photoContainer: {
-    marginBottom: 8,
+  card: {
+    borderRadius: 18,
+    padding: 18,
+    marginHorizontal: 16,
+    marginBottom: 24,
+    elevation: 3,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.12,
+    shadowRadius: 8,
   },
-  photoWrapper: {
-    marginRight: 8,
-    borderRadius: 8,
-    overflow: 'hidden',
+  carousel: {
+    marginBottom: 12,
+    borderRadius: 14,
+    // overflow: 'hidden', // Non supporté sur ScrollView
   },
-  photo: {
-    width: 120,
-    height: 80,
-    borderRadius: 8,
+  carouselPhoto: {
+    width: SCREEN_WIDTH - 32,
+    height: 180,
+    borderRadius: 14,
+    marginRight: 4,
+    // Pas de style View/Text ici
   },
-  cardHeader: {
+  infoGrid: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    flexWrap: 'wrap',
+    marginBottom: 10,
+    gap: 12,
+  },
+  infoCol: {
+    width: '48%',
     marginBottom: 4,
   },
-  cardTitle: {
-    fontSize: 18,
+  infoLabel: {
+    color: '#888',
+    fontSize: 13,
+  },
+  infoValue: {
+    fontSize: 15,
     fontWeight: 'bold',
   },
-  cardAddress: {
-    fontSize: 14,
-    marginBottom: 2,
+  proprioBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    borderRadius: 12,
+    padding: 10,
+    marginBottom: 10,
+    gap: 10,
+  },
+  avatarCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(0,0,0,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
   },
   sectionRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginTop: 8,
+    marginBottom: 2,
+    gap: 6,
   },
-  actionRow: {
+  chipsRow: {
     flexDirection: 'row',
-    justifyContent: 'flex-end',
-    marginTop: 12,
+    flexWrap: 'wrap',
     gap: 8,
+    marginLeft: 8,
   },
-  actionBtn: {
+  chip: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 8,
+    borderRadius: 16,
+    borderWidth: 1,
     paddingVertical: 6,
     paddingHorizontal: 12,
+    marginBottom: 4,
+    marginRight: 4,
+    minWidth: 90,
+    gap: 4,
   },
-  actionText: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    marginLeft: 6,
+  timeline: {
+    flex: 1,
+    flexDirection: 'column',
+    gap: 6,
+    marginLeft: 8,
+  },
+  timelineItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 2,
+    gap: 6,
+  },
+  floatingActions: {
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    gap: 16,
+    marginTop: 16,
+  },
+  fab: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 2,
   },
   modalOverlay: {
     flex: 1,
@@ -323,6 +381,7 @@ const styles = StyleSheet.create({
     width: '90%',
     height: '70%',
     borderRadius: 12,
+    // Pas de style View/Text ici
   },
   closeBtn: {
     position: 'absolute',
@@ -336,3 +395,6 @@ const styles = StyleSheet.create({
 });
 
 export default BiensScreen;
+
+
+
