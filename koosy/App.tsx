@@ -13,6 +13,7 @@ import React, { useState, useEffect } from 'react';
 import { getSession, saveSession, clearSession, generateToken } from './utils/session';
 import { View, Text, Button } from 'react-native';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
 const Tab = createBottomTabNavigator();
 
@@ -86,7 +87,33 @@ export default function App() {
   return (
     <ThemeProvider>
       <NavigationContainer>
-        <Tab.Navigator>
+        <Tab.Navigator
+          screenOptions={({ route }) => ({
+            tabBarIcon: ({ color, size }) => {
+              switch (route.name) {
+                case 'Accueil':
+                  return <MaterialCommunityIcons name="home" size={size} color={color} />;
+                case 'Biens':
+                  return <FontAwesome5 name="building" size={size} color={color} />;
+                case 'Tâches':
+                  return <MaterialCommunityIcons name="clipboard-list" size={size} color={color} />;
+                case 'Calendrier':
+                  return <MaterialCommunityIcons name="calendar" size={size} color={color} />;
+                case 'Carte':
+                  return <MaterialCommunityIcons name="map-marker" size={size} color={color} />;
+                case 'Locataire':
+                  return <FontAwesome5 name="users" size={size} color={color} />;
+                default:
+                  return null;
+              }
+            },
+            tabBarActiveTintColor: '#009688',
+            tabBarInactiveTintColor: '#6E7B8B',
+            headerTitleAlign: 'center',
+            headerStyle: { paddingTop: 0, height: 48 },
+            headerTitleStyle: { fontSize: 20, fontWeight: 'bold' },
+          })}
+        >
           <Tab.Screen name="Accueil">
             {() => (
               <HomeScreen
