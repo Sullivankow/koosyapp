@@ -86,22 +86,27 @@ function CalendrierScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      <Text style={[styles.title, { color: colors.primary }]}>Réservations</Text>
-      <FlatList
-        data={reservations.sort((a, b) => a.dateArrivee.localeCompare(b.dateArrivee))}
-        keyExtractor={item => item.id}
-        contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
-        ListEmptyComponent={<Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 40 }}>Aucune réservation</Text>}
-        renderItem={({ item }) => (
-          <TouchableOpacity style={[styles.card, { borderLeftColor: statutColor[item.statut] }]} onPress={() => openModal(item)}>
-            <Text style={[styles.cardTitle, { color: '#222B45' }]}>{MOCK_LOCATAIRES.find(l => l.id === item.locataireId)?.nom || item.locataireId}</Text>
-            <Text style={{ color: colors.textSecondary }}>Bien : {MOCK_BIENS.find(b => b.id === item.bienId)?.nom || item.bienId}</Text>
-            <Text style={{ color: colors.textSecondary }}>Arrivée : {formatDateFR(item.dateArrivee)} à {item.heureArrivee}</Text>
-            <Text style={{ color: colors.textSecondary }}>Départ : {formatDateFR(item.dateDepart)} à {item.heureDepart}</Text>
-            <Text style={{ color: statutColor[item.statut], fontWeight: 'bold' }}>Statut : {item.statut}</Text>
-          </TouchableOpacity>
-        )}
-      />
+      <View style={{ width: '100%', padding: 12 }}>
+        {/* <Calendrier reservations={reservations} /> */}
+      </View>
+      <View style={{ flex: 1, width: '100%' }}>
+        <Text style={[styles.title, { color: colors.primary }]}>Réservations</Text>
+        <FlatList
+          data={reservations.sort((a, b) => a.dateArrivee.localeCompare(b.dateArrivee))}
+          keyExtractor={item => item.id}
+          contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
+          ListEmptyComponent={<Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 40 }}>Aucune réservation</Text>}
+          renderItem={({ item }) => (
+            <TouchableOpacity style={[styles.card, { borderLeftColor: statutColor[item.statut] }]} onPress={() => openModal(item)}>
+              <Text style={[styles.cardTitle, { color: '#222B45' }]}>{MOCK_LOCATAIRES.find(l => l.id === item.locataireId)?.nom || item.locataireId}</Text>
+              <Text style={{ color: colors.textSecondary }}>Bien : {MOCK_BIENS.find(b => b.id === item.bienId)?.nom || item.bienId}</Text>
+              <Text style={{ color: colors.textSecondary }}>Arrivée : {formatDateFR(item.dateArrivee)} à {item.heureArrivee}</Text>
+              <Text style={{ color: colors.textSecondary }}>Départ : {formatDateFR(item.dateDepart)} à {item.heureDepart}</Text>
+              <Text style={{ color: statutColor[item.statut], fontWeight: 'bold' }}>Statut : {item.statut}</Text>
+            </TouchableOpacity>
+          )}
+        />
+      </View>
       {/* Bouton flottant ajout */}
       <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={() => openModal()}>
         <MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
