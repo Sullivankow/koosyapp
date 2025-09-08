@@ -110,7 +110,7 @@ export default function App() {
             tabBarActiveTintColor: '#009688',
             tabBarInactiveTintColor: '#6E7B8B',
             headerTitleAlign: 'center',
-            headerStyle: { paddingTop: 0, height: 48 },
+            headerStyle: { height: 48 }, // paddingTop supprimé
             headerTitleStyle: { fontSize: 20, fontWeight: 'bold' },
           })}
         >
