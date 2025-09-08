@@ -54,8 +54,18 @@ export interface Reservation {
   bienId: string; //le logement réservé
   locataireId: string; //la personne qui réserve
   dateArrivee: string; //quand la personne commence
-    dateDepart: string; //quand la personne finit
-    heureArrivee: string; // Heure d'arrivée (format HH:mm)
+  dateDepart: string; //quand la personne finit
+  heureArrivee: string; // Heure d'arrivée (format HH:mm)
   heureDepart: string;  // Heure de départ (format HH:mm)
   statut: 'confirmée' | 'en attente' | 'annulée';
+}
+
+
+export interface EvenementAgenda {
+  id: string;
+  date: string;
+  type: 'entrée' | 'départ';
+  locataireId: string;
+  bienId: string;
+  couleur: string;
 }
