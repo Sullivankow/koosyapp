@@ -174,6 +174,8 @@ const BiensScreen: React.FC = () => {
         contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
         renderItem={({ item }) => (
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
+            {/* Nom du bien */}
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 6 }}>{item.nom}</Text>
             {item.photos && item.photos.length > 0 && renderCarousel(item.photos)}
             <View style={styles.infoGrid}>
               <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Type</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.type}</Text></View>
