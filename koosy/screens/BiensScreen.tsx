@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal, Dimensions, TextInput } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Bien } from '../models/models';
@@ -113,6 +113,11 @@ const BiensScreen: React.FC = () => {
   };
   const { colors } = useTheme();
   const [biens, setBiens] = useState<Bien[]>(MOCK_BIENS);
+  const [search, setSearch] = useState('');
+  const filteredBiens = biens.filter(b =>
+    b.nom.toLowerCase().includes(search.toLowerCase()) ||
+    b.adresse.toLowerCase().includes(search.toLowerCase())
+  );
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
   // carouselIndex inutilisé, supprimé
@@ -144,8 +149,27 @@ const BiensScreen: React.FC = () => {
           <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
         </TouchableOpacity>
       </View>
+      {/* Barre de recherche */}
+      <TextInput
+        style={{
+          marginHorizontal: 16,
+          marginBottom: 2,
+          marginTop: 10,
+          paddingVertical: 6,
+          paddingHorizontal: 10,
+          borderRadius: 8,
+          borderWidth: 1,
+          borderColor: colors.border,
+          backgroundColor: colors.surface,
+          color: colors.text
+        }}
+        placeholder="Rechercher un bien..."
+        placeholderTextColor={colors.textSecondary}
+        value={search}
+        onChangeText={setSearch}
+      />
       <FlatList
-        data={biens}
+        data={filteredBiens}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
         renderItem={({ item }) => (
