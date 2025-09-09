@@ -70,3 +70,15 @@ export interface EvenementAgenda {
   bienId: string;
   couleur: string;
 }
+
+
+
+export type Utilisateur = {
+  id: string;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone?: string;
+  avatar?: string; //URL ou chemin vers l'image 
+  formule: 'gratuit' | 'payant';
+}
