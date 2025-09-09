@@ -10,8 +10,8 @@ const STORAGE_KEY = 'koosy_users';
 // Initialise avec 2 utilisateurs par défaut
 export async function initDefaultUsers() {
   const users: User[] = [
-    { email: 'demo1@koosy.com', password: 'azerty123' },
-    { email: 'demo2@koosy.com', password: 'koosy2025' },
+    { email: 'demo1@koosy.com', password: 'Azerty_123' },
+    { email: 'demo2@koosy.com', password: 'Koosy_2025' },
   ];
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(users));
 }
@@ -40,4 +40,16 @@ export async function userExists(email: string): Promise<boolean> {
 export async function checkCredentials(email: string, password: string): Promise<boolean> {
   const users = await getUsers();
   return users.some(u => u.email === email && u.password === password);
+}
+
+// Ajoute une fonction pour vérifier le token
+export async function isTokenValid(email: string, token: string): Promise<boolean> {
+  const session = await AsyncStorage.getItem('koosy_session');
+  if (!session) return false;
+  try {
+    const { email: storedEmail, token: storedToken } = JSON.parse(session);
+    return storedEmail === email && storedToken === token;
+  } catch {
+    return false;
+  }
 }

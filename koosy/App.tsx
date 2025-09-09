@@ -1,7 +1,7 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import HomeScreen from './screens/Homescreen';
-import LocatairesScreen from './screens/LocatairesScreen';
+
 import BiensScreen from './screens/BiensScreen';
 import TachesScreen from './screens/TachesScreen';
 import CalendrierScreen from './screens/CalendrierScreen';
@@ -11,6 +11,7 @@ import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import React, { useState, useEffect } from 'react';
 import { getSession, saveSession, clearSession, generateToken } from './utils/session';
+import { initDefaultUsers } from './utils/users';
 import { View, Text, Button } from 'react-native';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
@@ -25,11 +26,12 @@ export default function App() {
 
 
   useEffect(() => {
+    // Initialise les utilisateurs par défaut au démarrage
+    initDefaultUsers();
     // Simule le chargement (ex: 1.2 secondes)
     const timer = setTimeout(async () => {
       const sess = await getSession();
       if (sess?.token) {
-        // setSession(sess); // supprimé
         setIsLoggedIn(true);
       }
       setIsLoading(false);
@@ -128,7 +130,7 @@ export default function App() {
           <Tab.Screen name="Tâches" component={TachesScreen} />
           <Tab.Screen name="Calendrier" component={CalendrierScreen} />
           <Tab.Screen name="Carte" component={CarteScreen} />
-          <Tab.Screen name="Locataire" component={LocatairesScreen} />
+
         </Tab.Navigator>
       </NavigationContainer>
     </ThemeProvider>

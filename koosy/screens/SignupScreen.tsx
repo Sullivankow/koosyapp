@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { addUser } from '../utils/users';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
@@ -25,7 +26,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
     const isPasswordStrong = (val: string) =>
         /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(val);
 
-    const handleSignup = () => {
+    const handleSignup = async () => {
         let valid = true;
         if (!isPasswordStrong(password)) {
             setPasswordError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.");
@@ -42,6 +43,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
         if (!email.trim() || !password.trim() || !isEmailValid(email) || !valid) {
             return;
         }
+        await addUser({ email, password });
         onSignupSuccess?.(email, password);
     };
 

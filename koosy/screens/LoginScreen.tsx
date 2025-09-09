@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { checkCredentials } from '../utils/users';
 import { useTheme } from '../contexts/ThemeContext';
 
 
@@ -19,6 +20,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const { colors, isDarkMode, toggleTheme } = useTheme();
 
     // Ici tu ajouteras la logique de paiement/validation
@@ -41,7 +43,16 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
     }, []);
 
     const handleLogin = async () => {
+        setError(null);
         if (!email.trim() || !password.trim() || !isEmailValid(email)) return;
+        const isValid = await checkCredentials(email, password);
+        if (!isValid) {
+            setError('Identifiants incorrects');
+            return;
+        }
+        // Génère un token simple (UUID ou random string)
+        const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
+        await AsyncStorage.setItem('koosy_session', JSON.stringify({ email, token }));
         if (rememberMe) {
             await AsyncStorage.setItem('koosy_login', JSON.stringify({ email, password }));
         } else {
@@ -53,6 +64,9 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <Text style={[styles.title, { color: colors.primary }]}>Connexion</Text>
+            {error && (
+                <Text style={{ color: 'red', marginBottom: 10 }}>{error}</Text>
+            )}
             <TextInput
                 style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
                 placeholder="Email"
