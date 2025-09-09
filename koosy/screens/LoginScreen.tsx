@@ -110,13 +110,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
                     <Text style={[styles.link, { color: colors.primary }]}>Mot de passe oublié ?</Text>
                 </TouchableOpacity>
             </View>
-            <View style={{ marginTop: 30 }}>
-                <Button
-                    title={isDarkMode ? 'Mode clair' : 'Mode sombre'}
-                    onPress={toggleTheme}
-                    color={colors.secondary}
-                />
-            </View>
+
         </View>
     );
 };
