@@ -15,6 +15,7 @@ import { initDefaultUsers } from './utils/users';
 import { View, Text, Button } from 'react-native';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import ParametresStack from './screens/navigation/ParametresStack';
 
 const Tab = createBottomTabNavigator();
 
@@ -137,7 +138,7 @@ export default function App() {
             }}
           />
           <Tab.Screen name="Carte" component={CarteScreen} />
-          <Tab.Screen name="Param." component={require('./screens/ParametresScreen').default}
+          <Tab.Screen name="Param." component={ParametresStack}
             options={{
               tabBarIcon: ({ color, size }) => (
                 <MaterialCommunityIcons name="cog" size={size} color={color} />

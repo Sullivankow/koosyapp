@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 
 type MaterialCommunityIconName =
     | "account-circle"
@@ -18,14 +20,34 @@ const sections: { label: string; icon: MaterialCommunityIconName }[] = [
     { label: 'À propos', icon: 'information' },
 ];
 
+type ParametresStackParamList = {
+    Parametres: undefined;
+    Profil: undefined;
+    Preferences: undefined;
+    Notifications: undefined;
+    Securite: undefined;
+    APropos: undefined;
+};
+
 const ParametresScreen: React.FC = () => {
     const { colors } = useTheme();
+    const navigation = useNavigation<StackNavigationProp<ParametresStackParamList>>();
+
+    // Mapping entre label et nom de route
+    const routeMap: { [key: string]: string } = {
+        'Profil utilisateur': 'Profil',
+        'Préférences d’affichage': 'Preferences',
+        'Notifications': 'Notifications',
+        'Sécurité': 'Securite',
+        'À propos': 'APropos',
+    };
+
     return (
         <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
             <Text style={[styles.title, { color: colors.primary }]}>Paramètres</Text>
             {sections.map((section, idx) => (
                 <TouchableOpacity key={idx} style={[styles.sectionBtn, { backgroundColor: colors.surface }]}
-                    onPress={() => alert(`Section à créer : ${section.label}`)}>
+                    onPress={() => navigation.navigate({ name: routeMap[section.label] as keyof ParametresStackParamList, params: undefined })}>
                     <MaterialCommunityIcons name={section.icon} size={24} color={colors.primary} style={{ marginRight: 12 }} />
                     <Text style={{ color: colors.text, fontSize: 17 }}>{section.label}</Text>
                 </TouchableOpacity>
