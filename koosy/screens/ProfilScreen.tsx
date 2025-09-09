@@ -147,25 +147,28 @@ const ProfilScreen: React.FC = () => {
                     {showBank && (
                         <View style={styles.bankCard}>
                             <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.primary, marginBottom: 8 }}>Informations bancaires</Text>
+                            <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>Titulaire du compte</Text>
                             <TextInput
                                 style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
                                 value={bankInfo.titulaire}
                                 onChangeText={v => setBankInfo({ ...bankInfo, titulaire: v })}
-                                placeholder="Titulaire du compte"
+                                placeholder="Ex : Jean Dupont"
                                 placeholderTextColor={colors.text}
                             />
+                            <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>IBAN</Text>
                             <TextInput
                                 style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
                                 value={bankInfo.iban}
                                 onChangeText={v => setBankInfo({ ...bankInfo, iban: v })}
-                                placeholder="IBAN"
+                                placeholder="Ex : FR76 3000 6000 0112 3456 7890 189"
                                 placeholderTextColor={colors.text}
                             />
+                            <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>BIC</Text>
                             <TextInput
                                 style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
                                 value={bankInfo.bic}
                                 onChangeText={v => setBankInfo({ ...bankInfo, bic: v })}
-                                placeholder="BIC"
+                                placeholder="Ex : AGRIFRPP"
                                 placeholderTextColor={colors.text}
                             />
                             <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary, marginTop: 8 }]} onPress={handleSubscribe}>
