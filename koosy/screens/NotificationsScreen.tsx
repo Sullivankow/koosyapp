@@ -3,7 +3,15 @@ import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView } from 're
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-type PrefsKeys = 'push' | 'email' | 'event' | 'tache' | 'message' | 'securite';
+type PrefsKeys = keyof Omit<typeof initialPrefs, 'freq'>;
+const initialPrefs = {
+    push: true,
+    email: false,
+    event: true,
+    tache: true,
+    securite: false,
+    freq: 'immediat',
+};
 interface NotificationType {
     key: PrefsKeys;
     label: string;
@@ -15,7 +23,6 @@ const notificationTypes: NotificationType[] = [
     { key: 'email', label: 'Notifications email', icon: 'email', desc: 'Recevoir des notifications par email.' },
     { key: 'event', label: 'Événements', icon: 'calendar-check', desc: 'Nouvelle réservation, arrivée, départ.' },
     { key: 'tache', label: 'Tâches', icon: 'clipboard-list', desc: 'Tâche à faire ou en retard.' },
-    { key: 'message', label: 'Messages', icon: 'message-text', desc: 'Nouveau message ou commentaire.' },
     { key: 'securite', label: 'Sécurité', icon: 'shield-lock', desc: 'Modification du profil ou sécurité.' },
 ];
 
@@ -27,23 +34,7 @@ const frequencies = [
 
 const NotificationsScreen: React.FC = () => {
     const { colors } = useTheme();
-    const [prefs, setPrefs] = useState<{
-        push: boolean;
-        email: boolean;
-        event: boolean;
-        tache: boolean;
-        message: boolean;
-        securite: boolean;
-        freq: string;
-    }>({
-        push: true,
-        email: false,
-        event: true,
-        tache: true,
-        message: true,
-        securite: false,
-        freq: 'immediat',
-    });
+    const [prefs, setPrefs] = useState<typeof initialPrefs>(initialPrefs);
     const handleSwitch = (key: PrefsKeys) => setPrefs({ ...prefs, [key]: !prefs[key] });
     const handleFreq = (key: string) => setPrefs({ ...prefs, freq: key });
 
