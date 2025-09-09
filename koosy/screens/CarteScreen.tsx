@@ -20,6 +20,7 @@ const MOCK_BIENS: Bien[] = [
     taches: [],
     historique: [],
     commentaires: [],
+    dateCreation: '2025-08-01',
   },
   {
     id: '2',
@@ -37,6 +38,7 @@ const MOCK_BIENS: Bien[] = [
     taches: [],
     historique: [],
     commentaires: [],
+    dateCreation: '2025-07-15',
   },
   {
     id: '3',
@@ -54,6 +56,7 @@ const MOCK_BIENS: Bien[] = [
     taches: [],
     historique: [],
     commentaires: [],
+    dateCreation: '2025-06-20',
   },
 ];
 
@@ -84,7 +87,9 @@ function CarteScreen() {
                 <Text>Statut : {bien.statut}</Text>
                 <Text>Superficie : {bien.superficie} m²</Text>
                 <Text>Pièces : {bien.pieces}</Text>
-                {/* Ajoute d'autres infos si besoin */}
+                <Text style={{ color: '#888', fontSize: 13 }}>
+                  Créé le {bien.dateCreation ? new Date(bien.dateCreation).toLocaleDateString('fr-FR') : new Date().toLocaleDateString('fr-FR')}
+                </Text>
               </View>
             </Callout>
           </Marker>

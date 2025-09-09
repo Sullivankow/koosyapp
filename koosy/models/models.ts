@@ -27,6 +27,7 @@ export interface Bien {
   historique: any[];
   proprio: Proprio;
   commentaires?: Commentaire[];
+  dateCreation: string;
 }
 
 export interface Locataire {

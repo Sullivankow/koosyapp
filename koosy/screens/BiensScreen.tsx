@@ -31,6 +31,7 @@ const MOCK_BIENS: Bien[] = [
     ],
     historique: [],
     commentaires: [],
+    dateCreation: '2025-08-01',
   },
   {
     id: '2',
@@ -52,6 +53,7 @@ const MOCK_BIENS: Bien[] = [
     taches: [],
     historique: [],
     commentaires: [],
+    dateCreation: '2025-07-15',
   },
   {
     id: '3',
@@ -75,6 +77,7 @@ const MOCK_BIENS: Bien[] = [
     ],
     historique: [],
     commentaires: [],
+    dateCreation: '2025-06-20',
   },
   {
     id: '4',
@@ -100,6 +103,7 @@ const MOCK_BIENS: Bien[] = [
     ],
     historique: [],
     commentaires: [],
+    dateCreation: '2025-08-05',
   },
 ];
 
@@ -175,7 +179,10 @@ const BiensScreen: React.FC = () => {
         renderItem={({ item }) => (
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
             {/* Nom du bien */}
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 6 }}>{item.nom}</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 2 }}>{item.nom}</Text>
+            <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 6 }}>
+              Créé le {item.dateCreation ? formatDateFR(item.dateCreation) : formatDateFR(new Date().toISOString().slice(0, 10))}
+            </Text>
             {item.photos && item.photos.length > 0 && renderCarousel(item.photos)}
             <View style={styles.infoGrid}>
               <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Type</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.type}</Text></View>
