@@ -45,13 +45,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                         color={colors.surface}
                     />
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.accent }]} onPress={() => alert('Paramètres à venir : infos utilisateur et réglages')}>
-                    <MaterialCommunityIcons
-                        name="cog"
-                        size={28}
-                        color={colors.surface}
-                    />
-                </TouchableOpacity>
+                {/* Icône paramètres supprimée, accès via la barre de navigation en bas */}
             </View>
 
             {/* Résumé interactif */}

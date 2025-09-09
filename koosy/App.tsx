@@ -130,6 +130,14 @@ export default function App() {
           <Tab.Screen name="Tâches" component={TachesScreen} />
           <Tab.Screen name="Calendrier" component={CalendrierScreen} />
           <Tab.Screen name="Carte" component={CarteScreen} />
+          <Tab.Screen name="Param." component={require('./screens/ParametresScreen').default}
+            options={{
+              tabBarIcon: ({ color, size }) => (
+                <MaterialCommunityIcons name="cog" size={size} color={color} />
+              ),
+              tabBarLabel: 'Param.'
+            }}
+          />
 
         </Tab.Navigator>
       </NavigationContainer>
