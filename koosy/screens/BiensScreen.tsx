@@ -118,10 +118,16 @@ const BiensScreen: React.FC = () => {
   const { colors } = useTheme();
   const [biens, setBiens] = useState<Bien[]>(MOCK_BIENS);
   const [search, setSearch] = useState('');
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const filteredBiens = biens.filter(b =>
     b.nom.toLowerCase().includes(search.toLowerCase()) ||
     b.adresse.toLowerCase().includes(search.toLowerCase())
   );
+  const sortedBiens = [...filteredBiens].sort((a, b) => {
+    const dateA = new Date(a.dateCreation || new Date()).getTime();
+    const dateB = new Date(b.dateCreation || new Date()).getTime();
+    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+  });
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
   // carouselIndex inutilisé, supprimé
@@ -153,27 +159,37 @@ const BiensScreen: React.FC = () => {
           <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
         </TouchableOpacity>
       </View>
-      {/* Barre de recherche */}
-      <TextInput
-        style={{
-          marginHorizontal: 16,
-          marginBottom: 2,
-          marginTop: 10,
-          paddingVertical: 6,
-          paddingHorizontal: 10,
-          borderRadius: 8,
-          borderWidth: 1,
-          borderColor: colors.border,
-          backgroundColor: colors.surface,
-          color: colors.text
-        }}
-        placeholder="Rechercher un bien..."
-        placeholderTextColor={colors.textSecondary}
-        value={search}
-        onChangeText={setSearch}
-      />
+      {/* Barre de recherche + icône de tri alignées */}
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, marginTop: 18 }}>
+        <TextInput
+          style={{
+            flex: 1,
+            paddingVertical: 6,
+            paddingHorizontal: 10,
+            borderRadius: 8,
+            borderWidth: 1,
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
+            color: colors.text
+          }}
+          placeholder="Rechercher un bien..."
+          placeholderTextColor={colors.textSecondary}
+          value={search}
+          onChangeText={setSearch}
+        />
+        <TouchableOpacity
+          style={{ marginLeft: 8, padding: 8, backgroundColor: colors.primary, borderRadius: 8 }}
+          onPress={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+        >
+          <MaterialCommunityIcons
+            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+            size={24}
+            color={colors.surface}
+          />
+        </TouchableOpacity>
+      </View>
       <FlatList
-        data={filteredBiens}
+        data={sortedBiens}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
         renderItem={({ item }) => (
