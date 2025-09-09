@@ -128,7 +128,14 @@ export default function App() {
           </Tab.Screen>
           <Tab.Screen name="Biens" component={BiensScreen} />
           <Tab.Screen name="Tâches" component={TachesScreen} />
-          <Tab.Screen name="Calendrier" component={CalendrierScreen} />
+          <Tab.Screen name="Réserv." component={CalendrierScreen}
+            options={{
+              tabBarIcon: ({ color, size }) => (
+                <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
+              ),
+              tabBarLabel: 'Réserv.'
+            }}
+          />
           <Tab.Screen name="Carte" component={CarteScreen} />
           <Tab.Screen name="Param." component={require('./screens/ParametresScreen').default}
             options={{
