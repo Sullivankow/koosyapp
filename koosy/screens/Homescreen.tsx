@@ -3,20 +3,14 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'rea
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
-type HomeScreenProps = {
-    onLogout: () => void;
-};
-
-const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
-    const { colors, isDarkMode, toggleTheme } = useTheme();
-
-    // Exemples de données fictives
+const HomeScreen: React.FC = () => {
+    const { colors } = useTheme();
     const userName = 'Sullivan';
+    const avatarUrl = 'https://ui-avatars.com/api/?name=Sullivan&background=random';
     const biensCount = 5;
     const locatairesCount = 12;
     const tachesUrgentes = 2;
     const prochainEvenement = 'Check-in demain à 10h';
-    const avatarUrl = 'https://ui-avatars.com/api/?name=Sullivan&background=random';
 
     return (
         <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.container}>
@@ -27,25 +21,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                     <Text style={[styles.welcome, { color: colors.primary }]}>Bonjour, {userName} 👋</Text>
                     <Text style={[styles.subtitle, { color: colors.text }]}>Votre tableau de bord conciergerie</Text>
                 </View>
-            </View>
-
-            {/* Actions rapides en haut */}
-            <View style={styles.topActions}>
-                <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.secondary }]} onPress={toggleTheme}>
-                    <MaterialCommunityIcons
-                        name={isDarkMode ? 'weather-sunny' : 'weather-night'}
-                        size={28}
-                        color={colors.surface}
-                    />
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.error }]} onPress={onLogout}>
-                    <MaterialCommunityIcons
-                        name="logout"
-                        size={28}
-                        color={colors.surface}
-                    />
-                </TouchableOpacity>
-                {/* Icône paramètres supprimée, accès via la barre de navigation en bas */}
             </View>
 
             {/* Résumé interactif */}
@@ -73,18 +48,36 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                 <Text style={[styles.eventText, { color: colors.text }]}>Prochain événement : {prochainEvenement}</Text>
             </View>
 
-            {/* Actions principales avec icônes */}
-            <View style={styles.quickActions}>
-                <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
-                    <MaterialCommunityIcons name="plus-circle" size={20} color={colors.surface} style={{ marginRight: 6 }} />
-                    <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un bien</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', width: '100%', paddingLeft: 12 }}>
-                        <MaterialCommunityIcons name="playlist-plus" size={20} color={colors.surface} style={{ marginRight: 6 }} />
-                        <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une tâche</Text>
-                    </View>
-                </TouchableOpacity>
+            {/* Actions principales en grille 2x2 */}
+            <View style={styles.quickActionsGrid}>
+                <View style={styles.quickActionsRow}>
+                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+                        <View style={styles.centerContent}>
+                            <MaterialCommunityIcons name="plus-circle" size={24} color={colors.surface} style={styles.icon} />
+                            <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un bien</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]}>
+                        <View style={styles.centerContent}>
+                            <MaterialCommunityIcons name="playlist-plus" size={24} color={colors.surface} style={styles.icon} />
+                            <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une tâche</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
+                <View style={styles.quickActionsRow}>
+                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.accent }]}>
+                        <View style={styles.centerContent}>
+                            <MaterialCommunityIcons name="calendar-plus" size={24} color={colors.surface} style={styles.icon} />
+                            <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une résa</Text>
+                        </View>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.success || '#4CAF50' }]}>
+                        <View style={styles.centerContent}>
+                            <FontAwesome5 name="user-plus" size={22} color={colors.surface} style={styles.icon} />
+                            <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un locataire</Text>
+                        </View>
+                    </TouchableOpacity>
+                </View>
             </View>
 
             {/* Notifications stylées */}
@@ -125,29 +118,42 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         marginBottom: 2,
     },
-    topActions: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        width: '100%',
-        marginBottom: 10,
-        gap: 10,
-    },
-    iconBtn: {
-        borderRadius: 20,
-        padding: 10,
-        marginLeft: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    title: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        marginBottom: 10,
-    },
     subtitle: {
         fontSize: 16,
         marginBottom: 20,
+        textAlign: 'center',
+    },
+    quickActionsGrid: {
+        width: '100%',
+        marginBottom: 20,
+    },
+    quickActionsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginBottom: 12,
+    },
+    actionBtn: {
+        flex: 1,
+        marginHorizontal: 5,
+        borderRadius: 10,
+        paddingVertical: 18,
+        paddingHorizontal: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 2,
+    },
+    centerContent: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    icon: {
+        marginBottom: 8,
+    },
+    actionText: {
+        fontSize: 16,
+        fontWeight: 'bold',
         textAlign: 'center',
     },
     summaryContainer: {
@@ -183,25 +189,6 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     eventText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
-    quickActions: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        width: '100%',
-        marginBottom: 20,
-    },
-    actionBtn: {
-        flex: 1,
-        marginHorizontal: 5,
-        borderRadius: 8,
-        padding: 12,
-        alignItems: 'center',
-        flexDirection: 'row',
-        justifyContent: 'center',
-    },
-    actionText: {
         fontSize: 16,
         fontWeight: 'bold',
     },
