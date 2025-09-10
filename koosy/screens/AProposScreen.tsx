@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, Linking, TouchableOpacity } from 'react-native'
 import { useTheme } from '../contexts/ThemeContext';
 import { FontAwesome5 } from '@expo/vector-icons';
 import Constants from 'expo-constants';
+import { useNavigation } from '@react-navigation/native';
 
 const getVersion = () => {
     return (
@@ -14,14 +15,15 @@ const getVersion = () => {
 
 const AProposScreen: React.FC = () => {
     const { colors } = useTheme();
+    const navigation = useNavigation<any>();
     const version = getVersion();
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <View style={styles.logoContainer}>
                 <FontAwesome5 name="key" size={70} color={colors.primary} />
-                <Text style={[styles.appName, { color: colors.primary }]}>KoosyApp</Text>
+                <Text style={[styles.appName, { color: colors.primary }]}>Koosy</Text>
             </View>
-            <Text style={[styles.desc, { color: colors.text }]}>KoosyApp simplifie la gestion locative : réservation, calendrier, notifications et sécurité, tout en un.</Text>
+            <Text style={[styles.desc, { color: colors.text }]}>Koosy simplifie la gestion locative : réservation, calendrier, notifications et sécurité, tout en un.</Text>
             <View style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: colors.primary }]}>Version</Text>
                 <Text style={{ color: colors.text }}>{version}</Text>
@@ -34,7 +36,7 @@ const AProposScreen: React.FC = () => {
             <View style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: colors.primary }]}>Mentions légales</Text>
                 <Text style={{ color: colors.text }}>Toutes les données sont protégées et traitées selon la politique de confidentialité.</Text>
-                <TouchableOpacity onPress={() => Linking.openURL('https://www.koosyapp.com/confidentialite')}>
+                <TouchableOpacity onPress={() => navigation.navigate('Confidentialite')}>
                     <Text style={{ color: colors.primary, textDecorationLine: 'underline' }}>Voir la politique de confidentialité</Text>
                 </TouchableOpacity>
             </View>
