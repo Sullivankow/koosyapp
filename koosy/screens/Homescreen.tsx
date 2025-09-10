@@ -1,10 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+import { clearSession } from '../utils/session';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
-const HomeScreen: React.FC = () => {
+type HomeScreenProps = {
+    onLogout?: () => void;
+};
+
+const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const { colors, isDarkMode, toggleTheme } = useTheme();
+    const navigation = useNavigation();
     const [notifVisible, setNotifVisible] = useState(false);
     const userName = 'Sullivan';
     const avatarUrl = 'https://ui-avatars.com/api/?name=Sullivan&background=random';
@@ -13,8 +20,11 @@ const HomeScreen: React.FC = () => {
     const tachesUrgentes = 2;
     const prochainEvenement = 'Check-in demain à 10h';
 
-    const handleLogout = () => {
-        alert('Déconnexion !');
+    const handleLogout = async () => {
+        await clearSession();
+        if (onLogout) {
+            onLogout();
+        }
     };
 
     return (
