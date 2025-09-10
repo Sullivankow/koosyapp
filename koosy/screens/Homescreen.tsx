@@ -1,10 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
 const HomeScreen: React.FC = () => {
     const { colors, isDarkMode, toggleTheme } = useTheme();
+    const [notifVisible, setNotifVisible] = useState(false);
     const userName = 'Sullivan';
     const avatarUrl = 'https://ui-avatars.com/api/?name=Sullivan&background=random';
     const biensCount = 5;
@@ -12,130 +13,121 @@ const HomeScreen: React.FC = () => {
     const tachesUrgentes = 2;
     const prochainEvenement = 'Check-in demain à 10h';
 
-    // Simule une fonction de déconnexion
     const handleLogout = () => {
-        // Ajoute ici la logique de déconnexion réelle
         alert('Déconnexion !');
     };
 
     return (
-        <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.container}>
-            {/* Avatar et message personnalisé */}
-            <View style={styles.avatarRow}>
-                <Image source={{ uri: avatarUrl }} style={styles.avatar} />
-                <View style={{ marginLeft: 12 }}>
-                    <Text style={[styles.welcome, { color: colors.primary }]}>Bonjour, {userName} 👋</Text>
-                    <Text style={[styles.subtitle, { color: colors.text }]}>Votre tableau de bord conciergerie</Text>
+        <>
+            <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.container}>
+                {/* Avatar et message personnalisé */}
+                <View style={styles.avatarRow}>
+                    <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+                    <View style={{ marginLeft: 12 }}>
+                        <Text style={[styles.welcome, { color: colors.primary }]}>Bonjour, {userName} 👋</Text>
+                        <Text style={[styles.subtitle, { color: colors.text }]}>Votre tableau de bord conciergerie</Text>
+                    </View>
                 </View>
-            </View>
 
-            {/* Actions rapides en haut */}
-            <View style={styles.topActions}>
-                <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.secondary }]} onPress={toggleTheme}>
-                    <MaterialCommunityIcons
-                        name={isDarkMode ? 'weather-sunny' : 'weather-night'}
-                        size={28}
-                        color={colors.surface}
-                    />
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.error }]} onPress={handleLogout}>
-                    <MaterialCommunityIcons
-                        name="logout"
-                        size={28}
-                        color={colors.surface}
-                    />
-                </TouchableOpacity>
-            </View>
-
-            {/* Résumé interactif */}
-            <View style={styles.summaryContainer}>
-                <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}>
-                    <FontAwesome5 name="building" size={22} color={colors.primary} style={{ marginBottom: 5 }} />
-                    <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Biens</Text>
-                    <Text style={[styles.summaryValue, { color: colors.primary }]}>{biensCount}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}>
-                    <FontAwesome5 name="users" size={22} color={colors.primary} style={{ marginBottom: 5 }} />
-                    <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Locataires</Text>
-                    <Text style={[styles.summaryValue, { color: colors.primary }]}>{locatairesCount}</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}>
-                    <MaterialCommunityIcons name="alert-circle" size={22} color={colors.error} style={{ marginBottom: 5 }} />
-                    <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Tâches urgentes</Text>
-                    <Text style={[styles.summaryValue, { color: colors.error }]}>{tachesUrgentes}</Text>
-                </TouchableOpacity>
-            </View>
-
-            {/* Prochain événement */}
-            <View style={[styles.eventBox, { backgroundColor: colors.accent }]}>
-                <MaterialCommunityIcons name="calendar" size={20} color={colors.text} style={{ marginRight: 8 }} />
-                <Text style={[styles.eventText, { color: colors.text }]}>Prochain événement : {prochainEvenement}</Text>
-            </View>
-
-            {/* Actions principales en grille 2x2 */}
-            <View style={styles.quickActionsGrid}>
-                <View style={styles.quickActionsRow}>
-                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
-                        <View style={styles.centerContent}>
-                            <MaterialCommunityIcons name="plus-circle" size={24} color={colors.surface} style={styles.icon} />
-                            <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un bien</Text>
-                        </View>
+                {/* Actions rapides en haut */}
+                <View style={styles.topActions}>
+                    <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.accent }]} onPress={() => setNotifVisible(true)}>
+                        <MaterialCommunityIcons name="bell-outline" size={28} color={colors.surface} />
                     </TouchableOpacity>
-                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]}>
-                        <View style={styles.centerContent}>
-                            <MaterialCommunityIcons name="playlist-plus" size={24} color={colors.surface} style={styles.icon} />
-                            <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une tâche</Text>
-                        </View>
+                    <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.secondary }]} onPress={toggleTheme}>
+                        <MaterialCommunityIcons name={isDarkMode ? 'weather-sunny' : 'weather-night'} size={28} color={colors.surface} />
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.error }]} onPress={handleLogout}>
+                        <MaterialCommunityIcons name="logout" size={28} color={colors.surface} />
                     </TouchableOpacity>
                 </View>
-                <View style={styles.quickActionsRow}>
-                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.accent }]}>
-                        <View style={styles.centerContent}>
-                            <MaterialCommunityIcons name="calendar-plus" size={24} color={colors.surface} style={styles.icon} />
-                            <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une résa</Text>
-                        </View>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.success || '#4CAF50' }]}>
-                        <View style={styles.centerContent}>
-                            <FontAwesome5 name="user-plus" size={22} color={colors.surface} style={styles.icon} />
-                            <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un locataire</Text>
-                        </View>
-                    </TouchableOpacity>
-                </View>
-            </View>
 
-            {/* Notifications stylées */}
-            <View style={styles.notifications}>
-                <Text style={[styles.notificationsTitle, { color: colors.textSecondary }]}>Notifications</Text>
-                <View style={styles.notificationRow}>
-                    <MaterialCommunityIcons name="cash" size={18} color={colors.success || 'green'} style={{ marginRight: 4 }} />
-                    <Text style={[styles.notificationItem, { color: colors.text }]}>Paiement reçu pour le bien #2</Text>
+                {/* Résumé interactif */}
+                <View style={styles.summaryContainer}>
+                    <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}>
+                        <FontAwesome5 name="building" size={22} color={colors.primary} style={{ marginBottom: 5 }} />
+                        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Biens</Text>
+                        <Text style={[styles.summaryValue, { color: colors.primary }]}>{biensCount}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}>
+                        <FontAwesome5 name="users" size={22} color={colors.primary} style={{ marginBottom: 5 }} />
+                        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Locataires</Text>
+                        <Text style={[styles.summaryValue, { color: colors.primary }]}>{locatairesCount}</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}>
+                        <MaterialCommunityIcons name="alert-circle" size={22} color={colors.error} style={{ marginBottom: 5 }} />
+                        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Tâches urgentes</Text>
+                        <Text style={[styles.summaryValue, { color: colors.error }]}>{tachesUrgentes}</Text>
+                    </TouchableOpacity>
                 </View>
-                <View style={styles.notificationRow}>
-                    <MaterialCommunityIcons name="wrench" size={18} color={colors.accent} style={{ marginRight: 4 }} />
-                    <Text style={[styles.notificationItem, { color: colors.text }]}>Intervention prévue demain</Text>
+
+                {/* Prochain événement */}
+                <View style={[styles.eventBox, { backgroundColor: colors.accent }]}>
+                    <MaterialCommunityIcons name="calendar" size={20} color={colors.text} style={{ marginRight: 8 }} />
+                    <Text style={[styles.eventText, { color: colors.text }]}>Prochain événement : {prochainEvenement}</Text>
                 </View>
-            </View>
-        </ScrollView>
+
+                {/* Actions principales en grille 2x2 */}
+                <View style={styles.quickActionsGrid}>
+                    <View style={styles.quickActionsRow}>
+                        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+                            <View style={styles.centerContent}>
+                                <MaterialCommunityIcons name="plus-circle" size={24} color={colors.surface} style={styles.icon} />
+                                <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un bien</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]}>
+                            <View style={styles.centerContent}>
+                                <MaterialCommunityIcons name="playlist-plus" size={24} color={colors.surface} style={styles.icon} />
+                                <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une tâche</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                    <View style={styles.quickActionsRow}>
+                        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.accent }]}>
+                            <View style={styles.centerContent}>
+                                <MaterialCommunityIcons name="calendar-plus" size={24} color={colors.surface} style={styles.icon} />
+                                <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une résa</Text>
+                            </View>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.success || '#4CAF50' }]}>
+                            <View style={styles.centerContent}>
+                                <FontAwesome5 name="user-plus" size={22} color={colors.surface} style={styles.icon} />
+                                <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un locataire</Text>
+                            </View>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </ScrollView>
+            {/* Modal notifications façon Facebook */}
+            <Modal
+                visible={notifVisible}
+                animationType="slide"
+                transparent={true}
+                onRequestClose={() => setNotifVisible(false)}
+            >
+                <View style={styles.modalOverlay}>
+                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
+                        <Text style={[styles.notificationsTitle, { color: colors.primary }]}>Notifications</Text>
+                        <View style={styles.notificationRow}>
+                            <MaterialCommunityIcons name="cash" size={18} color={colors.success || 'green'} style={{ marginRight: 4 }} />
+                            <Text style={[styles.notificationItem, { color: colors.text }]}>Paiement reçu pour le bien #2</Text>
+                        </View>
+                        <View style={styles.notificationRow}>
+                            <MaterialCommunityIcons name="wrench" size={18} color={colors.accent} style={{ marginRight: 4 }} />
+                            <Text style={[styles.notificationItem, { color: colors.text }]}>Intervention prévue demain</Text>
+                        </View>
+                        <TouchableOpacity style={styles.closeBtn} onPress={() => setNotifVisible(false)}>
+                            <Text style={{ color: colors.error, fontWeight: 'bold' }}>Fermer</Text>
+                        </TouchableOpacity>
+                    </View>
+                </View>
+            </Modal>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
-    topActions: {
-        flexDirection: 'row',
-        justifyContent: 'flex-end',
-        alignItems: 'center',
-        width: '100%',
-        marginBottom: 10,
-        gap: 10,
-    },
-    iconBtn: {
-        borderRadius: 20,
-        padding: 10,
-        marginLeft: 10,
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
     container: {
         alignItems: 'center',
         padding: 20,
@@ -162,38 +154,20 @@ const styles = StyleSheet.create({
         marginBottom: 20,
         textAlign: 'center',
     },
-    quickActionsGrid: {
-        width: '100%',
-        marginBottom: 20,
-    },
-    quickActionsRow: {
+    topActions: {
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
         width: '100%',
-        marginBottom: 12,
+        marginBottom: 10,
+        gap: 10,
     },
-    actionBtn: {
-        flex: 1,
-        marginHorizontal: 5,
-        borderRadius: 10,
-        paddingVertical: 18,
-        paddingHorizontal: 8,
+    iconBtn: {
+        borderRadius: 20,
+        padding: 10,
+        marginLeft: 10,
         alignItems: 'center',
         justifyContent: 'center',
-        elevation: 2,
-    },
-    centerContent: {
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-    },
-    icon: {
-        marginBottom: 8,
-    },
-    actionText: {
-        fontSize: 16,
-        fontWeight: 'bold',
-        textAlign: 'center',
     },
     summaryContainer: {
         flexDirection: 'row',
@@ -231,9 +205,38 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: 'bold',
     },
-    notifications: {
+    quickActionsGrid: {
         width: '100%',
-        marginTop: 10,
+        marginBottom: 20,
+    },
+    quickActionsRow: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginBottom: 12,
+    },
+    actionBtn: {
+        flex: 1,
+        marginHorizontal: 5,
+        borderRadius: 10,
+        paddingVertical: 18,
+        paddingHorizontal: 8,
+        alignItems: 'center',
+        justifyContent: 'center',
+        elevation: 2,
+    },
+    centerContent: {
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    icon: {
+        marginBottom: 8,
+    },
+    actionText: {
+        fontSize: 16,
+        fontWeight: 'bold',
+        textAlign: 'center',
     },
     notificationsTitle: {
         fontSize: 15,
@@ -247,6 +250,26 @@ const styles = StyleSheet.create({
     },
     notificationItem: {
         fontSize: 14,
+    },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.3)',
+        justifyContent: 'center',
+        alignItems: 'center',
+    },
+    modalContent: {
+        width: '85%',
+        borderRadius: 16,
+        padding: 24,
+        elevation: 5,
+        alignItems: 'center',
+    },
+    closeBtn: {
+        marginTop: 18,
+        paddingVertical: 8,
+        paddingHorizontal: 24,
+        borderRadius: 8,
+        backgroundColor: '#eee',
     },
 });
 
