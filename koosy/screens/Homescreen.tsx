@@ -4,13 +4,19 @@ import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
 const HomeScreen: React.FC = () => {
-    const { colors } = useTheme();
+    const { colors, isDarkMode, toggleTheme } = useTheme();
     const userName = 'Sullivan';
     const avatarUrl = 'https://ui-avatars.com/api/?name=Sullivan&background=random';
     const biensCount = 5;
     const locatairesCount = 12;
     const tachesUrgentes = 2;
     const prochainEvenement = 'Check-in demain à 10h';
+
+    // Simule une fonction de déconnexion
+    const handleLogout = () => {
+        // Ajoute ici la logique de déconnexion réelle
+        alert('Déconnexion !');
+    };
 
     return (
         <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.container}>
@@ -21,6 +27,24 @@ const HomeScreen: React.FC = () => {
                     <Text style={[styles.welcome, { color: colors.primary }]}>Bonjour, {userName} 👋</Text>
                     <Text style={[styles.subtitle, { color: colors.text }]}>Votre tableau de bord conciergerie</Text>
                 </View>
+            </View>
+
+            {/* Actions rapides en haut */}
+            <View style={styles.topActions}>
+                <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.secondary }]} onPress={toggleTheme}>
+                    <MaterialCommunityIcons
+                        name={isDarkMode ? 'weather-sunny' : 'weather-night'}
+                        size={28}
+                        color={colors.surface}
+                    />
+                </TouchableOpacity>
+                <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.error }]} onPress={handleLogout}>
+                    <MaterialCommunityIcons
+                        name="logout"
+                        size={28}
+                        color={colors.surface}
+                    />
+                </TouchableOpacity>
             </View>
 
             {/* Résumé interactif */}
@@ -97,6 +121,21 @@ const HomeScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
+    topActions: {
+        flexDirection: 'row',
+        justifyContent: 'flex-end',
+        alignItems: 'center',
+        width: '100%',
+        marginBottom: 10,
+        gap: 10,
+    },
+    iconBtn: {
+        borderRadius: 20,
+        padding: 10,
+        marginLeft: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
     container: {
         alignItems: 'center',
         padding: 20,
