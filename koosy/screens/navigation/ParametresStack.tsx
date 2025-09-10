@@ -7,6 +7,7 @@ import NotificationsScreen from '../NotificationsScreen';
 import SecuriteScreen from '../SecuriteScreen';
 import AProposScreen from '../AProposScreen';
 import ConfidentialiteScreen from '../ConfidentialiteScreen';
+import SupportScreen from '../SupportScreen';
 
 const Stack = createStackNavigator();
 
@@ -19,6 +20,7 @@ const ParametresStack: React.FC = () => (
         <Stack.Screen name="Securite" component={SecuriteScreen} />
         <Stack.Screen name="APropos" component={AProposScreen} />
         <Stack.Screen name="Confidentialite" component={ConfidentialiteScreen} />
+        <Stack.Screen name="Support" component={SupportScreen} />
     </Stack.Navigator>
 );
 

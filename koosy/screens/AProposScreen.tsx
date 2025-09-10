@@ -42,8 +42,8 @@ const AProposScreen: React.FC = () => {
             </View>
             <View style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: colors.primary }]}>Crédits</Text>
-                <Text style={{ color: colors.text }}>Développement : Sullivankow</Text>
-                <Text style={{ color: colors.text }}>Design : KoosyApp Team</Text>
+                <Text style={{ color: colors.text }}>Développement : SunDev Agency</Text>
+                <Text style={{ color: colors.text }}>Design : Koosy Team</Text>
             </View>
             <TouchableOpacity style={[styles.feedbackBtn, { backgroundColor: colors.primary }]} onPress={() => Linking.openURL('mailto:contact@koosyapp.com?subject=Feedback KoosyApp')}>
                 <Text style={[styles.feedbackText, { color: colors.surface }]}>Envoyer un feedback</Text>

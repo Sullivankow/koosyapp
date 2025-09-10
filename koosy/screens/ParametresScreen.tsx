@@ -10,14 +10,15 @@ type MaterialCommunityIconName =
     | "theme-light-dark"
     | "bell"
     | "shield-lock"
-    | "information";
+    | "information"
+    | "help-circle";
 
 const sections: { label: string; icon: MaterialCommunityIconName }[] = [
     { label: 'Profil utilisateur', icon: 'account-circle' },
-    { label: 'Préférences d’affichage', icon: 'theme-light-dark' },
     { label: 'Notifications', icon: 'bell' },
     { label: 'Sécurité', icon: 'shield-lock' },
     { label: 'À propos', icon: 'information' },
+    { label: 'Support & Aide', icon: 'help-circle' },
 ];
 
 type ParametresStackParamList = {
@@ -27,6 +28,7 @@ type ParametresStackParamList = {
     Notifications: undefined;
     Securite: undefined;
     APropos: undefined;
+    Support: undefined;
 };
 
 const ParametresScreen: React.FC = () => {
@@ -36,10 +38,10 @@ const ParametresScreen: React.FC = () => {
     // Mapping entre label et nom de route
     const routeMap: { [key: string]: string } = {
         'Profil utilisateur': 'Profil',
-        'Préférences d’affichage': 'Preferences',
         'Notifications': 'Notifications',
         'Sécurité': 'Securite',
         'À propos': 'APropos',
+        'Support & Aide': 'Support',
     };
 
     return (
