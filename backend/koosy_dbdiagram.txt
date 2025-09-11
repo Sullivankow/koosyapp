@@ -1,0 +1,97 @@
+
+Table formule {
+  id varchar [pk]
+  nom varchar
+  description varchar
+  prix decimal
+  avantages text
+}
+
+Table utilisateur {
+  id varchar [pk]
+  nom varchar
+  prenom varchar
+  email varchar
+  telephone varchar
+  avatar varchar
+  formule_id varchar [ref: > formule.id]
+}
+
+Table proprio {
+  id varchar [pk]
+  nom varchar
+  email varchar
+  telephone varchar
+}
+
+Table bien {
+  id varchar [pk]
+  nom varchar
+  adresse varchar
+  type varchar
+  superficie int
+  pieces int
+  statut varchar
+  dateCreation varchar
+  proprio_id varchar [ref: > proprio.id]
+  utilisateur_id varchar [ref: > utilisateur.id]
+  geo_lat float
+  geo_lng float
+}
+
+Table locataire {
+  id varchar [pk]
+  nom varchar
+  email varchar
+  telephone varchar
+  dateArrivee varchar
+  dateDepart varchar
+  bien_id varchar [ref: > bien.id]
+}
+
+Table tache {
+  id varchar [pk]
+  titre varchar
+  description varchar
+  statut varchar
+  bien_id varchar [ref: > bien.id]
+  dateEcheance varchar
+}
+
+Table commentaire {
+  id varchar [pk]
+  texte varchar
+  date varchar
+  bien_id varchar [ref: > bien.id]
+  utilisateur_id varchar [ref: > utilisateur.id]
+}
+
+Table reservation {
+  id varchar [pk]
+  bien_id varchar [ref: > bien.id]
+  locataire_id varchar [ref: > locataire.id]
+  dateArrivee varchar
+  dateDepart varchar
+  heureArrivee varchar
+  heureDepart varchar
+  statut varchar
+}
+
+Table evenement_agenda {
+  id varchar [pk]
+  date varchar
+  type varchar
+  couleur varchar
+  locataire_id varchar [ref: > locataire.id]
+  bien_id varchar [ref: > bien.id]
+}
+
+Table notification {
+  id varchar [pk]
+  utilisateur_id varchar [ref: > utilisateur.id]
+  titre varchar
+  message text
+  type varchar
+  date_creation varchar
+  statut varchar // (non vue, vue, supprimée…)
+}
