@@ -3,7 +3,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
-import { User } from './users/user.entity';
+
+import { UsersModule } from './users/users.module';
 
 
 
@@ -22,6 +23,7 @@ import { User } from './users/user.entity';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    UsersModule,
 
 
 
@@ -37,10 +39,3 @@ export class AppModule { }
 
 
 
-//Module utilisateur 
-
-@Module({
-  imports: [TypeOrmModule.forFeature([User])],
-  // ...controllers, providers
-})
-export class UsersModule {}
