@@ -32,6 +32,7 @@ Table bien {
   superficie int
   pieces int
   statut varchar
+  statut_occupation varchar // (occupé, libre)
   dateCreation varchar
   proprio_id varchar [ref: > proprio.id]
   utilisateur_id varchar [ref: > utilisateur.id]
