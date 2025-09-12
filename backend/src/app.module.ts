@@ -3,12 +3,14 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { User } from './users/user.entity';
 
 
 
 
 @Module({
   imports: [
+    
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -32,3 +34,13 @@ import { ConfigModule } from '@nestjs/config';
 
 
 export class AppModule { }
+
+
+
+//Module utilisateur 
+
+@Module({
+  imports: [TypeOrmModule.forFeature([User])],
+  // ...controllers, providers
+})
+export class UsersModule {}
