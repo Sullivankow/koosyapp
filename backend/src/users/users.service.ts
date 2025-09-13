@@ -5,6 +5,8 @@ import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './create-user.dto';
 import * as bcrypt from 'bcrypt';
+import { NotFoundException } from '@nestjs/common';
+import { UpdateUserDto } from './create-user.dto'; 
 
 @Injectable()
 export class UsersService {
@@ -29,16 +31,37 @@ export class UsersService {
 
 //Méthode pour trouver un utilisateur par son id
 async findOne(id: number): Promise<User | null> {
-  return this.usersRepository.findOne({ where: { id } });
+  const user = await this.usersRepository.findOne({ where: { id } });
+  if (!user) {
+    throw new Error('L\'utilisateur n\'éxiste pas');
+  }
+  return user;
 }
 
 //Méthode pour mettre à jour un utilisateur par son id et seulement par champs
-async update(id: number, updateUserDto: Partial<CreateUserDto>): Promise<User> {
-  const user = await this.usersRepository.findOne({ where: {id}});
-  if(!user) {
-    throw new Error('L\'utilisateur n\'éxiste pas');
+
+
+async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  const user = await this.usersRepository.findOne({ where: { id } });
+  if (!user) {
+    throw new NotFoundException('Utilisateur non trouvé');
   }
   Object.assign(user, updateUserDto);
   return this.usersRepository.save(user);
 }
+
+
+
+
+//Méthode pour supprimer un utilisateur par son id
+async remove(id: number): Promise<void> {
+  const result = await this.usersRepository.delete(id);
+  if (result.affected === 0) {
+    throw new NotFoundException('Utilisateur non trouvé');
+  }
+
+
+
+}
+
 }

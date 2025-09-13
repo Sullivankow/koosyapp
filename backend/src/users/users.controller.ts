@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Patch, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Delete, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './create-user.dto';
 
@@ -29,4 +29,14 @@ return this.userService.findOne(Number (id));
 async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
   return this.userService.update(id, updateUserDto);
 }
+
+
+//Supprimer un utilisateur par son id 
+@Delete(':id') 
+async remove(@Param('id') id: number){
+  return this.userService.remove(id);
+}
+
+
+
 }
