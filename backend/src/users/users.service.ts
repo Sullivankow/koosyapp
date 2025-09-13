@@ -26,4 +26,11 @@ export class UsersService {
   async findAll(): Promise<User[]> {
     return this.usersRepository.find();
   }
+
+//Méthode pour trouver un utilisateur par son id
+async findOne(id: number): Promise<User | null> {
+  return this.usersRepository.findOne({ where: { id } });
+}
+
+
 }
