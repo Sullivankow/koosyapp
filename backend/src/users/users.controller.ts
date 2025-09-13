@@ -1,6 +1,8 @@
-import { Controller, Post, Body, Get, Patch, Delete, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Delete, Param, ForbiddenException, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './create-user.dto';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
 @Controller('users')
 export class UsersController {
@@ -26,14 +28,19 @@ return this.userService.findOne(Number (id));
 
 //Modifier un utilisateur par son id, seulement les champs que tu envoies
 @Patch(':id')
+@UseGuards(JwtAuthGuard)
 async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
   return this.userService.update(id, updateUserDto);
 }
 
 
 //Supprimer un utilisateur par son id 
-@Delete(':id') 
-async remove(@Param('id') id: number){
+@Delete(':id')
+@UseGuards(JwtAuthGuard)
+async remove(@Param('id') id: number, @Request() req) {
+  if (req.user.userId !== id) {
+    throw new ForbiddenException('Vous ne pouvez supprimer que votre propre compte.');
+  }
   return this.userService.remove(id);
 }
 

@@ -64,4 +64,10 @@ async remove(id: number): Promise<void> {
 
 }
 
+
+//Méthode pour trouver un utilisateur par son email
+async findByEmail(email: string): Promise<User | null> {
+  return this.usersRepository.findOne({ where: { email } });
+}
+
 }

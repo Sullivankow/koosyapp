@@ -16,6 +16,7 @@ async function bootstrap() {
     .setTitle('Koosy API')
     .setDescription('Documentation de l’API Koosy')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
