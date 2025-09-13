@@ -1,3 +1,4 @@
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { Controller, Post, Body, Get, Patch, Delete, Param, ForbiddenException, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './create-user.dto';
@@ -28,6 +29,7 @@ return this.userService.findOne(Number (id));
 
 //Modifier un utilisateur par son id, seulement les champs que tu envoies
 @Patch(':id')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
   return this.userService.update(id, updateUserDto);
@@ -36,6 +38,7 @@ async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
 
 //Supprimer un utilisateur par son id 
 @Delete(':id')
+@ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 async remove(@Param('id') id: number, @Request() req) {
   if (req.user.userId !== Number(id)) {
