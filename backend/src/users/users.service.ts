@@ -32,5 +32,13 @@ async findOne(id: number): Promise<User | null> {
   return this.usersRepository.findOne({ where: { id } });
 }
 
-
+//Méthode pour mettre à jour un utilisateur par son id et seulement par champs
+async update(id: number, updateUserDto: Partial<CreateUserDto>): Promise<User> {
+  const user = await this.usersRepository.findOne({ where: {id}});
+  if(!user) {
+    throw new Error('L\'utilisateur n\'éxiste pas');
+  }
+  Object.assign(user, updateUserDto);
+  return this.usersRepository.save(user);
+}
 }

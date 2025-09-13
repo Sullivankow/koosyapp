@@ -1,6 +1,6 @@
-import { Controller, Post, Body, Get, Param } from '@nestjs/common';
+import { Controller, Post, Body, Get, Patch, Param } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { CreateUserDto } from './create-user.dto';
+import { CreateUserDto, UpdateUserDto } from './create-user.dto';
 
 @Controller('users')
 export class UsersController {
@@ -24,9 +24,9 @@ findOne(@Param('id') id : number) {
 return this.userService.findOne(Number (id));
 }
 
-
-
-
+//Modifier un utilisateur par son id, seulement les champs que tu envoies
+@Patch(':id')
+async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+  return this.userService.update(id, updateUserDto);
 }
-
-
+}
