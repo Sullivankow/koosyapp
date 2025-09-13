@@ -38,10 +38,10 @@ async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
 @Delete(':id')
 @UseGuards(JwtAuthGuard)
 async remove(@Param('id') id: number, @Request() req) {
-  if (req.user.userId !== id) {
+  if (req.user.userId !== Number(id)) {
     throw new ForbiddenException('Vous ne pouvez supprimer que votre propre compte.');
   }
-  return this.userService.remove(id);
+  return this.userService.remove(Number(id));
 }
 
 

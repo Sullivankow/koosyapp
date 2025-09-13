@@ -20,7 +20,7 @@ export class AuthService {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
     const payload = { sub: user.id, email: user.email };
-    const token = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const token = this.jwtService.sign(payload);
     return { access_token: token };
   }
 }

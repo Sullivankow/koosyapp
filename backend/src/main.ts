@@ -10,13 +10,16 @@ async function bootstrap() {
     origin: 'http://localhost:3000', // adapte à l'adresse de ton front
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   const config = new DocumentBuilder()
     .setTitle('Koosy API')
     .setDescription('Documentation de l’API Koosy')
     .setVersion('1.0')
-    .addBearerAuth()
+    .addBearerAuth(
+      
+    )
     .build();
 
   const document = SwaggerModule.createDocument(app, config);
