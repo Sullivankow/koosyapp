@@ -3,7 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bien } from './bien.entity';
 import { User } from '../users/user.entity';
-import { CreateBienDto } from './create-bien.dto';
+import { CreateBienDto, UpdateBienDto } from './create-bien.dto';
+
 
 @Injectable()
 export class BiensService {
@@ -55,6 +56,19 @@ async getBienById(id: number, userId: number): Promise<Bien> {
   }
   return bien;
 }
+
+// Méthode pour mettre à jour un bien en vérifiant qu'il appartient à l'utilisateur
+async updateBien(id: number, userId: number, updateBienDto: UpdateBienDto): Promise<Bien> {
+  const bien = await this.biensRepository.findOne({ where: { id, conciergerie: { id: userId } } });
+  if (!bien) {
+    throw new NotFoundException('Bien non trouvé ou non accessible');
+  }
+  Object.assign(bien, updateBienDto);
+  return this.biensRepository.save(bien);
+}
+
+
+
 
 
 }

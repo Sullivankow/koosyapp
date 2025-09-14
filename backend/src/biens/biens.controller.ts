@@ -4,11 +4,14 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BiensService } from './biens.service';
 import { CreateBienDto } from './create-bien.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Patch } from '@nestjs/common';
+import { UpdateBienDto } from './create-bien.dto';
 
 @ApiTags('Biens')
 @ApiBearerAuth()
 @Controller('biens')
 export class BiensController {
+ 
   constructor(private readonly biensService: BiensService) {}
 
 
@@ -40,5 +43,19 @@ export class BiensController {
     return this.biensService.getBienById(Number(id), req.user.userId);
   }
 
+
+    // Modification d'un bien par son id (utilisateur connecté)
+  @UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  @ApiBody({ type: UpdateBienDto })
+  @ApiResponse({ status: 200, description: 'Bien mis à jour.' })
+  @ApiResponse({ status: 404, description: 'Bien non trouvé.' })
+  async updateBien(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() updateBienDto: UpdateBienDto
+  ) {
+    return this.biensService.updateBien(Number(id), req.user.userId, updateBienDto);
+  }
 
 }
