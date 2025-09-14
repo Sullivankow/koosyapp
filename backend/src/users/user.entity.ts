@@ -17,4 +17,8 @@ export class User {
 
   @Column()
   prenom: string;
+
+  
+   @Column({ default: 'gratuit' })
+  abonnement: 'gratuit' | 'premium';
 }

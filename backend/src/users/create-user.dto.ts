@@ -21,6 +21,9 @@ export class CreateUserDto {
   @ApiProperty({ example: 'Jean' })
   @IsString()
   prenom: string;
+
+  @ApiProperty({ example: 'premium', required: false })
+  abonnement?: 'gratuit' | 'premium';
 }
 
 
@@ -42,4 +45,7 @@ export class UpdateUserDto {
   @ApiProperty({ example: 'Jean' })
   @IsString()
   prenom?: string;
+
+    @ApiProperty({ example: 'premium', required: false })
+  abonnement?: 'gratuit' | 'premium';
 }
