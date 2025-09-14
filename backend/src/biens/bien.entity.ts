@@ -9,13 +9,13 @@ export class Bien {
 
   @PrimaryGeneratedColumn()
   id: number;
-  @Column({ nullable: true })
+  @Column()
   proprietaireNom: string;
 
-  @Column({ nullable: true })
+  @Column()
   proprietaireEmail: string;
 
-  @Column({ nullable: true })
+  @Column()
   proprietaireTelephone: string;
   @Column()
   nom: string;

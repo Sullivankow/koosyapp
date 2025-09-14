@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BiensService } from './biens.service';
 import { CreateBienDto } from './create-bien.dto';
@@ -21,4 +21,14 @@ export class BiensController {
   async createBien(@Body() createBienDto: CreateBienDto, @Request() req) {
     return this.biensService.createBien(createBienDto, req.user.userId);
   }
+
+//Affiche la liste des biens de l'utilisateur connecté
+ @UseGuards(JwtAuthGuard)
+  @Get()
+  @ApiResponse({ status: 200, description: 'Liste des biens.' })
+  async getAllBiens(@Request() req) {
+    return this.biensService.getAllBiens(req.user.userId);
+  }
+
+
 }

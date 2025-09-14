@@ -11,9 +11,10 @@ export class CreateBienDto {
 	@IsString()
 	proprietaireEmail: string;
 
-	@ApiProperty({ example: '0601020304' })
+	@ApiProperty({ example: '0601020304', required: false })
+	@IsOptional()
 	@IsString()
-	proprietaireTelephone: string;
+	proprietaireTelephone?: string;
 
 	@ApiProperty({ example: 'Appartement T2 centre-ville' })
 	@IsString()
