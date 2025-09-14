@@ -1,10 +1,12 @@
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Controller, Post, Body, Get, Patch, Delete, Param, ForbiddenException, Request } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto, UpdateUserDto } from './create-user.dto';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 
+
+@ApiTags('Utilisateur (Conciergerie)')
 @Controller('users')
 export class UsersController {
     constructor(private readonly userService: UsersService) {}

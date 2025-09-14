@@ -44,5 +44,17 @@ async getAllBiens(userId: number): Promise<Bien[]> {
   });
 }
 
+// Méthode pour récupérer un bien par son id et vérifier qu'il appartient à l'utilisateur
+async getBienById(id: number, userId: number): Promise<Bien> {
+  const bien = await this.biensRepository.findOne({
+    where: { id, conciergerie: { id: userId } },
+    relations: ['conciergerie'],
+  });
+  if (!bien) {
+    throw new NotFoundException('Bien non trouvé ou non accessible');
+  }
+  return bien;
+}
+
 
 }
