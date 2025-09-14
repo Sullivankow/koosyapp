@@ -67,8 +67,12 @@ async updateBien(id: number, userId: number, updateBienDto: UpdateBienDto): Prom
   return this.biensRepository.save(bien);
 }
 
-
-
-
-
+// Méthode pour supprimer un bien en vérifiant qu'il appartient à l'utilisateur
+async deleteBien(id: number, userId: number): Promise<void> {
+  const bien = await this.biensRepository.findOne({ where: { id, conciergerie: { id: userId } } });
+  if (!bien) {
+    throw new NotFoundException('Bien non trouvé ou non accessible');
+  }
+  await this.biensRepository.remove(bien);
+}
 }

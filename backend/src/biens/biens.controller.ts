@@ -1,10 +1,10 @@
-import { Controller, Post, Body, UseGuards, Request, Get } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get, Delete, Patch } from '@nestjs/common';
 import { Param } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BiensService } from './biens.service';
 import { CreateBienDto } from './create-bien.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Patch } from '@nestjs/common';
+
 import { UpdateBienDto } from './create-bien.dto';
 
 @ApiTags('Biens')
@@ -57,5 +57,16 @@ export class BiensController {
   ) {
     return this.biensService.updateBien(Number(id), req.user.userId, updateBienDto);
   }
+
+
+//Suppression d'un bien par son id (utilisateur doit être connecté)
+  @UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  @ApiResponse({ status: 204, description: 'Bien supprimé.' })
+  @ApiResponse({ status: 404, description: 'Bien non trouvé.' })
+  async deleteBien(@Request() req, @Param('id') id: string) {
+    return this.biensService.deleteBien(Number(id), req.user.userId);
+  }
+
 
 }
