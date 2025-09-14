@@ -1,12 +1,22 @@
+ 
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { User } from '../users/user.entity';
 
 
 @Entity()
 export class Bien {
+
+
   @PrimaryGeneratedColumn()
   id: number;
+  @Column({ nullable: true })
+  proprietaireNom: string;
 
+  @Column({ nullable: true })
+  proprietaireEmail: string;
+
+  @Column({ nullable: true })
+  proprietaireTelephone: string;
   @Column()
   nom: string;
 
@@ -34,9 +44,9 @@ export class Bien {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   dateCreation: Date;
 
-  // Pour la relation avec le propriétaire
+  // Pour la relation avec la conciergerie (utilisateur)
   @ManyToOne(() => User, user => user.biens)
-  proprio: User;
+  conciergerie: User;
 
   // Pour la géolocalisation
   @Column('float', { nullable: true })

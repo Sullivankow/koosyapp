@@ -14,20 +14,22 @@ export class BiensService {
     private usersRepository: Repository<User>,
   ) {}
 
+
+  //Méthode pour créer un bien en liant 
   async createBien(createBienDto: CreateBienDto, userId: number): Promise<Bien> {
     const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['biens'] });
     if (!user) {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
-    const biensCount = await this.biensRepository.count({ where: { proprio: { id: userId } } });
+  const biensCount = await this.biensRepository.count({ where: { conciergerie: { id: userId } } });
     if (user.abonnement === 'gratuit' && biensCount >= 5) {
       throw new ForbiddenException('Limite atteinte : abonnement gratuit limité à 5 biens.');
     }
 
     const bien = this.biensRepository.create({
       ...createBienDto,
-      proprio: user,
+  conciergerie: user,
     });
     return this.biensRepository.save(bien);
   }

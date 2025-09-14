@@ -1,7 +1,20 @@
+
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateBienDto {
+@ApiProperty({ example: 'Jean Dupont' })
+	@IsString()
+	proprietaireNom: string;
+
+	@ApiProperty({ example: 'jean.dupont@email.com' })
+	@IsString()
+	proprietaireEmail: string;
+
+	@ApiProperty({ example: '0601020304' })
+	@IsString()
+	proprietaireTelephone: string;
+
 	@ApiProperty({ example: 'Appartement T2 centre-ville' })
 	@IsString()
 	nom: string;

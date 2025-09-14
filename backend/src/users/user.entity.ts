@@ -24,7 +24,7 @@ export class User {
   abonnement: 'gratuit' | 'premium';
 
 //Relation avec les biens
-@OneToMany(() => Bien, bien => bien.proprio)
+@OneToMany(() => Bien, bien => bien.conciergerie)
 biens: Bien[];
 
 
