@@ -47,6 +47,9 @@ async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     throw new NotFoundException('Utilisateur non trouvé');
   }
   Object.assign(user, updateUserDto);
+  if (updateUserDto.password) {
+    user.password = await bcrypt.hash(updateUserDto.password, 10);
+  }
   return this.usersRepository.save(user);
 }
 
