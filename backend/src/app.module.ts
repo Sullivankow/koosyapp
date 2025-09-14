@@ -6,6 +6,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { BiensModule } from './biens/biens.module';
 
 
 
@@ -26,6 +27,7 @@ import { AuthModule } from './auth/auth.module';
     }),
     UsersModule,
     AuthModule,
+    BiensModule,
 
 
 

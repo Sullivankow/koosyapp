@@ -1,4 +1,5 @@
-import {Entity , PrimaryGeneratedColumn, Column } from 'typeorm'; 
+import {Entity , PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'; 
+import { Bien } from '../biens/bien.entity';
 
 
 @Entity()
@@ -21,4 +22,10 @@ export class User {
   
    @Column({ default: 'gratuit' })
   abonnement: 'gratuit' | 'premium';
+
+//Relation avec les biens
+@OneToMany(() => Bien, bien => bien.proprio)
+biens: Bien[];
+
+
 }
