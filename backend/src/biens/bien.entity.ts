@@ -1,6 +1,8 @@
  
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { User } from '../users/user.entity';
+import { OneToMany } from 'typeorm';
+import { Reservation } from '../reservations/reservation.entity';
 
 
 @Entity()
@@ -47,6 +49,9 @@ export class Bien {
   // Pour la relation avec la conciergerie (utilisateur)
   @ManyToOne(() => User, user => user.biens)
   conciergerie: User;
+
+  @OneToMany(() => Reservation, reservation => reservation.bien)
+reservations: Reservation[];
 
   // Pour la géolocalisation
   @Column('float', { nullable: true })

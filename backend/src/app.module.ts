@@ -7,6 +7,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { BiensModule } from './biens/biens.module';
+import { ReservationsModule } from './reservations/reservations.module';
 
 
 
@@ -28,6 +29,7 @@ import { BiensModule } from './biens/biens.module';
     UsersModule,
     AuthModule,
     BiensModule,
+    ReservationsModule,
 
 
 
