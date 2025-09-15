@@ -88,4 +88,14 @@ async deleteBien(id: number, userId: number): Promise<void> {
   }
   await this.biensRepository.remove(bien);
 }
+
+
+
+
+//Méthode pour compter le nombre total de biens
+async countBiens(): Promise<number> {
+  return this.biensRepository.count();
+}
+
+
 }

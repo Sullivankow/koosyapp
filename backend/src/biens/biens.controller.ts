@@ -34,6 +34,16 @@ export class BiensController {
     return this.biensService.getAllBiens(req.user.userId);
   }
 
+  //Méthode pour compter le nombre total de réservations
+@Get('count')
+@UseGuards(JwtAuthGuard)
+@ApiResponse({ status: 200, description: 'Nombre total de biens.' })
+@ApiResponse({ status: 401, description: 'Non authentifié.' })
+async getBiensCount() {
+  return { total: await this.biensService.countBiens() };
+}
+
+
 //Méthode pour rechercher un bien par mot clé (LIKE)
     @Get('search')
     @UseGuards(JwtAuthGuard)
