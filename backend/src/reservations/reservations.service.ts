@@ -4,8 +4,8 @@ import { Repository } from 'typeorm';
 import { Reservation } from './reservation.entity';
 import { Bien } from '../biens/bien.entity';
 import { Locataire } from '../locataires/locataire.entity';
-import { CreateReservationDto } from './create-reservation.dto';
-import { UpdateReservationDto } from './update-reservation.dto';
+import { CreateReservationDto, UpdateReservationDto } from './create-reservation.dto';
+
 
 
 
@@ -64,6 +64,7 @@ export class ReservationsService {
   }
 
 
+  //Méthode pour mettre à jour une réservation
   async updateReservation(id: number, updateDto: UpdateReservationDto) {
   const reservation = await this.reservationRepo.findOne({ where: { id } });
   if (!reservation) {
@@ -72,4 +73,16 @@ export class ReservationsService {
   Object.assign(reservation, updateDto);
   return this.reservationRepo.save(reservation);
 }
+
+//Méthode pour supprimer une réservation
+async deleteReservation(id: number) {
+  const reservation = await this.reservationRepo.findOne({ where: { id } });
+  if (!reservation) {
+    throw new NotFoundException('Réservation non trouvée');
+  }
+  await this.reservationRepo.remove(reservation);
+  return { message: 'Réservation supprimée avec succès' };
+}
+
+
 }

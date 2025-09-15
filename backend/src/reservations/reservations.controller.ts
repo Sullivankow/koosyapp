@@ -1,9 +1,9 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Patch, Param, BadRequestException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Patch, Param, BadRequestException, Delete } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ReservationsService } from './reservations.service';
-import { CreateReservationDto } from './create-reservation.dto';
+import { CreateReservationDto, UpdateReservationDto } from './create-reservation.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { UpdateReservationDto } from './update-reservation.dto';
+
 
 @ApiTags('Réservations')
 @ApiBearerAuth()
@@ -58,5 +58,18 @@ export class ReservationsController {
       return this.reservationsService.updateReservation(idNum, updateDto);
     }
 
-  
+    //Méthode pour supprimer une réservation
+  @Delete(':id')
+@UseGuards(JwtAuthGuard)
+@ApiResponse({ status: 200, description: 'Réservation supprimée.' })
+@ApiResponse({ status: 400, description: "Id de réservation invalide." })
+@ApiResponse({ status: 401, description: 'Non authentifié.' })
+@ApiResponse({ status: 404, description: 'Réservation non trouvée.' })
+async deleteReservation(@Param('id') id: string) {
+  const idNum = Number(id);
+  if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
+    throw new BadRequestException("L'id de la réservation doit être un entier valide");
+  }
+  return this.reservationsService.deleteReservation(idNum);
+}
 }
