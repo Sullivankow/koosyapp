@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsString, Matches, IsOptional } from 'class-validator';
+import { PartialType } from '@nestjs/mapped-types';
 
 export class CreateReservationDto {
   @ApiProperty({ example: 1 })
@@ -39,3 +40,4 @@ export class CreateReservationDto {
   @IsString()
   statut?: 'en attente' | 'confirmée' | 'terminée' | 'annulée';
 }
+

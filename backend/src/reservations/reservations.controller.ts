@@ -1,8 +1,9 @@
-import { Controller, Post, Body, UseGuards, Req, Get } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Patch, Param, BadRequestException } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto } from './create-reservation.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UpdateReservationDto } from './update-reservation.dto';
 
 @ApiTags('Réservations')
 @ApiBearerAuth()
@@ -35,4 +36,27 @@ export class ReservationsController {
   async getAllReservations() {
     return this.reservationsService.findAll();
   }
+
+
+// Mise à jour d'une réservation (utilisateur connecté)
+    @Patch(':id')
+    @UseGuards(JwtAuthGuard)
+    @ApiBody({ type: UpdateReservationDto })
+    @ApiResponse({ status: 200, description: 'Réservation mise à jour.' })
+    @ApiResponse({ status: 400, description: "Id de réservation invalide." })
+    @ApiResponse({ status: 401, description: 'Non authentifié.' })
+    @ApiResponse({ status: 404, description: 'Réservation non trouvée.' })
+    @ApiResponse({ status: 500, description: 'Erreur serveur.' })
+    async updateReservation(
+      @Param('id') id: string,
+      @Body() updateDto: UpdateReservationDto
+    ) {
+      const idNum = Number(id);
+      if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
+        throw new BadRequestException("L'id de la réservation doit être un entier valide");
+      }
+      return this.reservationsService.updateReservation(idNum, updateDto);
+    }
+
+  
 }

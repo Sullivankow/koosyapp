@@ -5,6 +5,10 @@ import { Reservation } from './reservation.entity';
 import { Bien } from '../biens/bien.entity';
 import { Locataire } from '../locataires/locataire.entity';
 import { CreateReservationDto } from './create-reservation.dto';
+import { UpdateReservationDto } from './update-reservation.dto';
+
+
+
 
 @Injectable()
 export class ReservationsService {
@@ -58,4 +62,14 @@ export class ReservationsService {
   async findAll(): Promise<Reservation[]> {
     return this.reservationRepo.find({ relations:  ['bien', 'locataire']});
   }
+
+
+  async updateReservation(id: number, updateDto: UpdateReservationDto) {
+  const reservation = await this.reservationRepo.findOne({ where: { id } });
+  if (!reservation) {
+    throw new NotFoundException('Réservation non trouvée');
+  }
+  Object.assign(reservation, updateDto);
+  return this.reservationRepo.save(reservation);
+}
 }
