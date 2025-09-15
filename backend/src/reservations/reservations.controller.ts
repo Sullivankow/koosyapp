@@ -37,6 +37,15 @@ export class ReservationsController {
     return this.reservationsService.findAll();
   }
 
+  //Méthode pour compter le nombre total de réservations
+@Get('count')
+@UseGuards(JwtAuthGuard)
+@ApiResponse({ status: 200, description: 'Nombre total de réservations.' })
+@ApiResponse({ status: 401, description: 'Non authentifié.' })
+async getReservationsCount() {
+  return { total: await this.reservationsService.countReservations() };
+}
+
 //Méthode pour récupérer une réservation par son ID
   @Get(':id')
 @UseGuards(JwtAuthGuard)
@@ -51,6 +60,8 @@ async getReservationById(@Param('id') id: string) {
   }
   return this.reservationsService.findOneReservation(idNum);
 }
+
+
 
 
 // Mise à jour d'une réservation (utilisateur connecté)
@@ -87,4 +98,11 @@ async deleteReservation(@Param('id') id: string) {
   }
   return this.reservationsService.deleteReservation(idNum);
 }
+
+
+
+
+
+
+
 }

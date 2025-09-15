@@ -96,4 +96,10 @@ async deleteReservation(id: number) {
 }
 
 
+//Méthode pour compter le nombre total de réservations
+async countReservations(): Promise<number> {
+  return this.reservationRepo.count();
+}
+
+
 }
