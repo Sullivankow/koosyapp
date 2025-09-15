@@ -22,9 +22,17 @@ export class ReservationsService {
     const bien = await this.bienRepo.findOne({ where: { id: dto.bienId, conciergerie: { id: userId } } });
     if (!bien) throw new NotFoundException('Bien non trouvé ou non accessible');
 
-    // Vérifier le locataire
-    const locataire = await this.locataireRepo.findOne({ where: { id: dto.locataireId } });
-    if (!locataire) throw new NotFoundException('Locataire non trouvé');
+    // Création systématique du locataire avec les infos du DTO
+    let locataire = await this.locataireRepo.findOne({ where: { email: dto.locataireEmail } });
+    if (!locataire) {
+      locataire = this.locataireRepo.create({
+        nom: dto.locataireNom,
+        prenom: dto.locatairePrenom,
+        email: dto.locataireEmail,
+        telephone: dto.locataireTelephone,
+      });
+      locataire = await this.locataireRepo.save(locataire);
+    }
 
     // Conversion des dates
     const [d, m, y] = dto.dateDebut.split('/');
