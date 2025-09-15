@@ -64,6 +64,17 @@ export class ReservationsService {
   }
 
 
+
+//Méthode pour récupérer une réservation par son ID
+async findOneReservation(id: number): Promise<Reservation> {
+  const reservation = await this.reservationRepo.findOne({ where: { id }, relations: ['bien', 'locataire'] });
+  if (!reservation) {
+    throw new NotFoundException('Réservation non trouvée');
+  }
+  return reservation;
+}
+
+
   //Méthode pour mettre à jour une réservation
   async updateReservation(id: number, updateDto: UpdateReservationDto) {
   const reservation = await this.reservationRepo.findOne({ where: { id } });

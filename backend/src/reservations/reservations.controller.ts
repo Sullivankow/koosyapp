@@ -37,6 +37,21 @@ export class ReservationsController {
     return this.reservationsService.findAll();
   }
 
+//Méthode pour récupérer une réservation par son ID
+  @Get(':id')
+@UseGuards(JwtAuthGuard)
+@ApiResponse({ status: 200, description: 'Réservation trouvée.' })
+@ApiResponse({ status: 400, description: "Id de réservation invalide." })
+@ApiResponse({ status: 401, description: 'Non authentifié.' })
+@ApiResponse({ status: 404, description: 'Réservation non trouvée.' })
+async getReservationById(@Param('id') id: string) {
+  const idNum = Number(id);
+  if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
+    throw new BadRequestException("L'id de la réservation doit être un entier valide");
+  }
+  return this.reservationsService.findOneReservation(idNum);
+}
+
 
 // Mise à jour d'une réservation (utilisateur connecté)
     @Patch(':id')
