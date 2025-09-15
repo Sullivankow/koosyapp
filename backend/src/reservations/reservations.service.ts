@@ -50,4 +50,12 @@ export class ReservationsService {
     });
     return this.reservationRepo.save(reservation);
   }
+
+
+
+
+  //Méthode pour récupérer la liste des réservations
+  async findAll(): Promise<Reservation[]> {
+    return this.reservationRepo.find({ relations:  ['bien', 'locataire']});
+  }
 }
