@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bien } from './bien.entity';
@@ -56,6 +56,19 @@ async getBienById(id: number, userId: number): Promise<Bien> {
   }
   return bien;
 }
+
+  //Méthode pour rechercher un bien par mot clé (LIKE)
+  async findByMotCle(motCle: string): Promise<Bien[]> {
+    try {
+      return await this.biensRepository
+        .createQueryBuilder('bien')
+        .where('bien.nom ILIKE :motCle', { motCle: `%${motCle}%` })
+        .getMany();
+    } catch (error) {
+      console.error('Erreur lors de la recherche par mot clé:', error);
+      throw new InternalServerErrorException('Erreur lors de la recherche des biens');
+    }
+  }
 
 // Méthode pour mettre à jour un bien en vérifiant qu'il appartient à l'utilisateur
 async updateBien(id: number, userId: number, updateBienDto: UpdateBienDto): Promise<Bien> {

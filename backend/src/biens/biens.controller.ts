@@ -1,9 +1,9 @@
-import { Controller, Post, Body, UseGuards, Request, Get, Delete, Patch } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Request, Get, Delete, Patch, Query, BadRequestException, NotFoundException } from '@nestjs/common';
 import { Param } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BiensService } from './biens.service';
 import { CreateBienDto } from './create-bien.dto';
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 
 import { UpdateBienDto } from './create-bien.dto';
 
@@ -34,14 +34,44 @@ export class BiensController {
     return this.biensService.getAllBiens(req.user.userId);
   }
 
+//Méthode pour rechercher un bien par mot clé (LIKE)
+    @Get('search')
+    @UseGuards(JwtAuthGuard)
+    @ApiQuery({ name: 'motCle', required: true, description: 'Mot clé à rechercher dans le nom du bien' })
+    @ApiResponse({ status: 200, description: 'Biens trouvés.' })
+    @ApiResponse({ status: 400, description: 'Paramètre motCle manquant.' })
+    @ApiResponse({ status: 404, description: 'Aucun bien trouvé.' })
+    @ApiResponse({ status: 401, description: 'Non authentifié.' })
+    @ApiResponse({ status: 500, description: 'Erreur serveur.' })
+    async searchBiens(@Query('motCle') motCle: string) {
+      if (!motCle || motCle.trim() === '') {
+        throw new BadRequestException('Le paramètre motCle est requis');
+      }
+      const biens = await this.biensService.findByMotCle(motCle);
+      if (!biens || biens.length === 0) {
+        throw new NotFoundException('Aucun bien trouvé avec ce mot clé');
+      }
+      return biens;
+    }
+
+
+
   // Affiche un bien par son id (accessible à l'utilisateur connecté)
-  @UseGuards(JwtAuthGuard)
+   @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiResponse({ status: 200, description: 'Bien trouvé.' })
   @ApiResponse({ status: 404, description: 'Bien non trouvé.' })
+    
   async getBienById(@Request() req, @Param('id') id: string) {
-    return this.biensService.getBienById(Number(id), req.user.userId);
+    const idNum = Number(id);
+    if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
+      throw new BadRequestException("L'id du bien doit être un entier valide");
+    }
+    return this.biensService.getBienById(idNum, req.user.userId);
   }
+
+
+  
 
 
     // Modification d'un bien par son id (utilisateur connecté)
@@ -59,6 +89,9 @@ export class BiensController {
   }
 
 
+
+
+
 //Suppression d'un bien par son id (utilisateur doit être connecté)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
@@ -67,6 +100,9 @@ export class BiensController {
   async deleteBien(@Request() req, @Param('id') id: string) {
     return this.biensService.deleteBien(Number(id), req.user.userId);
   }
+
+
+  
 
 
 }
