@@ -5,6 +5,10 @@ import { Tache } from './tache.entity';
 import { CreateTacheDto, UpdateTacheDto } from './create-tache.dto';
 import { Bien } from '../biens/bien.entity';
 import { NotFoundException } from '@nestjs/common';
+import { Not } from 'typeorm';
+import { TacheStatut } from './tache.entity';
+// import dynamique dans la méthode
+
 
 @Injectable()
 export class TachesService {
@@ -42,5 +46,63 @@ async deleteTache(id: number) {
     return { message: 'Tâche supprimée avec succès' };
 }
 
+
+//Méthode pour récupérer une tâche la veille de sa date d'échéance
+async getTachesRappelPourDemain(): Promise<Tache[]> {
+  const today = new Date();
+  const demain = new Date(today);
+  demain.setDate(today.getDate() + 1);
+
+  // Format JJ/MM/AAAA
+  const jour = String(demain.getDate()).padStart(2, '0');
+  const mois = String(demain.getMonth() + 1).padStart(2, '0');
+  const annee = demain.getFullYear();
+  const dateDemain = `${jour}/${mois}/${annee}`;
+
+  return this.tacheRepo.find({
+    where: {
+      dateEcheance: dateDemain,
+      statut: Not(TacheStatut.TERMINEE),
+    },
+    relations: ['bien'],
+  });
+}
+
+
+
+async sendExpoPushNotification(token: string, title: string, body: string) {
+  const fetch = (await import('node-fetch')).default;
+  await fetch('https://exp.host/--/api/v2/push/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      to: token,
+      title,
+      body,
+      sound: 'default',
+    }),
+  });
+}
+
+async envoyerRappelsTachesPourDemain() {
+  const taches = await this.getTachesRappelPourDemain();
+  let notificationsEnvoyees = 0;
+  for (const tache of taches) {
+    const user = tache.bien.conciergerie; // ou tache.bien.proprietaire selon ton modèle
+    if (user && user.expoPushToken) {
+      await this.sendExpoPushNotification(
+        user.expoPushToken,
+        'Rappel tâche',
+        `La tâche "${tache.titre}" est prévue demain (${tache.dateEcheance})`
+      );
+      notificationsEnvoyees++;
+    }
+  }
+  return {
+    success: true,
+    message: `Notifications envoyées : ${notificationsEnvoyees}`,
+    count: notificationsEnvoyees,
+  };
+}
 
 }

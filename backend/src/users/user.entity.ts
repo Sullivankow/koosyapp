@@ -23,6 +23,11 @@ export class User {
    @Column({ default: 'gratuit' })
   abonnement: 'gratuit' | 'premium';
 
+
+// Token Expo Push pour notifications
+@Column({ nullable: true })
+expoPushToken?: string;
+
 //Relation avec les biens
 @OneToMany(() => Bien, bien => bien.conciergerie)
 biens: Bien[];

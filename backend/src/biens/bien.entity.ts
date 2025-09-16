@@ -47,6 +47,9 @@ export class Bien {
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   dateCreation: Date;
 
+  @Column({ nullable: true })
+expoPushToken?: string;
+
   // Pour la relation avec la conciergerie (utilisateur)
   @ManyToOne(() => User, user => user.biens)
   conciergerie: User;

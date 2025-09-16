@@ -1,9 +1,10 @@
 import { Controller, BadRequestException } from '@nestjs/common';
-import { Body, Post, UseGuards, Request, Patch, Param, Delete } from '@nestjs/common';
+import { Body, Post, UseGuards, Request, Patch, Param, Delete,Get } from '@nestjs/common';
 import { TachesService } from './taches.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateTacheDto, UpdateTacheDto } from './create-tache.dto';
 import { ApiBody, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+
 
 
 
@@ -22,6 +23,18 @@ export class TachesController {
   async createTache(@Body() dto: CreateTacheDto, @Request() req) {
     return this.tachesService.createTache(dto, req.user.userId);
   }
+
+//Méthode pour récupérer une tâche la veille de sa date d'échéance
+  @Get('rappels')
+@UseGuards(JwtAuthGuard)
+@ApiResponse({ status: 200, description: 'Liste des tâches à rappeler demain.' })
+async getRappelsTaches(@Request() req) {
+  // Récupère l’id de l’utilisateur connecté (conciergerie)
+  const userId = req.user.userId;
+  // Filtre les tâches à rappeler pour ce user
+  const taches = await this.tachesService.getTachesRappelPourDemain();
+  return taches.filter(tache => tache.bien.conciergerie.id === userId);
+}
 
 
   //Méthode pour mettre à jour une tâche existante
@@ -51,5 +64,8 @@ async deleteTache(@Param('id') id: string) {
   }
   return this.tachesService.deleteTache(idNum);
 }
+
+
+
 
 }

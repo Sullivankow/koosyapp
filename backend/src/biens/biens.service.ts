@@ -39,10 +39,17 @@ export class BiensService {
 
 //Méthode pour récupérer la liste de tous les biens d'un utilisateur
 async getAllBiens(userId: number): Promise<Bien[]> {
-  return this.biensRepository.find({
+  const biens = await this.biensRepository.find({
     where: { conciergerie: { id: userId } },
     relations: ['conciergerie', 'taches'],
   });
+  // On adapte la réponse pour inclure les coordonnées du propriétaire réel
+  return biens.map(bien => ({
+    ...bien,
+    proprietaireNom: bien.proprietaireNom,
+    proprietaireEmail: bien.proprietaireEmail,
+    proprietaireTelephone: bien.proprietaireTelephone,
+  }));
 }
 
 // Méthode pour récupérer un bien par son id et vérifier qu'il appartient à l'utilisateur

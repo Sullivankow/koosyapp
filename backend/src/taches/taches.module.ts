@@ -9,6 +9,7 @@ import { Tache } from './tache.entity';
   providers: [TachesService],
   controllers: [TachesController],
   imports: [TypeOrmModule.forFeature([Tache, Bien])],
+  exports: [TachesService],
 })
 
 export class TachesModule {}
