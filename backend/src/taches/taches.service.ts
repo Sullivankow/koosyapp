@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Tache } from './tache.entity';
-import { CreateTacheDto } from './create-tache.dto';
+import { CreateTacheDto, UpdateTacheDto } from './create-tache.dto';
 import { Bien } from '../biens/bien.entity';
 import { NotFoundException } from '@nestjs/common';
 
@@ -23,4 +23,15 @@ export class TachesService {
     const tache = this.tacheRepo.create({ ...dto, bien });
     return this.tacheRepo.save(tache);
   }
+
+
+//Méthode pour mettre à jour une tâche existante
+async updateTache(id: number, dto: UpdateTacheDto) {
+  const tache = await this.tacheRepo.findOne({ where: { id } });
+  if (!tache) throw new NotFoundException('Tâche non trouvée');
+  Object.assign(tache, dto);
+  return this.tacheRepo.save(tache);
+}
+
+
 }
