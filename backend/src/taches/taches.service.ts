@@ -34,4 +34,13 @@ async updateTache(id: number, dto: UpdateTacheDto) {
 }
 
 
+//Méthode pour supprimer une tâche
+async deleteTache(id: number) {
+    const tache = await this.tacheRepo.findOne({ where: { id } });
+    if (!tache) throw new NotFoundException('Tâche non trouvée');
+    await this.tacheRepo.remove(tache);
+    return { message: 'Tâche supprimée avec succès' };
+}
+
+
 }

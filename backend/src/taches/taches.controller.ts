@@ -1,5 +1,5 @@
 import { Controller, BadRequestException } from '@nestjs/common';
-import { Body, Post, UseGuards, Request, Patch, Param } from '@nestjs/common';
+import { Body, Post, UseGuards, Request, Patch, Param, Delete } from '@nestjs/common';
 import { TachesService } from './taches.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateTacheDto, UpdateTacheDto } from './create-tache.dto';
@@ -38,5 +38,18 @@ async updateTache(@Param('id') id: string, @Body() dto: UpdateTacheDto) {
   return this.tachesService.updateTache(idNum, dto);
 }
 
+
+//Méthode pour supprimer une tâche
+@Delete(':id')
+@UseGuards(JwtAuthGuard)
+@ApiResponse({ status: 200, description: 'Tâche supprimée.' })
+@ApiResponse({ status: 404, description: 'Tâche non trouvée.' })
+async deleteTache(@Param('id') id: string) {
+  const idNum = Number(id);
+  if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
+    throw new BadRequestException("L'id de la tâche doit être un entier valide");
+  }
+  return this.tachesService.deleteTache(idNum);
+}
 
 }
