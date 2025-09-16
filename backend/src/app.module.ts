@@ -8,6 +8,7 @@ import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { BiensModule } from './biens/biens.module';
 import { ReservationsModule } from './reservations/reservations.module';
+import { TachesModule } from './taches/taches.module';
 
 
 
@@ -30,6 +31,7 @@ import { ReservationsModule } from './reservations/reservations.module';
     AuthModule,
     BiensModule,
     ReservationsModule,
+    TachesModule,
 
 
 

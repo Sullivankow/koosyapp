@@ -41,7 +41,7 @@ export class BiensService {
 async getAllBiens(userId: number): Promise<Bien[]> {
   return this.biensRepository.find({
     where: { conciergerie: { id: userId } },
-    relations: ['conciergerie'],
+    relations: ['conciergerie', 'taches'],
   });
 }
 
@@ -49,7 +49,7 @@ async getAllBiens(userId: number): Promise<Bien[]> {
 async getBienById(id: number, userId: number): Promise<Bien> {
   const bien = await this.biensRepository.findOne({
     where: { id, conciergerie: { id: userId } },
-    relations: ['conciergerie'],
+    relations: ['conciergerie', 'taches'],
   });
   if (!bien) {
     throw new NotFoundException('Bien non trouvé ou non accessible');
