@@ -1,5 +1,5 @@
 import { Controller, BadRequestException } from '@nestjs/common';
-import { Body, Post, UseGuards, Request, Patch, Param, Delete,Get } from '@nestjs/common';
+import { Body, Post, UseGuards, Request, Patch, Param, Delete,Get, Query } from '@nestjs/common';
 import { TachesService } from './taches.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateTacheDto, UpdateTacheDto } from './create-tache.dto';
@@ -73,7 +73,13 @@ async deleteTache(@Param('id') id: string) {
   return this.tachesService.deleteTache(idNum);
 }
 
-
+//Méthode pour compter les tâches "à faire" pour une date donnée
+@Get('count-a-faire')
+@UseGuards(JwtAuthGuard)
+async countTachesAFaire(@Request() req, @Query('date') date: string) {
+  const userId = req.user.userId;
+  return { count: await this.tachesService.countTachesAFairePourDate(date, userId) };
+}
 
 
 

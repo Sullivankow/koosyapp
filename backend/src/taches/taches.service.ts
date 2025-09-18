@@ -118,7 +118,23 @@ async envoyerRappelsTachesPourDemain() {
   };
 }
 
-
+//Méthode pour compter les tâches à faire le jour donné 
+async countTachesAFairePourDate(date: string, userId: number): Promise<number> {
+    // Conversion JJ/MM/AAAA -> YYYY-MM-DD
+    let dateISO = date;
+    if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+      const [jour, mois, annee] = date.split('/');
+      dateISO = `${annee}-${mois}-${jour}`;
+    }
+    return this.tacheRepo.count({
+      where: {
+        dateEcheance: dateISO,
+        statut: TacheStatut.A_FAIRE,
+        bien: { conciergerie: { id: userId } }
+      },
+      relations: ['bien'],
+    });
+}
 
 
 
