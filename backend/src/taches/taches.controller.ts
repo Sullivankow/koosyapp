@@ -51,6 +51,19 @@ async updateTache(@Param('id') id: string, @Body() dto: UpdateTacheDto) {
   return this.tachesService.updateTache(idNum, dto);
 }
 
+//Méthode pour marquer une tâche comme terminée
+@Patch(':id/terminee')
+@UseGuards(JwtAuthGuard)
+@ApiResponse({ status: 200, description: 'Tâche marquée comme terminée.' })
+async markTacheAsTerminee(@Param('id') id: string) {
+  const idNum = Number(id);
+  if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
+    throw new BadRequestException("L'id de la tâche doit être un entier valide");
+  }
+  return this.tachesService.markTacheAsTerminee(idNum);
+}
+
+
 
 //Méthode pour supprimer toutes les tâches avec le status terminée
 @UseGuards(JwtAuthGuard)

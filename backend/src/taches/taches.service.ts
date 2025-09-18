@@ -45,6 +45,14 @@ async deleteAllTachesTerminees(): Promise<{ deletedCount: number }> {
 }
 
 
+//Méthode pour marquer une tâche comme terminée
+async markTacheAsTerminee(id: number): Promise<Tache> {
+  const tache = await this.tacheRepo.findOne({ where: { id } });
+  if (!tache) throw new NotFoundException('Tâche non trouvée');
+  tache.statut = TacheStatut.TERMINEE;
+  return this.tacheRepo.save(tache);
+}
+
 //Méthode pour supprimer une tâche
 async deleteTache(id: number) {
     const tache = await this.tacheRepo.findOne({ where: { id } });
