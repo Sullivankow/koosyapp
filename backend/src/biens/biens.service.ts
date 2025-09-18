@@ -97,7 +97,25 @@ async deleteBien(id: number, userId: number): Promise<void> {
 }
 
 
+//Méthode pour ajouter ou mettre à jour une remarque sur un bien *
+async addOrUpdateRemarqueBien(id: number, remarque: string): Promise<Bien> {
+  const bien = await this.biensRepository.findOne({ where: { id } });
+  if (!bien) throw new NotFoundException('Bien non trouvé');
+  bien.remarque = remarque;
+  return this.biensRepository.save(bien);
+}
 
+//Méthode pour supprimer une remarque dans un bien 
+async deleteRemarqueBien(id: number): Promise<{ success: boolean; message: string }> {
+  const bien = await this.biensRepository.findOne({ where: { id } });
+  if (!bien) throw new NotFoundException('Bien non trouvé');
+  if (!bien.remarque) {
+    return { success: false, message: 'Aucune remarque à supprimer.' };
+  }
+  bien.remarque = undefined;
+  await this.biensRepository.save(bien);
+  return { success: true, message: 'Remarque supprimée avec succès.' };
+}
 
 //Méthode pour compter le nombre total de biens
 async countBiens(): Promise<number> {

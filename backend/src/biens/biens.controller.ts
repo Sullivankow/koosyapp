@@ -44,6 +44,8 @@ async getBiensCount() {
 }
 
 
+
+
 //Méthode pour rechercher un bien par mot clé (LIKE)
     @Get('search')
     @UseGuards(JwtAuthGuard)
@@ -98,6 +100,21 @@ async getBiensCount() {
     return this.biensService.updateBien(Number(id), req.user.userId, updateBienDto);
   }
 
+//Méthode pour ajouter ou mettre à jour une remarque sur un bien *
+@ApiBody({ schema: { type: 'object', properties: { remarque: { type: 'string' } } } })
+@Patch(':id/remarque')
+@UseGuards(JwtAuthGuard)
+async addOrUpdateRemarque(@Param('id') id: string, @Body('remarque') remarque: string) {
+  return this.biensService.addOrUpdateRemarqueBien(Number(id), remarque);
+}
+
+
+//Méthode pour supprimer une remarque dans un bien
+@Delete(':id/remarque')
+@UseGuards(JwtAuthGuard)
+async deleteRemarque(@Param('id') id: string) {
+  return this.biensService.deleteRemarqueBien(Number(id));
+}
 
 
 

@@ -15,6 +15,8 @@ export class Bien {
   @Column()
   proprietaireNom: string;
 
+ 
+
   @Column()
   proprietaireEmail: string;
 
@@ -60,6 +62,10 @@ reservations: Reservation[];
 //Pour la relation avec les taches
 @OneToMany(() => Tache, tache => tache.bien)
 taches: Tache[];
+
+//Champs pour les remarques
+ @Column({ nullable: true })
+  remarque?: string;
 
 
   // Pour la géolocalisation
