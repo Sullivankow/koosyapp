@@ -37,6 +37,13 @@ async updateTache(id: number, dto: UpdateTacheDto) {
   return this.tacheRepo.save(tache);
 }
 
+//Méthode pour supprimer toutes les tâches avec le status terminée
+async deleteAllTachesTerminees(): Promise<{ deletedCount: number }> {
+  const { TacheStatut } = require('./tache.entity');
+  const result = await this.tacheRepo.delete({ statut: TacheStatut.TERMINEE });
+  return { deletedCount: result.affected || 0 };
+}
+
 
 //Méthode pour supprimer une tâche
 async deleteTache(id: number) {
@@ -66,10 +73,16 @@ async getTachesRappelPourDemain(): Promise<Tache[]> {
     },
     relations: ['bien'],
   });
+
+
+
+
+
+
 }
 
 
-
+//Méthode pour envoyer une notification push via Expo
 async sendExpoPushNotification(token: string, title: string, body: string) {
   const fetch = (await import('node-fetch')).default;
   await fetch('https://exp.host/--/api/v2/push/send', {
@@ -104,5 +117,10 @@ async envoyerRappelsTachesPourDemain() {
     count: notificationsEnvoyees,
   };
 }
+
+
+
+
+
 
 }

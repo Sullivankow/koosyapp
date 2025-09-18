@@ -52,6 +52,14 @@ async updateTache(@Param('id') id: string, @Body() dto: UpdateTacheDto) {
 }
 
 
+//Méthode pour supprimer toutes les tâches avec le status terminée
+@UseGuards(JwtAuthGuard)
+@Delete('terminees')
+async deleteAllTachesTerminees() {
+    return this.tachesService.deleteAllTachesTerminees();
+  }
+
+
 //Méthode pour supprimer une tâche
 @Delete(':id')
 @UseGuards(JwtAuthGuard)
@@ -64,6 +72,7 @@ async deleteTache(@Param('id') id: string) {
   }
   return this.tachesService.deleteTache(idNum);
 }
+
 
 
 
