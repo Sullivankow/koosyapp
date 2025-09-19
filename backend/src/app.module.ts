@@ -9,15 +9,19 @@ import { AuthModule } from './auth/auth.module';
 import { BiensModule } from './biens/biens.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { TachesModule } from './taches/taches.module';
-import { BienImageService } from './image/bien-image/bien-image.service';
-import { BienImageController } from './image/bien-image/bien-image.controller';
-import { BienImageModule } from './image/bien-image/bien-image.module';
+import { BienImageModule } from './Image/bien-image/bien-image.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 
 
 
 @Module({
   imports: [
+      ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads',
+    }),
     
     ConfigModule.forRoot({ isGlobal: true }),
     TypeOrmModule.forRoot({
@@ -41,8 +45,8 @@ import { BienImageModule } from './image/bien-image/bien-image.module';
 
 
   ],
-  controllers: [AppController, BienImageController],
-  providers: [AppService, BienImageService],
+  controllers: [AppController],
+  providers: [AppService],
 })
 
 
