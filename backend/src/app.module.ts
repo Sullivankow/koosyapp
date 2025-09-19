@@ -9,6 +9,9 @@ import { AuthModule } from './auth/auth.module';
 import { BiensModule } from './biens/biens.module';
 import { ReservationsModule } from './reservations/reservations.module';
 import { TachesModule } from './taches/taches.module';
+import { BienImageService } from './image/bien-image/bien-image.service';
+import { BienImageController } from './image/bien-image/bien-image.controller';
+import { BienImageModule } from './image/bien-image/bien-image.module';
 
 
 
@@ -32,13 +35,14 @@ import { TachesModule } from './taches/taches.module';
     BiensModule,
     ReservationsModule,
     TachesModule,
+    BienImageModule,
 
 
 
 
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, BienImageController],
+  providers: [AppService, BienImageService],
 })
 
 

@@ -4,6 +4,7 @@ import { User } from '../users/user.entity';
 import { OneToMany } from 'typeorm';
 import { Reservation } from '../reservations/reservation.entity';
 import { Tache } from '../taches/tache.entity';
+import { BienImage } from '../Image/image.entity';
 
 
 @Entity()
@@ -40,8 +41,6 @@ export class Bien {
   @Column('simple-array', { nullable: true })
   equipements: string[];
 
-  @Column('simple-array', { nullable: true })
-  photos: string[];
 
   @Column({ default: 'disponible' })
   statut: 'disponible' | 'occupé' | 'travaux';
@@ -62,6 +61,9 @@ reservations: Reservation[];
 //Pour la relation avec les taches
 @OneToMany(() => Tache, tache => tache.bien)
 taches: Tache[];
+
+@OneToMany(() => BienImage, image => image.bien, { cascade: true })
+images: BienImage[];
 
 //Champs pour les remarques
  @Column({ nullable: true })
