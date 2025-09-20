@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { addUser } from '../utils/users';
+import { signup } from '../utils/api';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
@@ -13,6 +13,8 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [nom, setNom] = useState('');
+    const [prenom, setPrenom] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [confirmError, setConfirmError] = useState('');
     const { colors } = useTheme();
@@ -40,16 +42,39 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
         } else {
             setConfirmError("");
         }
-        if (!email.trim() || !password.trim() || !isEmailValid(email) || !valid) {
+        if (!email.trim() || !password.trim() || !isEmailValid(email) || !valid || !nom.trim() || !prenom.trim()) {
             return;
         }
-        await addUser({ email, password });
-        onSignupSuccess?.(email, password);
+        try {
+            await signup({ nom, prenom, email, password });
+            onSignupSuccess?.(email, password);
+        } catch (err: any) {
+            setPasswordError("Erreur lors de l'inscription : " + (err.message || ''));
+        }
     };
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <Text style={[styles.title, { color: colors.primary }]}>Inscription</Text>
+            {/* NOM */}
+            <TextInput
+                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
+                placeholder="Nom"
+                placeholderTextColor={colors.textSecondary}
+                value={nom}
+                onChangeText={setNom}
+                autoCapitalize="words"
+            />
+            {/* PRENOM */}
+            <TextInput
+                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
+                placeholder="Prénom"
+                placeholderTextColor={colors.textSecondary}
+                value={prenom}
+                onChangeText={setPrenom}
+                autoCapitalize="words"
+            />
+            {/* EMAIL */}
             <View style={{ width: '100%' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
@@ -92,6 +117,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
                     return emailValidationMessage;
                 })()}
             </View>
+            {/* MOT DE PASSE */}
             <View style={{ width: '100%' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
@@ -116,6 +142,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
                     </Text>
                 )}
             </View>
+            {/* CONFIRMATION MOT DE PASSE */}
             <View style={{ width: '100%' }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput
@@ -167,7 +194,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
                 title="S'inscrire"
                 onPress={handleSignup}
                 color={colors.primary}
-                disabled={!email.trim() || !password.trim() || !isEmailValid(email) || !isPasswordStrong(password) || password !== confirmPassword}
+                disabled={!email.trim() || !password.trim() || !isEmailValid(email) || !isPasswordStrong(password) || password !== confirmPassword || !nom.trim() || !prenom.trim()}
             />
             <Button title="Retour" onPress={onBack} color={colors.secondary} />
         </View>
