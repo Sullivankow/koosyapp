@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Switch } from 'react-native';
 import { login } from '../utils/api';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 
 
@@ -19,6 +21,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [rememberMe, setRememberMe] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const { colors, isDarkMode, toggleTheme } = useTheme();
 
@@ -27,7 +30,19 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
     const isEmailValid = (val: string) =>
         /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/.test(val.trim());
 
-    // Suppression de la logique de récupération des identifiants mémorisés
+    // Récupère les identifiants mémorisés si existants
+    useEffect(() => {
+        AsyncStorage.getItem('koosy_login').then(data => {
+            if (data) {
+                try {
+                    const { email, password } = JSON.parse(data);
+                    setEmail(email);
+                    setPassword(password);
+                    setRememberMe(true);
+                } catch { }
+            }
+        });
+    }, []);
 
     const handleLogin = async () => {
         setError(null);
@@ -36,6 +51,11 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
             const res = await login({ email, password });
             // res.access_token contient le token JWT
             // Ici tu peux stocker le token si besoin
+            if (rememberMe) {
+                await AsyncStorage.setItem('koosy_login', JSON.stringify({ email, password }));
+            } else {
+                await AsyncStorage.removeItem('koosy_login');
+            }
             onLogin?.(email, password);
         } catch (err) {
             setError('Identifiants invalides');
@@ -57,14 +77,24 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
                 keyboardType="email-address"
                 autoCapitalize="none"
             />
-            <TextInput
-                style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
-                placeholder="Mot de passe"
-                placeholderTextColor={colors.textSecondary}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-            />
+            <View style={{ flexDirection: 'row', alignItems: 'center', width: '100%' }}>
+                <TextInput
+                    style={[styles.input, { flex: 1, backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
+                    placeholder="Mot de passe"
+                    placeholderTextColor={colors.textSecondary}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry={!showPassword}
+                />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+                    <MaterialCommunityIcons
+                        name={showPassword ? 'eye' : 'eye-off'}
+                        size={22}
+                        color={colors.textSecondary}
+                        style={{ marginLeft: 8 }}
+                    />
+                </TouchableOpacity>
+            </View>
             <View style={{ width: '100%', marginBottom: 10 }}>
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
                     <Switch
