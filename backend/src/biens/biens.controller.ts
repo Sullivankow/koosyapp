@@ -39,8 +39,9 @@ export class BiensController {
 @UseGuards(JwtAuthGuard)
 @ApiResponse({ status: 200, description: 'Nombre total de biens.' })
 @ApiResponse({ status: 401, description: 'Non authentifié.' })
-async getBiensCount() {
-  return { total: await this.biensService.countBiens() };
+async getBiensCount(@Request() req) {
+  // Utilise l'ID de l'utilisateur connecté
+  return { total: await this.biensService.countBiens(req.user.userId) };
 }
 
 

@@ -49,10 +49,17 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
         if (!email.trim() || !password.trim() || !isEmailValid(email)) return;
         try {
             const res = await login({ email, password });
-            // res.access_token contient le token JWT
-            // res.prenom doit être retourné par le backend
-            if (res.prenom) {
-                await AsyncStorage.setItem('koosy_user', JSON.stringify({ prenom: res.prenom }));
+            // Sauvegarde le token JWT dans la session pour les appels API
+            if (res.access_token) {
+                const { access_token } = res;
+                const { prenom } = res;
+                // Stocke le token et l'email dans la session
+                const { saveSession } = require('../utils/session');
+                await saveSession(email, access_token);
+                // Stocke le prénom pour l'accueil
+                if (prenom) {
+                    await AsyncStorage.setItem('koosy_user', JSON.stringify({ prenom }));
+                }
             }
             if (rememberMe) {
                 await AsyncStorage.setItem('koosy_login', JSON.stringify({ email, password }));

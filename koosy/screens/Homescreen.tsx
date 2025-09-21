@@ -5,6 +5,7 @@ import { clearSession } from '../utils/session';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { getBiensCount } from '../utils/api';
 
 type HomeScreenProps = {
     onLogout?: () => void;
@@ -16,6 +17,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const [notifVisible, setNotifVisible] = useState(false);
     const [userName, setUserName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
+    const [biensCount, setBiensCount] = useState(0);
 
     useEffect(() => {
         AsyncStorage.getItem('koosy_user').then(data => {
@@ -27,8 +29,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                 } catch {}
             }
         });
+        // Récupère le nombre de biens depuis l'API
+        getBiensCount()
+            .then(data => {
+                // Correction : la réponse backend est { total: ... }
+                setBiensCount(data.total ?? 0);
+            })
+            .catch(() => setBiensCount(0));
     }, []);
-    const biensCount = 5;
+    // Les autres valeurs restent statiques pour l'instant
     const locatairesCount = 12;
     const tachesUrgentes = 2;
     const prochainEvenement = 'Check-in demain à 10h';

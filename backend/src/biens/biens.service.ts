@@ -118,8 +118,9 @@ async deleteRemarqueBien(id: number): Promise<{ success: boolean; message: strin
 }
 
 //Méthode pour compter le nombre total de biens
-async countBiens(): Promise<number> {
-  return this.biensRepository.count();
+// Compte les biens de l'utilisateur connecté
+async countBiens(userId: number): Promise<number> {
+  return this.biensRepository.count({ where: { conciergerie: { id: userId } } });
 }
 
 

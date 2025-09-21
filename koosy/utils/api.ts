@@ -1,6 +1,7 @@
 
+
 import { getSession } from './session';
-const BASE_URL = 'http://localhost:3000'; // à adapter selon ton environnement
+const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
 
 
 // Simule la récupération d'un token JWT stocké localement
@@ -44,3 +45,18 @@ export async function login({ email, password }: { email: string; password: stri
   }
   return await response.json(); // { access_token: ... }
 }
+
+//PAGE D'ACCUEIL
+//Fonction pour récupérer le nombre total de biens
+
+export async function getBiensCount() {
+  // Vérifie le token utilisé
+  const session = await getSession();
+  console.log('Token utilisé pour getBiensCount:', session?.token);
+  return apiFetch('/biens/count');
+}
+
+
+
+
+
