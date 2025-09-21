@@ -9,6 +9,7 @@ import CarteScreen from './screens/CarteScreen';
 import SplashScreen from './components/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
+import WelcomeScreen from './screens/WelcomeScreen';
 import React, { useState, useEffect } from 'react';
 import { getSession, saveSession, clearSession, generateToken } from './utils/session';
 import { initDefaultUsers } from './utils/users';
@@ -24,6 +25,7 @@ export default function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
 
 
   useEffect(() => {
@@ -44,6 +46,9 @@ export default function App() {
 
   // Auth flow
   if (!isLoggedIn) {
+    if (showWelcome) {
+      return <WelcomeScreen onFinish={() => { setShowWelcome(false); setIsLoggedIn(true); }} />;
+    }
     if (showSignup) {
       return (
         <SignupScreen
@@ -51,8 +56,7 @@ export default function App() {
             setShowSignup(false);
             const token = generateToken();
             await saveSession(email || '', token);
-
-            setIsLoggedIn(true);
+            setShowWelcome(true);
           }}
           onBack={() => setShowSignup(false)}
         />
@@ -71,12 +75,10 @@ export default function App() {
         onLogin={async (email?: string) => {
           const sess = await getSession();
           if (sess?.token && sess?.email === email) {
-            // setSession(sess); // supprimé
             setIsLoggedIn(true);
           } else {
             const token = generateToken();
             await saveSession(email || '', token);
-
             setIsLoggedIn(true);
           }
         }}

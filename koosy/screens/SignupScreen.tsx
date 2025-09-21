@@ -48,8 +48,9 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
         try {
             await signup({ nom, prenom, email, password });
             onSignupSuccess?.(email, password);
-        } catch (err: any) {
-            setPasswordError("Erreur lors de l'inscription : " + (err.message || ''));
+        } catch (err) {
+            const errorMsg = err instanceof Error ? err.message : String(err);
+            setPasswordError("Erreur lors de l'inscription : " + errorMsg);
         }
     };
 
