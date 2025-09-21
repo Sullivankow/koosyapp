@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { clearSession } from '../utils/session';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
@@ -13,8 +14,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const { colors, isDarkMode, toggleTheme } = useTheme();
     const navigation = useNavigation();
     const [notifVisible, setNotifVisible] = useState(false);
-    const userName = 'Sullivan';
-    const avatarUrl = 'https://ui-avatars.com/api/?name=Sullivan&background=random';
+    const [userName, setUserName] = useState('');
+    const [avatarUrl, setAvatarUrl] = useState('');
+
+    useEffect(() => {
+        AsyncStorage.getItem('koosy_user').then(data => {
+            if (data) {
+                try {
+                    const { prenom } = JSON.parse(data);
+                    setUserName(prenom);
+                    setAvatarUrl(`https://ui-avatars.com/api/?name=${encodeURIComponent(prenom)}&background=random`);
+                } catch {}
+            }
+        });
+    }, []);
     const biensCount = 5;
     const locatairesCount = 12;
     const tachesUrgentes = 2;

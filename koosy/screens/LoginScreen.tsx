@@ -50,7 +50,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
         try {
             const res = await login({ email, password });
             // res.access_token contient le token JWT
-            // Ici tu peux stocker le token si besoin
+            // res.prenom doit être retourné par le backend
+            if (res.prenom) {
+                await AsyncStorage.setItem('koosy_user', JSON.stringify({ prenom: res.prenom }));
+            }
             if (rememberMe) {
                 await AsyncStorage.setItem('koosy_login', JSON.stringify({ email, password }));
             } else {

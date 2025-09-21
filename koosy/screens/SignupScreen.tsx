@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { signup } from '../utils/api';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -47,6 +48,7 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
         }
         try {
             await signup({ nom, prenom, email, password });
+            await AsyncStorage.setItem('koosy_user', JSON.stringify({ prenom }));
             onSignupSuccess?.(email, password);
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : String(err);
