@@ -26,6 +26,7 @@ export default function App() {
   const [showSignup, setShowSignup] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [showWelcomeLogin, setShowWelcomeLogin] = useState(false);
 
 
   useEffect(() => {
@@ -48,6 +49,9 @@ export default function App() {
   if (!isLoggedIn) {
     if (showWelcome) {
       return <WelcomeScreen onFinish={() => { setShowWelcome(false); setIsLoggedIn(true); }} />;
+    }
+    if (showWelcomeLogin) {
+      return <WelcomeScreen onFinish={() => { setShowWelcomeLogin(false); setIsLoggedIn(true); }} />;
     }
     if (showSignup) {
       return (
@@ -75,11 +79,11 @@ export default function App() {
         onLogin={async (email?: string) => {
           const sess = await getSession();
           if (sess?.token && sess?.email === email) {
-            setIsLoggedIn(true);
+            setShowWelcomeLogin(true);
           } else {
             const token = generateToken();
             await saveSession(email || '', token);
-            setIsLoggedIn(true);
+            setShowWelcomeLogin(true);
           }
         }}
         onSignup={() => setShowSignup(true)}

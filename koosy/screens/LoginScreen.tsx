@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Switch } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { checkCredentials } from '../utils/users';
+import { login } from '../utils/api';
 import { useTheme } from '../contexts/ThemeContext';
 
 
@@ -28,37 +27,19 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
     const isEmailValid = (val: string) =>
         /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/.test(val.trim());
 
-    useEffect(() => {
-        // Récupère les identifiants mémorisés si existants
-        AsyncStorage.getItem('koosy_login').then(data => {
-            if (data) {
-                try {
-                    const { email, password } = JSON.parse(data);
-                    setEmail(email);
-                    setPassword(password);
-                    setRememberMe(true);
-                } catch { }
-            }
-        });
-    }, []);
+    // Suppression de la logique de récupération des identifiants mémorisés
 
     const handleLogin = async () => {
         setError(null);
         if (!email.trim() || !password.trim() || !isEmailValid(email)) return;
-        const isValid = await checkCredentials(email, password);
-        if (!isValid) {
-            setError('Identifiants incorrects');
-            return;
+        try {
+            const res = await login({ email, password });
+            // res.access_token contient le token JWT
+            // Ici tu peux stocker le token si besoin
+            onLogin?.(email, password);
+        } catch (err) {
+            setError('Identifiants invalides');
         }
-        // Génère un token simple (UUID ou random string)
-        const token = Math.random().toString(36).substring(2) + Date.now().toString(36);
-        await AsyncStorage.setItem('koosy_session', JSON.stringify({ email, token }));
-        if (rememberMe) {
-            await AsyncStorage.setItem('koosy_login', JSON.stringify({ email, password }));
-        } else {
-            await AsyncStorage.removeItem('koosy_login');
-        }
-        onLogin?.(email, password);
     };
 
     return (

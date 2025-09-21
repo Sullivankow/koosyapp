@@ -33,9 +33,14 @@ export function signup(data: { nom: string; prenom: string; email: string; passw
 }
 
 // Fonction de connexion
-export function login(data: { email: string; password: string }) {
-  return apiFetch('/auth/login', {
+export async function login({ email, password }: { email: string; password: string }) {
+  const response = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
-    body: JSON.stringify(data),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
   });
+  if (!response.ok) {
+    throw new Error('Identifiants invalides');
+  }
+  return await response.json(); // { access_token: ... }
 }
