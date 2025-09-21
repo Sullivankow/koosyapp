@@ -48,12 +48,12 @@ export async function login({ email, password }: { email: string; password: stri
 
 //PAGE D'ACCUEIL
 //Fonction pour récupérer le nombre total de biens
-
-export async function getBiensCount() {
-  // Vérifie le token utilisé
-  const session = await getSession();
-  console.log('Token utilisé pour getBiensCount:', session?.token);
+export async function getBiensCount(): Promise<{ total: number }> {
   return apiFetch('/biens/count');
+}
+
+export async function getReservationsCount(): Promise<{ total: number }> {
+  return apiFetch('/reservations/count');
 }
 
 

@@ -5,7 +5,7 @@ import { clearSession } from '../utils/session';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { getBiensCount } from '../utils/api';
+import { getBiensCount, getReservationsCount } from '../utils/api';
 
 type HomeScreenProps = {
     onLogout?: () => void;
@@ -18,6 +18,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const [userName, setUserName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
     const [biensCount, setBiensCount] = useState(0);
+    const [reservationsCount, setReservationsCount] = useState(0);
 
     useEffect(() => {
         AsyncStorage.getItem('koosy_user').then(data => {
@@ -32,13 +33,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         // Récupère le nombre de biens depuis l'API
         getBiensCount()
             .then(data => {
-                // Correction : la réponse backend est { total: ... }
                 setBiensCount(data.total ?? 0);
             })
             .catch(() => setBiensCount(0));
+       getReservationsCount()
+  .then((data: { total: number }) => {
+    setReservationsCount(data.total ?? 0);
+  })
+  .catch(() => setReservationsCount(0));
     }, []);
     // Les autres valeurs restent statiques pour l'instant
-    const locatairesCount = 12;
+    // const locatairesCount = 12; // supprimé, remplacé par le nombre de réservations
     const tachesUrgentes = 2;
     const prochainEvenement = 'Check-in demain à 10h';
 
@@ -82,9 +87,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                         <Text style={[styles.summaryValue, { color: colors.primary }]}>{biensCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}>
-                        <FontAwesome5 name="users" size={22} color={colors.primary} style={{ marginBottom: 5 }} />
-                        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Locataires</Text>
-                        <Text style={[styles.summaryValue, { color: colors.primary }]}>{locatairesCount}</Text>
+                        <FontAwesome5 name="calendar-check" size={22} color={colors.primary} style={{ marginBottom: 5 }} />
+                        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Réserv.</Text>
+                        <Text style={[styles.summaryValue, { color: colors.primary }]}>{reservationsCount}</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}>
                         <MaterialCommunityIcons name="alert-circle" size={22} color={colors.error} style={{ marginBottom: 5 }} />
