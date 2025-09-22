@@ -17,7 +17,11 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   };
   const response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
   if (!response.ok) throw new Error(await response.text());
-  return response.json();
+  // Si la réponse est vide ou status 204, ne pas parser en JSON
+  if (response.status === 204) return;
+  const text = await response.text();
+  if (!text) return;
+  return JSON.parse(text);
 }
 
 
