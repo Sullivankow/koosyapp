@@ -1,6 +1,7 @@
 
 
 
+
 import { getSession } from './session';
 const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
 
@@ -130,6 +131,20 @@ export async function uploadBienImages(bienId: number, imageUris: string[]): Pro
   }
 }
 
+
+
+// Fonction pour modifier un bien
+export async function updateBien(id: string, data: any): Promise<any> {
+  const session = await getSession();
+  const token = session?.token;
+  return apiFetch(`/biens/${id}`, {
+    method: 'PATCH',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(data),
+  });
+}
 
 
 

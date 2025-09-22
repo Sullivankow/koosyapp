@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, 
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Bien } from '../models/models';
-import { getBiens } from '../utils/api';
-import { deleteBien } from '../utils/api';
+import { getBiens, updateBien, deleteBien } from '../utils/api';
 import AddBienModal from '../components/AddBienModal';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 import { getImageUrl } from '../utils/api';
@@ -51,14 +50,11 @@ const BiensScreen: React.FC = () => {
         return {
           ...bien,
           photos,
-          proprio: bien.proprio
-            ? {
-                id: bien.proprio.id?.toString() || '',
-                nom: bien.proprio.nom || 'N/A',
-                email: bien.proprio.email || '',
-                telephone: bien.proprio.telephone || '',
-              }
-            : { id: '', nom: 'N/A', email: '', telephone: '' },
+          proprio: {
+            nom: bien.proprietaireNom || 'N/A',
+            email: bien.proprietaireEmail || '',
+            telephone: bien.proprietaireTelephone || '',
+          },
           locataires: Array.isArray(bien.locataires)
             ? bien.locataires.map((loc: any) => ({
                 id: loc.id?.toString() || '',
@@ -121,7 +117,46 @@ const BiensScreen: React.FC = () => {
   
   // Actions principales
   const handleAjouterBien = () => alert('Ajouter un bien (à implémenter)');
-  const handleModifierBien = (bien: Bien) => alert(`Modifier le bien : ${bien.nom}`);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<any>({});
+
+  const handleEditBien = (bien: Bien) => {
+    setEditingId(bien.id);
+    setEditForm({
+      nom: bien.nom,
+      adresse: bien.adresse,
+      type: bien.type,
+      superficie: bien.superficie?.toString() || '',
+      pieces: bien.pieces?.toString() || '',
+      proprietaireNom: bien.proprio?.nom || '',
+      proprietaireEmail: bien.proprio?.email || '',
+      proprietaireTelephone: bien.proprio?.telephone || '',
+      equipements: Array.isArray(bien.equipements) ? bien.equipements.join(', ') : '',
+      statut: bien.statut || '',
+    });
+  };
+
+  const handleValidateEdit = async (bienId: string) => {
+    try {
+      const data = {
+        ...editForm,
+        superficie: Number(editForm.superficie),
+        pieces: Number(editForm.pieces),
+        equipements: editForm.equipements ? editForm.equipements.split(',').map((e: string) => e.trim()) : [],
+      };
+      await updateBien(bienId, data);
+      setEditingId(null);
+      setEditForm({});
+      await fetchBiens();
+    } catch (err) {
+      console.error('Erreur modification bien:', err);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingId(null);
+    setEditForm({});
+  };
   const handleSupprimerBien = async (bienId: string) => {
     try {
       await deleteBien(bienId);
@@ -199,18 +234,54 @@ const BiensScreen: React.FC = () => {
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
         renderItem={({ item }) => (
-          <View style={[styles.card, { backgroundColor: colors.surface }]}>
+          <View style={[styles.card, { backgroundColor: colors.surface }]}> 
             {/* Nom du bien */}
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 2 }}>{item.nom || 'Sans nom'}</Text>
+            {editingId === item.id ? (
+              <TextInput
+                style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 2, backgroundColor: '#f5f5f5', borderRadius: 8, padding: 6 }}
+                value={editForm.nom}
+                onChangeText={v => setEditForm((prev: any) => ({ ...prev, nom: v }))}
+              />
+            ) : (
+              <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 2 }}>{item.nom || 'Sans nom'}</Text>
+            )}
             <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 6 }}>
               Créé le {item.dateCreation ? formatDateFR(item.dateCreation) : formatDateFR(new Date().toISOString().slice(0, 10))}
             </Text>
             {Array.isArray(item.photos) && item.photos.length > 0 && renderCarousel(item.photos)}
             <View style={styles.infoGrid}>
-              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Type</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.type || '-'}</Text></View>
-              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Superficie</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.superficie ? item.superficie + ' m²' : '-'}</Text></View>
-              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Pièces</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.pieces || '-'}</Text></View>
-              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Statut</Text><Text style={[styles.infoValue, { color: colors.accent }]}>{item.statut || '-'}</Text></View>
+              <View style={styles.infoCol}>
+                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Type</Text>
+                {editingId === item.id ? (
+                  <TextInput style={[styles.infoValue, { backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4 }]} value={editForm.type} onChangeText={v => setEditForm((prev: any) => ({ ...prev, type: v }))} />
+                ) : (
+                  <Text style={[styles.infoValue, { color: colors.text }]}>{item.type || '-'}</Text>
+                )}
+              </View>
+              <View style={styles.infoCol}>
+                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Superficie</Text>
+                {editingId === item.id ? (
+                  <TextInput style={[styles.infoValue, { backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4 }]} value={editForm.superficie} onChangeText={v => setEditForm((prev: any) => ({ ...prev, superficie: v }))} keyboardType="numeric" />
+                ) : (
+                  <Text style={[styles.infoValue, { color: colors.text }]}>{item.superficie ? item.superficie + ' m²' : '-'}</Text>
+                )}
+              </View>
+              <View style={styles.infoCol}>
+                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Pièces</Text>
+                {editingId === item.id ? (
+                  <TextInput style={[styles.infoValue, { backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4 }]} value={editForm.pieces} onChangeText={v => setEditForm((prev: any) => ({ ...prev, pieces: v }))} keyboardType="numeric" />
+                ) : (
+                  <Text style={[styles.infoValue, { color: colors.text }]}>{item.pieces || '-'}</Text>
+                )}
+              </View>
+              <View style={styles.infoCol}>
+                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Statut</Text>
+                {editingId === item.id ? (
+                  <TextInput style={[styles.infoValue, { backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4 }]} value={editForm.statut || ''} onChangeText={v => setEditForm((prev: any) => ({ ...prev, statut: v }))} />
+                ) : (
+                  <Text style={[styles.infoValue, { color: colors.accent }]}>{item.statut || '-'}</Text>
+                )}
+              </View>
             </View>
             {/* Propriétaire */}
             <View style={styles.proprioBox}>
@@ -218,9 +289,19 @@ const BiensScreen: React.FC = () => {
                 <FontAwesome5 name="user-tie" size={18} color={colors.secondary} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{item.proprio?.nom || 'N/A'}</Text>
-                <Text style={{ color: colors.textSecondary }}>{item.proprio?.email || ''}</Text>
-                <Text style={{ color: colors.textSecondary }}>{item.proprio?.telephone || ''}</Text>
+                {editingId === item.id ? (
+                  <>
+                    <TextInput style={{ color: '#222', fontWeight: 'bold', backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4, marginBottom: 2 }} value={editForm.proprietaireNom} onChangeText={v => setEditForm((prev: any) => ({ ...prev, proprietaireNom: v }))} />
+                    <TextInput style={{ color: '#222', backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4, marginBottom: 2 }} value={editForm.proprietaireEmail} onChangeText={v => setEditForm((prev: any) => ({ ...prev, proprietaireEmail: v }))} keyboardType="email-address" />
+                    <TextInput style={{ color: '#222', backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4 }} value={editForm.proprietaireTelephone} onChangeText={v => setEditForm((prev: any) => ({ ...prev, proprietaireTelephone: v }))} keyboardType="phone-pad" />
+                  </>
+                ) : (
+                  <>
+                    <Text style={{ color: colors.text, fontWeight: 'bold' }}>{item.proprio?.nom || 'N/A'}</Text>
+                    <Text style={{ color: colors.textSecondary }}>{item.proprio?.email || ''}</Text>
+                    <Text style={{ color: colors.textSecondary }}>{item.proprio?.telephone || ''}</Text>
+                  </>
+                )}
               </View>
             </View>
             {/* Locataires */}
@@ -257,15 +338,28 @@ const BiensScreen: React.FC = () => {
             </View>
             {/* Actions */}
             <View style={styles.floatingActions}>
-              <TouchableOpacity style={[styles.fab, { backgroundColor: colors.secondary }]} onPress={() => handleModifierBien(item)}>
-                <MaterialCommunityIcons name="pencil" size={20} color={colors.surface} />
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={() => handleSupprimerBien(item.id)}>
-                <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.fab, { backgroundColor: colors.accent }]} onPress={() => handleVoirMap(item)}>
-                <MaterialCommunityIcons name="map-marker" size={20} color={colors.surface} />
-              </TouchableOpacity>
+              {editingId === item.id ? (
+                <>
+                  <TouchableOpacity style={[styles.fab, { backgroundColor: colors.success }]} onPress={() => handleValidateEdit(item.id)}>
+                    <MaterialCommunityIcons name="check" size={20} color={colors.surface} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={handleCancelEdit}>
+                    <MaterialCommunityIcons name="close" size={20} color={colors.surface} />
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  <TouchableOpacity style={[styles.fab, { backgroundColor: colors.secondary }]} onPress={() => handleEditBien(item)}>
+                    <MaterialCommunityIcons name="pencil" size={20} color={colors.surface} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={() => handleSupprimerBien(item.id)}>
+                    <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.fab, { backgroundColor: colors.accent }]} onPress={() => handleVoirMap(item)}>
+                    <MaterialCommunityIcons name="map-marker" size={20} color={colors.surface} />
+                  </TouchableOpacity>
+                </>
+              )}
             </View>
           </View>
         )}
