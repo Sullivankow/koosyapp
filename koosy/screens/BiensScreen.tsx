@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal, Dimensions, TextInput } from 'react-native';
+import StatusModal from '../components/StatusModal';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Bien } from '../models/models';
@@ -11,6 +12,7 @@ import { getImageUrl } from '../utils/api';
 // Les biens seront récupérés dynamiquement depuis le backend
 
 const BiensScreen: React.FC = () => {
+  const [statutModalVisible, setStatutModalVisible] = useState(false);
   // Formatage date française
   const formatDateFR = (dateStr?: string) => {
     if (!dateStr) return '';
@@ -253,7 +255,11 @@ const BiensScreen: React.FC = () => {
               <View style={styles.infoCol}>
                 <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Type</Text>
                 {editingId === item.id ? (
-                  <TextInput style={[styles.infoValue, { backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4 }]} value={editForm.type} onChangeText={v => setEditForm((prev: any) => ({ ...prev, type: v }))} />
+                  <TextInput
+                    style={{ fontSize: 15, fontWeight: 'bold', backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4, color: '#222' }}
+                    value={editForm.type}
+                    onChangeText={v => setEditForm((prev: any) => ({ ...prev, type: v }))}
+                  />
                 ) : (
                   <Text style={[styles.infoValue, { color: colors.text }]}>{item.type || '-'}</Text>
                 )}
@@ -261,7 +267,12 @@ const BiensScreen: React.FC = () => {
               <View style={styles.infoCol}>
                 <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Superficie</Text>
                 {editingId === item.id ? (
-                  <TextInput style={[styles.infoValue, { backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4 }]} value={editForm.superficie} onChangeText={v => setEditForm((prev: any) => ({ ...prev, superficie: v }))} keyboardType="numeric" />
+                  <TextInput
+                    style={{ fontSize: 15, fontWeight: 'bold', backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4, color: '#222' }}
+                    value={editForm.superficie}
+                    onChangeText={v => setEditForm((prev: any) => ({ ...prev, superficie: v }))}
+                    keyboardType="numeric"
+                  />
                 ) : (
                   <Text style={[styles.infoValue, { color: colors.text }]}>{item.superficie ? item.superficie + ' m²' : '-'}</Text>
                 )}
@@ -269,7 +280,12 @@ const BiensScreen: React.FC = () => {
               <View style={styles.infoCol}>
                 <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Pièces</Text>
                 {editingId === item.id ? (
-                  <TextInput style={[styles.infoValue, { backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4 }]} value={editForm.pieces} onChangeText={v => setEditForm((prev: any) => ({ ...prev, pieces: v }))} keyboardType="numeric" />
+                  <TextInput
+                    style={{ fontSize: 15, fontWeight: 'bold', backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4, color: '#222' }}
+                    value={editForm.pieces}
+                    onChangeText={v => setEditForm((prev: any) => ({ ...prev, pieces: v }))}
+                    keyboardType="numeric"
+                  />
                 ) : (
                   <Text style={[styles.infoValue, { color: colors.text }]}>{item.pieces || '-'}</Text>
                 )}
@@ -277,7 +293,22 @@ const BiensScreen: React.FC = () => {
               <View style={styles.infoCol}>
                 <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Statut</Text>
                 {editingId === item.id ? (
-                  <TextInput style={[styles.infoValue, { backgroundColor: '#f5f5f5', borderRadius: 8, padding: 4 }]} value={editForm.statut || ''} onChangeText={v => setEditForm((prev: any) => ({ ...prev, statut: v }))} />
+                  <>
+                    <TouchableOpacity
+                      style={{ backgroundColor: '#f5f5f5', borderRadius: 8, padding: 8 }}
+                      onPress={() => setStatutModalVisible(true)}
+                    >
+                      <Text style={{ fontSize: 15, fontWeight: 'bold', color: '#222' }}>
+                        {editForm.statut ? editForm.statut.charAt(0).toUpperCase() + editForm.statut.slice(1) : 'Choisir le statut'}
+                      </Text>
+                    </TouchableOpacity>
+                    <StatusModal
+                      visible={statutModalVisible}
+                      onClose={() => setStatutModalVisible(false)}
+                      onSelect={status => setEditForm((prev: any) => ({ ...prev, statut: status }))}
+                      currentStatus={editForm.statut}
+                    />
+                  </>
                 ) : (
                   <Text style={[styles.infoValue, { color: colors.accent }]}>{item.statut || '-'}</Text>
                 )}
