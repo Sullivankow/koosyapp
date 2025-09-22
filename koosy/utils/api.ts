@@ -2,6 +2,7 @@
 
 
 
+
 import { getSession } from './session';
 const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
 
@@ -158,4 +159,28 @@ export async function deleteBien(id: string): Promise<void> {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
   });
+}
+
+
+
+//Fonction pour créer une nouvelle tâche
+
+export async function createTache(data: {
+  titre: string;
+  description?: string;
+  statut?: 'à faire' | 'en cours' | 'terminée';
+  bienId: number;
+  dateEcheance?: string; // format JJ/MM/AAAA
+}): Promise<{ id: number }> {
+  const res = await apiFetch('/taches', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  return { id: res.id ?? res.tache?.id ?? res["id"] };
+}
+
+
+// Fonction pour récupérer la liste des tâches
+export async function getTaches(): Promise<any[]> {
+  return apiFetch('/taches');
 }

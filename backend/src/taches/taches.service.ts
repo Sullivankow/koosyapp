@@ -1,3 +1,5 @@
+
+
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -19,6 +21,14 @@ export class TachesService {
     private bienRepo: Repository<Bien>,
   ) {}
 
+
+    // Récupérer toutes les tâches liées à l’utilisateur connecté
+  async getAllTaches(userId: number): Promise<Tache[]> {
+    return this.tacheRepo.find({
+      where: { bien: { conciergerie: { id: userId } } },
+      relations: ['bien'],
+    });
+  }
 
   //Méthode spour créer une tâche liée à un bien spécifique
   async createTache(dto: CreateTacheDto, userId: number) {
@@ -158,6 +168,5 @@ async countTachesAFairePourDate(date: string, userId: number): Promise<number> {
 }
 
 
-
-
 }
+

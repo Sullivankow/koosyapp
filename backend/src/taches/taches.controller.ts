@@ -15,6 +15,20 @@ export class TachesController {
   constructor(private tachesService: TachesService) {}
 
 
+
+
+
+
+
+//Méthode pour récupérer la liste de toutes les tâches pour un utilisateur donné
+@Get()
+@UseGuards(JwtAuthGuard)
+@ApiResponse({ status: 200, description: 'Liste de toutes les tâches.' })
+async getAllTaches(@Request() req) {
+  const userId = req.user.userId;
+  return this.tachesService.getAllTaches(userId);
+}
+
   //Méthode pour crée une tâche liées à un bien spécifique 
   @Post()
   @UseGuards(JwtAuthGuard)

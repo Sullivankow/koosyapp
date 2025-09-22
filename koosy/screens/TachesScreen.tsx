@@ -1,6 +1,8 @@
+import { createTache, getTaches } from '../utils/api';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
+import AddTachesModal from '../components/AddTachesModal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const STATUTS = [
@@ -17,53 +19,44 @@ type Tache = {
   dateEcheance?: string;
 };
 
-const MOCK_TACHES: Tache[] = [
-  { id: 't1', titre: 'Réparer la porte', description: 'La porte d’entrée est cassée.', statut: 'à faire', dateEcheance: '10/09/2025' },
-  { id: 't2', titre: 'Nettoyage annuel', description: 'Nettoyer les parties communes.', statut: 'en cours', dateEcheance: '15/09/2025' },
-  { id: 't3', titre: 'Contrôle chaudière', description: 'Vérifier la chaudière.', statut: 'à faire', dateEcheance: '30/09/2025' },
-];
 
 function TachesScreen() {
   const { colors } = useTheme();
-  const [taches, setTaches] = useState<Tache[]>(MOCK_TACHES);
+  const [taches, setTaches] = useState<Tache[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [editTache, setEditTache] = useState<Tache | null>(null);
-  const [form, setForm] = useState<{ titre: string; description: string; statut: string; dateEcheance?: string }>({ titre: '', description: '', statut: 'à faire', dateEcheance: '' });
+  // Suppression de la gestion locale du formulaire et de l’édition
 
-  // Ajout ou modification
-  const openModal = (tache?: Tache) => {
-    if (tache) {
-      setEditTache(tache);
-      setForm({ titre: tache.titre, description: tache.description, statut: tache.statut, dateEcheance: tache.dateEcheance });
-    } else {
-      setEditTache(null);
-      setForm({ titre: '', description: '', statut: 'à faire', dateEcheance: '' });
-    }
-    setModalVisible(true);
-  };
+  // Récupérer les vraies tâches au chargement
+  React.useEffect(() => {
+    const fetchTaches = async () => {
+      try {
+        const data = await getTaches();
+        setTaches(data.map((t: any) => ({
+          id: t.id?.toString() || '',
+          titre: t.titre,
+          description: t.description || '',
+          statut: t.statut,
+          dateEcheance: t.dateEcheance || '',
+        })));
+      } catch (err) {
+        setTaches([]);
+      }
+    };
+    fetchTaches();
+  }, []);
+
+  // Nouvelle gestion de la modal
+  const openModal = () => setModalVisible(true);
   const closeModal = () => {
     setModalVisible(false);
-    setEditTache(null);
-  };
-  const handleSave = () => {
-    if (!form.titre.trim()) return;
-    if (editTache) {
-      setTaches(taches.map(t => t.id === editTache.id ? {
-        ...editTache,
-        ...form,
-        statut: form.statut as "à faire" | "en cours" | "terminée"
-      } : t));
-    } else {
-      const newTache: Tache = {
-        id: 't' + Date.now(),
-        titre: form.titre,
-        description: form.description,
-        statut: form.statut as "à faire" | "en cours" | "terminée",
-        dateEcheance: form.dateEcheance,
-      };
-      setTaches([...taches, newTache]);
-    }
-    closeModal();
+    // Rafraîchir la liste à chaque fermeture de la modal
+    getTaches().then(data => setTaches(data.map((t: any) => ({
+      id: t.id?.toString() || '',
+      titre: t.titre,
+      description: t.description || '',
+      statut: t.statut,
+      dateEcheance: t.dateEcheance || '',
+    }))));
   };
   const handleDelete = (id: string) => {
     setTaches(taches.filter(t => t.id !== id));
@@ -92,7 +85,7 @@ function TachesScreen() {
               <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{item.description}</Text>
               {item.dateEcheance ? <Text style={[styles.cardDate, { color: colors.textSecondary }]}>Échéance : {item.dateEcheance}</Text> : null}
               <View style={styles.cardActions}>
-                <TouchableOpacity style={styles.actionBtn} onPress={() => openModal(item)}>
+                <TouchableOpacity style={styles.actionBtn} onPress={openModal}>
                   <MaterialCommunityIcons name="pencil" size={18} color={colors.accent} />
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.actionBtn} onPress={() => handleDelete(item.id)}>
@@ -111,54 +104,23 @@ function TachesScreen() {
         }}
       />
       {/* Bouton flottant ajout */}
-      <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={() => openModal()}>
+  <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={openModal}>
         <MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
       </TouchableOpacity>
-      {/* Modal ajout/modif */}
-      <Modal visible={modalVisible} transparent animationType="slide">
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined} style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: colors.surface }]}>
-            <Text style={[styles.modalTitle, { color: colors.primary }]}>{editTache ? 'Modifier la tâche' : 'Ajouter une tâche'}</Text>
-            <TextInput
-              style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-              placeholder="Titre"
-              placeholderTextColor={colors.textSecondary}
-              value={form.titre}
-              onChangeText={v => setForm(f => ({ ...f, titre: v }))}
-            />
-            <TextInput
-              style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-              placeholder="Description"
-              placeholderTextColor={colors.textSecondary}
-              value={form.description}
-              onChangeText={v => setForm(f => ({ ...f, description: v }))}
-            />
-            <Text style={{ color: colors.textSecondary, marginTop: 8 }}>Statut :</Text>
-            <View style={styles.statutRow}>
-              {STATUTS.map(s => (
-                <TouchableOpacity key={s.key} style={[styles.statutBtn, form.statut === s.key && { backgroundColor: s.color }]} onPress={() => setForm(f => ({ ...f, statut: s.key }))}>
-                  <Text style={{ color: form.statut === s.key ? '#fff' : colors.textSecondary, fontSize: 12 }}>{s.label}</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-            <TextInput
-              style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-              placeholder="Date d'échéance (JJ/MM/AAAA)"
-              placeholderTextColor={colors.textSecondary}
-              value={form.dateEcheance}
-              onChangeText={v => setForm(f => ({ ...f, dateEcheance: v }))}
-            />
-            <View style={styles.modalActions}>
-              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={handleSave}>
-                <Text style={{ color: colors.surface, fontWeight: 'bold' }}>{editTache ? 'Enregistrer' : 'Ajouter'}</Text>
-              </TouchableOpacity>
-              <TouchableOpacity style={[styles.modalBtn, { backgroundColor: colors.error }]} onPress={closeModal}>
-                <Text style={{ color: colors.surface }}>Annuler</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </KeyboardAvoidingView>
-      </Modal>
+      {/* Modal ajout/modif avec sélecteur de biens */}
+      <AddTachesModal
+        visible={modalVisible}
+        onClose={closeModal}
+        onSuccess={() => {
+          getTaches().then(data => setTaches(data.map((t: any) => ({
+            id: t.id?.toString() || '',
+            titre: t.titre,
+            description: t.description || '',
+            statut: t.statut,
+            dateEcheance: t.dateEcheance || '',
+          }))));
+        }}
+      />
     </View>
   );
 }
