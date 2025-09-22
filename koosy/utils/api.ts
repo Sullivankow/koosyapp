@@ -78,3 +78,60 @@ export function getImageUrl(url: string): string {
   const cleanUrl = url.replace(/\\\\|\\/g, '/');
   return cleanUrl.startsWith('http') ? cleanUrl : `${BASE_URL}/${cleanUrl}`;
 }
+
+//Fonction pour créer un nouveau bien
+export async function createBien(data: {
+
+  nom: string;
+  adresse: string;
+  type?: string;
+  superficie: number;
+  pieces: number;
+  proprietaireNom: string;
+  proprietaireEmail: string;
+  proprietaireTelephone?: string;
+  equipements?: string[];
+}): Promise<{ id: number }> {
+  // On attend un objet avec l'id du bien créé
+  const res = await apiFetch('/biens', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  // Si le backend retourne l'objet bien, on extrait l'id
+  return { id: res.id ?? res.bien?.id ?? res["id"] };
+}
+// Fonction pour uploader les images d'un bien
+export async function uploadBienImages(bienId: number, imageUris: string[]): Promise<void> {
+  const session = await getSession();
+  const token = session?.token;
+  for (const uri of imageUris) {
+    const formData = new FormData();
+    // Expo-image-picker retourne un uri local, il faut le transformer en fichier
+    const filename = uri.split('/').pop() || `image_${Date.now()}.jpg`;
+    const match = uri.match(/\.(\w+)$/);
+    const type = match ? `image/${match[1]}` : `image`;
+    formData.append('file', {
+      uri,
+      name: filename,
+      type,
+    } as any);
+    await fetch(`${BASE_URL}/bien-image/biens/${bienId}/images`, {
+      method: 'POST',
+      headers: {
+        'Authorization': token ? `Bearer ${token}` : '',
+        'Content-Type': 'multipart/form-data',
+      },
+      body: formData,
+    });
+  }
+}
+
+
+
+
+//Fonction pour supprimer un bien par son iD
+export async function deleteBien(id: string): Promise<void> {
+  return apiFetch(`/biens/${id}`, {
+    method: 'DELETE',
+  });
+}

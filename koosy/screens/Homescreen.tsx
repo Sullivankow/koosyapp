@@ -65,7 +65,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
             <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.container}>
                 {/* Avatar et message personnalisé */}
                 <View style={styles.avatarRow}>
-                    <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+                    <Image
+                        source={avatarUrl && avatarUrl.trim() !== '' ? { uri: avatarUrl } : require('../assets/house.jpg')}
+                        style={styles.avatar}
+                    />
                     <View style={{ marginLeft: 12 }}>
                         <Text style={[styles.welcome, { color: colors.primary }]}>Bonjour, {userName} 👋</Text>
                         <Text style={[styles.subtitle, { color: colors.text }]}>Votre tableau de bord conciergerie</Text>

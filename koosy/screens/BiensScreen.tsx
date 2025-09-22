@@ -4,6 +4,8 @@ import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Bien } from '../models/models';
 import { getBiens } from '../utils/api';
+import { deleteBien } from '../utils/api';
+import AddBienModal from '../components/AddBienModal';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 import { getImageUrl } from '../utils/api';
 
@@ -17,95 +19,149 @@ const BiensScreen: React.FC = () => {
     if (isNaN(d.getTime())) return dateStr || '';
     return d.toLocaleDateString('fr-FR');
   };
+
+
+
   const { colors } = useTheme();
   const [biens, setBiens] = useState<Bien[]>([]);
+
+
+
   // Récupération des biens depuis le backend
-  useEffect(() => {
-    const fetchBiens = async () => {
-      try {
-  const biensData = await getBiens();
-        // Adaptation des images si besoin (remplacer par assets locaux si pas d'URL)
-        const biensAdapted = biensData.map((bien: any) => ({
+  const fetchBiens = async () => {
+    try {
+      const biensData = await getBiens();
+      // Mapping et sécurisation des données
+      const mappedBiens = biensData.map((bien: any) => {
+        // Filtrage et mapping des images
+        let photos = [];
+        if (bien.images && bien.images.length > 0) {
+          photos = bien.images
+            .map((img: any) => {
+              const uri = img.url ? getImageUrl(img.url.replace(/\\|\//g, '/')) : '';
+              return uri && uri.trim() !== '' ? { uri } : null;
+            })
+            .filter((img: any) => img && img.uri && img.uri.trim() !== '');
+        }
+        // Log pour tous les biens
+        console.log('PHOTOS bien', bien.nom, photos);
+        if (photos.length === 0) {
+          photos = [require('../assets/house.jpg')];
+        }
+        return {
           ...bien,
-       photos: bien.images && bien.images.length > 0
-  ? bien.images.map((img: any) => ({
-      uri: getImageUrl(img.url.replace(/\\\\|\\/g, '/'))
-    }))
-  : [require('../assets/house.jpg')],
-          proprio: {
-            id: bien.conciergerie?.id?.toString() || '',
-            nom: bien.proprietaireNom || '',
-            email: bien.proprietaireEmail || '',
-            telephone: bien.proprietaireTelephone || '',
-          },
-          geo: { lat: bien.lat, lng: bien.lng },
-          locataires: bien.reservations?.map((r: any) => ({
-            id: r.locataire?.id?.toString() || '',
-            nom: r.locataire?.nom || '',
-            email: r.locataire?.email || '',
-            telephone: r.locataire?.telephone || '',
-            dateArrivee: r.dateArrivee,
-            dateDepart: r.dateDepart,
-            bienId: bien.id?.toString() || '',
-          })) || [],
-          taches: bien.taches?.map((t: any) => ({
-            id: t.id?.toString() || '',
-            titre: t.titre,
-            description: t.description,
-            statut: t.statut,
-            bienId: bien.id?.toString() || '',
-            dateEcheance: t.dateEcheance,
-          })) || [],
-          historique: [],
-          commentaires: [],
-          dateCreation: bien.dateCreation,
-        }));
-        setBiens(biensAdapted);
-      } catch (err) {
-        console.error('Erreur récupération biens:', err);
-      }
-    };
+          photos,
+          proprio: bien.proprio
+            ? {
+                id: bien.proprio.id?.toString() || '',
+                nom: bien.proprio.nom || 'N/A',
+                email: bien.proprio.email || '',
+                telephone: bien.proprio.telephone || '',
+              }
+            : { id: '', nom: 'N/A', email: '', telephone: '' },
+          locataires: Array.isArray(bien.locataires)
+            ? bien.locataires.map((loc: any) => ({
+                id: loc.id?.toString() || '',
+                nom: loc.nom || 'N/A',
+                dateArrivee: loc.dateArrivee || '',
+                dateDepart: loc.dateDepart || '',
+              }))
+            : [],
+          taches: Array.isArray(bien.taches)
+            ? bien.taches.map((tache: any) => ({
+                id: tache.id?.toString() || '',
+                titre: tache.titre || 'N/A',
+                statut: tache.statut || '',
+                dateEcheance: tache.dateEcheance || '',
+              }))
+            : [],
+        };
+      });
+      setBiens(mappedBiens);
+    } catch (err) {
+      console.error('Erreur récupération biens:', err);
+    }
+  };
+
+  useEffect(() => {
     fetchBiens();
   }, []);
+
+
+
+
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const filteredBiens = biens.filter(b =>
     b.nom.toLowerCase().includes(search.toLowerCase()) ||
     b.adresse.toLowerCase().includes(search.toLowerCase())
   );
+
+
+
+
   const sortedBiens = [...filteredBiens].sort((a, b) => {
     const dateA = new Date(a.dateCreation || new Date()).getTime();
     const dateB = new Date(b.dateCreation || new Date()).getTime();
     return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
-  const [modalVisible, setModalVisible] = useState(false);
+
+
+
+
+  // Séparation des états modaux
+  const [addBienModalVisible, setAddBienModalVisible] = useState(false);
+  const [photoModalVisible, setPhotoModalVisible] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
   // carouselIndex inutilisé, supprimé
 
+
+
+
+  
   // Actions principales
   const handleAjouterBien = () => alert('Ajouter un bien (à implémenter)');
   const handleModifierBien = (bien: Bien) => alert(`Modifier le bien : ${bien.nom}`);
-  const handleSupprimerBien = (bienId: string) => setBiens(biens.filter(b => b.id !== bienId));
+  const handleSupprimerBien = async (bienId: string) => {
+    try {
+      await deleteBien(bienId);
+      await fetchBiens();
+    } catch (err) {
+      console.error('Erreur suppression bien:', err);
+    }
+  };
   const handleVoirMap = (bien: Bien) => alert(`Voir la carte pour : ${bien.nom}`);
-  const handlePhotoPress = (photo: any) => { setSelectedPhoto(photo); setModalVisible(true); };
+  const handlePhotoPress = (photo: any) => { setSelectedPhoto(photo); setPhotoModalVisible(true); };
 
   // Carrousel photos
   const renderCarousel = (photos: any[]) => (
     <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.carousel}>
-      {photos.map((photo, idx) => (
-        <TouchableOpacity key={idx} onPress={() => handlePhotoPress(photo)}>
-          <Image source={photo} style={styles.carouselPhoto} resizeMode="cover" />
-        </TouchableOpacity>
-      ))}
+      {photos.map((photo, idx) => {
+        // Fallback si URI vide
+        let source = photo;
+        if (photo && photo.uri !== undefined && (!photo.uri || photo.uri.trim() === '')) {
+          source = require('../assets/house.jpg');
+        }
+        return (
+          <TouchableOpacity key={idx} onPress={() => handlePhotoPress(source)}>
+            <Image source={source} style={styles.carouselPhoto} resizeMode="cover" />
+          </TouchableOpacity>
+        );
+      })}
     </ScrollView>
   );
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}> 
+      <AddBienModal
+        visible={addBienModalVisible}
+        onClose={() => setAddBienModalVisible(false)}
+        onSuccess={fetchBiens}
+      />
       {/* Header sticky */}
-      <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}>
+      <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}> 
         <Text style={[styles.title, { color: colors.text }]}>Mes biens</Text>
-        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={handleAjouterBien}>
+        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={() => setAddBienModalVisible(true)}>
           <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
         </TouchableOpacity>
       </View>
@@ -145,16 +201,16 @@ const BiensScreen: React.FC = () => {
         renderItem={({ item }) => (
           <View style={[styles.card, { backgroundColor: colors.surface }]}>
             {/* Nom du bien */}
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 2 }}>{item.nom}</Text>
+            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 2 }}>{item.nom || 'Sans nom'}</Text>
             <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 6 }}>
               Créé le {item.dateCreation ? formatDateFR(item.dateCreation) : formatDateFR(new Date().toISOString().slice(0, 10))}
             </Text>
-            {item.photos && item.photos.length > 0 && renderCarousel(item.photos)}
+            {Array.isArray(item.photos) && item.photos.length > 0 && renderCarousel(item.photos)}
             <View style={styles.infoGrid}>
-              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Type</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.type}</Text></View>
-              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Superficie</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.superficie} m²</Text></View>
-              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Pièces</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.pieces}</Text></View>
-              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Statut</Text><Text style={[styles.infoValue, { color: colors.accent }]}>{item.statut}</Text></View>
+              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Type</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.type || '-'}</Text></View>
+              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Superficie</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.superficie ? item.superficie + ' m²' : '-'}</Text></View>
+              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Pièces</Text><Text style={[styles.infoValue, { color: colors.text }]}>{item.pieces || '-'}</Text></View>
+              <View style={styles.infoCol}><Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Statut</Text><Text style={[styles.infoValue, { color: colors.accent }]}>{item.statut || '-'}</Text></View>
             </View>
             {/* Propriétaire */}
             <View style={styles.proprioBox}>
@@ -162,9 +218,9 @@ const BiensScreen: React.FC = () => {
                 <FontAwesome5 name="user-tie" size={18} color={colors.secondary} />
               </View>
               <View style={{ flex: 1 }}>
-                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{item.proprio.nom}</Text>
-                <Text style={{ color: colors.textSecondary }}>{item.proprio.email}</Text>
-                <Text style={{ color: colors.textSecondary }}>{item.proprio.telephone}</Text>
+                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{item.proprio?.nom || 'N/A'}</Text>
+                <Text style={{ color: colors.textSecondary }}>{item.proprio?.email || ''}</Text>
+                <Text style={{ color: colors.textSecondary }}>{item.proprio?.telephone || ''}</Text>
               </View>
             </View>
             {/* Locataires */}
@@ -172,11 +228,11 @@ const BiensScreen: React.FC = () => {
               <FontAwesome5 name="user-friends" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
               <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 6 }}>Locataires :</Text>
               <View style={styles.chipsRow}>
-                {item.locataires.length > 0 ? item.locataires.map(loc => (
+                {Array.isArray(item.locataires) && item.locataires.length > 0 ? item.locataires.map(loc => (
                   <View key={loc.id} style={[styles.chip, { backgroundColor: colors.primary + '22', borderColor: colors.primary }]}>
                     <FontAwesome5 name="user" size={14} color={colors.primary} style={{ marginRight: 4 }} />
                     <View>
-                      <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 13 }}>{loc.nom}</Text>
+                      <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 13 }}>{loc.nom || 'N/A'}</Text>
                       <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{formatDateFR(loc.dateArrivee)} → {formatDateFR(loc.dateDepart)}</Text>
                     </View>
                   </View>
@@ -188,11 +244,11 @@ const BiensScreen: React.FC = () => {
               <MaterialCommunityIcons name="clipboard-list" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
               <Text style={{ color: colors.text, fontWeight: 'bold' }}>Tâches :</Text>
               <View style={styles.timeline}>
-                {item.taches.length > 0 ? item.taches.map(tache => (
+                {Array.isArray(item.taches) && item.taches.length > 0 ? item.taches.map(tache => (
                   <View key={tache.id} style={styles.timelineItem}>
                     <MaterialCommunityIcons name="circle" size={10} color={tache.statut === 'à faire' ? colors.error : colors.accent} style={{ marginRight: 6 }} />
                     <View style={{ flex: 1 }}>
-                      <Text style={{ color: colors.text, fontWeight: '500' }}>{tache.titre}</Text>
+                      <Text style={{ color: colors.text, fontWeight: '500' }}>{tache.titre || 'N/A'}</Text>
                       <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{tache.statut} {tache.dateEcheance ? `- ${formatDateFR(tache.dateEcheance)}` : ''}</Text>
                     </View>
                   </View>
@@ -215,10 +271,10 @@ const BiensScreen: React.FC = () => {
         )}
       />
       {/* Modale photo */}
-      <Modal visible={modalVisible} transparent animationType="fade">
+      <Modal visible={photoModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           {/* Fermer */}
-          <TouchableOpacity style={styles.closeBtn} onPress={() => setModalVisible(false)}>
+          <TouchableOpacity style={styles.closeBtn} onPress={() => setPhotoModalVisible(false)}>
             <MaterialCommunityIcons name="close" size={32} color="#fff" />
           </TouchableOpacity>
           {/* Image */}
@@ -394,6 +450,9 @@ const styles = StyleSheet.create({
 });
 
 export default BiensScreen;
+
+
+
 
 
 

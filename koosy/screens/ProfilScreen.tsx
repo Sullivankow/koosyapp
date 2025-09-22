@@ -74,7 +74,14 @@ const ProfilScreen: React.FC = () => {
         <View style={[styles.bg, { backgroundColor: colors.background }]}>
             <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
                 <View style={{ alignItems: 'center', marginBottom: 18 }}>
-                    <Image source={{ uri: modeEdition ? editUser.avatar : user.avatar }} style={styles.avatar} />
+                    <Image
+                        source={
+                            (modeEdition ? editUser.avatar : user.avatar)
+                                ? { uri: modeEdition ? editUser.avatar : user.avatar }
+                                : require('../assets/house.jpg')
+                        }
+                        style={styles.avatar}
+                    />
                     {modeEdition ? (
                         <TextInput
                             style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
