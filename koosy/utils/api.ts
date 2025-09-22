@@ -1,5 +1,6 @@
 
 
+
 import { getSession } from './session';
 const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
 
@@ -64,5 +65,16 @@ export async function getTachesAFaireTotal(): Promise<{ total: number }> {
   return apiFetch('/taches/count-a-faire-total');
 }
 
+// Récupérer la liste des biens de l'utilisateur connecté
+import { Bien } from '../models/models';
+export async function getBiens(): Promise<Bien[]> {
+  return apiFetch('/biens');
+}
 
 
+//Fonction pour récupérer l'URL complète d'une image d'un bien
+export function getImageUrl(url: string): string {
+  if (!url) return '';
+  const cleanUrl = url.replace(/\\\\|\\/g, '/');
+  return cleanUrl.startsWith('http') ? cleanUrl : `${BASE_URL}/${cleanUrl}`;
+}

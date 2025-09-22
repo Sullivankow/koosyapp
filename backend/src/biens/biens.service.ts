@@ -41,7 +41,7 @@ export class BiensService {
 async getAllBiens(userId: number): Promise<Bien[]> {
   const biens = await this.biensRepository.find({
     where: { conciergerie: { id: userId } },
-    relations: ['conciergerie', 'taches'],
+    relations: ['conciergerie', 'taches', 'images'],
   });
   // On adapte la réponse pour inclure les coordonnées du propriétaire réel
   return biens.map(bien => ({

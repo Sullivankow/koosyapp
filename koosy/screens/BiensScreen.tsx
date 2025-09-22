@@ -3,8 +3,9 @@ import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, 
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Bien } from '../models/models';
-import { apiFetch } from '../utils/api';
+import { getBiens } from '../utils/api';
 const SCREEN_WIDTH = Dimensions.get('window').width;
+import { getImageUrl } from '../utils/api';
 
 // Les biens seront récupérés dynamiquement depuis le backend
 
@@ -22,13 +23,15 @@ const BiensScreen: React.FC = () => {
   useEffect(() => {
     const fetchBiens = async () => {
       try {
-        const biensData = await apiFetch('/biens');
+  const biensData = await getBiens();
         // Adaptation des images si besoin (remplacer par assets locaux si pas d'URL)
         const biensAdapted = biensData.map((bien: any) => ({
           ...bien,
-          photos: bien.images && bien.images.length > 0
-            ? bien.images.map((img: any) => ({ uri: img.url }))
-            : [require('../assets/house.jpg')], // fallback image
+       photos: bien.images && bien.images.length > 0
+  ? bien.images.map((img: any) => ({
+      uri: getImageUrl(img.url.replace(/\\\\|\\/g, '/'))
+    }))
+  : [require('../assets/house.jpg')],
           proprio: {
             id: bien.conciergerie?.id?.toString() || '',
             nom: bien.proprietaireNom || '',
