@@ -52,11 +52,17 @@ export async function getBiensCount(): Promise<{ total: number }> {
   return apiFetch('/biens/count');
 }
 
+
+//Fonction pour récupérer le nombre total de locataires
 export async function getReservationsCount(): Promise<{ total: number }> {
   return apiFetch('/reservations/count');
 }
 
 
+// Fonction pour récupérer le nombre total de tâches à faire
+export async function getTachesAFaireTotal(): Promise<{ total: number }> {
+  return apiFetch('/taches/count-a-faire-total');
+}
 
 
 

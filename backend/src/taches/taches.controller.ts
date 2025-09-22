@@ -86,12 +86,25 @@ async deleteTache(@Param('id') id: string) {
   return this.tachesService.deleteTache(idNum);
 }
 
+
+
+
+
 //Méthode pour compter les tâches "à faire" pour une date donnée
 @Get('count-a-faire')
 @UseGuards(JwtAuthGuard)
 async countTachesAFaire(@Request() req, @Query('date') date: string) {
   const userId = req.user.userId;
   return { count: await this.tachesService.countTachesAFairePourDate(date, userId) };
+}
+
+
+//Méthode pour compter le nombre total de tâches "à faire" pour un utilisateur donné
+@Get('count-a-faire-total')
+@UseGuards(JwtAuthGuard)
+async countTachesAFaireTotal(@Request() req) {
+  const userId = req.user.userId;
+  return { total: await this.tachesService.countTachesAFaireTotal(userId) };
 }
 
 

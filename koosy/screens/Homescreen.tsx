@@ -6,12 +6,14 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { getBiensCount, getReservationsCount } from '../utils/api';
+import { getTachesAFaireTotal } from '../utils/api';
 
 type HomeScreenProps = {
     onLogout?: () => void;
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
+    const [tachesAFaireCount, setTachesAFaireCount] = useState(0);
     const { colors, isDarkMode, toggleTheme } = useTheme();
     const navigation = useNavigation();
     const [notifVisible, setNotifVisible] = useState(false);
@@ -21,6 +23,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const [reservationsCount, setReservationsCount] = useState(0);
 
     useEffect(() => {
+        getTachesAFaireTotal()
+            .then(data => {
+                setTachesAFaireCount(data.total ?? 0);
+            })
+            .catch(() => setTachesAFaireCount(0));
         AsyncStorage.getItem('koosy_user').then(data => {
             if (data) {
                 try {
@@ -44,7 +51,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     }, []);
     // Les autres valeurs restent statiques pour l'instant
     // const locatairesCount = 12; // supprimé, remplacé par le nombre de réservations
-    const tachesUrgentes = 2;
     const prochainEvenement = 'Check-in demain à 10h';
 
     const handleLogout = async () => {
@@ -93,8 +99,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}>
                         <MaterialCommunityIcons name="alert-circle" size={22} color={colors.error} style={{ marginBottom: 5 }} />
-                        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Tâches urgentes</Text>
-                        <Text style={[styles.summaryValue, { color: colors.error }]}>{tachesUrgentes}</Text>
+                        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Tâches à faire</Text>
+                        <Text style={[styles.summaryValue, { color: colors.error }]}>{tachesAFaireCount}</Text>
                     </TouchableOpacity>
                 </View>
 

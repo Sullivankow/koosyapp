@@ -84,10 +84,23 @@ async getTachesRappelPourDemain(): Promise<Tache[]> {
 
 
 
+}
 
 
+   //Méthode pour compter le nombre total de tâches à faire pour un utilisateur donné
+
+async countTachesAFaireTotal(userId: number): Promise<number> {
+  return this.tacheRepo.count({
+    where: {
+      statut: TacheStatut.A_FAIRE,
+      bien: { conciergerie: { id: userId } }
+    },
+    relations: ['bien'],
+  });
 
 }
+
+
 
 
 //Méthode pour envoyer une notification push via Expo
