@@ -1,111 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal, Dimensions, TextInput } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { Bien } from '../models/models';
+import { apiFetch } from '../utils/api';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
-// Mock de 4 biens avec plusieurs photos
-const MOCK_BIENS: Bien[] = [
-  {
-    id: '1',
-    nom: 'Appartement République',
-    adresse: '12 rue de la Liberté, Paris',
-    type: 'Appartement',
-    superficie: 65,
-    pieces: 3,
-    equipements: ['Wifi', 'TV', 'Lave-linge'],
-    photos: [
-      require('../assets/house.jpg'),
-      require('../assets/house2.jpg'),
-      require('../assets/house3.jpg'),
-    ],
-    statut: 'occupé',
-    geo: { lat: 48.867, lng: 2.363 },
-    proprio: { id: 'p1', nom: 'Jean Dupont', email: 'jean@ex.fr', telephone: '0601020304' },
-    locataires: [
-      { id: 'l1', nom: 'Alice Martin', email: 'alice@loc.fr', telephone: '0600000001', dateArrivee: '2025-09-01', dateDepart: '2025-09-10' }
-    ],
-    taches: [
-      { id: 't1', titre: 'Nettoyage', description: 'Nettoyer la salle de bain', statut: 'à faire', bienId: '1', dateEcheance: '2025-09-11' }
-    ],
-    historique: [],
-    commentaires: [],
-    dateCreation: '2025-08-01',
-  },
-  {
-    id: '2',
-    nom: 'Studio Opéra',
-    adresse: '5 avenue de l’Opéra, Paris',
-    type: 'Studio',
-    superficie: 28,
-    pieces: 1,
-    equipements: ['Wifi', 'Micro-ondes'],
-    photos: [
-      require('../assets/house2.jpg'),
-      require('../assets/house3.jpg'),
-      require('../assets/house4.jpg'),
-    ],
-    statut: 'disponible',
-    geo: { lat: 48.868, lng: 2.332 },
-    proprio: { id: 'p2', nom: 'Marie Dubois', email: 'marie@ex.fr', telephone: '0601020305' },
-    locataires: [],
-    taches: [],
-    historique: [],
-    commentaires: [],
-    dateCreation: '2025-07-15',
-  },
-  {
-    id: '3',
-    nom: 'Maison Montmartre',
-    adresse: '22 rue Lepic, Paris',
-    type: 'Maison',
-    superficie: 120,
-    pieces: 5,
-    equipements: ['Jardin', 'Garage', 'Wifi'],
-    photos: [
-      require('../assets/house3.jpg'),
-      require('../assets/house4.jpg'),
-      require('../assets/house.jpg'),
-    ],
-    statut: 'travaux',
-    geo: { lat: 48.886, lng: 2.338 },
-    proprio: { id: 'p3', nom: 'Paul Morel', email: 'paul@ex.fr', telephone: '0601020306' },
-    locataires: [],
-    taches: [
-      { id: 't2', titre: 'Réparation', description: 'Réparer la porte', statut: 'en cours', bienId: '3', dateEcheance: '2025-09-15' }
-    ],
-    historique: [],
-    commentaires: [],
-    dateCreation: '2025-06-20',
-  },
-  {
-    id: '4',
-    nom: 'Loft Bastille',
-    adresse: '8 passage de la Main d’Or, Paris',
-    type: 'Loft',
-    superficie: 80,
-    pieces: 2,
-    equipements: ['Wifi', 'Cuisine équipée'],
-    photos: [
-      require('../assets/house4.jpg'),
-      require('../assets/house.jpg'),
-      require('../assets/house2.jpg'),
-    ],
-    statut: 'occupé',
-    geo: { lat: 48.853, lng: 2.370 },
-    proprio: { id: 'p4', nom: 'Lucie Bernard', email: 'lucie@ex.fr', telephone: '0601020307' },
-    locataires: [
-      { id: 'l2', nom: 'Tom Leroy', email: 'tom@loc.fr', telephone: '0600000002', dateArrivee: '2025-09-05', dateDepart: '2025-09-12' }
-    ],
-    taches: [
-      { id: 't3', titre: 'Inventaire', description: 'Vérifier les équipements', statut: 'à faire', bienId: '4', dateEcheance: '2025-09-13' }
-    ],
-    historique: [],
-    commentaires: [],
-    dateCreation: '2025-08-05',
-  },
-];
+// Les biens seront récupérés dynamiquement depuis le backend
 
 const BiensScreen: React.FC = () => {
   // Formatage date française
@@ -116,7 +17,53 @@ const BiensScreen: React.FC = () => {
     return d.toLocaleDateString('fr-FR');
   };
   const { colors } = useTheme();
-  const [biens, setBiens] = useState<Bien[]>(MOCK_BIENS);
+  const [biens, setBiens] = useState<Bien[]>([]);
+  // Récupération des biens depuis le backend
+  useEffect(() => {
+    const fetchBiens = async () => {
+      try {
+        const biensData = await apiFetch('/biens');
+        // Adaptation des images si besoin (remplacer par assets locaux si pas d'URL)
+        const biensAdapted = biensData.map((bien: any) => ({
+          ...bien,
+          photos: bien.images && bien.images.length > 0
+            ? bien.images.map((img: any) => ({ uri: img.url }))
+            : [require('../assets/house.jpg')], // fallback image
+          proprio: {
+            id: bien.conciergerie?.id?.toString() || '',
+            nom: bien.proprietaireNom || '',
+            email: bien.proprietaireEmail || '',
+            telephone: bien.proprietaireTelephone || '',
+          },
+          geo: { lat: bien.lat, lng: bien.lng },
+          locataires: bien.reservations?.map((r: any) => ({
+            id: r.locataire?.id?.toString() || '',
+            nom: r.locataire?.nom || '',
+            email: r.locataire?.email || '',
+            telephone: r.locataire?.telephone || '',
+            dateArrivee: r.dateArrivee,
+            dateDepart: r.dateDepart,
+            bienId: bien.id?.toString() || '',
+          })) || [],
+          taches: bien.taches?.map((t: any) => ({
+            id: t.id?.toString() || '',
+            titre: t.titre,
+            description: t.description,
+            statut: t.statut,
+            bienId: bien.id?.toString() || '',
+            dateEcheance: t.dateEcheance,
+          })) || [],
+          historique: [],
+          commentaires: [],
+          dateCreation: bien.dateCreation,
+        }));
+        setBiens(biensAdapted);
+      } catch (err) {
+        console.error('Erreur récupération biens:', err);
+      }
+    };
+    fetchBiens();
+  }, []);
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
   const filteredBiens = biens.filter(b =>
