@@ -8,6 +8,7 @@ import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { getReservationsCount } from '../utils/api';
 import { useBienCount } from '../contexts/BienCountContext';
 import { getTachesAFaireTotal } from '../utils/api';
+import AddBienModal from '../components/AddBienModal';
 
 type HomeScreenProps = {
     onLogout?: () => void;
@@ -22,6 +23,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const [avatarUrl, setAvatarUrl] = useState('');
     const { biensCount, refreshBiensCount } = useBienCount();
     const [reservationsCount, setReservationsCount] = useState(0);
+    const [addBienModalVisible, setAddBienModalVisible] = useState(false);
 
     useEffect(() => {
         getTachesAFaireTotal()
@@ -112,7 +114,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                 {/* Actions principales en grille 2x2 */}
                 <View style={styles.quickActionsGrid}>
                     <View style={styles.quickActionsRow}>
-                        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]}>
+                        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]} onPress={() => setAddBienModalVisible(true)}>
                             <View style={styles.centerContent}>
                                 <MaterialCommunityIcons name="plus-circle" size={24} color={colors.surface} style={styles.icon} />
                                 <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un bien</Text>
@@ -165,6 +167,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                     </View>
                 </View>
             </Modal>
+        {/* Modal d'ajout de bien */}
+        <AddBienModal
+            visible={addBienModalVisible}
+            onClose={() => setAddBienModalVisible(false)}
+            onSuccess={() => setAddBienModalVisible(false)}
+        />
         </>
     );
 };

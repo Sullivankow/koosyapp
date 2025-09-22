@@ -8,10 +8,12 @@ import { getBiens, updateBien, deleteBien } from '../utils/api';
 import AddBienModal from '../components/AddBienModal';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 import { getImageUrl } from '../utils/api';
+import { useBienCount } from '../contexts/BienCountContext';
 
 // Les biens seront récupérés dynamiquement depuis le backend
 
 const BiensScreen: React.FC = () => {
+  const { lastBienAdded } = useBienCount();
   const [statutModalVisible, setStatutModalVisible] = useState(false);
   // Formatage date française
   const formatDateFR = (dateStr?: string) => {
@@ -83,7 +85,7 @@ const BiensScreen: React.FC = () => {
 
   useEffect(() => {
     fetchBiens();
-  }, []);
+  }, [lastBienAdded]);
 
 
 
