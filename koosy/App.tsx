@@ -15,6 +15,7 @@ import { getSession, saveSession, clearSession, generateToken } from './utils/se
 import { initDefaultUsers } from './utils/users';
 import { View, Text, Button } from 'react-native';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { BienCountProvider } from './contexts/BienCountContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import ParametresStack from './screens/navigation/ParametresStack';
 
@@ -95,66 +96,68 @@ export default function App() {
   // App principale
   return (
     <ThemeProvider>
-      <NavigationContainer>
-        <Tab.Navigator
-          screenOptions={({ route }) => ({
-            tabBarIcon: ({ color, size }) => {
-              switch (route.name) {
-                case 'Accueil':
-                  return <MaterialCommunityIcons name="home" size={size} color={color} />;
-                case 'Biens':
-                  return <FontAwesome5 name="building" size={size} color={color} />;
-                case 'Tâches':
-                  return <MaterialCommunityIcons name="clipboard-list" size={size} color={color} />;
-                case 'Calendrier':
-                  return <MaterialCommunityIcons name="calendar" size={size} color={color} />;
-                case 'Carte':
-                  return <MaterialCommunityIcons name="map-marker" size={size} color={color} />;
-                case 'Locataire':
-                  return <FontAwesome5 name="users" size={size} color={color} />;
-                default:
-                  return null;
-              }
-            },
-            tabBarActiveTintColor: '#009688',
-            tabBarInactiveTintColor: '#6E7B8B',
-            headerTitleAlign: 'center',
-            headerStyle: { height: 48 }, // paddingTop supprimé
-            headerTitleStyle: { fontSize: 20, fontWeight: 'bold' },
-          })}
-        >
-          <Tab.Screen name="Accueil">
-            {() => (
-              <HomeScreen
-                onLogout={async () => {
-                  await clearSession();
-                  setIsLoggedIn(false);
-                }}
-              />
-            )}
-          </Tab.Screen>
-          <Tab.Screen name="Biens" component={BiensScreen} />
-          <Tab.Screen name="Tâches" component={TachesScreen} />
-          <Tab.Screen name="Réserv." component={CalendrierScreen}
-            options={{
-              tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
-              ),
-              tabBarLabel: 'Réserv.'
-            }}
-          />
-          <Tab.Screen name="Carte" component={CarteScreen} />
-          <Tab.Screen name="Param." component={ParametresStack}
-            options={{
-              tabBarIcon: ({ color, size }) => (
-                <MaterialCommunityIcons name="cog" size={size} color={color} />
-              ),
-              tabBarLabel: 'Param.'
-            }}
-          />
+      <BienCountProvider>
+        <NavigationContainer>
+          <Tab.Navigator
+            screenOptions={({ route }) => ({
+              tabBarIcon: ({ color, size }) => {
+                switch (route.name) {
+                  case 'Accueil':
+                    return <MaterialCommunityIcons name="home" size={size} color={color} />;
+                  case 'Biens':
+                    return <FontAwesome5 name="building" size={size} color={color} />;
+                  case 'Tâches':
+                    return <MaterialCommunityIcons name="clipboard-list" size={size} color={color} />;
+                  case 'Calendrier':
+                    return <MaterialCommunityIcons name="calendar" size={size} color={color} />;
+                  case 'Carte':
+                    return <MaterialCommunityIcons name="map-marker" size={size} color={color} />;
+                  case 'Locataire':
+                    return <FontAwesome5 name="users" size={size} color={color} />;
+                  default:
+                    return null;
+                }
+              },
+              tabBarActiveTintColor: '#009688',
+              tabBarInactiveTintColor: '#6E7B8B',
+              headerTitleAlign: 'center',
+              headerStyle: { height: 48 }, // paddingTop supprimé
+              headerTitleStyle: { fontSize: 20, fontWeight: 'bold' },
+            })}
+          >
+            <Tab.Screen name="Accueil">
+              {() => (
+                <HomeScreen
+                  onLogout={async () => {
+                    await clearSession();
+                    setIsLoggedIn(false);
+                  }}
+                />
+              )}
+            </Tab.Screen>
+            <Tab.Screen name="Biens" component={BiensScreen} />
+            <Tab.Screen name="Tâches" component={TachesScreen} />
+            <Tab.Screen name="Réserv." component={CalendrierScreen}
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
+                ),
+                tabBarLabel: 'Réserv.'
+              }}
+            />
+            <Tab.Screen name="Carte" component={CarteScreen} />
+            <Tab.Screen name="Param." component={ParametresStack}
+              options={{
+                tabBarIcon: ({ color, size }) => (
+                  <MaterialCommunityIcons name="cog" size={size} color={color} />
+                ),
+                tabBarLabel: 'Param.'
+              }}
+            />
 
-        </Tab.Navigator>
-      </NavigationContainer>
+          </Tab.Navigator>
+        </NavigationContainer>
+      </BienCountProvider>
     </ThemeProvider>
   );
 }

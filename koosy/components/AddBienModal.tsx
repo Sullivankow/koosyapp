@@ -3,6 +3,7 @@ import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions,
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../contexts/ThemeContext';
 import { createBien } from '../utils/api';
+import { useBienCount } from '../contexts/BienCountContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -14,6 +15,7 @@ interface AddBienModalProps {
 
 const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess }) => {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
+  const { refreshBiensCount } = useBienCount();
   // Sélection d'image (plusieurs)
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -73,6 +75,7 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
         await uploadBienImages(bienId, selectedImages);
       }
       setSuccessMsg('Bien ajouté avec succès !');
+      await refreshBiensCount();
       setTimeout(() => {
         setSuccessMsg('');
         setForm({ nom: '', adresse: '', type: '', superficie: '', pieces: '', proprietaireNom: '', proprietaireEmail: '', proprietaireTelephone: '', equipements: '' });

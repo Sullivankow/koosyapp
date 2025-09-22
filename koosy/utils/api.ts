@@ -131,7 +131,12 @@ export async function uploadBienImages(bienId: number, imageUris: string[]): Pro
 
 //Fonction pour supprimer un bien par son iD
 export async function deleteBien(id: string): Promise<void> {
+  const session = await getSession();
+  const token = session?.token;
   return apiFetch(`/biens/${id}`, {
     method: 'DELETE',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
   });
 }

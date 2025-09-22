@@ -5,7 +5,8 @@ import { clearSession } from '../utils/session';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { getBiensCount, getReservationsCount } from '../utils/api';
+import { getReservationsCount } from '../utils/api';
+import { useBienCount } from '../contexts/BienCountContext';
 import { getTachesAFaireTotal } from '../utils/api';
 
 type HomeScreenProps = {
@@ -19,7 +20,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const [notifVisible, setNotifVisible] = useState(false);
     const [userName, setUserName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
-    const [biensCount, setBiensCount] = useState(0);
+    const { biensCount, refreshBiensCount } = useBienCount();
     const [reservationsCount, setReservationsCount] = useState(0);
 
     useEffect(() => {
@@ -37,12 +38,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                 } catch {}
             }
         });
-        // Récupère le nombre de biens depuis l'API
-        getBiensCount()
-            .then(data => {
-                setBiensCount(data.total ?? 0);
-            })
-            .catch(() => setBiensCount(0));
+        // Le compteur de biens est géré par le contexte
        getReservationsCount()
   .then((data: { total: number }) => {
     setReservationsCount(data.total ?? 0);
