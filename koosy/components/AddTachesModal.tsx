@@ -3,6 +3,8 @@ import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions,
 import { useTheme } from '../contexts/ThemeContext';
 const SCREEN_WIDTH = Dimensions.get('window').width;
 import { getBiens } from '../utils/api';
+const { createTache } = require('../utils/api');
+	import { useTache } from '../contexts/TacheContext';
 
 // Enum des statuts
 const TACHE_STATUTS = [
@@ -38,12 +40,12 @@ const AddTachesModal: React.FC<AddTachesModalProps> = ({ visible, onClose, onSuc
 		}
 	}, [visible]);
 
-	const { createTache } = require('../utils/api');
+	
+	const { signalTacheAdded } = useTache();
 	const handleSubmit = async () => {
 		setLoading(true);
 		setSuccessMsg('');
 		try {
-			// Appel réel à l’API
 			await createTache({
 				titre: form.titre,
 				description: form.description,
@@ -51,6 +53,7 @@ const AddTachesModal: React.FC<AddTachesModalProps> = ({ visible, onClose, onSuc
 				bienId: form.bienId,
 				dateEcheance: form.dateEcheance,
 			});
+			signalTacheAdded();
 			setSuccessMsg('Tâche ajoutée !');
 			setTimeout(() => {
 				setSuccessMsg('');

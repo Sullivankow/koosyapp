@@ -184,3 +184,8 @@ export async function createTache(data: {
 export async function getTaches(): Promise<any[]> {
   return apiFetch('/taches');
 }
+
+
+
+
+
