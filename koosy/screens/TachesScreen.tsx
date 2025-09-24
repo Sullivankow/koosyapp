@@ -1,6 +1,6 @@
-import { createTache, getTaches } from '../utils/api';
+import { createTache, getTaches, deleteTache } from '../utils/api';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import AddTachesModal from '../components/AddTachesModal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -24,6 +24,8 @@ function TachesScreen() {
   const { colors } = useTheme();
   const [taches, setTaches] = useState<Tache[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [successMsg, setSuccessMsg] = useState('');
+
   // Suppression de la gestion locale du formulaire et de l’édition
 
   // Récupérer les vraies tâches au chargement
@@ -58,8 +60,35 @@ function TachesScreen() {
       dateEcheance: t.dateEcheance || '',
     }))));
   };
-  const handleDelete = (id: string) => {
-    setTaches(taches.filter(t => t.id !== id));
+  const handleDelete = async (id: string) => {
+    Alert.alert(
+      'Confirmation',
+      'Voulez-vous vraiment supprimer cette tâche ?',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteTache(id);
+              const data = await getTaches();
+              setTaches(data.map((t: any) => ({
+                id: t.id?.toString() || '',
+                titre: t.titre,
+                description: t.description || '',
+                statut: t.statut,
+                dateEcheance: t.dateEcheance || '',
+              })));
+              setSuccessMsg('Tâche supprimée avec succès');
+              setTimeout(() => setSuccessMsg(''), 1800);
+            } catch (err) {
+              Alert.alert('Erreur', "La suppression a échoué.");
+            }
+          }
+        }
+      ]
+    );
   };
   const handleStatutChange = (id: string, statut: string) => {
     setTaches(taches.map(t => t.id === id ? { ...t, statut: statut as "à faire" | "en cours" | "terminée" } : t));
@@ -121,6 +150,9 @@ function TachesScreen() {
           }))));
         }}
       />
+      {successMsg ? (
+        <Text style={{ color: colors.success, textAlign: 'center', marginVertical: 8 }}>{successMsg}</Text>
+      ) : null}
     </View>
   );
 }

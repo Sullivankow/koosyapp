@@ -187,5 +187,12 @@ export async function getTaches(): Promise<any[]> {
 
 
 
+//Fonction pour supprimer une tâche par son ID
+export async function deleteTache(id: number | string): Promise<void> {
+  await apiFetch(`/taches/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 
 
