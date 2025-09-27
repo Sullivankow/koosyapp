@@ -162,7 +162,7 @@ function CalendrierScreen() {
                           ) : null}
                           {/* Dates sous le téléphone */}
                           <Text style={{ color: '#1976D2', fontSize: 13, fontWeight: 'bold', marginTop: 2 }}>
-                            {dateDebut} → {dateFin}
+                            {formatDateFR(dateDebut)} → {formatDateFR(dateFin)}
                           </Text>
                           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
                             <Text style={{
