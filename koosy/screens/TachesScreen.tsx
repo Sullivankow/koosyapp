@@ -7,7 +7,6 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 const STATUTS = [
   { key: 'à faire', label: 'À faire', color: '#FF7043' },
-  { key: 'en cours', label: 'En cours', color: '#448AFF' },
   { key: 'terminée', label: 'Terminée', color: '#43A047' },
 ];
 
@@ -136,45 +135,44 @@ function TachesScreen() {
             <View style={[styles.card, { backgroundColor: colors.surface }]}> 
               <View style={styles.cardHeader}>
                 <Text style={[styles.cardTitle, { color: colors.text }]}>{item.titre}</Text>
-                <View style={{ flexDirection: 'row', gap: 8 }}>
-                  {/* Badge "À faire" */}
-                  <TouchableOpacity
-                    onPress={() => !item.statut.startsWith('à faire') && handleMarkStatut(item.id, 'à faire')}
-                    activeOpacity={0.7}
-                    style={{
-                      borderWidth: 2,
-                      borderColor: '#FF7043',
-                      borderRadius: 12,
-                      marginRight: 4,
-                      opacity: item.statut === 'à faire' ? 1 : 0.5,
-                    }}
-                  >
-                    <View style={[styles.statutBadge, { backgroundColor: '#FF7043', minWidth: 80, alignItems: 'center', justifyContent: 'center' }]}> 
-                      <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>À faire</Text>
-                    </View>
-                  </TouchableOpacity>
-                  {/* Badge "Terminée" */}
-                  <TouchableOpacity
-                    onPress={() => !isTerminee && handleMarkTerminee(item.id)}
-                    activeOpacity={0.7}
-                    style={{
-                      borderWidth: 2,
-                      borderColor: '#43A047',
-                      borderRadius: 12,
-                      opacity: isTerminee ? 1 : 0.5,
-                    }}
-                  >
-                    <View style={[styles.statutBadge, { backgroundColor: '#43A047', minWidth: 90, alignItems: 'center', justifyContent: 'center' }]}> 
-                      <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>Terminée</Text>
-                    </View>
-                  </TouchableOpacity>
-                </View>
               </View>
               <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{item.description}</Text>
               {item.dateEcheance ? <Text style={[styles.cardDate, { color: colors.textSecondary }]}>Échéance : {item.dateEcheance}</Text> : null}
-              <View style={styles.cardActions}>
+              <View style={[styles.cardActions, { flexDirection: 'row', alignItems: 'center' }]}> 
                 <TouchableOpacity style={styles.actionBtn} onPress={handleDelete.bind(null, item.id)}>
                   <MaterialCommunityIcons name="delete" size={18} color={colors.error} />
+                </TouchableOpacity>
+                {/* Badge "À faire" */}
+                <TouchableOpacity
+                  onPress={() => handleMarkStatut(item.id, 'à faire')}
+                  activeOpacity={0.7}
+                  style={{
+                    borderWidth: 2,
+                    borderColor: '#FF7043',
+                    borderRadius: 12,
+                    marginLeft: 8,
+                    opacity: item.statut === 'à faire' ? 1 : 0.5,
+                  }}
+                >
+                  <View style={[styles.statutBadge, { backgroundColor: '#FF7043', minWidth: 80, alignItems: 'center', justifyContent: 'center' }]}> 
+                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>À faire</Text>
+                  </View>
+                </TouchableOpacity>
+                {/* Badge "Terminée" */}
+                <TouchableOpacity
+                  onPress={() => !isTerminee && handleMarkTerminee(item.id)}
+                  activeOpacity={0.7}
+                  style={{
+                    borderWidth: 2,
+                    borderColor: '#43A047',
+                    borderRadius: 12,
+                    marginLeft: 8,
+                    opacity: isTerminee ? 1 : 0.5,
+                  }}
+                >
+                  <View style={[styles.statutBadge, { backgroundColor: '#43A047', minWidth: 90, alignItems: 'center', justifyContent: 'center' }]}> 
+                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>Terminée</Text>
+                  </View>
                 </TouchableOpacity>
               </View>
             </View>

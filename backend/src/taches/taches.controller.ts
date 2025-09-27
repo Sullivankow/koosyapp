@@ -4,7 +4,7 @@ import { TachesService } from './taches.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateTacheDto, UpdateTacheDto } from './create-tache.dto';
 import { ApiBody, ApiResponse, ApiTags, ApiBearerAuth } from '@nestjs/swagger';
-
+import { TacheStatut } from './tache.entity';
 
 
 
@@ -120,6 +120,25 @@ async countTachesAFaireTotal(@Request() req) {
   const userId = req.user.userId;
   return { total: await this.tachesService.countTachesAFaireTotal(userId) };
 }
+
+
+ // Méthode pour changer le statut d'une tâche (à faire, en cours, terminée...)
+  @Patch(':id/statut')
+  @UseGuards(JwtAuthGuard)
+  @ApiBody({ schema: { properties: { statut: { type: 'string' } } } })
+  @ApiResponse({ status: 200, description: 'Statut de la tâche mis à jour.' })
+  async updateTacheStatut(@Param('id') id: string, @Body() body: { statut: string }) {
+    const idNum = Number(id);
+    if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
+      throw new BadRequestException("L'id de la tâche doit être un entier valide");
+    }
+    const statut = body.statut;
+    const statutEnum = (<any>TacheStatut)[statut] || statut;
+    if (!Object.values(TacheStatut).includes(statutEnum)) {
+      throw new BadRequestException('Statut invalide');
+    }
+    return this.tachesService.updateTacheStatut(idNum, statutEnum as TacheStatut);
+  }
 
 
 

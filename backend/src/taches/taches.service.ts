@@ -168,5 +168,15 @@ async countTachesAFairePourDate(date: string, userId: number): Promise<number> {
 }
 
 
+
+
+// Méthode pour changer le statut d'une tâche (à faire, en cours, terminée...)
+async updateTacheStatut(id: number, statut: TacheStatut): Promise<Tache> {
+  const tache = await this.tacheRepo.findOne({ where: { id } });
+  if (!tache) throw new NotFoundException('Tâche non trouvée');
+  tache.statut = statut;
+  return this.tacheRepo.save(tache);
+}
+
 }
 

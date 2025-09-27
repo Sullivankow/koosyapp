@@ -196,7 +196,7 @@ export async function markTacheAsTerminee(id: number | string): Promise<void> {
 }
 
 export async function updateTacheStatut(id: number | string, statut: string): Promise<void> {
-  await apiFetch(`/taches/${id}`, {
+  await apiFetch(`/taches/${id}/statut`, {
     method: 'PATCH',
     body: JSON.stringify({ statut }),
   });

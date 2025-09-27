@@ -3,7 +3,6 @@ import { Bien } from '../biens/bien.entity';
 
 export enum TacheStatut {
 	A_FAIRE = 'à faire',
-	EN_COURS = 'en cours',
 	TERMINEE = 'terminée',
 }
 

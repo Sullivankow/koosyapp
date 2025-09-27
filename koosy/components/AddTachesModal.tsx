@@ -9,7 +9,6 @@ const { createTache } = require('../utils/api');
 // Enum des statuts
 const TACHE_STATUTS = [
 	{ label: 'À faire', value: 'à faire' },
-	{ label: 'En cours', value: 'en cours' },
 	{ label: 'Terminée', value: 'terminée' },
 ];
 
