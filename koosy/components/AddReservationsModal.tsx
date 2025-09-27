@@ -1,11 +1,9 @@
 import React from 'react';
-import { Modal, View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
-import { Bien } from '../models/models';
+import { Modal, View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 
 const statutColor = {
 	'confirmée': '#43A047',
 	'en attente': '#FF7043',
-	'annulée': '#E53935',
 };
 
 type ReservationForm = {
@@ -27,7 +25,7 @@ interface AddReservationsModalProps {
 	onSave: () => void;
 	form: ReservationForm;
 	setForm: React.Dispatch<React.SetStateAction<ReservationForm>>;
-	biens: Bien[];
+	biens: any[];
 	colors: any;
 }
 
@@ -42,21 +40,27 @@ export default function AddReservationsModal({
 }: AddReservationsModalProps) {
 	return (
 		<Modal visible={visible} transparent animationType="slide">
-			<View style={styles.modalOverlay}>
-				<View style={[styles.modalBox, { backgroundColor: colors.surface }]}> 
-					<Text style={[styles.modalTitle, { color: colors.primary }]}>Ajouter une réservation</Text>
-					<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Bien :</Text>
-					<FlatList
-						data={biens}
-						horizontal
-						keyExtractor={b => b.id.toString()}
+			<KeyboardAvoidingView
+				style={styles.modalOverlay}
+				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+				keyboardVerticalOffset={Platform.OS === 'ios' ? 40 : 0}
+			>
+						<View style={[styles.modalBox, { backgroundColor: colors.surface }]}> 
+							<ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
+								{/* ...tout le contenu du formulaire ici... */}
+								<Text style={[styles.modalTitle, { color: colors.primary }]}>Ajouter une réservation</Text>
+								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Bien :</Text>
+								<FlatList
+									data={biens}
+									horizontal
+									keyExtractor={b => b.id.toString()}
 									renderItem={({ item }) => (
 										<TouchableOpacity style={[styles.chip, form.bienId === item.id.toString() && { backgroundColor: colors.secondary }]} onPress={() => setForm((f: ReservationForm) => ({ ...f, bienId: item.id.toString() }))}>
 											<Text style={{ color: form.bienId === item.id.toString() ? '#fff' : colors.text }}>{item.nom}</Text>
 										</TouchableOpacity>
 									)}
-					/>
-					<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Nom du locataire :</Text>
+								/>
+								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Nom du locataire :</Text>
 								<TextInput
 									style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
 									placeholder="Nom"
@@ -88,8 +92,8 @@ export default function AddReservationsModal({
 									onChangeText={v => setForm((f: ReservationForm) => ({ ...f, locataireTelephone: v }))}
 									keyboardType="phone-pad"
 								/>
-					<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Arrivée :</Text>
-					<View style={styles.row}>
+								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Arrivée :</Text>
+								<View style={styles.row}>
 									<TextInput
 										style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
 										placeholder="Date (YYYY-MM-DD)"
@@ -104,9 +108,9 @@ export default function AddReservationsModal({
 										value={form.heureArrivee}
 										onChangeText={v => setForm((f: ReservationForm) => ({ ...f, heureArrivee: v }))}
 									/>
-					</View>
-					<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Départ :</Text>
-					<View style={styles.row}>
+								</View>
+								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Départ :</Text>
+								<View style={styles.row}>
 									<TextInput
 										style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
 										placeholder="Date (YYYY-MM-DD)"
@@ -121,25 +125,26 @@ export default function AddReservationsModal({
 										value={form.heureDepart}
 										onChangeText={v => setForm((f: ReservationForm) => ({ ...f, heureDepart: v }))}
 									/>
-					</View>
-					<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Statut :</Text>
-					<View style={styles.row}>
-												{(['confirmée', 'en attente'] as const).map(s => (
-													<TouchableOpacity key={s} style={[styles.chip, form.statut === s && { backgroundColor: statutColor[s] }]} onPress={() => setForm((f: ReservationForm) => ({ ...f, statut: s }))}>
-														<Text style={{ color: form.statut === s ? '#fff' : colors.text }}>{s}</Text>
-													</TouchableOpacity>
-												))}
-					</View>
-					<View style={styles.modalActions}>
-						<TouchableOpacity style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={onSave}>
-							<Text style={{ color: colors.surface, fontWeight: 'bold' }}>Ajouter</Text>
-						</TouchableOpacity>
-						<TouchableOpacity style={[styles.modalBtn, { backgroundColor: colors.disabled }]} onPress={onClose}>
-							<Text style={{ color: colors.surface }}>Annuler</Text>
-						</TouchableOpacity>
-					</View>
-				</View>
-			</View>
+								</View>
+								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Statut :</Text>
+								<View style={styles.row}>
+									{(['confirmée', 'en attente'] as const).map(s => (
+										<TouchableOpacity key={s} style={[styles.chip, form.statut === s && { backgroundColor: statutColor[s] }]} onPress={() => setForm((f: ReservationForm) => ({ ...f, statut: s }))}>
+											<Text style={{ color: form.statut === s ? '#fff' : colors.text }}>{s}</Text>
+										</TouchableOpacity>
+									))}
+								</View>
+								<View style={styles.modalActions}>
+									<TouchableOpacity style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={onSave}>
+										<Text style={{ color: colors.surface, fontWeight: 'bold' }}>Ajouter</Text>
+									</TouchableOpacity>
+									<TouchableOpacity style={[styles.modalBtn, { backgroundColor: colors.disabled }]} onPress={onClose}>
+										<Text style={{ color: colors.surface }}>Annuler</Text>
+									</TouchableOpacity>
+								</View>
+							</ScrollView>
+						</View>
+			</KeyboardAvoidingView>
 		</Modal>
 	);
 }
