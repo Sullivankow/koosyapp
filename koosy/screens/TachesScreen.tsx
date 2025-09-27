@@ -1,3 +1,5 @@
+import { deleteAllTachesTerminees } from '../utils/api';
+
 import { getTaches, deleteTache, markTacheAsTerminee, updateTacheStatut } from '../utils/api';
 import { useTacheCount } from '../contexts/TacheCountContext';
 import React, { useState } from 'react';
@@ -24,6 +26,27 @@ function TachesScreen() {
   const [taches, setTaches] = useState<Tache[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'à faire' | 'terminée'>('à faire');
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+    // Suppression de toutes les tâches terminées (doit être après useState)
+  const handleDeleteAllTerminees = async () => {
+    try {
+      await deleteAllTachesTerminees();
+      // Rafraîchir la liste après suppression
+      const data = await getTaches();
+      setTaches(data.map((t: any) => ({
+        id: t.id?.toString() || '',
+        titre: t.titre,
+        description: t.description || '',
+        statut: t.statut,
+        dateEcheance: t.dateEcheance || '',
+        bienTitre: t.bien?.nom || '',
+      })));
+      setSuccessMsg('Toutes les tâches terminées ont été supprimées.');
+      setTimeout(() => setSuccessMsg(null), 2500);
+    } catch (err) {
+      alert('Erreur lors de la suppression des tâches terminées');
+    }
+  };
 
   React.useEffect(() => {
     getTaches()
@@ -71,6 +94,7 @@ function TachesScreen() {
                 description: t.description || '',
                 statut: t.statut,
                 dateEcheance: t.dateEcheance || '',
+                bienTitre: t.bien?.nom || '',
               })));
             } catch {
               Alert.alert('Erreur', "La suppression a échoué.");
@@ -91,6 +115,7 @@ function TachesScreen() {
         description: t.description || '',
         statut: t.statut,
         dateEcheance: t.dateEcheance || '',
+        bienTitre: t.bien?.nom || '',
       })));
       await refreshTacheCount();
     } catch {
@@ -108,6 +133,7 @@ function TachesScreen() {
         description: t.description || '',
         statut: t.statut,
         dateEcheance: t.dateEcheance || '',
+        bienTitre: t.bien?.nom || '',
       })));
       await refreshTacheCount();
     } catch {
@@ -148,6 +174,14 @@ function formatDateFr(dateStr?: string) {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
+      {/* Message de succès */}
+      {successMsg && (
+        <View style={styles.successMsgBox}>
+          <Text style={styles.successMsgText}>{successMsg}</Text>
+        </View>
+      )}
+      {/* Titre principal */}
+      <Text style={styles.pageTitle}>Mes tâches</Text>
       {/* Onglets */}
       <View style={styles.tabsContainer}>
         <TouchableOpacity
@@ -157,7 +191,7 @@ function formatDateFr(dateStr?: string) {
           <Text style={[styles.tabText, selectedTab === 'à faire' && styles.tabTextActive]}>À faire</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tabBtn, selectedTab === 'terminée' && styles.tabBtnActive]}
+          style={[styles.tabBtn, selectedTab === 'terminée' && styles.tabBtnTermineeActive]}
           onPress={() => setSelectedTab('terminée')}
         >
           <Text style={[styles.tabText, selectedTab === 'terminée' && styles.tabTextActive]}>Terminée</Text>
@@ -223,6 +257,24 @@ function formatDateFr(dateStr?: string) {
           );
         }}
       />
+      {/* Bouton suppression toutes les tâches terminées en bas */}
+      {selectedTab === 'terminée' && (
+        <TouchableOpacity
+          style={{
+            backgroundColor: '#e53935',
+            paddingVertical: 8,
+            paddingHorizontal: 18,
+            borderRadius: 20,
+            alignSelf: 'center',
+            marginBottom: 24,
+            minWidth: 0,
+            alignItems: 'center',
+          }}
+          onPress={handleDeleteAllTerminees}
+        >
+          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>Tout supprimer</Text>
+        </TouchableOpacity>
+      )}
       <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={openModal}>
         <MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
       </TouchableOpacity>
@@ -237,6 +289,15 @@ function formatDateFr(dateStr?: string) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  pageTitle: {
+    fontSize: 26,
+    fontWeight: 'bold',
+    color: '#fff',
+    textAlign: 'center',
+    marginTop: 28,
+    marginBottom: 8,
+    letterSpacing: 0.5,
+  },
   tabsContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
@@ -254,6 +315,9 @@ const styles = StyleSheet.create({
   },
   tabBtnActive: {
     backgroundColor: '#FF7043',
+  },
+  tabBtnTermineeActive: {
+    backgroundColor: '#43A047',
   },
   tabText: {
     color: '#888',
@@ -282,6 +346,22 @@ const styles = StyleSheet.create({
   cardActions: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
   actionBtn: { padding: 8, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.04)' },
   fab: { position: 'absolute', right: 24, bottom: 24, width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', elevation: 4 },
+  successMsgBox: {
+    backgroundColor: '#43A047',
+    paddingVertical: 10,
+    paddingHorizontal: 24,
+    borderRadius: 18,
+    alignSelf: 'center',
+    marginTop: 18,
+    marginBottom: 2,
+    zIndex: 10,
+  },
+  successMsgText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 15,
+    textAlign: 'center',
+  },
 });
 
 export default TachesScreen;

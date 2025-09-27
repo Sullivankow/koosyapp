@@ -189,18 +189,43 @@ export async function deleteTache(id: number | string): Promise<void> {
   });
 }
 
+
+//Fonction pour marquer une tâche comme terminée
 export async function markTacheAsTerminee(id: number | string): Promise<void> {
   await apiFetch(`/taches/${id}/terminee`, {
     method: 'PATCH',
   });
 }
 
+
+// Fonction pour mettre à jour le statut d'une tâche
 export async function updateTacheStatut(id: number | string, statut: string): Promise<void> {
   await apiFetch(`/taches/${id}/statut`, {
     method: 'PATCH',
     body: JSON.stringify({ statut }),
   });
 }
+
+
+
+//Fonction pour supprimer toutes les tâches terminées
+
+export async function deleteAllTachesTerminees() {
+  const session = await getSession();
+  const token = session?.token;
+  const response = await fetch(`${BASE_URL}/taches/terminees`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+  if (!response.ok) {
+    throw new Error('Erreur lors de la suppression des tâches terminées');
+  }
+  return response.json();
+}
+
 
 
 
