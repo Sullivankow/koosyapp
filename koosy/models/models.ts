@@ -33,6 +33,7 @@ export interface Bien {
 export interface Locataire {
   id: string;
   nom: string;
+  prenom: string;
   email: string;
   telephone: string;
   dateArrivee?: string;
@@ -52,13 +53,18 @@ export interface Tache {
 
 export interface Reservation {
   id: string;
-  bienId: string; //le logement réservé
-  locataireId: string; //la personne qui réserve
-  dateArrivee: string; //quand la personne commence
-  dateDepart: string; //quand la personne finit
-  heureArrivee: string; // Heure d'arrivée (format HH:mm)
-  heureDepart: string;  // Heure de départ (format HH:mm)
-  statut: 'confirmée' | 'en attente' | 'annulée';
+  bienId: string;
+  locataireId: string;
+  dateArrivee?: string;
+  dateDepart?: string;
+  heureArrivee?: string;
+  heureDepart?: string;
+  statut: 'confirmée' | 'en attente' | 'annulée' | 'terminée';
+  // Champs enrichis par le backend (relations TypeORM)
+  bien?: Bien;
+  locataire?: Locataire;
+  dateDebut?: string;
+  dateFin?: string;
 }
 
 

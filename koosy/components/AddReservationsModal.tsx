@@ -1,6 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
+import dayjs from 'dayjs';
+import 'dayjs/locale/fr';
 import { Modal, View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
+import DateTimePicker from '@react-native-community/datetimepicker';
 
+
+dayjs.locale('fr');
 const statutColor = {
 	'confirmée': '#43A047',
 	'en attente': '#FF7043',
@@ -30,15 +35,34 @@ interface AddReservationsModalProps {
 }
 
 export default function AddReservationsModal({
-	visible,
-	onClose,
-	onSave,
-	form,
-	setForm,
-	biens,
-	colors
+   visible,
+   onClose,
+   onSave,
+   form,
+   setForm,
+   biens,
+   colors
 }: AddReservationsModalProps) {
-	return (
+   const [showDatePicker, setShowDatePicker] = useState<{ field: 'dateArrivee' | 'dateDepart' | null, visible: boolean }>({ field: null, visible: false });
+   const handleDateChange = (event: any, selectedDate?: Date) => {
+	   if (event.type === 'dismissed') {
+		   setShowDatePicker({ field: null, visible: false });
+		   return;
+	   }
+	   if (selectedDate && showDatePicker.field) {
+		   const iso = selectedDate.toISOString().slice(0, 10); // YYYY-MM-DD
+		   setForm((f: ReservationForm) => ({ ...f, [showDatePicker.field!]: iso }));
+	   }
+	   setShowDatePicker({ field: null, visible: false });
+   };
+   const getDateValue = (field: 'dateArrivee' | 'dateDepart') => {
+	   const val = form[field];
+	   if (/^(\d{4})-(\d{2})-(\d{2})$/.test(val) && dayjs(val).isValid()) {
+		   return dayjs(val).format('DD/MM/YYYY');
+	   }
+	   return val || '';
+   };
+   return (
 		<Modal visible={visible} transparent animationType="slide">
 			<KeyboardAvoidingView
 				style={styles.modalOverlay}
@@ -94,38 +118,55 @@ export default function AddReservationsModal({
 								/>
 								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Arrivée :</Text>
 								<View style={styles.row}>
-									<TextInput
-										style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-										placeholder="Date (YYYY-MM-DD)"
-										placeholderTextColor={colors.textSecondary}
-										value={form.dateArrivee}
-										onChangeText={v => setForm((f: ReservationForm) => ({ ...f, dateArrivee: v }))}
-									/>
-									<TextInput
-										style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-										placeholder="Heure (HH:mm)"
-										placeholderTextColor={colors.textSecondary}
-										value={form.heureArrivee}
-										onChangeText={v => setForm((f: ReservationForm) => ({ ...f, heureArrivee: v }))}
-									/>
+								   <TouchableOpacity
+									   style={[styles.input, { justifyContent: 'center', backgroundColor: colors.background, borderColor: colors.border }]}
+									   onPress={() => setShowDatePicker({ field: 'dateArrivee', visible: true })}
+								   >
+									   <Text style={{ color: getDateValue('dateArrivee') ? colors.text : colors.textSecondary }}>
+										   {getDateValue('dateArrivee') || 'Date (JJ/MM/AAAA)'}
+									   </Text>
+								   </TouchableOpacity>
+								   <TextInput
+									   style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+									   placeholder="Heure (HH:mm)"
+									   placeholderTextColor={colors.textSecondary}
+									   value={form.heureArrivee}
+									   onChangeText={v => setForm((f: ReservationForm) => ({ ...f, heureArrivee: v }))}
+								   />
 								</View>
 								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Départ :</Text>
 								<View style={styles.row}>
-									<TextInput
-										style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-										placeholder="Date (YYYY-MM-DD)"
-										placeholderTextColor={colors.textSecondary}
-										value={form.dateDepart}
-										onChangeText={v => setForm((f: ReservationForm) => ({ ...f, dateDepart: v }))}
-									/>
-									<TextInput
-										style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
-										placeholder="Heure (HH:mm)"
-										placeholderTextColor={colors.textSecondary}
-										value={form.heureDepart}
-										onChangeText={v => setForm((f: ReservationForm) => ({ ...f, heureDepart: v }))}
-									/>
+								   <TouchableOpacity
+									   style={[styles.input, { justifyContent: 'center', backgroundColor: colors.background, borderColor: colors.border }]}
+									   onPress={() => setShowDatePicker({ field: 'dateDepart', visible: true })}
+								   >
+									   <Text style={{ color: getDateValue('dateDepart') ? colors.text : colors.textSecondary }}>
+										   {getDateValue('dateDepart') || 'Date (JJ/MM/AAAA)'}
+									   </Text>
+								   </TouchableOpacity>
+								   <TextInput
+									   style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
+									   placeholder="Heure (HH:mm)"
+									   placeholderTextColor={colors.textSecondary}
+									   value={form.heureDepart}
+									   onChangeText={v => setForm((f: ReservationForm) => ({ ...f, heureDepart: v }))}
+								   />
 								</View>
+   {showDatePicker.visible && (
+	   <DateTimePicker
+		   value={(() => {
+			   const val = form[showDatePicker.field!];
+			   if (/^(\d{4})-(\d{2})-(\d{2})$/.test(val) && dayjs(val).isValid()) {
+				   return new Date(val);
+			   }
+			   return new Date();
+		   })()}
+		   mode="date"
+		   display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
+		   onChange={handleDateChange}
+		   locale="fr-FR"
+	   />
+   )}
 								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Statut :</Text>
 								<View style={styles.row}>
 									{(['confirmée', 'en attente'] as const).map(s => (

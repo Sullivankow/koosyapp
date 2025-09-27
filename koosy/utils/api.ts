@@ -1,3 +1,4 @@
+
 import { getSession } from './session';
 const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
 
@@ -243,10 +244,27 @@ export async function createReservation(data: {
 }
 
 
+//Fonction pour récupérer la liste des réservations
+export async function getReservations(): Promise<any[]> {
+  return apiFetch('/reservations');
+}
 
 
 
+// Met à jour le statut d'une réservation (confirmée, annulée, etc.)
+export async function updateReservationStatut(id: string | number, statut: 'en attente' | 'confirmée' | 'terminée' | 'annulée') {
+  return apiFetch(`/reservations/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ statut }),
+  });
+}
 
 
+// Supprime une réservation par son id
+export async function deleteReservation(id: string | number) {
+  return apiFetch(`/reservations/${id}`, {
+    method: 'DELETE',
+  });
+}
 
 
