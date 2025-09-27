@@ -14,6 +14,7 @@ type Tache = {
   description: string;
   statut: "à faire" | "en cours" | "terminée";
   dateEcheance?: string;
+  bienTitre?: string; // Titre du bien associé
 };
 
 function TachesScreen() {
@@ -22,6 +23,7 @@ function TachesScreen() {
   const { refreshTacheCount } = useTacheCount();
   const [taches, setTaches] = useState<Tache[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedTab, setSelectedTab] = useState<'à faire' | 'terminée'>('à faire');
 
   React.useEffect(() => {
     getTaches()
@@ -31,6 +33,7 @@ function TachesScreen() {
         description: t.description || '',
         statut: t.statut,
         dateEcheance: t.dateEcheance || '',
+        bienTitre: t.bien?.nom || '',
       }))))
       .catch(() => setTaches([]));
   }, []);
@@ -45,6 +48,7 @@ function TachesScreen() {
       description: t.description || '',
       statut: t.statut,
       dateEcheance: t.dateEcheance || '',
+      bienTitre: t.bien?.nom || '',
     }))));
   };
 
@@ -127,10 +131,40 @@ function formatDateFr(dateStr?: string) {
   return `${day}/${month}/${year}`;
 }
 
+  // Tri des tâches : statut (à faire, en cours, terminée) puis date d'échéance (plus proche d'abord)
+  const statutOrder: Record<string, number> = { 'à faire': 0, 'en cours': 1, 'terminée': 2 };
+  // Filtrage selon l'onglet sélectionné
+  const filteredTaches = taches.filter(t =>
+    selectedTab === 'à faire' ? t.statut !== 'terminée' : t.statut === 'terminée'
+  );
+  const sortedTaches = [...filteredTaches].sort((a, b) => {
+    if (statutOrder[a.statut] !== statutOrder[b.statut]) {
+      return statutOrder[a.statut] - statutOrder[b.statut];
+    }
+    const dateA = a.dateEcheance ? new Date(a.dateEcheance) : new Date(8640000000000000);
+    const dateB = b.dateEcheance ? new Date(b.dateEcheance) : new Date(8640000000000000);
+    return dateA.getTime() - dateB.getTime();
+  });
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
+      {/* Onglets */}
+      <View style={styles.tabsContainer}>
+        <TouchableOpacity
+          style={[styles.tabBtn, selectedTab === 'à faire' && styles.tabBtnActive]}
+          onPress={() => setSelectedTab('à faire')}
+        >
+          <Text style={[styles.tabText, selectedTab === 'à faire' && styles.tabTextActive]}>À faire</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.tabBtn, selectedTab === 'terminée' && styles.tabBtnActive]}
+          onPress={() => setSelectedTab('terminée')}
+        >
+          <Text style={[styles.tabText, selectedTab === 'terminée' && styles.tabTextActive]}>Terminée</Text>
+        </TouchableOpacity>
+      </View>
       <FlatList
-        data={taches}
+        data={sortedTaches}
         keyExtractor={item => item.id}
         contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
         ListEmptyComponent={<Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 40 }}>Aucune tâche</Text>}
@@ -142,6 +176,10 @@ function formatDateFr(dateStr?: string) {
               <View style={styles.cardHeader}>
                 <Text style={[styles.cardTitle, { color: colors.text }]}>{item.titre}</Text>
               </View>
+              {/* Titre du bien associé */}
+              {item.bienTitre ? (
+                <Text style={[styles.cardBien, { color: '#1976D2' }]}>Bien : {item.bienTitre}</Text>
+              ) : null}
               <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{item.description}</Text>
               {dateAffichee ? (
                 <Text style={[styles.cardDate, { color: colors.textSecondary }]}>Échéance : {dateAffichee}</Text>
@@ -199,6 +237,32 @@ function formatDateFr(dateStr?: string) {
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
+  tabsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 16,
+    marginBottom: 8,
+    gap: 8,
+  },
+  tabBtn: {
+    flex: 1,
+    paddingVertical: 10,
+    backgroundColor: '#eee',
+    borderRadius: 16,
+    marginHorizontal: 4,
+    alignItems: 'center',
+  },
+  tabBtnActive: {
+    backgroundColor: '#FF7043',
+  },
+  tabText: {
+    color: '#888',
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  tabTextActive: {
+    color: '#fff',
+  },
   card: {
     borderRadius: 16,
     padding: 16,
@@ -212,6 +276,7 @@ const styles = StyleSheet.create({
   cardHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
   cardTitle: { fontSize: 18, fontWeight: 'bold' },
   cardDesc: { fontSize: 14, marginBottom: 6 },
+  cardBien: { fontSize: 13, fontWeight: 'bold', marginBottom: 2 },
   cardDate: { fontSize: 12, marginBottom: 2 },
   statutBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
   cardActions: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
