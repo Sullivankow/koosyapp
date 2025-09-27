@@ -197,7 +197,6 @@ export async function markTacheAsTerminee(id: number | string): Promise<void> {
   });
 }
 
-
 // Fonction pour mettre à jour le statut d'une tâche
 export async function updateTacheStatut(id: number | string, statut: string): Promise<void> {
   await apiFetch(`/taches/${id}/statut`, {
@@ -225,6 +224,25 @@ export async function deleteAllTachesTerminees() {
   }
   return response.json();
 }
+
+// Fonction pour créer une réservation
+export async function createReservation(data: {
+  bienId: number;
+  locataireNom: string;
+  locatairePrenom: string;
+  locataireEmail: string;
+  locataireTelephone: string;
+  dateDebut: string; // format JJ/MM/AAAA
+  dateFin: string; // format JJ/MM/AAAA
+  statut?: 'en attente' | 'confirmée' | 'terminée' | 'annulée';
+}) {
+  return apiFetch('/reservations', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+
 
 
 

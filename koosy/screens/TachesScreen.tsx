@@ -20,6 +20,8 @@ type Tache = {
   bienTitre?: string; // Titre du bien associé
 };
 
+
+// Écran principal des tâches
 function TachesScreen() {
 
   const { colors } = useTheme();
@@ -50,6 +52,7 @@ function TachesScreen() {
     }
   };
 
+  // Chargement initial des tâches
   React.useEffect(() => {
     getTaches()
       .then(data => setTaches(data.map((t: any) => ({
@@ -64,6 +67,8 @@ function TachesScreen() {
   }, [lastTacheAdded]);
 
 
+
+  // Ouverture/fermeture du modal d'ajout
   const openModal = () => setModalVisible(true);
   const closeModal = () => {
     setModalVisible(false);
@@ -77,6 +82,8 @@ function TachesScreen() {
     }))));
   };
 
+
+  // Suppression d'une tâche avec confirmation
   const handleDelete = (id: string) => {
     Alert.alert(
       'Confirmation',
@@ -107,6 +114,8 @@ function TachesScreen() {
     );
   };
 
+
+  // Marquer une tâche comme terminée
   const handleMarkTerminee = async (id: string) => {
     try {
       await markTacheAsTerminee(id);
@@ -124,6 +133,10 @@ function TachesScreen() {
       Alert.alert('Erreur', "Impossible de marquer la tâche comme terminée.");
     }
   };
+
+
+
+  // Mise à jour du statut d'une tâche
 
   const handleMarkStatut = async (id: string, statut: string) => {
     try {
@@ -174,6 +187,8 @@ function formatDateFr(dateStr?: string) {
     return dateA.getTime() - dateB.getTime();
   });
 
+
+  // Rendu principal
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
       {/* Message de succès */}
@@ -289,6 +304,8 @@ function formatDateFr(dateStr?: string) {
   );
 }
 
+
+// Styles du composant
 const styles = StyleSheet.create({
   container: { flex: 1 },
   pageTitle: {
