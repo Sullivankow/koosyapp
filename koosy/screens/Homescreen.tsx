@@ -8,7 +8,9 @@ import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { getReservationsCount } from '../utils/api';
 import { useBienCount } from '../contexts/BienCountContext';
 import { useTacheCount } from '../contexts/TacheCountContext';
+import { useTache } from '../contexts/TacheContext';
 import AddBienModal from '../components/AddBienModal';
+import AddTachesModal from '../components/AddTachesModal';
 
 type HomeScreenProps = {
     onLogout?: () => void;
@@ -16,6 +18,7 @@ type HomeScreenProps = {
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const { tacheCount, refreshTacheCount } = useTacheCount();
+    const { lastTacheAdded } = useTache();
     const { colors, isDarkMode, toggleTheme } = useTheme();
     const navigation = useNavigation();
     const [notifVisible, setNotifVisible] = useState(false);
@@ -24,6 +27,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const { biensCount, refreshBiensCount } = useBienCount();
     const [reservationsCount, setReservationsCount] = useState(0);
     const [addBienModalVisible, setAddBienModalVisible] = useState(false);
+    const [addTacheModalVisible, setAddTacheModalVisible] = useState(false);
 
     useEffect(() => {
         refreshTacheCount();
@@ -42,7 +46,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     setReservationsCount(data.total ?? 0);
   })
   .catch(() => setReservationsCount(0));
-    }, []);
+    }, [lastTacheAdded]);
     // Les autres valeurs restent statiques pour l'instant
     // const locatairesCount = 12; // supprimé, remplacé par le nombre de réservations
     const prochainEvenement = 'Check-in demain à 10h';
@@ -116,7 +120,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                                 <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un bien</Text>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]}>
+                        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]} onPress={() => setAddTacheModalVisible(true)}>
                             <View style={styles.centerContent}>
                                 <MaterialCommunityIcons name="playlist-plus" size={24} color={colors.surface} style={styles.icon} />
                                 <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une tâche</Text>
@@ -168,6 +172,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
             visible={addBienModalVisible}
             onClose={() => setAddBienModalVisible(false)}
             onSuccess={() => setAddBienModalVisible(false)}
+        />
+        {/* Modal d'ajout de tâche */}
+        <AddTachesModal
+            visible={addTacheModalVisible}
+            onClose={() => setAddTacheModalVisible(false)}
+            onSuccess={() => setAddTacheModalVisible(false)}
         />
         </>
     );

@@ -2,6 +2,7 @@ import { deleteAllTachesTerminees } from '../utils/api';
 
 import { getTaches, deleteTache, markTacheAsTerminee, updateTacheStatut } from '../utils/api';
 import { useTacheCount } from '../contexts/TacheCountContext';
+import { useTache } from '../contexts/TacheContext';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
@@ -23,6 +24,7 @@ function TachesScreen() {
 
   const { colors } = useTheme();
   const { refreshTacheCount } = useTacheCount();
+  const { lastTacheAdded } = useTache();
   const [taches, setTaches] = useState<Tache[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'à faire' | 'terminée'>('à faire');
@@ -59,7 +61,7 @@ function TachesScreen() {
         bienTitre: t.bien?.nom || '',
       }))))
       .catch(() => setTaches([]));
-  }, []);
+  }, [lastTacheAdded]);
 
 
   const openModal = () => setModalVisible(true);
