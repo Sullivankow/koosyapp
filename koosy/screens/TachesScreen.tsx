@@ -1,6 +1,6 @@
-import { createTache, getTaches, deleteTache } from '../utils/api';
+import { createTache, getTaches, deleteTache, markTacheAsTerminee, updateTacheStatut } from '../utils/api';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Modal, TextInput, KeyboardAvoidingView, Platform, Alert } from 'react-native';
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import AddTachesModal from '../components/AddTachesModal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -19,16 +19,12 @@ type Tache = {
   dateEcheance?: string;
 };
 
-
 function TachesScreen() {
   const { colors } = useTheme();
   const [taches, setTaches] = useState<Tache[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Suppression de la gestion locale du formulaire et de l’édition
-
-  // Récupérer les vraies tâches au chargement
   React.useEffect(() => {
     const fetchTaches = async () => {
       try {
@@ -47,11 +43,9 @@ function TachesScreen() {
     fetchTaches();
   }, []);
 
-  // Nouvelle gestion de la modal
   const openModal = () => setModalVisible(true);
   const closeModal = () => {
     setModalVisible(false);
-    // Rafraîchir la liste à chaque fermeture de la modal
     getTaches().then(data => setTaches(data.map((t: any) => ({
       id: t.id?.toString() || '',
       titre: t.titre,
@@ -60,6 +54,7 @@ function TachesScreen() {
       dateEcheance: t.dateEcheance || '',
     }))));
   };
+
   const handleDelete = async (id: string) => {
     Alert.alert(
       'Confirmation',
@@ -90,8 +85,41 @@ function TachesScreen() {
       ]
     );
   };
-  const handleStatutChange = (id: string, statut: string) => {
-    setTaches(taches.map(t => t.id === id ? { ...t, statut: statut as "à faire" | "en cours" | "terminée" } : t));
+
+  const handleMarkTerminee = async (id: string) => {
+    try {
+      await markTacheAsTerminee(id);
+      const data = await getTaches();
+      setTaches(data.map((t: any) => ({
+        id: t.id?.toString() || '',
+        titre: t.titre,
+        description: t.description || '',
+        statut: t.statut,
+        dateEcheance: t.dateEcheance || '',
+      })));
+      setSuccessMsg('Tâche marquée comme terminée');
+      setTimeout(() => setSuccessMsg(''), 1800);
+    } catch (err) {
+      Alert.alert('Erreur', "Impossible de marquer la tâche comme terminée.");
+    }
+  };
+
+  const handleMarkStatut = async (id: string, statut: string) => {
+    try {
+      await updateTacheStatut(id, statut);
+      const data = await getTaches();
+      setTaches(data.map((t: any) => ({
+        id: t.id?.toString() || '',
+        titre: t.titre,
+        description: t.description || '',
+        statut: t.statut,
+        dateEcheance: t.dateEcheance || '',
+      })));
+      setSuccessMsg(`Tâche marquée comme "${statut}"`);
+      setTimeout(() => setSuccessMsg(''), 1800);
+    } catch (err) {
+      Alert.alert('Erreur', "Impossible de changer le statut de la tâche.");
+    }
   };
 
   return (
@@ -103,52 +131,65 @@ function TachesScreen() {
         ListEmptyComponent={<Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 40 }}>Aucune tâche</Text>}
         renderItem={({ item }) => {
           const statutObj = STATUTS.find(s => s.key === item.statut) || STATUTS[0];
+          const isTerminee = item.statut === 'terminée';
           return (
-            <View style={[styles.card, { backgroundColor: colors.surface }]}>
+            <View style={[styles.card, { backgroundColor: colors.surface }]}> 
               <View style={styles.cardHeader}>
                 <Text style={[styles.cardTitle, { color: colors.text }]}>{item.titre}</Text>
-                <View style={[styles.statutBadge, { backgroundColor: statutObj.color }]}>
-                  <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 12 }}>{statutObj.label}</Text>
+                <View style={{ flexDirection: 'row', gap: 8 }}>
+                  {/* Badge "À faire" */}
+                  <TouchableOpacity
+                    onPress={() => !item.statut.startsWith('à faire') && handleMarkStatut(item.id, 'à faire')}
+                    activeOpacity={0.7}
+                    style={{
+                      borderWidth: 2,
+                      borderColor: '#FF7043',
+                      borderRadius: 12,
+                      marginRight: 4,
+                      opacity: item.statut === 'à faire' ? 1 : 0.5,
+                    }}
+                  >
+                    <View style={[styles.statutBadge, { backgroundColor: '#FF7043', minWidth: 80, alignItems: 'center', justifyContent: 'center' }]}> 
+                      <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>À faire</Text>
+                    </View>
+                  </TouchableOpacity>
+                  {/* Badge "Terminée" */}
+                  <TouchableOpacity
+                    onPress={() => !isTerminee && handleMarkTerminee(item.id)}
+                    activeOpacity={0.7}
+                    style={{
+                      borderWidth: 2,
+                      borderColor: '#43A047',
+                      borderRadius: 12,
+                      opacity: isTerminee ? 1 : 0.5,
+                    }}
+                  >
+                    <View style={[styles.statutBadge, { backgroundColor: '#43A047', minWidth: 90, alignItems: 'center', justifyContent: 'center' }]}> 
+                      <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>Terminée</Text>
+                    </View>
+                  </TouchableOpacity>
                 </View>
               </View>
               <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{item.description}</Text>
               {item.dateEcheance ? <Text style={[styles.cardDate, { color: colors.textSecondary }]}>Échéance : {item.dateEcheance}</Text> : null}
               <View style={styles.cardActions}>
-                <TouchableOpacity style={styles.actionBtn} onPress={openModal}>
-                  <MaterialCommunityIcons name="pencil" size={18} color={colors.accent} />
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.actionBtn} onPress={() => handleDelete(item.id)}>
+                <TouchableOpacity style={styles.actionBtn} onPress={handleDelete.bind(null, item.id)}>
                   <MaterialCommunityIcons name="delete" size={18} color={colors.error} />
                 </TouchableOpacity>
-                <View style={styles.statutRow}>
-                  {STATUTS.map(s => (
-                    <TouchableOpacity key={s.key} style={[styles.statutBtn, item.statut === s.key && { backgroundColor: s.color }]} onPress={() => handleStatutChange(item.id, s.key)}>
-                      <Text style={{ color: item.statut === s.key ? '#fff' : colors.textSecondary, fontSize: 12 }}>{s.label}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
               </View>
             </View>
           );
         }}
       />
       {/* Bouton flottant ajout */}
-  <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={openModal}>
+      <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={openModal}>
         <MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
       </TouchableOpacity>
       {/* Modal ajout/modif avec sélecteur de biens */}
       <AddTachesModal
         visible={modalVisible}
         onClose={closeModal}
-        onSuccess={() => {
-          getTaches().then(data => setTaches(data.map((t: any) => ({
-            id: t.id?.toString() || '',
-            titre: t.titre,
-            description: t.description || '',
-            statut: t.statut,
-            dateEcheance: t.dateEcheance || '',
-          }))));
-        }}
+        onSuccess={closeModal}
       />
       {successMsg ? (
         <Text style={{ color: colors.success, textAlign: 'center', marginVertical: 8 }}>{successMsg}</Text>
@@ -176,15 +217,7 @@ const styles = StyleSheet.create({
   statutBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
   cardActions: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 8 },
   actionBtn: { padding: 8, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.04)' },
-  statutRow: { flexDirection: 'row', gap: 8, flexWrap: 'wrap', marginTop: 6 },
-  statutBtn: { paddingHorizontal: 10, paddingVertical: 6, borderRadius: 14, backgroundColor: '#eee', marginRight: 4, marginBottom: 4 },
   fab: { position: 'absolute', right: 24, bottom: 24, width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', elevation: 4 },
-  modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.18)' },
-  modalBox: { width: '90%', borderRadius: 18, padding: 18 },
-  modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
-  input: { borderWidth: 1, borderRadius: 10, padding: 10, marginBottom: 10, fontSize: 15 },
-  modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 10 },
-  modalBtn: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 10 },
 });
 
 export default TachesScreen;

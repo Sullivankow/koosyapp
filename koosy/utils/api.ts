@@ -1,8 +1,3 @@
-
-
-
-
-
 import { getSession } from './session';
 const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
 
@@ -185,7 +180,7 @@ export async function getTaches(): Promise<any[]> {
   return apiFetch('/taches');
 }
 
-
+//Fontion pour mettre à jour le status d'une tâche
 
 //Fonction pour supprimer une tâche par son ID
 export async function deleteTache(id: number | string): Promise<void> {
@@ -193,6 +188,22 @@ export async function deleteTache(id: number | string): Promise<void> {
     method: 'DELETE',
   });
 }
+
+export async function markTacheAsTerminee(id: number | string): Promise<void> {
+  await apiFetch(`/taches/${id}/terminee`, {
+    method: 'PATCH',
+  });
+}
+
+export async function updateTacheStatut(id: number | string, statut: string): Promise<void> {
+  await apiFetch(`/taches/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify({ statut }),
+  });
+}
+
+
+
 
 
 
