@@ -1,14 +1,12 @@
-import { createTache, getTaches, deleteTache, markTacheAsTerminee, updateTacheStatut } from '../utils/api';
+import { getTaches, deleteTache, markTacheAsTerminee, updateTacheStatut } from '../utils/api';
+import { useTacheCount } from '../contexts/TacheCountContext';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import AddTachesModal from '../components/AddTachesModal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-const STATUTS = [
-  { key: 'à faire', label: 'À faire', color: '#FF7043' },
-  { key: 'terminée', label: 'Terminée', color: '#43A047' },
-];
+
 
 type Tache = {
   id: string;
@@ -19,28 +17,24 @@ type Tache = {
 };
 
 function TachesScreen() {
+
   const { colors } = useTheme();
+  const { refreshTacheCount } = useTacheCount();
   const [taches, setTaches] = useState<Tache[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [successMsg, setSuccessMsg] = useState('');
 
   React.useEffect(() => {
-    const fetchTaches = async () => {
-      try {
-        const data = await getTaches();
-        setTaches(data.map((t: any) => ({
-          id: t.id?.toString() || '',
-          titre: t.titre,
-          description: t.description || '',
-          statut: t.statut,
-          dateEcheance: t.dateEcheance || '',
-        })));
-      } catch (err) {
-        setTaches([]);
-      }
-    };
-    fetchTaches();
+    getTaches()
+      .then(data => setTaches(data.map((t: any) => ({
+        id: t.id?.toString() || '',
+        titre: t.titre,
+        description: t.description || '',
+        statut: t.statut,
+        dateEcheance: t.dateEcheance || '',
+      }))))
+      .catch(() => setTaches([]));
   }, []);
+
 
   const openModal = () => setModalVisible(true);
   const closeModal = () => {
@@ -54,7 +48,7 @@ function TachesScreen() {
     }))));
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     Alert.alert(
       'Confirmation',
       'Voulez-vous vraiment supprimer cette tâche ?',
@@ -74,9 +68,7 @@ function TachesScreen() {
                 statut: t.statut,
                 dateEcheance: t.dateEcheance || '',
               })));
-              setSuccessMsg('Tâche supprimée avec succès');
-              setTimeout(() => setSuccessMsg(''), 1800);
-            } catch (err) {
+            } catch {
               Alert.alert('Erreur', "La suppression a échoué.");
             }
           }
@@ -96,9 +88,8 @@ function TachesScreen() {
         statut: t.statut,
         dateEcheance: t.dateEcheance || '',
       })));
-      setSuccessMsg('Tâche marquée comme terminée');
-      setTimeout(() => setSuccessMsg(''), 1800);
-    } catch (err) {
+      await refreshTacheCount();
+    } catch {
       Alert.alert('Erreur', "Impossible de marquer la tâche comme terminée.");
     }
   };
@@ -114,35 +105,51 @@ function TachesScreen() {
         statut: t.statut,
         dateEcheance: t.dateEcheance || '',
       })));
-      setSuccessMsg(`Tâche marquée comme "${statut}"`);
-      setTimeout(() => setSuccessMsg(''), 1800);
-    } catch (err) {
+      await refreshTacheCount();
+    } catch {
       Alert.alert('Erreur', "Impossible de changer le statut de la tâche.");
     }
   };
 
+// Formatage simple de la date en DD/MM/YYYY
+function formatDateFr(dateStr?: string) {
+  if (!dateStr) return '';
+  const isoMatch = dateStr.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (isoMatch) {
+    const [, y, m, d] = isoMatch;
+    return `${d}/${m}/${y}`;
+  }
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '';
+  const day = d.getDate().toString().padStart(2, '0');
+  const month = (d.getMonth() + 1).toString().padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+}
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}> 
       <FlatList
         data={taches}
         keyExtractor={item => item.id}
         contentContainerStyle={{ padding: 16, paddingBottom: 80 }}
         ListEmptyComponent={<Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 40 }}>Aucune tâche</Text>}
         renderItem={({ item }) => {
-          const statutObj = STATUTS.find(s => s.key === item.statut) || STATUTS[0];
           const isTerminee = item.statut === 'terminée';
+          const dateAffichee = item.dateEcheance ? formatDateFr(item.dateEcheance) : '';
           return (
             <View style={[styles.card, { backgroundColor: colors.surface }]}> 
               <View style={styles.cardHeader}>
                 <Text style={[styles.cardTitle, { color: colors.text }]}>{item.titre}</Text>
               </View>
               <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{item.description}</Text>
-              {item.dateEcheance ? <Text style={[styles.cardDate, { color: colors.textSecondary }]}>Échéance : {item.dateEcheance}</Text> : null}
-              <View style={[styles.cardActions, { flexDirection: 'row', alignItems: 'center' }]}> 
-                <TouchableOpacity style={styles.actionBtn} onPress={handleDelete.bind(null, item.id)}>
+              {dateAffichee ? (
+                <Text style={[styles.cardDate, { color: colors.textSecondary }]}>Échéance : {dateAffichee}</Text>
+              ) : null}
+              <View style={styles.cardActions}> 
+                <TouchableOpacity style={styles.actionBtn} onPress={() => handleDelete(item.id)}>
                   <MaterialCommunityIcons name="delete" size={18} color={colors.error} />
                 </TouchableOpacity>
-                {/* Badge "À faire" */}
                 <TouchableOpacity
                   onPress={() => handleMarkStatut(item.id, 'à faire')}
                   activeOpacity={0.7}
@@ -158,7 +165,6 @@ function TachesScreen() {
                     <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>À faire</Text>
                   </View>
                 </TouchableOpacity>
-                {/* Badge "Terminée" */}
                 <TouchableOpacity
                   onPress={() => !isTerminee && handleMarkTerminee(item.id)}
                   activeOpacity={0.7}
@@ -179,19 +185,14 @@ function TachesScreen() {
           );
         }}
       />
-      {/* Bouton flottant ajout */}
       <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={openModal}>
         <MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
       </TouchableOpacity>
-      {/* Modal ajout/modif avec sélecteur de biens */}
       <AddTachesModal
         visible={modalVisible}
         onClose={closeModal}
         onSuccess={closeModal}
       />
-      {successMsg ? (
-        <Text style={{ color: colors.success, textAlign: 'center', marginVertical: 8 }}>{successMsg}</Text>
-      ) : null}
     </View>
   );
 }
@@ -213,7 +214,7 @@ const styles = StyleSheet.create({
   cardDesc: { fontSize: 14, marginBottom: 6 },
   cardDate: { fontSize: 12, marginBottom: 2 },
   statutBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
-  cardActions: { flexDirection: 'row', alignItems: 'center', marginTop: 10, gap: 8 },
+  cardActions: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
   actionBtn: { padding: 8, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.04)' },
   fab: { position: 'absolute', right: 24, bottom: 24, width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', elevation: 4 },
 });

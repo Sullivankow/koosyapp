@@ -7,7 +7,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { getReservationsCount } from '../utils/api';
 import { useBienCount } from '../contexts/BienCountContext';
-import { getTachesAFaireTotal } from '../utils/api';
+import { useTacheCount } from '../contexts/TacheCountContext';
 import AddBienModal from '../components/AddBienModal';
 
 type HomeScreenProps = {
@@ -15,7 +15,7 @@ type HomeScreenProps = {
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
-    const [tachesAFaireCount, setTachesAFaireCount] = useState(0);
+    const { tacheCount, refreshTacheCount } = useTacheCount();
     const { colors, isDarkMode, toggleTheme } = useTheme();
     const navigation = useNavigation();
     const [notifVisible, setNotifVisible] = useState(false);
@@ -26,11 +26,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const [addBienModalVisible, setAddBienModalVisible] = useState(false);
 
     useEffect(() => {
-        getTachesAFaireTotal()
-            .then(data => {
-                setTachesAFaireCount(data.total ?? 0);
-            })
-            .catch(() => setTachesAFaireCount(0));
+        refreshTacheCount();
         AsyncStorage.getItem('koosy_user').then(data => {
             if (data) {
                 try {
@@ -101,7 +97,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                     <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}>
                         <MaterialCommunityIcons name="alert-circle" size={22} color={colors.error} style={{ marginBottom: 5 }} />
                         <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Tâches à faire</Text>
-                        <Text style={[styles.summaryValue, { color: colors.error }]}>{tachesAFaireCount}</Text>
+                        <Text style={[styles.summaryValue, { color: colors.error }]}>{tacheCount}</Text>
                     </TouchableOpacity>
                 </View>
 
