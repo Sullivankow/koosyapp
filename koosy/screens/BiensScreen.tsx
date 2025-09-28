@@ -339,21 +339,30 @@ const BiensScreen: React.FC = () => {
                 )}
               </View>
             </View>
-            {/* Locataires */}
+
+            {/* Réservations */}
             <View style={styles.sectionRow}>
-              <FontAwesome5 name="user-friends" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
-              <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 6 }}>Locataires :</Text>
-              <View style={styles.chipsRow}>
-                {Array.isArray(item.locataires) && item.locataires.length > 0 ? item.locataires.map(loc => (
-                  <View key={loc.id} style={[styles.chip, { backgroundColor: colors.primary + '22', borderColor: colors.primary }]}>
-                    <FontAwesome5 name="user" size={14} color={colors.primary} style={{ marginRight: 4 }} />
-                    <View>
-                      <Text style={{ color: colors.primary, fontWeight: 'bold', fontSize: 13 }}>{loc.nom || 'N/A'}</Text>
-                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{formatDateFR(loc.dateArrivee)} → {formatDateFR(loc.dateDepart)}</Text>
-                    </View>
+              <MaterialCommunityIcons name="calendar-check" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
+              <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 6 }}>Réservations :</Text>
+            </View>
+            {/* Liste verticale des réservations, sous le titre */}
+            <View style={{ width: '100%', flexDirection: 'column', gap: 8, marginBottom: 8 }}>
+              {Array.isArray(item.reservations) && item.reservations.length > 0 ? item.reservations.map((resa: any) => (
+                <View key={resa.id} style={{ flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.accent + '22', borderColor: colors.accent, borderWidth: 1, borderRadius: 12, padding: 8, marginBottom: 2, maxWidth: '100%' }}>
+                  <MaterialCommunityIcons name="account" size={16} color={colors.accent} style={{ marginRight: 8, marginTop: 2 }} />
+                  <View style={{ flex: 1 }}>
+                    <Text style={{ color: colors.accent, fontWeight: 'bold', fontSize: 13 }}>{resa.locataire?.nom || ''} {resa.locataire?.prenom || ''}</Text>
+                    {resa.locataire?.email ? (
+                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.locataire.email}</Text>
+                    ) : null}
+                    {resa.locataire?.telephone ? (
+                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.locataire.telephone}</Text>
+                    ) : null}
+                    <Text style={{ color: '#1976D2', fontSize: 12, fontWeight: 'bold', marginTop: 2 }}>{formatDateFR(resa.dateDebut)} → {formatDateFR(resa.dateFin)}</Text>
+                    <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.statut ? resa.statut.charAt(0).toUpperCase() + resa.statut.slice(1) : ''}</Text>
                   </View>
-                )) : <Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucun locataire</Text>}
-              </View>
+                </View>
+              )) : <Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune réservation</Text>}
             </View>
             {/* Tâches */}
             <View style={styles.sectionRow}>

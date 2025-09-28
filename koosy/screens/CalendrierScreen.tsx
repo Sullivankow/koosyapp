@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useBienCount } from '../contexts/BienCountContext';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { Reservation, Bien, Locataire } from '../models/models';
@@ -24,6 +25,7 @@ function formatDateFR(dateStr: string) {
 
 function CalendrierScreen() {
   const { colors } = useTheme();
+  const { signalBienAdded } = useBienCount();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [biens, setBiens] = useState<Bien[]>([]);
   // Pas de table locataires, on utilise uniquement les champs de la réservation
@@ -82,8 +84,8 @@ function CalendrierScreen() {
       });
       setModalVisible(false);
       setForm({ bienId: '', locataireNom: '', locatairePrenom: '', locataireEmail: '', locataireTelephone: '', dateArrivee: '', dateDepart: '', heureArrivee: '', heureDepart: '', statut: 'en attente' });
-      // Rafraîchir la liste après ajout
       fetchData();
+      signalBienAdded();
     } catch (e) {
       Alert.alert('Erreur', 'Impossible d\'ajouter la réservation.');
     }
@@ -189,8 +191,10 @@ function CalendrierScreen() {
                                   try {
                                     await import('../utils/api').then(api => api.updateReservationStatut(r.id, 'confirmée'));
                                     fetchData();
-                                  } catch (e) {
-                                    Alert.alert('Erreur', 'Impossible de confirmer la réservation.');
+                                    signalBienAdded();
+                                  } catch (e: any) {
+                                    const msg = e?.message || e?.toString() || 'Impossible de confirmer la réservation.';
+                                    Alert.alert('Erreur', msg);
                                   }
                                 }}
                               >
@@ -210,6 +214,7 @@ function CalendrierScreen() {
                                         try {
                                           await import('../utils/api').then(api => api.deleteReservation(r.id));
                                           fetchData();
+                                          signalBienAdded();
                                         } catch (e) {
                                           Alert.alert('Erreur', 'Impossible de supprimer la réservation.');
                                         }

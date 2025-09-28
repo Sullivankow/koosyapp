@@ -28,6 +28,7 @@ export interface Bien {
   proprio: Proprio;
   commentaires?: Commentaire[];
   dateCreation: string;
+  reservations?: Reservation[];
 }
 
 export interface Locataire {
