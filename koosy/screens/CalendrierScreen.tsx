@@ -101,7 +101,7 @@ function CalendrierScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       {/* Titre principal */}
-      <Text style={{ fontSize: 32, fontWeight: 'bold', color: colors.primary, marginTop: 32, marginBottom: 8, textAlign: 'center', letterSpacing: 0.5 }}>
+      <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#fff', marginTop: 32, marginBottom: 8, textAlign: 'center', letterSpacing: 0.5 }}>
         Mes réservations
       </Text>
       {loading ? (

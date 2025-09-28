@@ -250,7 +250,7 @@ export async function getReservations(): Promise<any[]> {
   return apiFetch('/reservations');
 }
 
-//Fonction pour afficher une réservation par son id
+
 // Fonction pour récupérer une réservation par son id
 export async function getReservationById(id: string | number): Promise<any> {
   return apiFetch(`/reservations/${id}`);
@@ -272,4 +272,23 @@ export async function deleteReservation(id: string | number) {
   });
 }
 
-
+//Fonction pour modifier une réservation 
+// Fonction pour modifier une réservation (tous champs)
+export async function updateReservation(
+  id: string | number,
+  data: {
+    bienId?: number;
+    locataireNom?: string;
+    locatairePrenom?: string;
+    locataireEmail?: string;
+    locataireTelephone?: string;
+    dateDebut?: string;
+    dateFin?: string;
+    statut?: 'en attente' | 'confirmée' | 'terminée' | 'annulée';
+  }
+) {
+  return apiFetch(`/reservations/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
