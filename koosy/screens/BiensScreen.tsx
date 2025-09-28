@@ -14,7 +14,7 @@ import { useTache } from '../contexts/TacheContext';
 // Les biens seront récupérés dynamiquement depuis le backend
 
 const BiensScreen: React.FC = () => {
-  const { lastBienAdded } = useBienCount();
+  const { lastBienAdded, signalBienAdded } = useBienCount();
   const { lastTacheAdded } = useTache();
   const [statutModalVisible, setStatutModalVisible] = useState(false);
   // Formatage date française
@@ -167,6 +167,7 @@ const BiensScreen: React.FC = () => {
     try {
       await deleteBien(bienId);
       await fetchBiens();
+      signalBienAdded();
     } catch (err) {
       console.error('Erreur suppression bien:', err);
     }
@@ -197,7 +198,7 @@ const BiensScreen: React.FC = () => {
       <AddBienModal
         visible={addBienModalVisible}
         onClose={() => setAddBienModalVisible(false)}
-        onSuccess={fetchBiens}
+        onSuccess={() => { fetchBiens(); signalBienAdded(); }}
       />
       {/* Header sticky */}
       <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}> 

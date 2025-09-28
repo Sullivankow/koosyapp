@@ -24,13 +24,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const [notifVisible, setNotifVisible] = useState(false);
     const [userName, setUserName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
-    const { biensCount, refreshBiensCount } = useBienCount();
+    const { biensCount, refreshBiensCount, lastBienAdded } = useBienCount();
     const [reservationsCount, setReservationsCount] = useState(0);
     const [addBienModalVisible, setAddBienModalVisible] = useState(false);
     const [addTacheModalVisible, setAddTacheModalVisible] = useState(false);
 
     useEffect(() => {
         refreshTacheCount();
+        refreshBiensCount();
         AsyncStorage.getItem('koosy_user').then(data => {
             if (data) {
                 try {
@@ -46,7 +47,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     setReservationsCount(data.total ?? 0);
   })
   .catch(() => setReservationsCount(0));
-    }, [lastTacheAdded]);
+    }, [lastTacheAdded, lastBienAdded]);
     // Les autres valeurs restent statiques pour l'instant
     // const locatairesCount = 12; // supprimé, remplacé par le nombre de réservations
     const prochainEvenement = 'Check-in demain à 10h';
