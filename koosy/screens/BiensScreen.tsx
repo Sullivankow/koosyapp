@@ -181,11 +181,13 @@ const BiensScreen: React.FC = () => {
       {photos.map((photo, idx) => {
         // Fallback si URI vide
         let source = photo;
+        let key = (photo && photo.uri) ? photo.uri : `photo-${idx}`;
         if (photo && photo.uri !== undefined && (!photo.uri || photo.uri.trim() === '')) {
           source = require('../assets/house.jpg');
+          key = `default-photo-${idx}`;
         }
         return (
-          <TouchableOpacity key={idx} onPress={() => handlePhotoPress(source)}>
+          <TouchableOpacity key={key} onPress={() => handlePhotoPress(source)}>
             <Image source={source} style={styles.carouselPhoto} resizeMode="cover" />
           </TouchableOpacity>
         );
