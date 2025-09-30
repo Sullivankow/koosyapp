@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useBienCount } from '../contexts/BienCountContext';
-import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { Reservation, Bien, Locataire } from '../models/models';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getBiens, createReservation, getReservations } from '../utils/api';
+import { useReservationRefresh } from '../contexts/ReservationRefreshContext';
 import dayjs from 'dayjs';
 import AddReservationsModal from '../components/AddReservationsModal';
 
@@ -26,6 +27,7 @@ function formatDateFR(dateStr: string) {
 function CalendrierScreen() {
   const { colors } = useTheme();
   const { signalBienAdded } = useBienCount();
+  const { lastReservationAdded } = useReservationRefresh();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [biens, setBiens] = useState<Bien[]>([]);
   // Pas de table locataires, on utilise uniquement les champs de la réservation
@@ -56,7 +58,7 @@ function CalendrierScreen() {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [lastReservationAdded]);
 
   // Ajout réel via API
   const handleSave = async () => {
@@ -86,6 +88,8 @@ function CalendrierScreen() {
       setForm({ bienId: '', locataireNom: '', locatairePrenom: '', locataireEmail: '', locataireTelephone: '', dateArrivee: '', dateDepart: '', heureArrivee: '', heureDepart: '', statut: 'en attente' });
       fetchData();
       signalBienAdded();
+      // Signale le rafraîchissement global
+      import('../contexts/ReservationRefreshContext').then(ctx => ctx.useReservationRefresh().signalReservationAdded());
     } catch (e) {
       Alert.alert('Erreur', 'Impossible d\'ajouter la réservation.');
     }
@@ -127,7 +131,7 @@ function CalendrierScreen() {
               </TouchableOpacity>
             ))}
           </View>
-          <View style={{ flex: 1, width: '100%' }}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={{ paddingBottom: 32 }}>
             <Text style={[styles.title, { color: colors.primary }]}>Réservations {tab === 'en attente' ? 'en attente' : 'confirmées'}</Text>
             {/* Liste filtrée */}
             {reservations.length === 0 ? (
@@ -237,7 +241,7 @@ function CalendrierScreen() {
             <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={openModal}>
               <MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
             </TouchableOpacity>
-          </View>
+          </ScrollView>
           <AddReservationsModal
             visible={modalVisible}
             onClose={() => setModalVisible(false)}

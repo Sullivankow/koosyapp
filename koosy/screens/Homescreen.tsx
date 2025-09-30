@@ -11,6 +11,11 @@ import { useTacheCount } from '../contexts/TacheCountContext';
 import { useTache } from '../contexts/TacheContext';
 import AddBienModal from '../components/AddBienModal';
 import AddTachesModal from '../components/AddTachesModal';
+import AddReservationsModal from '../components/AddReservationsModal';
+import { getBiens, createReservation, getReservations } from '../utils/api';
+import { Bien } from '../models/models';
+import { useReservationRefresh } from '../contexts/ReservationRefreshContext';
+import dayjs from 'dayjs';
 
 type HomeScreenProps = {
     onLogout?: () => void;
@@ -24,10 +29,37 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const [notifVisible, setNotifVisible] = useState(false);
     const [userName, setUserName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
-    const { biensCount, refreshBiensCount, lastBienAdded } = useBienCount();
+    const { biensCount, refreshBiensCount, lastBienAdded, signalBienAdded } = useBienCount();
     const [reservationsCount, setReservationsCount] = useState(0);
     const [addBienModalVisible, setAddBienModalVisible] = useState(false);
     const [addTacheModalVisible, setAddTacheModalVisible] = useState(false);
+    const [addReservationModalVisible, setAddReservationModalVisible] = useState(false);
+    const [reservationForm, setReservationForm] = useState<{
+        bienId: string;
+        locataireNom: string;
+        locatairePrenom: string;
+        locataireEmail: string;
+        locataireTelephone: string;
+        dateArrivee: string;
+        dateDepart: string;
+        heureArrivee: string;
+        heureDepart: string;
+        statut: 'confirmée' | 'en attente';
+    }>({
+        bienId: '',
+        locataireNom: '',
+        locatairePrenom: '',
+        locataireEmail: '',
+        locataireTelephone: '',
+        dateArrivee: '',
+        dateDepart: '',
+        heureArrivee: '',
+        heureDepart: '',
+        statut: 'en attente',
+    });
+    const [biens, setBiens] = useState<Bien[]>([]);
+    const [successMsg, setSuccessMsg] = useState<string>('');
+    const { signalReservationAdded } = useReservationRefresh();
 
     useEffect(() => {
         refreshTacheCount();
@@ -47,6 +79,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     setReservationsCount(data.total ?? 0);
   })
   .catch(() => setReservationsCount(0));
+        getBiens().then(setBiens).catch(() => setBiens([]));
     }, [lastTacheAdded, lastBienAdded]);
     // Les autres valeurs restent statiques pour l'instant
     // const locatairesCount = 12; // supprimé, remplacé par le nombre de réservations
@@ -59,8 +92,54 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         }
     };
 
+    // Ajout réservation depuis la modale
+    const handleAddReservation = async () => {
+        if (!reservationForm.bienId || !reservationForm.locataireNom || !reservationForm.locatairePrenom || !reservationForm.locataireEmail || !reservationForm.dateArrivee || !reservationForm.dateDepart) {
+            alert('Merci de remplir tous les champs obligatoires.');
+            return;
+        }
+        try {
+            // Conversion ISO -> JJ/MM/AAAA pour le backend (comme CalendrierScreen)
+            const formatToFR = (iso: string) => {
+                if (/^(\d{4})-(\d{2})-(\d{2})$/.test(iso)) {
+                    return dayjs(iso).format('DD/MM/YYYY');
+                }
+                return iso;
+            };
+            await createReservation({
+                bienId: Number(reservationForm.bienId),
+                locataireNom: reservationForm.locataireNom,
+                locatairePrenom: reservationForm.locatairePrenom,
+                locataireEmail: reservationForm.locataireEmail,
+                locataireTelephone: reservationForm.locataireTelephone,
+                dateDebut: formatToFR(reservationForm.dateArrivee),
+                dateFin: formatToFR(reservationForm.dateDepart),
+                statut: reservationForm.statut as 'confirmée' | 'en attente',
+            });
+            setAddReservationModalVisible(false);
+            setReservationForm({ bienId: '', locataireNom: '', locatairePrenom: '', locataireEmail: '', locataireTelephone: '', dateArrivee: '', dateDepart: '', heureArrivee: '', heureDepart: '', statut: 'en attente' });
+            // Rafraîchir le compteur et la liste via le contexte
+            refreshBiensCount();
+            signalBienAdded();
+            getReservationsCount().then((data: { total: number }) => setReservationsCount(data.total ?? 0));
+            // Signal global pour rafraîchir la page des réservations
+            signalReservationAdded();
+            // Affiche le message de succès
+            setSuccessMsg('Réservation ajoutée avec succès !');
+            setTimeout(() => setSuccessMsg(''), 2000);
+        } catch (e) {
+            console.log('Erreur lors de l\'ajout de la réservation:', e);
+            alert("Erreur lors de l'ajout de la réservation");
+        }
+    };
+
     return (
         <>
+            {successMsg ? (
+                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100, backgroundColor: colors.success || '#43A047', padding: 14, alignItems: 'center' }}>
+                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>{successMsg}</Text>
+                </View>
+            ) : null}
             <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.container}>
                 {/* Avatar et message personnalisé */}
                 <View style={styles.avatarRow}>
@@ -129,7 +208,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                         </TouchableOpacity>
                     </View>
                     <View style={styles.quickActionsRow}>
-                        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.accent }]}>
+                        <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.accent }]} onPress={() => setAddReservationModalVisible(true)}>
                             <View style={styles.centerContent}>
                                 <MaterialCommunityIcons name="calendar-plus" size={24} color={colors.surface} style={styles.icon} />
                                 <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une résa</Text>
@@ -179,6 +258,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
             visible={addTacheModalVisible}
             onClose={() => setAddTacheModalVisible(false)}
             onSuccess={() => setAddTacheModalVisible(false)}
+        />
+        {/* Modale d'ajout de réservation */}
+        <AddReservationsModal
+            visible={addReservationModalVisible}
+            onClose={() => setAddReservationModalVisible(false)}
+            onSave={handleAddReservation}
+            form={reservationForm}
+            setForm={setReservationForm}
+            biens={biens}
+            colors={colors}
         />
         </>
     );
