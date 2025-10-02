@@ -27,11 +27,18 @@ const CarteScreen = () => {
       }}
     >
       {biens
-        .filter(bien => bien.geo && typeof bien.geo.lat === 'number' && typeof bien.geo.lng === 'number' && bien.adresse && bien.adresse.trim() !== '')
+        .filter(
+          bien =>
+            typeof bien.lat === 'number' &&
+            typeof bien.lng === 'number' &&
+            bien.lat !== undefined &&
+            bien.lng !== undefined &&
+            bien.adresse && bien.adresse.trim() !== ''
+        )
         .map(bien => (
           <Marker
             key={bien.id}
-            coordinate={{ latitude: bien.geo.lat, longitude: bien.geo.lng }}
+            coordinate={{ latitude: bien.lat as number, longitude: bien.lng as number }}
             title={bien.nom}
             description={bien.adresse}
           >
@@ -43,7 +50,6 @@ const CarteScreen = () => {
                 <Text>Superficie : {bien.superficie} m²</Text>
                 <Text>Pièces : {bien.pieces}</Text>
                 <Text>Statut : {bien.statut}</Text>
-                {/* Ajoute d'autres infos si besoin */}
               </View>
             </Callout>
           </Marker>

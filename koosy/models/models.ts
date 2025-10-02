@@ -22,7 +22,9 @@ export interface Bien {
   photos: string[];
   locataires: Locataire[];
   taches: Tache[];
-  geo: { lat: number; lng: number };
+  geo?: { lat: number; lng: number };
+  lat?: number;
+  lng?: number;
   statut: 'disponible' | 'occupé' | 'travaux';
   historique: any[];
   proprio: Proprio;
