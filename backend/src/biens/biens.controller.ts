@@ -136,7 +136,8 @@ async deleteRemarque(@Param('id') id: string) {
   @ApiResponse({ status: 204, description: 'Bien supprimé.' })
   @ApiResponse({ status: 404, description: 'Bien non trouvé.' })
   async deleteBien(@Request() req, @Param('id') id: string) {
-    return this.biensService.deleteBien(Number(id), req.user.userId);
+    await this.biensService.deleteBien(Number(id), req.user.userId);
+    return { success: true };
   }
 
 

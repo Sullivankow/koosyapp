@@ -24,14 +24,23 @@ export class BiensService {
       throw new NotFoundException('Utilisateur non trouvé');
     }
 
-  const biensCount = await this.biensRepository.count({ where: { conciergerie: { id: userId } } });
+    const biensCount = await this.biensRepository.count({ where: { conciergerie: { id: userId } } });
     if (user.abonnement === 'gratuit' && biensCount >= 5) {
       throw new ForbiddenException('Limite atteinte : abonnement gratuit limité à 5 biens.');
     }
 
+    // Géocodage automatique de l'adresse
+    if (createBienDto.adresse) {
+      const coords = await this.geocodeAdresse(createBienDto.adresse);
+      if (coords) {
+        createBienDto.lat = coords.lat;
+        createBienDto.lng = coords.lng;
+      }
+    }
+
     const bien = this.biensRepository.create({
       ...createBienDto,
-  conciergerie: user,
+      conciergerie: user,
     });
     return this.biensRepository.save(bien);
   }
@@ -90,10 +99,26 @@ async updateBien(id: number, userId: number, updateBienDto: UpdateBienDto): Prom
 
 // Méthode pour supprimer un bien en vérifiant qu'il appartient à l'utilisateur
 async deleteBien(id: number, userId: number): Promise<void> {
-  const bien = await this.biensRepository.findOne({ where: { id, conciergerie: { id: userId } } });
+  // Récupère le bien avec ses relations
+  const bien = await this.biensRepository.findOne({ where: { id, conciergerie: { id: userId } }, relations: ['taches', 'reservations'] });
   if (!bien) {
     throw new NotFoundException('Bien non trouvé ou non accessible');
   }
+  // Supprime les tâches liées
+  if (bien.taches && bien.taches.length > 0) {
+    const tacheRepo = this.biensRepository.manager.getRepository('Tache');
+    for (const tache of bien.taches) {
+      await tacheRepo.delete(tache.id);
+    }
+  }
+  // Supprime les réservations liées
+  if (bien.reservations && bien.reservations.length > 0) {
+    const reservationRepo = this.biensRepository.manager.getRepository('Reservation');
+    for (const reservation of bien.reservations) {
+      await reservationRepo.delete(reservation.id);
+    }
+  }
+  // Supprime le bien
   await this.biensRepository.remove(bien);
 }
 

@@ -163,11 +163,14 @@ const BiensScreen: React.FC = () => {
     setEditingId(null);
     setEditForm({});
   };
+  const [successMsg, setSuccessMsg] = useState('');
   const handleSupprimerBien = async (bienId: string) => {
     try {
       await deleteBien(bienId);
+      setSuccessMsg('Bien supprimé avec succès !');
       await fetchBiens();
       signalBienAdded();
+      setTimeout(() => setSuccessMsg(''), 2000);
     } catch (err) {
       console.error('Erreur suppression bien:', err);
     }
@@ -197,6 +200,11 @@ const BiensScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
+      {successMsg ? (
+        <View style={{ backgroundColor: '#43a047', padding: 10, borderRadius: 8, margin: 10 }}>
+          <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: 16 }}>{successMsg}</Text>
+        </View>
+      ) : null}
       <AddBienModal
         visible={addBienModalVisible}
         onClose={() => setAddBienModalVisible(false)}
