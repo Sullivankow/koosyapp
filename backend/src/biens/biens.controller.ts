@@ -5,6 +5,7 @@ import { BiensService } from './biens.service';
 import { CreateBienDto } from './create-bien.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
 
+
 import { UpdateBienDto } from './create-bien.dto';
 
 @ApiTags('Biens')
@@ -25,6 +26,15 @@ export class BiensController {
   async createBien(@Body() createBienDto: CreateBienDto, @Request() req) {
     return this.biensService.createBien(createBienDto, req.user.userId);
   }
+
+  //Méthode pour géocoder une adresse en latitude et longitude
+  @Get('geocode')
+async geocodeAdresse(@Query('adresse') adresse: string) {
+  if (!adresse) {
+    throw new BadRequestException('Adresse requise');
+  }
+  return await this.biensService.geocodeAdresse(adresse);
+}
 
 //Affiche la liste des biens de l'utilisateur connecté
  @UseGuards(JwtAuthGuard)
@@ -130,7 +140,6 @@ async deleteRemarque(@Param('id') id: string) {
   }
 
 
-  
 
 
 }

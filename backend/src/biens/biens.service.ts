@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Bien } from './bien.entity';
 import { User } from '../users/user.entity';
 import { CreateBienDto, UpdateBienDto } from './create-bien.dto';
+import fetch from 'node-fetch';
 
 
 @Injectable()
@@ -122,6 +123,28 @@ async deleteRemarqueBien(id: number): Promise<{ success: boolean; message: strin
 async countBiens(userId: number): Promise<number> {
   return this.biensRepository.count({ where: { conciergerie: { id: userId } } });
 }
+
+
+
+
+
+
+
+  // Méthode pour géocoder une adresse postale avec Geoapify
+  async geocodeAdresse(adresse: string): Promise<{ lat: number, lng: number } | null> {
+    const apiKey = process.env.GEOPIFY_API_KEY;
+    const url = `https://api.geoapify.com/v1/geocode/search?text=${encodeURIComponent(adresse)}&apiKey=${apiKey}`;
+  const fetchFn = global.fetch || ((...args: [any]) => import('node-fetch').then(mod => mod.default(...args)));
+    const res = await fetchFn(url);
+    const data: any = await res.json();
+    if (data.features && data.features.length > 0) {
+      const [lng, lat] = data.features[0].geometry.coordinates;
+      return { lat, lng };
+    }
+    return null;
+  }
+
+
 
 
 }
