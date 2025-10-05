@@ -8,19 +8,27 @@ import { Bien } from '../models/models';
 import { View, Text } from 'react-native';
 
 
+// Valeur par défaut pour la région de la carte
+const DEFAULT_REGION = {
+  latitude: 45.631945,
+  longitude: -1.029613,
+  latitudeDelta: 0.1,
+  longitudeDelta: 0.1,
+};
+
 const CarteScreen = () => {
+  // Liste des biens à afficher sur la carte
   const [biens, setBiens] = useState<Bien[]>([]);
+  // Position GPS de l'utilisateur
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  // Pour déclencher le rafraîchissement des biens
   const { lastBienAdded } = useBienCount();
-  // Région contrôlée, mais ne suit plus en temps réel
-  const [region, setRegion] = useState({
-    latitude: 45.631945,
-    longitude: -1.029613,
-    latitudeDelta: 0.1,
-    longitudeDelta: 0.1,
-  });
+  // Région affichée sur la carte (centrage et zoom)
+  const [region, setRegion] = useState(DEFAULT_REGION);
+  // Référence vers le composant MapView pour manipuler la carte
   const mapRef = useRef<MapView>(null);
 
+  // Récupère la position GPS de l'utilisateur au chargement
   useEffect(() => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
@@ -34,7 +42,7 @@ const CarteScreen = () => {
         latitude: coords.latitude,
         longitude: coords.longitude,
       });
-      // On centre la carte sur la position utilisateur uniquement au premier chargement
+      // Centre la carte sur la position utilisateur au premier chargement
       setRegion({
         latitude: coords.latitude,
         longitude: coords.longitude,
@@ -44,16 +52,14 @@ const CarteScreen = () => {
     })();
   }, []);
 
+  // Récupère la liste des biens à chaque ajout ou modification
   useEffect(() => {
     getBiens().then((data) => {
-      console.log('Biens récupérés pour la carte:', data);
       setBiens(data);
-    }); // récupère tous les biens de la BDD
+    });
   }, [lastBienAdded]);
 
-  // La région est maintenant contrôlée et mise à jour en temps réel
-
-  // Bouton flottant pour recentrer sur la position utilisateur
+  // Fonction pour recentrer la carte sur la position utilisateur (bouton GPS)
   const handleRecenter = () => {
     if (userLocation && mapRef.current) {
       mapRef.current.animateToRegion({
@@ -65,8 +71,42 @@ const CarteScreen = () => {
     }
   };
 
+  // Affiche le marqueur d'un bien sur la carte
+  const renderBienMarker = (bien: Bien) => (
+    <Marker
+      key={bien.id}
+      coordinate={{ latitude: bien.lat as number, longitude: bien.lng as number }}
+      title={bien.nom}
+      description={bien.adresse}
+    >
+      <Callout>
+        <View style={{ maxWidth: 220 }}>
+          <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{bien.nom}</Text>
+          <Text>Adresse : {bien.adresse}</Text>
+          <Text>Type : {bien.type}</Text>
+          <Text>Superficie : {bien.superficie} m²</Text>
+          <Text>Pièces : {bien.pieces}</Text>
+          <Text
+            style={{
+              color:
+                bien.statut === 'disponible'
+                  ? 'green'
+                  : bien.statut === 'occupé'
+                  ? 'orange'
+                  : 'black',
+              fontWeight: 'bold',
+            }}
+          >
+            Statut : {bien.statut}
+          </Text>
+        </View>
+      </Callout>
+    </Marker>
+  );
+
   return (
     <View style={{ flex: 1 }}>
+      {/* Carte principale */}
       <MapView
         ref={mapRef}
         style={{ flex: 1 }}
@@ -80,6 +120,7 @@ const CarteScreen = () => {
             pinColor="blue"
           />
         )}
+        {/* Marqueurs des biens */}
         {biens
           .filter(
             bien =>
@@ -89,45 +130,16 @@ const CarteScreen = () => {
               bien.lng !== undefined &&
               bien.adresse && bien.adresse.trim() !== ''
           )
-          .map(bien => (
-            <Marker
-              key={bien.id}
-              coordinate={{ latitude: bien.lat as number, longitude: bien.lng as number }}
-              title={bien.nom}
-              description={bien.adresse}
-            >
-              <Callout>
-                <View style={{ maxWidth: 220 }}>
-                  <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{bien.nom}</Text>
-                  <Text>Adresse : {bien.adresse}</Text>
-                  <Text>Type : {bien.type}</Text>
-                  <Text>Superficie : {bien.superficie} m²</Text>
-                  <Text>Pièces : {bien.pieces}</Text>
-                  <Text
-                    style={{
-                      color:
-                        bien.statut === 'disponible'
-                          ? 'green'
-                          : bien.statut === 'occupé'
-                          ? 'orange'
-                          : 'black',
-                      fontWeight: 'bold',
-                    }}
-                  >
-                    Statut : {bien.statut}
-                  </Text>
-                </View>
-              </Callout>
-            </Marker>
-          ))}
+          .map(renderBienMarker)}
       </MapView>
-      {/* Bouton flottant style GPS/fleche */}
+      {/* Bouton flottant pour recentrer sur la position utilisateur */}
       <View style={{ position: 'absolute', bottom: 30, right: 20 }}>
         <View style={{ backgroundColor: 'white', borderRadius: 30, elevation: 4 }}>
           <Text
             onPress={handleRecenter}
             style={{ padding: 12, fontSize: 22 }}
           >
+            {/* Icône GPS/flèche */}
             🧭
           </Text>
         </View>
