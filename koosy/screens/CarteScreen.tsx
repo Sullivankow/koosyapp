@@ -1,13 +1,12 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import SearchBar from '../components/SearchBar';
 import { useBienCount } from '../contexts/BienCountContext';
 import * as Location from 'expo-location';
 import MapView, { Marker, Callout } from 'react-native-maps';
-import { getBiens } from '../utils/api';
 import { Bien } from '../models/models';
 import { View, Text } from 'react-native';
-
+import Itineraire from '../components/Itineraire';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 // Valeur par défaut pour la région de la carte
 const DEFAULT_REGION = {
@@ -37,6 +36,8 @@ const CarteScreen = () => {
   const [region, setRegion] = useState(DEFAULT_REGION);
   // Référence vers le composant MapView pour manipuler la carte
   const mapRef = useRef<MapView>(null);
+  // Affichage du tracé d'itinéraire
+  const [showRoute, setShowRoute] = useState(false);
 
   // Centrage et ouverture du Callout sur le bien sélectionné
   useEffect(() => {
@@ -58,7 +59,7 @@ const CarteScreen = () => {
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
-        console.log('Permission localisation refusée');
+        // Permission refusée
         return;
       }
       let location = await Location.getCurrentPositionAsync({});
@@ -79,8 +80,10 @@ const CarteScreen = () => {
 
   // Récupère la liste des biens à chaque ajout ou modification
   useEffect(() => {
-    getBiens().then((data) => {
-      setBiens(data);
+    import('../utils/api').then(({ getBiens }) => {
+      getBiens().then((data) => {
+        setBiens(data);
+      });
     });
   }, [lastBienAdded]);
 
@@ -104,7 +107,12 @@ const CarteScreen = () => {
       title={bien.nom}
       description={bien.adresse}
     >
-      <Callout>
+      <Callout
+        onPress={() => {
+          setSelectedBienId(bien.id);
+          setShowRoute(true);
+        }}
+      >
         <View style={{ maxWidth: 220 }}>
           <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{bien.nom}</Text>
           <Text>Adresse : {bien.adresse}</Text>
@@ -123,6 +131,12 @@ const CarteScreen = () => {
             }}
           >
             Statut : {bien.statut}
+          </Text>
+          {/* Bouton itinéraire moderne avec flèche GPS */}
+          <Text
+            style={{ marginTop: 10, color: '#1976D2', fontWeight: 'bold', textAlign: 'center', padding: 8, borderRadius: 8, backgroundColor: '#e3f2fd' }}
+          >
+            Itinéraire <MaterialCommunityIcons name="navigation-variant" size={20} color="#1976D2" />
           </Text>
         </View>
       </Callout>
@@ -181,6 +195,22 @@ const CarteScreen = () => {
               bien.adresse && bien.adresse.trim() !== ''
           )
           .map(renderBienMarker)}
+        {/* Affichage de l'itinéraire si demandé */}
+        {showRoute && userLocation && selectedBienId && (
+          (() => {
+            const bien = biens.find(b => b.id === selectedBienId);
+            if (bien && bien.lat && bien.lng) {
+              return (
+                <Itineraire
+                  origin={userLocation}
+                  destination={{ latitude: bien.lat, longitude: bien.lng }}
+                  apiKey="eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjU2NjBlZDE2MTQ0ZjRlMGRiNmU0NzkxYjdmNWI4ZjFkIiwiaCI6Im11cm11cjY0In0="
+                />
+              );
+            }
+            return null;
+          })()
+        )}
       </MapView>
       {/* Bouton flottant pour recentrer sur la position utilisateur */}
       <View style={{ position: 'absolute', bottom: 30, right: 20 }}>
