@@ -13,7 +13,10 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "Cette app utilise votre position pour afficher votre emplacement sur la carte."
+      }
     },
     "android": {
       "adaptiveIcon": {

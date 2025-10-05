@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import * as Location from 'expo-location';
+import MapView, { Marker } from 'react-native-maps';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal, Dimensions, TextInput } from 'react-native';
 import StatusModal from '../components/StatusModal';
 import { useTheme } from '../contexts/ThemeContext';
@@ -14,6 +16,23 @@ import { useTache } from '../contexts/TacheContext';
 // Les biens seront récupérés dynamiquement depuis le backend
 
 const BiensScreen: React.FC = () => {
+  const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  useEffect(() => {
+    (async () => {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        console.log('Permission localisation refusée');
+        return;
+      }
+      let location = await Location.getCurrentPositionAsync({});
+      console.log('Position utilisateur récupérée:', location.coords);
+      setUserLocation({
+        latitude: location.coords.latitude,
+        longitude: location.coords.longitude,
+      });
+    })();
+  }, []);
   const { lastBienAdded, signalBienAdded } = useBienCount();
   const { lastTacheAdded } = useTache();
   const [statutModalVisible, setStatutModalVisible] = useState(false);
@@ -200,6 +219,7 @@ const BiensScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
+      {/* ...existing code... (la carte a été supprimée) */}
       {successMsg ? (
         <View style={{ backgroundColor: '#43a047', padding: 10, borderRadius: 8, margin: 10 }}>
           <Text style={{ color: '#fff', fontWeight: 'bold', textAlign: 'center', fontSize: 16 }}>{successMsg}</Text>
