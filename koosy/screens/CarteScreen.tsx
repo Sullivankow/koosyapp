@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import SearchBar from '../components/SearchBar';
+import GpsTracker from '../components/GpsTracker';
 import { useBienCount } from '../contexts/BienCountContext';
 import * as Location from 'expo-location';
 import MapView, { Marker, Callout } from 'react-native-maps';
@@ -30,6 +31,16 @@ const CarteScreen = () => {
   );
   // Position GPS de l'utilisateur
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+  // Suivi GPS en temps réel
+  const handleLocationUpdate = (coords: { latitude: number; longitude: number }) => {
+    setUserLocation(coords);
+    // Optionnel : centrer la carte sur la nouvelle position
+    setRegion(region => ({
+      ...region,
+      latitude: coords.latitude,
+      longitude: coords.longitude,
+    }));
+  };
   // Pour déclencher le rafraîchissement des biens
   const { lastBienAdded } = useBienCount();
   // Région affichée sur la carte (centrage et zoom)
@@ -145,6 +156,21 @@ const CarteScreen = () => {
 
   return (
     <View style={{ flex: 1 }}>
+      {/* Boutons flottants à droite : centrage et trajectoire */}
+      <View style={{ position: 'absolute', bottom: 30, right: 20, zIndex: 10, alignItems: 'center' }}>
+        {/* Bouton centrage */}
+        <View style={{ backgroundColor: 'white', borderRadius: 30, elevation: 4, marginBottom: 16 }}>
+          <Text
+            onPress={handleRecenter}
+            style={{ padding: 12, fontSize: 24 }}
+          >
+            {/* Icône GPS/flèche */}
+            🧭
+          </Text>
+        </View>
+        {/* Bouton trajectoire (GPSTracker) juste en dessous */}
+        <GpsTracker onLocationUpdate={handleLocationUpdate} />
+      </View>
       {/* Barre de recherche en haut */}
       <View style={{ padding: 12, backgroundColor: 'white', zIndex: 2 }}>
         <SearchBar
@@ -212,18 +238,6 @@ const CarteScreen = () => {
           })()
         )}
       </MapView>
-      {/* Bouton flottant pour recentrer sur la position utilisateur */}
-      <View style={{ position: 'absolute', bottom: 30, right: 20 }}>
-        <View style={{ backgroundColor: 'white', borderRadius: 30, elevation: 4 }}>
-          <Text
-            onPress={handleRecenter}
-            style={{ padding: 12, fontSize: 22 }}
-          >
-            {/* Icône GPS/flèche */}
-            🧭
-          </Text>
-        </View>
-      </View>
     </View>
   );
 };
