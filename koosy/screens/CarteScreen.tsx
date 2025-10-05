@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState, useRef } from 'react';
+import SearchBar from '../components/SearchBar';
 import { useBienCount } from '../contexts/BienCountContext';
 import * as Location from 'expo-location';
 import MapView, { Marker, Callout } from 'react-native-maps';
@@ -17,8 +18,17 @@ const DEFAULT_REGION = {
 };
 
 const CarteScreen = () => {
+  // Bien sélectionné pour centrage et Callout
+  const [selectedBienId, setSelectedBienId] = useState<string | null>(null);
+  // Barre de recherche pour filtrer les biens
+  const [search, setSearch] = useState('');
   // Liste des biens à afficher sur la carte
   const [biens, setBiens] = useState<Bien[]>([]);
+  // Filtrage des biens selon la recherche
+  const filteredBiens = biens.filter(bien =>
+    bien.nom.toLowerCase().includes(search.toLowerCase()) ||
+    bien.adresse.toLowerCase().includes(search.toLowerCase())
+  );
   // Position GPS de l'utilisateur
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
   // Pour déclencher le rafraîchissement des biens
@@ -27,6 +37,21 @@ const CarteScreen = () => {
   const [region, setRegion] = useState(DEFAULT_REGION);
   // Référence vers le composant MapView pour manipuler la carte
   const mapRef = useRef<MapView>(null);
+
+  // Centrage et ouverture du Callout sur le bien sélectionné
+  useEffect(() => {
+    if (selectedBienId && mapRef.current) {
+      const bien = biens.find(b => b.id === selectedBienId);
+      if (bien && typeof bien.lat === 'number' && typeof bien.lng === 'number') {
+        mapRef.current.animateToRegion({
+          latitude: bien.lat,
+          longitude: bien.lng,
+          latitudeDelta: 0.05,
+          longitudeDelta: 0.05,
+        }, 500);
+      }
+    }
+  }, [selectedBienId, biens]);
 
   // Récupère la position GPS de l'utilisateur au chargement
   useEffect(() => {
@@ -106,6 +131,31 @@ const CarteScreen = () => {
 
   return (
     <View style={{ flex: 1 }}>
+      {/* Barre de recherche en haut */}
+      <View style={{ padding: 12, backgroundColor: 'white', zIndex: 2 }}>
+        <SearchBar
+          value={search}
+          onChangeText={setSearch}
+          placeholder="Rechercher un bien..."
+        />
+        {/* Liste des biens filtrés (suggestions) */}
+        {search.length > 0 && filteredBiens.length > 0 && (
+          <View style={{ backgroundColor: '#fff', borderRadius: 8, marginTop: 4, elevation: 2, maxHeight: 180 }}>
+            {filteredBiens.map(bien => (
+              <Text
+                key={bien.id}
+                style={{ padding: 8, borderBottomWidth: 1, borderColor: '#eee' }}
+                onPress={() => {
+                  setSelectedBienId(bien.id);
+                  setSearch(''); // Réinitialise la barre de recherche
+                }}
+              >
+                {bien.nom} - {bien.adresse}
+              </Text>
+            ))}
+          </View>
+        )}
+      </View>
       {/* Carte principale */}
       <MapView
         ref={mapRef}
@@ -120,8 +170,8 @@ const CarteScreen = () => {
             pinColor="blue"
           />
         )}
-        {/* Marqueurs des biens */}
-        {biens
+        {/* Marqueurs des biens filtrés */}
+        {filteredBiens
           .filter(
             bien =>
               typeof bien.lat === 'number' &&
