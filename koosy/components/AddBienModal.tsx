@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, ScrollView, KeyboardAvoidingView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../contexts/ThemeContext';
-import { createBien, updateBien, uploadBienImages } from '../utils/api';
+import { createBien, updateBien, uploadBienImages, geocodeAdresse } from '../utils/api';
 import { useBienCount } from '../contexts/BienCountContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -74,7 +74,20 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
       if (mode === 'add') {
         // 1. Création du bien
         const { id: newBienId } = await createBien(data);
-        // 2. Upload des images si présentes
+        // 2. Si le backend n'a pas géocodé (ou si lat/lng manquent), demander géocodage via le backend et patcher
+        if (newBienId) {
+          try {
+            // On tente d'obtenir des coordonnées depuis le backend centralisé
+            const coords = await geocodeAdresse(data.adresse);
+            if (coords && (coords.lat !== undefined && coords.lng !== undefined)) {
+              // Patch le bien pour ajouter lat/lng
+              await updateBien(String(newBienId), { lat: coords.lat, lng: coords.lng });
+            }
+          } catch (e) {
+            // ignore geocoding failure silently
+          }
+        }
+        // 3. Upload des images si présentes
         if (newBienId && selectedImages.length > 0) {
           await uploadBienImages(newBienId, selectedImages);
         }

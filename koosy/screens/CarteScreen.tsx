@@ -93,7 +93,15 @@ const CarteScreen = () => {
   useEffect(() => {
     import('../utils/api').then(({ getBiens }) => {
       getBiens().then((data) => {
-        setBiens(data);
+        // Normalize lat/lng in case backend returns strings
+        const normalized = Array.isArray(data)
+          ? data.map((b: any) => ({
+              ...b,
+              lat: b.lat !== undefined && b.lat !== null ? Number(b.lat) : undefined,
+              lng: b.lng !== undefined && b.lng !== null ? Number(b.lng) : undefined,
+            }))
+          : [];
+        setBiens(normalized);
       });
     });
   }, [lastBienAdded]);

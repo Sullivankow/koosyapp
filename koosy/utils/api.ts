@@ -144,6 +144,19 @@ export async function updateBien(id: string, data: any): Promise<any> {
   });
 }
 
+// Utilise l'endpoint backend pour géocoder une adresse (le backend centralise la clé)
+export async function geocodeAdresse(adresse: string): Promise<{ lat: number; lng: number } | null> {
+  if (!adresse) return null;
+  try {
+    const res = await apiFetch(`/biens/geocode?adresse=${encodeURIComponent(adresse)}`);
+    // Le backend retourne { lat, lng } ou null
+    return res ?? null;
+  } catch (err) {
+    // Ne pas faire planter l'app si le géocodage échoue
+    return null;
+  }
+}
+
 
 
 //Fonction pour supprimer un bien par son iD
