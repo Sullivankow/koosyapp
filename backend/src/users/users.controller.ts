@@ -1,6 +1,7 @@
 import { ApiBearerAuth, ApiTags, ApiBody } from '@nestjs/swagger';
 import { Controller, Post, Body, Get, Patch, Delete, Param, ForbiddenException, Request, BadRequestException } from '@nestjs/common';
 import { UsersService } from './users.service';
+import { TachesService } from '../taches/taches.service';
 import { CreateUserDto, UpdateUserDto } from './create-user.dto';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
@@ -9,7 +10,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @ApiTags('Utilisateur (Conciergerie)')
 @Controller('users')
 export class UsersController {
-    constructor(private readonly userService: UsersService) {}
+  constructor(private readonly userService: UsersService, private readonly tachesService: TachesService) {}
 
 //Ajouter un nouvel utilisateur
     @Post()
@@ -46,6 +47,22 @@ async savePushToken(@Request() req, @Body() body: { token: string }) {
       body: body || null,
       headers: req.headers || null,
     };
+  }
+
+  // Endpoint de test: envoie une notification push au token enregistré de l'utilisateur
+  @Post('me/test-push')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async testPush(@Request() req) {
+    const userId = req.user?.userId;
+    if (!userId) throw new BadRequestException('User not authenticated');
+    const user = await this.userService.findOne(Number(userId));
+    if (!user || !user.expoPushToken) {
+      throw new BadRequestException('No expoPushToken registered for user');
+    }
+    // envoyer une notification simple
+    await this.tachesService.sendExpoPushNotification(user.expoPushToken, 'Test Koosy', `Notification test pour ${user.email}`);
+    return { success: true };
   }
 
 
