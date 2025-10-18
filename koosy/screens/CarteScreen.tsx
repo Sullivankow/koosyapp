@@ -6,7 +6,7 @@ import * as Location from 'expo-location';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { Bien } from '../models/models';
 import { View, Text, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 // Itinéraire removed — ce fichier affiche uniquement les biens sur la carte
 
 // Valeur par défaut pour la région de la carte
@@ -20,6 +20,8 @@ const DEFAULT_REGION = {
 const CarteScreen = () => {
   
   const navigation: any = useNavigation();
+  const route: any = useRoute();
+  const focusFromParams = route?.params?.focusBienId as string | undefined;
   // Bien sélectionné pour centrage et Callout
   const [selectedBienId, setSelectedBienId] = useState<string | null>(null);
   // Barre de recherche pour filtrer les biens
@@ -64,6 +66,13 @@ const CarteScreen = () => {
       }
     }
   }, [selectedBienId, biens]);
+
+  // If the screen receives a focusBienId param, select it and center
+  useEffect(() => {
+    if (focusFromParams) {
+      setSelectedBienId(focusFromParams);
+    }
+  }, [focusFromParams]);
 
   // Récupère la position GPS de l'utilisateur au chargement
   useEffect(() => {

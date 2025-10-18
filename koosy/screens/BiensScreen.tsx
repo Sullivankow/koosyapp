@@ -222,7 +222,10 @@ const BiensScreen: React.FC = () => {
       // erreur suppression bien
     }
   };
-  const handleVoirMap = (bien: Bien) => alert(`Voir la carte pour : ${bien.nom}`);
+  const handleVoirMap = (bien: Bien) => {
+    // navigate to the Carte tab and ask it to focus this bien
+    navigation.navigate('Carte', { focusBienId: bien.id });
+  };
   const handlePhotoPress = (photo: any) => { setSelectedPhoto(photo); setPhotoModalVisible(true); };
 
   // Carrousel photos
