@@ -2,8 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 const SCREEN_WIDTH = Dimensions.get('window').width;
-import { getBiens } from '../utils/api';
-const { createTache } = require('../utils/api');
+import { getBiens, createTache } from '../utils/api';
 	import { useTache } from '../contexts/TacheContext';
 
 // Enum des statuts
@@ -41,17 +40,39 @@ const AddTachesModal: React.FC<AddTachesModalProps> = ({ visible, onClose, onSuc
 
 	
 	const { signalTacheAdded } = useTache();
+	const normalizeDate = (d: string) => {
+		if (!d) return undefined;
+		// accept YYYY-MM-DD -> convert to DD/MM/YYYY
+		const isoMatch = /^\d{4}-\d{2}-\d{2}$/.test(d);
+		if (isoMatch) {
+			const [y, m, day] = d.split('-');
+			return `${day}/${m}/${y}`;
+		}
+		// accept already DD/MM/YYYY
+		if (/^\d{2}\/\d{2}\/\d{4}$/.test(d)) return d;
+		// otherwise return as-is (backend will validate)
+		return d;
+	};
+
 	const handleSubmit = async () => {
 		setLoading(true);
 		setSuccessMsg('');
 		try {
-			await createTache({
+			const bienIdNumber = Number(form.bienId);
+			if (!bienIdNumber || isNaN(bienIdNumber)) {
+				setSuccessMsg("Veuillez sélectionner un bien valide");
+				setLoading(false);
+				return;
+			}
+			const payload: any = {
 				titre: form.titre,
-				description: form.description,
+				description: form.description || undefined,
 				statut: form.statut,
-				bienId: form.bienId,
-				dateEcheance: form.dateEcheance,
-			});
+				bienId: bienIdNumber,
+			};
+			const normalizedDate = normalizeDate(form.dateEcheance);
+			if (normalizedDate) payload.dateEcheance = normalizedDate;
+			await createTache(payload);
 			signalTacheAdded();
 			setSuccessMsg('Tâche ajoutée !');
 			setTimeout(() => {
