@@ -73,4 +73,16 @@ async findByEmail(email: string): Promise<User | null> {
   return this.usersRepository.findOne({ where: { email } });
 }
 
+
+
+
+//Méthode pour sauvegarder le token de push notification d'un utilisateur
+async savePushToken(userId: number, token: string): Promise<User> {
+  const user = await this.usersRepository.findOne({ where: { id: userId }});
+  if (!user) throw new NotFoundException('Utilisateur non trouvé');
+  user.expoPushToken = token;
+  return this.usersRepository.save(user);
+}
+
+
 }
