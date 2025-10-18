@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, ScrollView, KeyboardAvoidingView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../contexts/ThemeContext';
-import { createBien } from '../utils/api';
+import { createBien, updateBien, uploadBienImages } from '../utils/api';
 import { useBienCount } from '../contexts/BienCountContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -11,9 +11,14 @@ interface AddBienModalProps {
   visible: boolean;
   onClose: () => void;
   onSuccess?: () => void;
+  // mode: 'add' (default) or 'edit'
+  mode?: 'add' | 'edit';
+  // when editing, provide the bien id and initial data
+  bienId?: string;
+  initialData?: Partial<any>;
 }
 
-const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess }) => {
+const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess, mode = 'add', bienId, initialData }) => {
   const [selectedImages, setSelectedImages] = useState<string[]>([]);
   const { refreshBiensCount, signalBienAdded } = useBienCount();
   // Sélection d'image (plusieurs)
@@ -66,17 +71,26 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
         proprietaireTelephone: form.proprietaireTelephone,
         equipements: form.equipements ? form.equipements.split(',').map(e => e.trim()) : [],
       };
-      // 1. Création du bien
-      const { id: bienId } = await createBien(data);
-      // 2. Upload des images si présentes
-      if (bienId && selectedImages.length > 0) {
-        // @ts-ignore
-        const { uploadBienImages } = await import('../utils/api');
-        await uploadBienImages(bienId, selectedImages);
+      if (mode === 'add') {
+        // 1. Création du bien
+        const { id: newBienId } = await createBien(data);
+        // 2. Upload des images si présentes
+        if (newBienId && selectedImages.length > 0) {
+          await uploadBienImages(newBienId, selectedImages);
+        }
+        setSuccessMsg('Bien ajouté avec succès !');
+      } else {
+        // edit mode
+        if (!bienId) throw new Error('bienId requis pour l\'édition');
+        await updateBien(bienId, data);
+        // si ajout d'images, les uploader
+        if (selectedImages.length > 0) {
+          await uploadBienImages(Number(bienId), selectedImages);
+        }
+        setSuccessMsg('Bien modifié avec succès !');
       }
-      setSuccessMsg('Bien ajouté avec succès !');
-  await refreshBiensCount();
-  signalBienAdded();
+      await refreshBiensCount();
+      signalBienAdded();
       setTimeout(() => {
         setSuccessMsg('');
         setForm({ nom: '', adresse: '', type: '', superficie: '', pieces: '', proprietaireNom: '', proprietaireEmail: '', proprietaireTelephone: '', equipements: '' });
@@ -86,10 +100,28 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
         if (onSuccess) onSuccess();
       }, 1200);
     } catch (err) {
-      setSuccessMsg("Erreur lors de l'ajout du bien");
+      setSuccessMsg(mode === 'add' ? "Erreur lors de l'ajout du bien" : "Erreur lors de la modification du bien");
       setLoading(false);
     }
   };
+
+  // Pré-remplir les champs si initialData fourni (mode edit)
+  React.useEffect(() => {
+    if (mode === 'edit' && initialData && visible) {
+      setForm({
+        nom: initialData.nom || '',
+        adresse: initialData.adresse || '',
+        type: initialData.type || '',
+        superficie: initialData.superficie ? String(initialData.superficie) : '',
+        pieces: initialData.pieces ? String(initialData.pieces) : '',
+        proprietaireNom: initialData.proprietaireNom || initialData.proprio?.nom || '',
+        proprietaireEmail: initialData.proprietaireEmail || initialData.proprio?.email || '',
+        proprietaireTelephone: initialData.proprietaireTelephone || initialData.proprio?.telephone || '',
+        equipements: Array.isArray(initialData.equipements) ? initialData.equipements.join(', ') : (initialData.equipements || ''),
+      });
+      // ne pré-remplit pas selectedImages (on ajoute seulement)
+    }
+  }, [mode, initialData, visible]);
 
   return (
     <Modal visible={visible} animationType="slide" transparent>
