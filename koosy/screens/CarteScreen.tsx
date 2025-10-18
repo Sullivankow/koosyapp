@@ -5,9 +5,9 @@ import { useBienCount } from '../contexts/BienCountContext';
 import * as Location from 'expo-location';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import { Bien } from '../models/models';
-import { View, Text } from 'react-native';
-import Itineraire from '../components/Itineraire';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
+// Itinéraire removed — ce fichier affiche uniquement les biens sur la carte
 
 // Valeur par défaut pour la région de la carte
 const DEFAULT_REGION = {
@@ -18,6 +18,8 @@ const DEFAULT_REGION = {
 };
 
 const CarteScreen = () => {
+  
+  const navigation: any = useNavigation();
   // Bien sélectionné pour centrage et Callout
   const [selectedBienId, setSelectedBienId] = useState<string | null>(null);
   // Barre de recherche pour filtrer les biens
@@ -47,8 +49,6 @@ const CarteScreen = () => {
   const [region, setRegion] = useState(DEFAULT_REGION);
   // Référence vers le composant MapView pour manipuler la carte
   const mapRef = useRef<MapView>(null);
-  // Affichage du tracé d'itinéraire
-  const [showRoute, setShowRoute] = useState(false);
 
   // Centrage et ouverture du Callout sur le bien sélectionné
   useEffect(() => {
@@ -118,12 +118,7 @@ const CarteScreen = () => {
       title={bien.nom}
       description={bien.adresse}
     >
-      <Callout
-        onPress={() => {
-          setSelectedBienId(bien.id);
-          setShowRoute(true);
-        }}
-      >
+      <Callout onPress={() => { setSelectedBienId(bien.id); navigation.navigate('Biens', { focusBienId: bien.id }); }}>
         <View style={{ maxWidth: 220 }}>
           <Text style={{ fontWeight: 'bold', fontSize: 16 }}>{bien.nom}</Text>
           <Text>Adresse : {bien.adresse}</Text>
@@ -143,12 +138,13 @@ const CarteScreen = () => {
           >
             Statut : {bien.statut}
           </Text>
-          {/* Bouton itinéraire moderne avec flèche GPS */}
-          <Text
-            style={{ marginTop: 10, color: '#1976D2', fontWeight: 'bold', textAlign: 'center', padding: 8, borderRadius: 8, backgroundColor: '#e3f2fd' }}
+          {/* Bouton 'Voir le bien' : navigue vers l'onglet Biens et focus le bien */}
+          <TouchableOpacity
+            onPress={() => navigation.navigate('Biens', { focusBienId: bien.id })}
+            style={{ marginTop: 10, padding: 8, borderRadius: 8, backgroundColor: '#e3f2fd' }}
           >
-            Itinéraire <MaterialCommunityIcons name="navigation-variant" size={20} color="#1976D2" />
-          </Text>
+            <Text style={{ color: '#1976D2', fontWeight: 'bold', textAlign: 'center' }}>Voir le bien</Text>
+          </TouchableOpacity>
         </View>
       </Callout>
     </Marker>
@@ -221,22 +217,7 @@ const CarteScreen = () => {
               bien.adresse && bien.adresse.trim() !== ''
           )
           .map(renderBienMarker)}
-        {/* Affichage de l'itinéraire si demandé */}
-        {showRoute && userLocation && selectedBienId && (
-          (() => {
-            const bien = biens.find(b => b.id === selectedBienId);
-            if (bien && bien.lat && bien.lng) {
-              return (
-                <Itineraire
-                  origin={userLocation}
-                  destination={{ latitude: bien.lat, longitude: bien.lng }}
-                  apiKey="eyJvcmciOiI1YjNjZTM1OTc4NTExMTAwMDFjZjYyNDgiLCJpZCI6IjU2NjBlZDE2MTQ0ZjRlMGRiNmU0NzkxYjdmNWI4ZjFkIiwiaCI6Im11cm11cjY0In0="
-                />
-              );
-            }
-            return null;
-          })()
-        )}
+        {/* Itinéraire supprimé : la carte affiche uniquement les biens */}
       </MapView>
     </View>
   );

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal, Dimensions, TextInput } from 'react-native';
 import StatusModal from '../components/StatusModal';
@@ -14,7 +14,13 @@ import { useTache } from '../contexts/TacheContext';
 
 // Les biens seront récupérés dynamiquement depuis le backend
 
+import { useNavigation, useRoute } from '@react-navigation/native';
+
 const BiensScreen: React.FC = () => {
+  const route: any = useRoute();
+  const navigation: any = useNavigation();
+  const focusBienId = route?.params?.focusBienId as string | undefined;
+  const listRef = useRef<any>(null);
   const { lastBienAdded, signalBienAdded } = useBienCount();
   const { lastTacheAdded } = useTache();
   const [statutModalVisible, setStatutModalVisible] = useState(false);
@@ -90,6 +96,34 @@ const BiensScreen: React.FC = () => {
     fetchBiens();
   }, [lastBienAdded, lastTacheAdded]);
 
+  // Si on arrive avec un param focusBienId, on scroll vers l'item correspondant
+  useEffect(() => {
+    if (focusBienId && biens && biens.length > 0 && listRef.current) {
+      // Utiliser l'ordre affiché (sortedBiens) pour trouver l'index
+      const index = sortedBiens.findIndex((b: any) => b.id === focusBienId);
+      if (index >= 0) {
+        // Scroll doucement vers l'index
+        setTimeout(() => {
+          try {
+            listRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.4 });
+          } catch (err) {
+            console.warn('Impossible de scroller vers l\'index', err);
+            
+              // Fallback : scrollToOffset en calculant l'offset via CARD_HEIGHT
+              try {
+                const offset = CARD_HEIGHT * index;
+                listRef.current.scrollToOffset({ offset, animated: true });
+              } catch (err2) {
+                console.warn('Fallback scrollToOffset failed', err2);
+              }
+          }
+        }, 300);
+      }
+      // Nettoyer le param pour éviter scroll répété
+      navigation.setParams({ focusBienId: undefined });
+    }
+  }, [focusBienId, biens]);
+
 
 
 
@@ -108,6 +142,9 @@ const BiensScreen: React.FC = () => {
     const dateB = new Date(b.dateCreation || new Date()).getTime();
     return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
+
+  // Hauteur approximative d'une carte pour getItemLayout (ajuster si nécessaire)
+  const CARD_HEIGHT = 340;
 
 
 
@@ -220,7 +257,7 @@ const BiensScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
       {/* Barre de recherche + icône de tri alignées */}
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, marginTop: 18 }}>
+  <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, marginTop: 18 }}>
         <TextInput
           style={{
             flex: 1,
@@ -249,9 +286,11 @@ const BiensScreen: React.FC = () => {
         </TouchableOpacity>
       </View>
       <FlatList
+        ref={listRef}
         data={sortedBiens}
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
+        getItemLayout={(_, index) => ({ length: CARD_HEIGHT, offset: CARD_HEIGHT * index, index })}
         renderItem={({ item }) => (
           <View style={[styles.card, { backgroundColor: colors.surface }]}> 
             {/* Nom du bien */}
