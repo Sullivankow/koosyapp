@@ -128,7 +128,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
             setSuccessMsg('Réservation ajoutée avec succès !');
             setTimeout(() => setSuccessMsg(''), 2000);
         } catch (e) {
-            console.log('Erreur lors de l\'ajout de la réservation:', e);
+            // erreur lors de l'ajout de la réservation (gérée par l'alerte utilisateur)
             alert("Erreur lors de l'ajout de la réservation");
         }
     };

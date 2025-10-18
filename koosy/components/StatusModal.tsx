@@ -11,7 +11,6 @@ interface StatusModalProps {
 const STATUS_OPTIONS = [
   { label: 'Disponible', value: 'disponible' },
   { label: 'Occupé', value: 'occupé' },
-  { label: 'Travaux', value: 'travaux' },
 ];
 
 const StatusModal: React.FC<StatusModalProps> = ({ visible, onClose, onSelect, currentStatus }) => {

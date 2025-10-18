@@ -24,6 +24,8 @@ const BiensScreen: React.FC = () => {
   const { lastBienAdded, signalBienAdded } = useBienCount();
   const { lastTacheAdded } = useTache();
   const [statutModalVisible, setStatutModalVisible] = useState(false);
+  const [currentStatusBienId, setCurrentStatusBienId] = useState<string | null>(null);
+  const [currentBienStatus, setCurrentBienStatus] = useState<string | undefined>(undefined);
   // Formatage date française
   const formatDateFR = (dateStr?: string) => {
     if (!dateStr) return '';
@@ -56,7 +58,7 @@ const BiensScreen: React.FC = () => {
             .filter((img: any) => img && img.uri && img.uri.trim() !== '');
         }
         // Log pour tous les biens
-        console.log('PHOTOS bien', bien.nom, photos);
+  // photos processed for UI
         if (photos.length === 0) {
           photos = [require('../assets/house.jpg')];
         }
@@ -88,7 +90,7 @@ const BiensScreen: React.FC = () => {
       });
       setBiens(mappedBiens);
     } catch (err) {
-      console.error('Erreur récupération biens:', err);
+      // erreur lors de la récupération des biens
     }
   };
 
@@ -107,14 +109,12 @@ const BiensScreen: React.FC = () => {
           try {
             listRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.4 });
           } catch (err) {
-            console.warn('Impossible de scroller vers l\'index', err);
-            
-              // Fallback : scrollToOffset en calculant l'offset via CARD_HEIGHT
+            // unable to scroll to index; fallback handled silently
               try {
                 const offset = CARD_HEIGHT * index;
                 listRef.current.scrollToOffset({ offset, animated: true });
               } catch (err2) {
-                console.warn('Fallback scrollToOffset failed', err2);
+                // fallback failed silently
               }
           }
         }, 300);
@@ -169,6 +169,47 @@ const BiensScreen: React.FC = () => {
   const closeEditModal = () => {
     setEditModalData({ visible: false });
   };
+
+  const openStatusModal = (bien: Bien) => {
+    setCurrentStatusBienId(bien.id);
+    setCurrentBienStatus(bien.statut);
+    setStatutModalVisible(true);
+  };
+
+  const handleSelectStatus = async (status: string) => {
+    if (!currentStatusBienId) return;
+    try {
+      // Récupère le bien complet pour construire un payload conforme au DTO du backend
+      const fullBien = await (await import('../utils/api')).getBienById(currentStatusBienId);
+      if (!fullBien) throw new Error('Bien introuvable');
+      const payload = {
+        proprietaireNom: fullBien.proprietaireNom || fullBien.proprio?.nom || '',
+        proprietaireEmail: fullBien.proprietaireEmail || fullBien.proprio?.email || '',
+        proprietaireTelephone: fullBien.proprietaireTelephone || fullBien.proprio?.telephone || '',
+        nom: fullBien.nom || '',
+        adresse: fullBien.adresse || '',
+        type: fullBien.type || '',
+        superficie: Number(fullBien.superficie) || 0,
+        pieces: Number(fullBien.pieces) || 0,
+        equipements: Array.isArray(fullBien.equipements) ? fullBien.equipements : (fullBien.equipements ? String(fullBien.equipements).split(',').map((s: string) => s.trim()) : []),
+        photos: fullBien.photos || fullBien.images || [],
+        statut: status,
+        lat: fullBien.lat,
+        lng: fullBien.lng,
+      } as any;
+      await updateBien(currentStatusBienId, payload);
+      setSuccessMsg('Statut mis à jour');
+      await fetchBiens();
+      signalBienAdded();
+      setTimeout(() => setSuccessMsg(''), 1800);
+    } catch (err) {
+      // erreur lors de la mise à jour du statut
+    } finally {
+      setStatutModalVisible(false);
+      setCurrentStatusBienId(null);
+      setCurrentBienStatus(undefined);
+    }
+  };
   const [successMsg, setSuccessMsg] = useState('');
   const handleSupprimerBien = async (bienId: string) => {
     try {
@@ -178,7 +219,7 @@ const BiensScreen: React.FC = () => {
       signalBienAdded();
       setTimeout(() => setSuccessMsg(''), 2000);
     } catch (err) {
-      console.error('Erreur suppression bien:', err);
+      // erreur suppression bien
     }
   };
   const handleVoirMap = (bien: Bien) => alert(`Voir la carte pour : ${bien.nom}`);
@@ -217,6 +258,7 @@ const BiensScreen: React.FC = () => {
         onClose={() => setAddBienModalVisible(false)}
         onSuccess={() => { fetchBiens(); signalBienAdded(); }}
       />
+      <StatusModal visible={statutModalVisible} onClose={() => setStatutModalVisible(false)} onSelect={handleSelectStatus} currentStatus={currentBienStatus} />
       {/* Header sticky */}
       <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}> 
         <Text style={[styles.title, { color: colors.text }]}>Mes biens</Text>
@@ -282,7 +324,9 @@ const BiensScreen: React.FC = () => {
               </View>
               <View style={styles.infoCol}>
                 <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Statut</Text>
-                <Text style={[styles.infoValue, { color: colors.accent }]}>{item.statut || '-'}</Text>
+                <TouchableOpacity onPress={() => openStatusModal(item)}>
+                  <Text style={[styles.infoValue, { color: item.statut === 'disponible' ? 'green' : item.statut === 'occupé' ? 'red' : colors.accent }]}>{item.statut || '-'}</Text>
+                </TouchableOpacity>
               </View>
             </View>
             {/* Propriétaire */}

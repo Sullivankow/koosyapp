@@ -74,6 +74,11 @@ export async function getBiens(): Promise<Bien[]> {
   return apiFetch('/biens');
 }
 
+// Récupère un bien par son id
+export async function getBienById(id: string | number): Promise<any> {
+  return apiFetch(`/biens/${id}`);
+}
+
 
 //Fonction pour récupérer l'URL complète d'une image d'un bien
 export function getImageUrl(url: string): string {
