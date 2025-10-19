@@ -1,6 +1,6 @@
 import { Controller, Post, UseGuards, Request, Body, Get, Delete, BadRequestException } from '@nestjs/common';
 import { TachesService } from '../../taches/taches.service';
-import { ApiBearerAuth, ApiBody, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PushTokensService } from './push-tokens.service';
 import { UsersService } from '../users.service';
@@ -99,6 +99,7 @@ export class NotificationsController {
 
   // Supprime un push token précis pour l'utilisateur connecté (query param ?token=...)
   @Delete('me/push-token')
+  @ApiQuery({ name: 'token', required: true, type: 'string', description: "Expo push token à supprimer (ex: ExponentPushToken[...])" })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   async deleteMyPushToken(@Request() req) {
