@@ -1,7 +1,10 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Alert, Linking } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
+import { savePushToken } from '../utils/api';
 
 type PrefsKeys = keyof Omit<typeof initialPrefs, 'freq'>;
 const initialPrefs = {
@@ -35,7 +38,64 @@ const frequencies = [
 const NotificationsScreen: React.FC = () => {
     const { colors } = useTheme();
     const [prefs, setPrefs] = useState<typeof initialPrefs>(initialPrefs);
-    const handleSwitch = (key: PrefsKeys) => setPrefs({ ...prefs, [key]: !prefs[key] });
+
+    useEffect(() => {
+        // check current notification permission on mount and update the switch
+        (async () => {
+            try {
+                const perm = await Notifications.getPermissionsAsync();
+                const granted = (perm as any).granted || (perm as any).status === 'granted';
+                setPrefs(prev => ({ ...prev, push: !!granted }));
+            } catch (err) {
+                console.warn('Erreur getPermissionsAsync', err);
+            }
+        })();
+    }, []);
+
+    const handleSwitch = async (key: PrefsKeys) => {
+        // toggle locally first for immediate UI feedback
+        const newPrefs = { ...prefs, [key]: !prefs[key] };
+        setPrefs(newPrefs);
+        if (key === 'push') {
+            try {
+                if (newPrefs.push) {
+                    const { status } = await Notifications.requestPermissionsAsync();
+                    if (status !== 'granted') {
+                        // user denied or blocked — offer to open settings
+                        Alert.alert(
+                            'Permission refusée',
+                            "Les notifications push ont été refusées. Vous pouvez les activer depuis les paramètres de l'application.",
+                            [
+                                { text: 'Annuler', style: 'cancel' },
+                                { text: 'Ouvrir paramètres', onPress: () => Linking.openSettings() },
+                            ],
+                        );
+                        setPrefs({ ...newPrefs, push: false });
+                        return;
+                    }
+                    // ensure projectId is available (required by expo-notifications for SDKs using EAS)
+                    const projectId = (Constants.expoConfig as any)?.projectId || (Constants.expoConfig as any)?.extra?.eas?.projectId || (Constants.manifest as any)?.projectId;
+                    if (!projectId) {
+                        Alert.alert(
+                            'Configuration manquante',
+                            "Aucun 'projectId' Expo trouvé. Pour utiliser les push Expo, ajoutez le 'projectId' de votre projet expo.dev dans 'app.json' (champ 'expo.projectId') ou dans 'extra.eas.projectId'.\n\nTu peux créer/voir ton projectId sur https://expo.dev -> Project Settings.",
+                        );
+                        setPrefs({ ...newPrefs, push: false });
+                        return;
+                    }
+                    const tokenObj = await Notifications.getExpoPushTokenAsync({ projectId });
+                    const token = (tokenObj as any).data ?? (tokenObj as any).token ?? null;
+                    await savePushToken(token);
+                } else {
+                    // user disabled push -> clear token on server
+                    await savePushToken(null);
+                }
+            } catch (err: any) {
+                console.error('Erreur push token:', err);
+                Alert.alert('Erreur', "Impossible d'enregistrer le token de notifications.");
+            }
+        }
+    };
     const handleFreq = (key: string) => setPrefs({ ...prefs, freq: key });
 
     const handleSave = () => {
@@ -76,6 +136,7 @@ const NotificationsScreen: React.FC = () => {
                 <MaterialCommunityIcons name="content-save" size={20} color={colors.surface} />
                 <Text style={[styles.saveText, { color: colors.surface }]}>Enregistrer</Text>
             </TouchableOpacity>
+            {/* Debug token and manual test button removed */}
         </ScrollView>
     );
 };

@@ -310,3 +310,11 @@ export async function updateReservation(
     body: JSON.stringify(data),
   });
 }
+
+// Sauvegarde le token de push (ou le supprime si token === null)
+export async function savePushToken(token: string | null) {
+  return apiFetch('/users/me/push-token', {
+    method: 'POST',
+    body: JSON.stringify({ token }),
+  });
+}

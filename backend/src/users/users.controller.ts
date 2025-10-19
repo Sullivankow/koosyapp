@@ -31,10 +31,21 @@ findAll() {
 @ApiBody({ schema: { properties: { token: { type: 'string', example: 'ExponentPushToken[abc123]' } } } })
 async savePushToken(@Request() req, @Body() body: { token: string }) {
   const userId = req.user?.userId;
-  if (!body || !body.token) {
+  console.log('[users.controller] savePushToken called, userId=', userId, 'body=', body);
+  // Accept explicit null to clear token. Require the token property to be present (can be null).
+  const hasTokenProp = body && Object.prototype.hasOwnProperty.call(body, 'token');
+  if (!hasTokenProp) {
+    console.warn('[users.controller] Missing token property in request body');
     throw new BadRequestException('Missing token in request body');
   }
-  return this.userService.savePushToken(userId, body.token);
+  const token = body.token === null || body.token === '' ? null : body.token;
+  const res = await this.userService.savePushToken(userId, token);
+  if (token === null) {
+    console.log('[users.controller] savePushToken cleared token for user', userId);
+  } else {
+    console.log('[users.controller] savePushToken saved for user', userId);
+  }
+  return res;
 }
 
   // Debug route: renvoie user et body pour vérification
@@ -58,11 +69,14 @@ async savePushToken(@Request() req, @Body() body: { token: string }) {
     if (!userId) throw new BadRequestException('User not authenticated');
     const user = await this.userService.findOne(Number(userId));
     if (!user || !user.expoPushToken) {
+      console.warn('[users.controller] No expoPushToken registered for user', userId);
       throw new BadRequestException('No expoPushToken registered for user');
     }
-    // envoyer une notification simple
-    await this.tachesService.sendExpoPushNotification(user.expoPushToken, 'Test Koosy', `Notification test pour ${user.email}`);
-    return { success: true };
+    console.log('[users.controller] testPush called for user', userId, 'expoPushToken=', user.expoPushToken);
+    // envoyer une notification simple et retourner la réponse d'Expo pour debug
+    const res = await this.tachesService.sendExpoPushNotification(user.expoPushToken, 'Test Koosy', `Notification test pour ${user.email}`);
+    console.log('[users.controller] testPush expo response:', res);
+    return res;
   }
 
 

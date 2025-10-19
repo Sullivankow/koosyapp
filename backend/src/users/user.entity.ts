@@ -25,8 +25,8 @@ export class User {
 
 
 // Token Expo Push pour notifications
-@Column({ nullable: true })
-expoPushToken?: string;
+@Column({ type: 'text', nullable: true })
+expoPushToken: string | null;
 
 //Relation avec les biens
 @OneToMany(() => Bien, bien => bien.conciergerie)

@@ -2,6 +2,7 @@
   "expo": {
     "name": "koosy",
     "slug": "koosy",
+  "projectId": "6e49d5ed-36c7-4347-9365-082448dc0a86",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
