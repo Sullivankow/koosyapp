@@ -3,6 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
+import { PushTokensService } from './push-tokens/push-tokens.service';
 import { CreateUserDto } from './create-user.dto';
 import * as bcrypt from 'bcrypt';
 import { NotFoundException } from '@nestjs/common';
@@ -13,6 +14,7 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    private pushTokensService: PushTokensService,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -76,12 +78,28 @@ async findByEmail(email: string): Promise<User | null> {
 
 
 
-//Méthode pour sauvegarder le token de push notification d'un utilisateur
-async savePushToken(userId: number, token: string | null): Promise<User> {
-  const user = await this.usersRepository.findOne({ where: { id: userId }});
-  if (!user) throw new NotFoundException('Utilisateur non trouvé');
-  user.expoPushToken = token;
-  return this.usersRepository.save(user);
+// Méthode pour sauvegarder le token de push notification d'un utilisateur
+// Supporte l'upsert dans user_push_tokens. Si token === null => supprime tous les tokens pour l'utilisateur.
+async savePushToken(userId: number, token: string | null, platform?: string): Promise<any> {
+  if (token === null) {
+    await this.pushTokensService.deleteToken(userId);
+    // Keep legacy field empty for compatibility
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (user) {
+      user.expoPushToken = null;
+      await this.usersRepository.save(user);
+    }
+    return { cleared: true };
+  }
+  if (!token) throw new NotFoundException('Token vide');
+  const saved = await this.pushTokensService.upsertToken(userId, token, platform);
+  // update legacy field too for backward compatibility
+  const user = await this.usersRepository.findOne({ where: { id: userId } });
+  if (user) {
+    user.expoPushToken = token;
+    await this.usersRepository.save(user);
+  }
+  return saved;
 }
 
 

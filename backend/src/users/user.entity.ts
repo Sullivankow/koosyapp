@@ -1,5 +1,6 @@
 import {Entity , PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'; 
 import { Bien } from '../biens/bien.entity';
+import { UserPushToken } from './push-tokens/user-push-token.entity';
 
 
 @Entity()
@@ -31,6 +32,9 @@ expoPushToken: string | null;
 //Relation avec les biens
 @OneToMany(() => Bien, bien => bien.conciergerie)
 biens: Bien[];
+
+  @OneToMany(() => UserPushToken, t => t.user)
+  pushTokens: UserPushToken[];
 
 
 }
