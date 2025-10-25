@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { listNotifications, markNotificationRead, markAllNotificationsRead } from '../utils/api';
 import { useNotificationCount } from '../contexts/NotificationCountContext';
+import { useTheme } from '../contexts/ThemeContext';
 import dayjs from 'dayjs';
 
 type NotificationItem = {
@@ -14,6 +15,7 @@ type NotificationItem = {
 };
 
 export default function NotificationScreen() {
+  const { colors, isDarkMode } = useTheme();
   // Liste des notifications locales
   const [items, setItems] = useState<NotificationItem[]>([]);
   // Indique si la liste est en cours de chargement
@@ -70,37 +72,37 @@ export default function NotificationScreen() {
   };
 
   const renderItem = ({ item }: { item: NotificationItem }) => (
-    <View style={[styles.item, item.read ? styles.read : styles.unread]}>
+    <View style={[styles.item, { backgroundColor: item.read ? colors.surface : (isDarkMode ? '#2A2F36' : '#f7f7f7') }]}> 
       <View style={{ flex: 1 }}>
-        <Text style={styles.title}>{item.title}</Text>
-        <Text style={styles.body}>{item.body}</Text>
-        <Text style={styles.meta}>{dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}</Text>
+        <Text style={[styles.title, { color: colors.text }]}>{item.title}</Text>
+        <Text style={[styles.body, { color: colors.textSecondary }]}>{item.body}</Text>
+        <Text style={[styles.meta, { color: colors.textSecondary }]}>{dayjs(item.createdAt).format('DD/MM/YYYY HH:mm')}</Text>
       </View>
       {!item.read && (
-        <TouchableOpacity style={styles.markBtn} onPress={() => markRead(item.id)}>
-          <Text style={styles.markBtnText}>Marquer lu</Text>
+        <TouchableOpacity style={[styles.markBtn, { backgroundColor: colors.accent }]} onPress={() => markRead(item.id)}>
+          <Text style={[styles.markBtnText, { color: colors.surface }]}>Marquer lu</Text>
         </TouchableOpacity>
       )}
     </View>
   );
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}> 
       <View style={styles.headerRow}>
-        <Text style={styles.header}>Notifications</Text>
+        <Text style={[styles.header, { color: colors.primary }]}>Notifications</Text>
         <TouchableOpacity onPress={() => { markAllRead(); }}>
-          <Text style={styles.markAll}>Tout marquer lu</Text>
+          <Text style={[styles.markAll, { color: colors.accent }]}>Tout marquer lu</Text>
         </TouchableOpacity>
       </View>
       {loading ? (
-        <ActivityIndicator style={{ marginTop: 20 }} />
+        <ActivityIndicator style={{ marginTop: 20 }} color={colors.primary} />
       ) : (
         <FlatList
           data={items}
           keyExtractor={i => String(i.id)}
           renderItem={renderItem}
           contentContainerStyle={{ padding: 12 }}
-          ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20 }}>Aucune notification</Text>}
+          ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 20, color: colors.text }}>Aucune notification</Text>}
         />
       )}
     </View>
