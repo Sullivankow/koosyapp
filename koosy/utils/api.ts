@@ -318,3 +318,51 @@ export async function savePushToken(token: string | null, platform?: string) {
     body: JSON.stringify({ token, platform }),
   });
 }
+
+/* -------------------------------------------------------------------------- */
+/*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
+/*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Récupère le nombre de notifications non lues pour l'utilisateur connecté.
+ * Retourne un objet { unread: number }.
+ */
+export async function getNotificationsUnreadCount(): Promise<{ unread: number }> {
+  return apiFetch('/notifications/unread-count');
+}
+
+/**
+ * Récupère la liste paginée des notifications pour l'utilisateur connecté.
+ * page: numéro de page (1-based), limit: éléments par page.
+ * Retour attendu: { items: Notification[], total: number, page, limit }
+ */
+export async function listNotifications(page = 1, limit = 20) {
+  return apiFetch(`/notifications?page=${page}&limit=${limit}`);
+}
+
+/**
+ * Marque une notification spécifique comme lue.
+ * id: identifiant de la notification
+ * Retour: généralement { success: true, unread: number }
+ */
+export async function markNotificationRead(id: number) {
+  return apiFetch(`/notifications/${id}/mark-read`, { method: 'POST' });
+}
+
+/**
+ * Marque toutes les notifications de l'utilisateur comme lues.
+ * Retour: { success: true, unread: 0 } ou similar
+ */
+export async function markAllNotificationsRead() {
+  return apiFetch('/notifications/mark-all-read', { method: 'POST' });
+}
+
+/**
+ * Endpoint admin/test pour créer et envoyer une notification à un utilisateur.
+ * payload: { userId, title, body, data? }
+ * ATTENTION: endpoint protégé par JWT, en prod restreindre aux admins.
+ */
+export async function adminSendNotification(payload: { userId: number; title: string; body?: string; data?: any }) {
+  return apiFetch('/notifications/admin/send', { method: 'POST', body: JSON.stringify(payload) });
+}

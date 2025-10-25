@@ -1,5 +1,6 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './screens/Homescreen';
 
 import BiensScreen from './screens/BiensScreen';
@@ -19,10 +20,26 @@ import { BienCountProvider } from './contexts/BienCountContext';
 import { TacheProvider } from './contexts/TacheContext';
 import { TacheCountProvider } from './contexts/TacheCountContext';
 import { ReservationRefreshProvider } from './contexts/ReservationRefreshContext';
+import { NotificationCountProvider } from './contexts/NotificationCountContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import ParametresStack from './screens/navigation/ParametresStack';
+import NotificationScreen from './screens/NotificationScreen';
 
 const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
+const HomeStack = createStackNavigator();
+
+// Composant Stack dédié à l'écran Accueil + notifications afin de garder la TabBar
+function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
+  return (
+    <HomeStack.Navigator screenOptions={{ headerShown: false }}>
+      <HomeStack.Screen name="HomeMain">
+        {() => <HomeScreen onLogout={onLogout} />}
+      </HomeStack.Screen>
+      <HomeStack.Screen name="NotificationsScreen" component={NotificationScreen} />
+    </HomeStack.Navigator>
+  );
+}
 
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
@@ -103,8 +120,19 @@ export default function App() {
         <TacheProvider>
           <TacheCountProvider>
             <ReservationRefreshProvider>
-              <NavigationContainer>
-                <Tab.Navigator
+              <NotificationCountProvider>
+                <NavigationContainer>
+                {/*
+                  On utilise une stack racine qui contient les onglets (Tab.Navigator)
+                  et l'écran de notifications. Plutôt que d'enregistrer
+                  `NotificationScreen` comme un onglet caché (qui laissait un trou),
+                  on l'enregistre dans la Stack pour qu'elle ne prenne pas de place
+                  dans la tabBar.
+                */}
+                <Stack.Navigator screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="MainTabs">
+                    {() => (
+                      <Tab.Navigator
                   screenOptions={({ route }) => ({
                     tabBarIcon: ({ color, size }) => {
                       switch (route.name) {
@@ -130,17 +158,17 @@ export default function App() {
                     headerStyle: { height: 48 }, // paddingTop supprimé
                     headerTitleStyle: { fontSize: 20, fontWeight: 'bold' },
                   })}
-                >
-                  <Tab.Screen name="Accueil">
-                    {() => (
-                      <HomeScreen
-                        onLogout={async () => {
-                          await clearSession();
-                          setIsLoggedIn(false);
-                        }}
-                      />
-                    )}
-                  </Tab.Screen>
+                      >
+                              <Tab.Screen name="Accueil">
+                                {() => (
+                                  <HomeStackScreen
+                                    onLogout={async () => {
+                                      await clearSession();
+                                      setIsLoggedIn(false);
+                                    }}
+                                  />
+                                )}
+                              </Tab.Screen>
                   <Tab.Screen name="Biens" component={BiensScreen} />
                   <Tab.Screen name="Tâches" component={TachesScreen} />
                   <Tab.Screen name="Réserv." component={CalendrierScreen}
@@ -151,8 +179,8 @@ export default function App() {
                       tabBarLabel: 'Réserv.'
                     }}
                   />
-                  <Tab.Screen name="Carte" component={CarteScreen} />
-                  <Tab.Screen name="Param." component={ParametresStack}
+        <Tab.Screen name="Carte" component={CarteScreen} />
+        <Tab.Screen name="Param." component={ParametresStack}
                     options={{
                       tabBarIcon: ({ color, size }) => (
                         <MaterialCommunityIcons name="cog" size={size} color={color} />
@@ -160,9 +188,14 @@ export default function App() {
                       tabBarLabel: 'Param.'
                     }}
                   />
-
-                </Tab.Navigator>
-              </NavigationContainer>
+                      </Tab.Navigator>
+                    )}
+                  </Stack.Screen>
+                  {/* écran accessible via navigation.navigate('NotificationsScreen') */}
+                  <Stack.Screen name="NotificationsScreen" component={NotificationScreen} />
+                </Stack.Navigator>
+                </NavigationContainer>
+              </NotificationCountProvider>
             </ReservationRefreshProvider>
           </TacheCountProvider>
         </TacheProvider>

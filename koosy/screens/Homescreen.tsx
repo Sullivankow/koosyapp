@@ -5,6 +5,7 @@ import { clearSession } from '../utils/session';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import NotificationBell from '../components/NotificationBell';
 import { getReservationsCount } from '../utils/api';
 import { useBienCount } from '../contexts/BienCountContext';
 import { useTacheCount } from '../contexts/TacheCountContext';
@@ -26,7 +27,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const { lastTacheAdded } = useTache();
     const { colors, isDarkMode, toggleTheme } = useTheme();
     const navigation = useNavigation();
-    const [notifVisible, setNotifVisible] = useState(false);
     const [userName, setUserName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
     const { biensCount, refreshBiensCount, lastBienAdded, signalBienAdded } = useBienCount();
@@ -155,9 +155,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
 
                 {/* Actions rapides en haut */}
                 <View style={styles.topActions}>
-                    <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.accent }]} onPress={() => setNotifVisible(true)}>
-                        <MaterialCommunityIcons name="bell-outline" size={28} color={colors.surface} />
-                    </TouchableOpacity>
+                    <NotificationBell style={[styles.iconBtn, { backgroundColor: colors.accent }]} size={28} color={colors.surface} />
                     <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.secondary }]} onPress={toggleTheme}>
                         <MaterialCommunityIcons name={isDarkMode ? 'weather-sunny' : 'weather-night'} size={28} color={colors.surface} />
                     </TouchableOpacity>
@@ -223,30 +221,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                     </View>
                 </View>
             </ScrollView>
-            {/* Modal notifications façon Facebook */}
-            <Modal
-                visible={notifVisible}
-                animationType="slide"
-                transparent={true}
-                onRequestClose={() => setNotifVisible(false)}
-            >
-                <View style={styles.modalOverlay}>
-                    <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
-                        <Text style={[styles.notificationsTitle, { color: colors.primary }]}>Notifications</Text>
-                        <View style={styles.notificationRow}>
-                            <MaterialCommunityIcons name="cash" size={18} color={colors.success || 'green'} style={{ marginRight: 4 }} />
-                            <Text style={[styles.notificationItem, { color: colors.text }]}>Paiement reçu pour le bien #2</Text>
-                        </View>
-                        <View style={styles.notificationRow}>
-                            <MaterialCommunityIcons name="wrench" size={18} color={colors.accent} style={{ marginRight: 4 }} />
-                            <Text style={[styles.notificationItem, { color: colors.text }]}>Intervention prévue demain</Text>
-                        </View>
-                        <TouchableOpacity style={styles.closeBtn} onPress={() => setNotifVisible(false)}>
-                            <Text style={{ color: colors.error, fontWeight: 'bold' }}>Fermer</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
-            </Modal>
+            {/* Modales gérées séparément (AddBien/AddTaches/AddReservations) — modale de notifications statique supprimée */}
         {/* Modal d'ajout de bien */}
         <AddBienModal
             visible={addBienModalVisible}
@@ -384,39 +359,7 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         textAlign: 'center',
     },
-    notificationsTitle: {
-        fontSize: 15,
-        fontWeight: 'bold',
-        marginBottom: 5,
-    },
-    notificationRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        marginBottom: 4,
-    },
-    notificationItem: {
-        fontSize: 14,
-    },
-    modalOverlay: {
-        flex: 1,
-        backgroundColor: 'rgba(0,0,0,0.3)',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    modalContent: {
-        width: '85%',
-        borderRadius: 16,
-        padding: 24,
-        elevation: 5,
-        alignItems: 'center',
-    },
-    closeBtn: {
-        marginTop: 18,
-        paddingVertical: 8,
-        paddingHorizontal: 24,
-        borderRadius: 8,
-        backgroundColor: '#eee',
-    },
+    /* styles pour la modale de notifications supprimés - modales restantes utilisent leurs propres styles */
 });
 
 export default HomeScreen;
