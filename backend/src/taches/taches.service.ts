@@ -114,33 +114,42 @@ async countTachesAFaireTotal(userId: number): Promise<number> {
 
 
 //Méthode pour envoyer une notification push via Expo
-async sendExpoPushNotification(token: string, title: string, body: string) {
-    const fetch = (await import('node-fetch')).default;
+async sendExpoPushNotification(
+  token: string,
+  title: string,
+  body: string,
+  options?: { data?: any; badge?: number; sound?: string },
+) {
+  const fetch = (await import('node-fetch')).default;
+  try {
+    const payload: any = {
+      to: token,
+      title,
+      body,
+      sound: options?.sound ?? 'default',
+    };
+    if (options?.data) payload.data = options.data;
+    if (typeof options?.badge === 'number') payload.badge = options.badge;
+
+    const res = await fetch('https://exp.host/--/api/v2/push/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const text = await res.text();
+    let json;
     try {
-      const res = await fetch('https://exp.host/--/api/v2/push/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          to: token,
-          title,
-          body,
-          sound: 'default',
-        }),
-      });
-      const text = await res.text();
-      let json;
-      try {
-        json = text ? JSON.parse(text) : null;
-      } catch (e) {
-        json = { raw: text };
-      }
-      // return structured result for caller
-      return { ok: res.ok, status: res.status, body: json };
-    } catch (err) {
-      // bubble up error with some context
-      console.error('sendExpoPushNotification error:', err);
-      return { ok: false, error: String(err) };
+      json = text ? JSON.parse(text) : null;
+    } catch (e) {
+      json = { raw: text };
     }
+    // return structured result for caller
+    return { ok: res.ok, status: res.status, body: json };
+  } catch (err) {
+    // bubble up error with some context
+    console.error('sendExpoPushNotification error:', err);
+    return { ok: false, error: String(err) };
+  }
 }
 
 async envoyerRappelsTachesPourDemain() {
