@@ -359,6 +359,14 @@ export async function markAllNotificationsRead() {
 }
 
 /**
+ * Supprime une notification par son id pour l'utilisateur connecté.
+ * Retour attendu: { success: true, unread: number }
+ */
+export async function deleteNotification(id: number) {
+  return apiFetch(`/notifications/${id}`, { method: 'DELETE' });
+}
+
+/**
  * Endpoint admin/test pour créer et envoyer une notification à un utilisateur.
  * payload: { userId, title, body, data? }
  * ATTENTION: endpoint protégé par JWT, en prod restreindre aux admins.

@@ -91,6 +91,26 @@ export class NotificationsController {
     }
   }
 
+  @Delete(':id')
+  @ApiParam({ name: 'id', required: true, description: 'ID de la notification à supprimer' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  async deleteNotification(@Request() req, @Param('id') idParam: string) {
+    const userId = req.user?.userId;
+    if (!userId) throw new BadRequestException('User not authenticated');
+    const id = Number(idParam);
+    if (Number.isNaN(id)) throw new BadRequestException('Invalid notification id');
+    try {
+      const result = await this.notificationsService.delete(Number(userId), id);
+      if (!result.deleted) throw new BadRequestException('Notification not found or not owned by user');
+      return { success: true, unread: result.unread };
+    } catch (err) {
+      console.error('[notifications.controller] deleteNotification error', err);
+      throw new BadRequestException('Could not delete notification');
+    }
+  }
+
   // Sauvegarder le token de push notification d'un utilisateur
   @Post('me/push-token')
   @ApiBearerAuth()

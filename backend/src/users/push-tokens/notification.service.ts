@@ -102,4 +102,13 @@ export class NotificationsService {
     await this.repo.update({ user: { id: userId } as any, read: false }, { read: true });
     return this.getUnreadCount(userId);
   }
+
+  // Supprime une notification si elle appartient à l'utilisateur
+  async delete(userId: number, id: number) {
+    const res = await this.repo.delete({ id, user: { id: userId } as any });
+    // res.affected indique combien d'enregistrements supprimés
+    const deleted = !!res.affected;
+    const unread = await this.getUnreadCount(userId);
+    return { deleted, unread };
+  }
 }
