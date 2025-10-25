@@ -12,6 +12,7 @@ import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
 import WelcomeScreen from './screens/WelcomeScreen';
 import React, { useState, useEffect } from 'react';
+import { useTheme } from './contexts/ThemeContext';
 import { getSession, saveSession, clearSession, generateToken } from './utils/session';
 import { initDefaultUsers } from './utils/users';
 import { View, Text, Button } from 'react-native';
@@ -131,65 +132,73 @@ export default function App() {
                 */}
                 <Stack.Navigator screenOptions={{ headerShown: false }}>
                   <Stack.Screen name="MainTabs">
-                    {() => (
-                      <Tab.Navigator
-                  screenOptions={({ route }) => ({
-                    tabBarIcon: ({ color, size }) => {
-                      switch (route.name) {
-                        case 'Accueil':
-                          return <MaterialCommunityIcons name="home" size={size} color={color} />;
-                        case 'Biens':
-                          return <FontAwesome5 name="building" size={size} color={color} />;
-                        case 'Tâches':
-                          return <MaterialCommunityIcons name="clipboard-list" size={size} color={color} />;
-                        case 'Calendrier':
-                          return <MaterialCommunityIcons name="calendar" size={size} color={color} />;
-                        case 'Carte':
-                          return <MaterialCommunityIcons name="map-marker" size={size} color={color} />;
-                        case 'Locataire':
-                          return <FontAwesome5 name="users" size={size} color={color} />;
-                        default:
-                          return null;
-                      }
-                    },
-                    tabBarActiveTintColor: '#009688',
-                    tabBarInactiveTintColor: '#6E7B8B',
-                    headerTitleAlign: 'center',
-                    headerStyle: { height: 48 }, // paddingTop supprimé
-                    headerTitleStyle: { fontSize: 20, fontWeight: 'bold' },
-                  })}
-                      >
-                              <Tab.Screen name="Accueil">
-                                {() => (
-                                  <HomeStackScreen
-                                    onLogout={async () => {
-                                      await clearSession();
-                                      setIsLoggedIn(false);
-                                    }}
-                                  />
-                                )}
-                              </Tab.Screen>
-                  <Tab.Screen name="Biens" component={BiensScreen} />
-                  <Tab.Screen name="Tâches" component={TachesScreen} />
-                  <Tab.Screen name="Réserv." component={CalendrierScreen}
-                    options={{
-                      tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
-                      ),
-                      tabBarLabel: 'Réserv.'
+                    {() => {
+                      // Tab navigator wrapped in a component that can use the ThemeContext
+                      const TabNav: React.FC = () => {
+                        const { colors } = useTheme();
+                        return (
+                          <Tab.Navigator
+                            screenOptions={({ route }) => ({
+                              tabBarIcon: ({ color, size }) => {
+                                switch (route.name) {
+                                  case 'Accueil':
+                                    return <MaterialCommunityIcons name="home" size={size} color={color} />;
+                                  case 'Biens':
+                                    return <FontAwesome5 name="building" size={size} color={color} />;
+                                  case 'Tâches':
+                                    return <MaterialCommunityIcons name="clipboard-list" size={size} color={color} />;
+                                  case 'Calendrier':
+                                    return <MaterialCommunityIcons name="calendar" size={size} color={color} />;
+                                  case 'Carte':
+                                    return <MaterialCommunityIcons name="map-marker" size={size} color={color} />;
+                                  case 'Locataire':
+                                    return <FontAwesome5 name="users" size={size} color={color} />;
+                                  default:
+                                    return null;
+                                }
+                              },
+                              tabBarActiveTintColor: colors.primary,
+                              tabBarInactiveTintColor: colors.textSecondary,
+                              tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+                              headerTitleAlign: 'center',
+                              headerStyle: { height: 48, backgroundColor: colors.surface },
+                              headerTitleStyle: { fontSize: 20, fontWeight: 'bold', color: colors.text },
+                            })}
+                          >
+                            <Tab.Screen name="Accueil">
+                              {() => (
+                                <HomeStackScreen
+                                  onLogout={async () => {
+                                    await clearSession();
+                                    setIsLoggedIn(false);
+                                  }}
+                                />
+                              )}
+                            </Tab.Screen>
+                            <Tab.Screen name="Biens" component={BiensScreen} />
+                            <Tab.Screen name="Tâches" component={TachesScreen} />
+                            <Tab.Screen name="Réserv." component={CalendrierScreen}
+                              options={{
+                                tabBarIcon: ({ color, size }) => (
+                                  <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
+                                ),
+                                tabBarLabel: 'Réserv.'
+                              }}
+                            />
+                            <Tab.Screen name="Carte" component={CarteScreen} />
+                            <Tab.Screen name="Param." component={ParametresStack}
+                              options={{
+                                tabBarIcon: ({ color, size }) => (
+                                  <MaterialCommunityIcons name="cog" size={size} color={color} />
+                                ),
+                                tabBarLabel: 'Param.'
+                              }}
+                            />
+                          </Tab.Navigator>
+                        );
+                      };
+                      return <TabNav />;
                     }}
-                  />
-        <Tab.Screen name="Carte" component={CarteScreen} />
-        <Tab.Screen name="Param." component={ParametresStack}
-                    options={{
-                      tabBarIcon: ({ color, size }) => (
-                        <MaterialCommunityIcons name="cog" size={size} color={color} />
-                      ),
-                      tabBarLabel: 'Param.'
-                    }}
-                  />
-                      </Tab.Navigator>
-                    )}
                   </Stack.Screen>
                   {/* écran accessible via navigation.navigate('NotificationsScreen') */}
                   <Stack.Screen name="NotificationsScreen" component={NotificationScreen} />
