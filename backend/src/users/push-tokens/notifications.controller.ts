@@ -1,9 +1,10 @@
-import { Controller, Post, UseGuards, Request, Body, Get, Delete, BadRequestException } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Body, Get, Delete, BadRequestException, Param, Query, NotFoundException, HttpCode } from '@nestjs/common';
 import { TachesService } from '../../taches/taches.service';
-import { ApiBearerAuth, ApiBody, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags, ApiQuery, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PushTokensService } from './push-tokens.service';
 import { UsersService } from '../users.service';
+import { NotificationsService } from './notification.service';
 
 @ApiTags('Notifications')
 @Controller('notifications')
@@ -12,12 +13,82 @@ export class NotificationsController {
     private readonly tachesService: TachesService,
     private readonly usersService: UsersService,
     private readonly pushTokensService: PushTokensService,
+    private readonly notificationsService: NotificationsService,
   ) {}
 
   @UseGuards(JwtAuthGuard)
   @Post('rappel-taches')
   async lancerRappelTaches() {
     return this.tachesService.envoyerRappelsTachesPourDemain();
+  }
+
+  // --- Notifications API: unread count, list, mark-read, mark-all-read ---
+  @Get('unread-count')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getUnreadCount(@Request() req) {
+    const userId = req.user?.userId;
+    if (!userId) throw new BadRequestException('User not authenticated');
+    try {
+      const unread = await this.notificationsService.getUnreadCount(Number(userId));
+      return { unread };
+    } catch (err) {
+      console.error('[notifications.controller] getUnreadCount error', err);
+      throw new BadRequestException('Could not fetch unread count');
+    }
+  }
+
+  @Get()
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiQuery({ name: 'page', required: false, type: 'number', example: 1 })
+  @ApiQuery({ name: 'limit', required: false, type: 'number', example: 20 })
+  async listNotifications(@Request() req, @Query('page') page = '1', @Query('limit') limit = '20') {
+    const userId = req.user?.userId;
+    if (!userId) throw new BadRequestException('User not authenticated');
+    const p = Math.max(1, parseInt(String(page), 10) || 1);
+    const l = Math.max(1, Math.min(100, parseInt(String(limit), 10) || 20));
+    try {
+      return this.notificationsService.list(Number(userId), p, l);
+    } catch (err) {
+      console.error('[notifications.controller] listNotifications error', err);
+      throw new BadRequestException('Could not list notifications');
+    }
+  }
+
+  @Post(':id/mark-read')
+  @ApiParam({ name: 'id', required: true, description: 'ID de la notification' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  async markRead(@Request() req, @Param('id') idParam: string) {
+    const userId = req.user?.userId;
+    if (!userId) throw new BadRequestException('User not authenticated');
+    const id = Number(idParam);
+    if (Number.isNaN(id)) throw new BadRequestException('Invalid notification id');
+    try {
+      const unread = await this.notificationsService.markRead(Number(userId), id);
+      return { success: true, unread };
+    } catch (err) {
+      console.error('[notifications.controller] markRead error', err);
+      throw new NotFoundException('Notification not found or not owned by user');
+    }
+  }
+
+  @Post('mark-all-read')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(200)
+  async markAllRead(@Request() req) {
+    const userId = req.user?.userId;
+    if (!userId) throw new BadRequestException('User not authenticated');
+    try {
+      const unread = await this.notificationsService.markAllRead(Number(userId));
+      return { success: true, unread };
+    } catch (err) {
+      console.error('[notifications.controller] markAllRead error', err);
+      throw new BadRequestException('Could not mark notifications as read');
+    }
   }
 
   // Sauvegarder le token de push notification d'un utilisateur
@@ -85,6 +156,32 @@ export class NotificationsController {
     const res = await this.tachesService.sendExpoPushNotification(user.expoPushToken, 'Test Koosy', `Notification test pour ${user.email}`);
     console.log('[notifications.controller] testPush expo response:', res);
     return res;
+  }
+
+  // Admin / test: envoyer une notification à un utilisateur (permet de tester via Swagger)
+  @Post('admin/send')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiBody({ schema: {
+      type: 'object',
+      properties: {
+        userId: { type: 'number', example: 1 },
+        title: { type: 'string', example: 'Rappel de tâche' },
+        body: { type: 'string', example: 'Ta tâche est due demain' },
+        data: { type: 'object', nullable: true },
+      },
+    },
+  })
+  async adminSend(@Request() req, @Body() body: { userId: number; title: string; body: string; data?: any }) {
+    // note: this endpoint is protected by JWT but not role-checked; use for testing
+    if (!body || !body.userId || !body.title) throw new BadRequestException('userId and title required');
+    try {
+      const result = await this.notificationsService.createAndSend(Number(body.userId), body.title, body.body || '', body.data || {});
+      return { ok: true, result };
+    } catch (err) {
+      console.error('[notifications.controller] adminSend error', err);
+      throw new BadRequestException('Could not send notification');
+    }
   }
 
   // Liste les push tokens pour l'utilisateur connecté

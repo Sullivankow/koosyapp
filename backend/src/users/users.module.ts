@@ -5,6 +5,7 @@ import { User } from './user.entity';
 import { UserPushToken } from './push-tokens/user-push-token.entity';
 import { Notification } from './push-tokens/notifications.entity';
 import { PushTokensService } from './push-tokens/push-tokens.service';
+import { NotificationsService } from './push-tokens/notification.service';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { NotificationsController } from './push-tokens/notifications.controller';
@@ -12,8 +13,8 @@ import { TachesModule } from '../taches/taches.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, UserPushToken, Notification]), TachesModule],
-  providers: [UsersService, PushTokensService],
+  providers: [UsersService, PushTokensService, NotificationsService],
   controllers: [UsersController, NotificationsController],
-   exports: [UsersService, PushTokensService],
+   exports: [UsersService, PushTokensService, NotificationsService],
 })
 export class UsersModule {}
