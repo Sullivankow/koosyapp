@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { useNotificationCount } from '../contexts/NotificationCountContext';
 
@@ -10,7 +10,7 @@ type Props = {
 	style?: any;
 };
 
-export default function NotificationBell({ size = 26, color = '#000', style }: Props) {
+export default function NotificationBell({ size = 28, color = '#000', style }: Props) {
 	const navigation = useNavigation();
 	const { unread } = useNotificationCount();
 
@@ -22,7 +22,7 @@ export default function NotificationBell({ size = 26, color = '#000', style }: P
 
 	return (
 		<TouchableOpacity onPress={onPress} style={[styles.wrapper, style]}>
-			<MaterialIcons name="notifications-none" size={size} color={color} />
+			<MaterialCommunityIcons name="bell-outline" size={size} color={color} />
 			{unread > 0 && (
 				<View style={styles.badge}>
 					<Text style={styles.badgeText}>{unread > 99 ? '99+' : unread}</Text>

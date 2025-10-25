@@ -155,12 +155,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
 
                 {/* Actions rapides en haut */}
                 <View style={styles.topActions}>
-                    <NotificationBell style={[styles.iconBtn, { backgroundColor: colors.accent }]} size={28} color={colors.surface} />
+                    <NotificationBell style={[styles.iconBtn, { backgroundColor: colors.accent }]} size={30} color={colors.surface} />
                     <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.secondary }]} onPress={toggleTheme}>
-                        <MaterialCommunityIcons name={isDarkMode ? 'weather-sunny' : 'weather-night'} size={28} color={colors.surface} />
+                        <MaterialCommunityIcons name={isDarkMode ? 'weather-sunny' : 'weather-night'} size={22} color={colors.surface} />
                     </TouchableOpacity>
                     <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.error }]} onPress={handleLogout}>
-                        <MaterialCommunityIcons name="logout" size={28} color={colors.surface} />
+                        <MaterialCommunityIcons name="logout" size={22} color={colors.surface} />
                     </TouchableOpacity>
                 </View>
 
