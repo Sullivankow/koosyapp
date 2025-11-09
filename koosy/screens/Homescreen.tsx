@@ -289,7 +289,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                         <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.success || '#4CAF50' }]}>
                             <View style={styles.centerContent}>
                                 <FontAwesome5 name="user-plus" size={22} color={colors.surface} style={styles.icon} />
-                                <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un locataire</Text>
+                                <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une prestation</Text>
                             </View>
                         </TouchableOpacity>
                     </View>

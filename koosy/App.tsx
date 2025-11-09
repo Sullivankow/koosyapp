@@ -7,6 +7,7 @@ import BiensScreen from './screens/BiensScreen';
 import TachesScreen from './screens/TachesScreen';
 import CalendrierScreen from './screens/CalendrierScreen';
 import CarteScreen from './screens/CarteScreen';
+import PrestationsScreen from './screens/PrestationsScreen';
 import SplashScreen from './components/SplashScreen';
 import LoginScreen from './screens/LoginScreen';
 import SignupScreen from './screens/SignupScreen';
@@ -151,6 +152,8 @@ export default function App() {
                                     return <MaterialCommunityIcons name="calendar" size={size} color={color} />;
                                   case 'Carte':
                                     return <MaterialCommunityIcons name="map-marker" size={size} color={color} />;
+                                  case 'Prestations':
+                                    return <FontAwesome5 name="briefcase" size={size} color={color} />;
                                   case 'Locataire':
                                     return <FontAwesome5 name="users" size={size} color={color} />;
                                   default:
@@ -185,7 +188,7 @@ export default function App() {
                                 tabBarLabel: 'Réserv.'
                               }}
                             />
-                            <Tab.Screen name="Carte" component={CarteScreen} />
+                            <Tab.Screen name="Prestations" component={PrestationsScreen} />
                             <Tab.Screen name="Param." component={ParametresStack}
                               options={{
                                 tabBarIcon: ({ color, size }) => (
@@ -202,6 +205,8 @@ export default function App() {
                   </Stack.Screen>
                   {/* écran accessible via navigation.navigate('NotificationsScreen') */}
                   <Stack.Screen name="NotificationsScreen" component={NotificationScreen} />
+                  {/* Garder la page Carte accessible via navigation.navigate('Carte') mais la retirer de la tabBar */}
+                  <Stack.Screen name="Carte" component={CarteScreen} />
                 </Stack.Navigator>
                 </NavigationContainer>
               </NotificationCountProvider>

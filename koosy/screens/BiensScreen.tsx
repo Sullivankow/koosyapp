@@ -222,10 +222,6 @@ const BiensScreen: React.FC = () => {
       // erreur suppression bien
     }
   };
-  const handleVoirMap = (bien: Bien) => {
-    // navigate to the Carte tab and ask it to focus this bien
-    navigation.navigate('Carte', { focusBienId: bien.id });
-  };
   const handlePhotoPress = (photo: any) => { setSelectedPhoto(photo); setPhotoModalVisible(true); };
 
   // Carrousel photos
@@ -395,9 +391,7 @@ const BiensScreen: React.FC = () => {
                   <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={() => handleSupprimerBien(item.id)}>
                     <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
                   </TouchableOpacity>
-                  <TouchableOpacity style={[styles.fab, { backgroundColor: colors.accent }]} onPress={() => handleVoirMap(item)}>
-                    <MaterialCommunityIcons name="map-marker" size={20} color={colors.surface} />
-                  </TouchableOpacity>
+                  {/* map icon removed as requested */}
                 </>
             </View>
           </View>
