@@ -93,11 +93,7 @@ async getTachesRappelPourDemain(): Promise<Tache[]> {
     .andWhere('t.statut != :termine', { termine: TacheStatut.TERMINEE })
     .orderBy('t.id', 'ASC');
 
-  // Log temporaire pour debug (supprimer en production)
-  console.log('[taches.service] getTachesRappelPourDemain dateISO=', dateISO, 'dateFrench=', dateFrench);
-
   const results = await qb.getMany();
-  console.log('[taches.service] getTachesRappelPourDemain found=', results.length);
   return results;
 }
 

@@ -253,6 +253,11 @@ export class NotificationsController {
   async adminSend(@Request() req, @Body() body: { userId: number; title: string; body: string; data?: any }) {
     // note: this endpoint is protected by JWT but not role-checked; use for testing
     if (!body || !body.userId || !body.title) throw new BadRequestException('userId and title required');
+    // validation: s'assurer que l'utilisateur existe pour éviter une erreur de contrainte FK
+    const targetUser = await this.usersService.findOne(Number(body.userId)).catch(() => null);
+    if (!targetUser) {
+      throw new BadRequestException(`User with id ${body.userId} not found`);
+    }
     try {
       const result = await this.notificationsService.createAndSend(Number(body.userId), body.title, body.body || '', body.data || {});
       return { ok: true, result };
