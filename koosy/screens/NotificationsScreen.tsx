@@ -1,19 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Switch, TouchableOpacity, ScrollView, Alert, Linking } from 'react-native';
+import { View, Text, StyleSheet, Switch, ScrollView, Alert, Linking } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { savePushToken, updateUserSettings } from '../utils/api';
 
-type PrefsKeys = keyof Omit<typeof initialPrefs, 'freq'>;
+type PrefsKeys = keyof typeof initialPrefs;
 const initialPrefs = {
     push: true,
-    email: false,
     event: true,
-    tache: true,
-    securite: false,
-    freq: 'immediat',
 };
 interface NotificationType {
     key: PrefsKeys;
@@ -23,17 +19,11 @@ interface NotificationType {
 }
 const notificationTypes: NotificationType[] = [
     { key: 'push', label: 'Notifications push', icon: 'bell-ring', desc: 'Recevoir des alertes sur le téléphone.' },
-    { key: 'email', label: 'Notifications email', icon: 'email', desc: 'Recevoir des notifications par email.' },
     { key: 'event', label: 'Événements', icon: 'calendar-check', desc: 'Nouvelle réservation, arrivée, départ.' },
-    { key: 'tache', label: 'Tâches', icon: 'clipboard-list', desc: 'Tâche à faire ou en retard.' },
-    { key: 'securite', label: 'Sécurité', icon: 'shield-lock', desc: 'Modification du profil ou sécurité.' },
+    // Tâches et Sécurité retirées temporairement
 ];
 
-const frequencies = [
-    { key: 'immediat', label: 'Immédiat' },
-    { key: 'quotidien', label: 'Quotidien' },
-    { key: 'hebdo', label: 'Hebdomadaire' },
-];
+// éléments retirés temporairement pour simplifier l'écran
 
 const NotificationsScreen: React.FC = () => {
     const { colors } = useTheme();
@@ -106,12 +96,7 @@ const NotificationsScreen: React.FC = () => {
                         }
         }
     };
-    const handleFreq = (key: string) => setPrefs({ ...prefs, freq: key });
-
-    const handleSave = () => {
-        // Appel API ou stockage local
-        alert('Préférences enregistrées !');
-    };
+    // fréquence retirée — gestion désactivée pour l'instant
 
     return (
         <ScrollView style={[styles.container, { backgroundColor: colors.background }]}
@@ -134,18 +119,8 @@ const NotificationsScreen: React.FC = () => {
                     />
                 </View>
             ))}
-            <Text style={[styles.subtitle, { color: colors.primary }]}>Fréquence des notifications</Text>
-            <View style={styles.freqRow}>
-                {frequencies.map(f => (
-                    <TouchableOpacity key={f.key} style={[styles.freqBtn, { backgroundColor: prefs.freq === f.key ? colors.primary : colors.surface }]} onPress={() => handleFreq(f.key)}>
-                        <Text style={{ color: prefs.freq === f.key ? colors.surface : colors.text, fontWeight: 'bold' }}>{f.label}</Text>
-                    </TouchableOpacity>
-                ))}
-            </View>
-            <TouchableOpacity style={[styles.saveBtn, { backgroundColor: colors.primary }]} onPress={handleSave}>
-                <MaterialCommunityIcons name="content-save" size={20} color={colors.surface} />
-                <Text style={[styles.saveText, { color: colors.surface }]}>Enregistrer</Text>
-            </TouchableOpacity>
+            {/* Fréquence des notifications retirée temporairement */}
+          
             {/* Debug token and manual test button removed */}
         </ScrollView>
     );
@@ -177,38 +152,8 @@ const styles = StyleSheet.create({
         fontSize: 13,
         color: '#888',
     },
-    subtitle: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        marginTop: 18,
-        marginBottom: 8,
-    },
-    freqRow: {
-        flexDirection: 'row',
-        justifyContent: 'center',
-        marginBottom: 18,
-    },
-    freqBtn: {
-        paddingVertical: 8,
-        paddingHorizontal: 18,
-        borderRadius: 8,
-        marginHorizontal: 4,
-        elevation: 2,
-    },
-    saveBtn: {
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 14,
-        borderRadius: 12,
-        marginTop: 10,
-        elevation: 2,
-    },
-    saveText: {
-        marginLeft: 8,
-        fontSize: 16,
-        fontWeight: 'bold',
-    },
+    // subtitle style removed as it's unused
+    // styles pour la fréquence et le bouton de sauvegarde retirés
 });
 
 export default NotificationsScreen;
