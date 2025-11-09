@@ -30,6 +30,19 @@ export class User {
 @Column({ type: 'text', nullable: true })
 expoPushToken: string | null;
 
+  /**
+   * Paramètres utilisateur génériques (JSONB recommandé en production).
+   *
+   * Exemple: { "eventsEnabled": true, "notifFreq": "quotidien" }
+   *
+   * Remarques:
+   * - Nous utilisons `type: 'json'` côté TypeORM; en Postgres la colonne sera
+   *   stockée sous forme JSONB si vous exécutez la migration correspondante.
+   * - Ce champ est nullable pour compatibilité avec les lignes existantes.
+   */
+  @Column({ type: 'json', nullable: true })
+  settings: any;
+
 //Relation avec les biens
 @OneToMany(() => Bien, bien => bien.conciergerie)
 biens: Bien[];

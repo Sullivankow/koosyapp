@@ -102,5 +102,23 @@ async savePushToken(userId: number, token: string | null, platform?: string): Pr
   return saved;
 }
 
+  /**
+   * Met à jour partiellement les préférences (settings) de l'utilisateur.
+   * Le patch est fusionné avec l'objet existant pour éviter d'écraser d'autres clés.
+   *
+   * @param userId id de l'utilisateur connecté
+   * @param patch objet partiel contenant les clés à mettre à jour
+   * @returns l'objet settings fusionné
+   */
+  async updateSettings(userId: number, patch: Record<string, any>): Promise<any> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('Utilisateur non trouvé');
+    const current = (user as any).settings || {};
+    const merged = { ...current, ...(patch || {}) };
+    (user as any).settings = merged;
+    await this.usersRepository.save(user);
+    return { settings: merged };
+  }
+
 
 }

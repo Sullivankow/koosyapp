@@ -1,11 +1,12 @@
-import { ApiBearerAuth, ApiTags, ApiBody } from '@nestjs/swagger';
-import { Controller, Post, Body, Get, Patch, Delete, Param, ForbiddenException, Request, BadRequestException } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags, ApiBody, ApiOperation } from '@nestjs/swagger';
+import { Controller, Post, Body, Get, Patch, Delete, Param, ForbiddenException, Request, BadRequestException, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { TachesService } from '../taches/taches.service';
 import { PushTokensService } from './push-tokens/push-tokens.service';
 import { CreateUserDto, UpdateUserDto } from './create-user.dto';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { SettingsDto } from './settings.dto';
 
 
 @ApiTags('Utilisateur (Conciergerie)')
@@ -57,6 +58,21 @@ async remove(@Param('id') id: number, @Request() req) {
   }
   return this.userService.remove(Number(id));
 }
+
+
+  /**
+   * Endpoint pour mettre à jour partiellement les preferences utilisateur.
+   * Reçoit { settings: { ... } } et fusionne côté serveur.
+   */
+  @Put('me/settings')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Mettre à jour les préférences utilisateur (merge-safe)' })
+  async updateMySettings(@Request() req, @Body() settingsDto: SettingsDto) {
+    const userId = req.user?.userId;
+    if (!userId) throw new ForbiddenException('Utilisateur non authentifié');
+    return this.userService.updateSettings(userId, settingsDto.settings || {});
+  }
 
   
 

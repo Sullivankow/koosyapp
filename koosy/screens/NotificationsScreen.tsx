@@ -4,7 +4,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
-import { savePushToken } from '../utils/api';
+import { savePushToken, updateUserSettings } from '../utils/api';
 
 type PrefsKeys = keyof Omit<typeof initialPrefs, 'freq'>;
 const initialPrefs = {
@@ -83,7 +83,7 @@ const NotificationsScreen: React.FC = () => {
                         setPrefs({ ...newPrefs, push: false });
                         return;
                     }
-                    const tokenObj = await Notifications.getExpoPushTokenAsync({ projectId });
+                                const tokenObj = await Notifications.getExpoPushTokenAsync({ projectId });
                     const token = (tokenObj as any).data ?? (tokenObj as any).token ?? null;
                     await savePushToken(token);
                 } else {
@@ -94,6 +94,16 @@ const NotificationsScreen: React.FC = () => {
                 console.error('Erreur push token:', err);
                 Alert.alert('Erreur', "Impossible d'enregistrer le token de notifications.");
             }
+                    } else if (key === 'event') {
+                        // Mettre à jour la préférence côté serveur (merge-safe)
+                        try {
+                            await updateUserSettings({ eventsEnabled: !!newPrefs.event });
+                        } catch (err: any) {
+                            console.error('Erreur updateUserSettings:', err);
+                            Alert.alert('Erreur', "Impossible de sauvegarder la préférence d'événements.");
+                            // rollback visuel
+                            setPrefs(prev => ({ ...prev, event: !prev.event }));
+                        }
         }
     };
     const handleFreq = (key: string) => setPrefs({ ...prefs, freq: key });

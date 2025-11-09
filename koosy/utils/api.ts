@@ -319,6 +319,17 @@ export async function savePushToken(token: string | null, platform?: string) {
   });
 }
 
+/**
+ * Met à jour partiellement les settings de l'utilisateur (merge-safe).
+ * body attendu: { settings: { ... } }
+ */
+export async function updateUserSettings(settings: Record<string, any>) {
+  return apiFetch('/users/me/settings', {
+    method: 'PUT',
+    body: JSON.stringify({ settings }),
+  });
+}
+
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
