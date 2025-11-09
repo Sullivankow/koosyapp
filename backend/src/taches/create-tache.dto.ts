@@ -21,10 +21,10 @@ export class CreateTacheDto {
 	@IsInt()
 	bienId: number;
 
-	@ApiProperty({ example: '20/09/2025', required: false, description: 'Format JJ/MM/AAAA' })
+	@ApiProperty({ example: '2025-11-10', required: false, description: "Format de date attendu pour l'API : YYYY-MM-DD (date-only). Le format français DD/MM/YYYY est aussi accepté et converti côté serveur." })
 	@IsOptional()
 	@IsString()
-	@Matches(/^\d{2}\/\d{2}\/\d{4}$/, { message: 'La date doit être au format JJ/MM/AAAA' })
+	@Matches(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/, { message: "La date doit être au format YYYY-MM-DD ou DD/MM/YYYY" })
 	dateEcheance?: string;
 }
 
@@ -47,10 +47,10 @@ export class UpdateTacheDto {
 	@IsInt()
 	bienId: number;
 
-	@ApiProperty({ example: '20/09/2025', required: false, description: 'Format JJ/MM/AAAA' })
+	@ApiProperty({ example: '2025-11-10', required: false, description: "Format de date attendu pour l'API : YYYY-MM-DD (date-only). Le format français DD/MM/YYYY est aussi accepté et converti côté serveur." })
 	@IsOptional()
 	@IsString()
-	@Matches(/^\d{2}\/\d{2}\/\d{4}$/, { message: 'La date doit être au format JJ/MM/AAAA' })
+	@Matches(/^(\d{4}-\d{2}-\d{2}|\d{2}\/\d{2}\/\d{4})$/, { message: "La date doit être au format YYYY-MM-DD ou DD/MM/YYYY" })
 	dateEcheance?: string;
 
 

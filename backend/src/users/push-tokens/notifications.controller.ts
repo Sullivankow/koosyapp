@@ -17,9 +17,67 @@ export class NotificationsController {
   ) {}
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
   @Post('rappel-taches')
   async lancerRappelTaches() {
-    return this.tachesService.envoyerRappelsTachesPourDemain();
+    // Endpoint manuel aligné avec le scheduler : crée la notification en DB et envoie les pushes
+    try {
+      const taches = await this.tachesService.getTachesRappelPourDemain();
+      let sent = 0;
+      for (const tache of taches) {
+        const user = (tache as any).bien?.conciergerie;
+        if (!user || !user.id) continue;
+        try {
+          const exists = await this.notificationsService.existsReminderForTache(user.id, tache.id);
+          if (exists) continue;
+          const title = 'Rappel tâche — demain';
+          const body = `La tâche "${tache.titre}" est prévue demain (${tache.dateEcheance})`;
+          await this.notificationsService.createAndSend(user.id, title, body, { type: 'rappel', tacheId: tache.id });
+          sent++;
+        } catch (err) {
+          console.warn('[notifications.controller] erreur en envoyant rappel pour tache', tache.id, err);
+        }
+      }
+      return { success: true, message: `Notifications envoyées : ${sent}`, count: sent };
+    } catch (err) {
+      console.error('[notifications.controller] lancerRappelTaches error', err);
+      throw err;
+    }
+  }
+
+  // Route de debug: liste les tâches candidate au rappel avec info conciergerie et tokens push
+  @Get('debug/rappels-candidates')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  async debugRappelsCandidates(@Request() req) {
+    // calculer les mêmes dates que getTachesRappelPourDemain pour diagnostic
+    const today = new Date();
+    const demain = new Date(today);
+    demain.setDate(today.getDate() + 1);
+    const jour = String(demain.getDate()).padStart(2, '0');
+    const mois = String(demain.getMonth() + 1).padStart(2, '0');
+    const annee = demain.getFullYear();
+    const dateISO = `${annee}-${mois}-${jour}`;
+    const dateFrench = `${jour}/${mois}/${annee}`;
+
+    const taches = await this.tachesService.getTachesRappelPourDemain();
+    const items = [] as any[];
+    for (const t of taches) {
+      const bien = (t as any).bien || null;
+      const conciergerie = bien?.conciergerie || null;
+      let pushTokens = [] as any[];
+      if (conciergerie && conciergerie.id) {
+        pushTokens = await this.pushTokensService.getTokensForUser(Number(conciergerie.id));
+      }
+      items.push({
+        tache: { id: t.id, titre: t.titre, dateEcheance: t.dateEcheance, statut: t.statut },
+        bien: bien ? { id: bien.id, nom: bien.nom } : null,
+        conciergerie: conciergerie ? { id: conciergerie.id, email: conciergerie.email, expoPushToken: conciergerie.expoPushToken } : null,
+        pushTokens,
+      });
+    }
+
+    return { dateISO, dateFrench, count: items.length, items };
   }
 
   // --- Notifications API: unread count, list, mark-read, mark-all-read ---

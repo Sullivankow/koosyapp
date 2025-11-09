@@ -78,22 +78,27 @@ async getTachesRappelPourDemain(): Promise<Tache[]> {
   const demain = new Date(today);
   demain.setDate(today.getDate() + 1);
 
-  // Format JJ/MM/AAAA
+  // Préparer deux formats possibles : ISO (YYYY-MM-DD) et français (DD/MM/YYYY)
   const jour = String(demain.getDate()).padStart(2, '0');
   const mois = String(demain.getMonth() + 1).padStart(2, '0');
   const annee = demain.getFullYear();
-  const dateDemain = `${jour}/${mois}/${annee}`;
+  const dateISO = `${annee}-${mois}-${jour}`;
+  const dateFrench = `${jour}/${mois}/${annee}`;
 
-  return this.tacheRepo.find({
-    where: {
-      dateEcheance: dateDemain,
-      statut: Not(TacheStatut.TERMINEE),
-    },
-    relations: ['bien'],
-  });
+  // Utiliser QueryBuilder pour matcher soit YYYY-MM-DD soit DD/MM/YYYY (compatibilité avec données existantes)
+  const qb = this.tacheRepo.createQueryBuilder('t')
+    .leftJoinAndSelect('t.bien', 'bien')
+    .leftJoinAndSelect('bien.conciergerie', 'conciergerie')
+    .where('(t.dateEcheance = :iso OR t.dateEcheance = :french)', { iso: dateISO, french: dateFrench })
+    .andWhere('t.statut != :termine', { termine: TacheStatut.TERMINEE })
+    .orderBy('t.id', 'ASC');
 
+  // Log temporaire pour debug (supprimer en production)
+  console.log('[taches.service] getTachesRappelPourDemain dateISO=', dateISO, 'dateFrench=', dateFrench);
 
-
+  const results = await qb.getMany();
+  console.log('[taches.service] getTachesRappelPourDemain found=', results.length);
+  return results;
 }
 
 

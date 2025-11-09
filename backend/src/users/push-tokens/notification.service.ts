@@ -103,6 +103,21 @@ export class NotificationsService {
     return this.getUnreadCount(userId);
   }
 
+  // Vérifie s'il existe déjà un rappel (notification) pour une tache donnée aujourd'hui
+  async existsReminderForTache(userId: number, tacheId: number): Promise<boolean> {
+    // Postgres JSON field query using ->> operator to compare text
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const qb = this.repo.createQueryBuilder('n')
+      .where('n.userId = :userId', { userId })
+      .andWhere("(n.data ->> 'type') = :type", { type: 'rappel' })
+      .andWhere("(n.data ->> 'tacheId') = :tacheId", { tacheId: String(tacheId) })
+      .andWhere('n.created_at >= :todayStart', { todayStart: todayStart.toISOString() })
+      .limit(1);
+    const existing = await qb.getOne();
+    return !!existing;
+  }
+
   // Supprime une notification si elle appartient à l'utilisateur
   async delete(userId: number, id: number) {
     const res = await this.repo.delete({ id, user: { id: userId } as any });

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ConfigModule } from '@nestjs/config';
 
 import { UsersModule } from './users/users.module';
@@ -34,6 +35,7 @@ import { join } from 'path';
       autoLoadEntities: true,
       synchronize: true,
     }),
+  ScheduleModule.forRoot(),
     UsersModule,
     AuthModule,
     BiensModule,
