@@ -31,6 +31,29 @@ findAll() {
 }
 
 
+// Retourne les informations du user authentifié (incluant settings si présent).
+  @Get('me')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard)
+  async getMe(@Request() req) {
+    const userId = req.user?.userId;
+    const idNum = Number(userId);
+    if (!userId || isNaN(idNum)) throw new ForbiddenException('Utilisateur non authentifié');
+    try {
+      const user = await this.userService.findOne(idNum);
+      if (user) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...safe } = user as any;
+        return safe;
+      }
+      return null;
+    } catch (err) {
+      // si l'utilisateur n'existe pas, retourner null plutôt que 500
+      return null;
+    }
+  }
+
+
 
 
 //Affiche un utilisateur par son id 

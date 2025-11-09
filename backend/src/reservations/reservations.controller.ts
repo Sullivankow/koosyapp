@@ -3,6 +3,7 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto, UpdateReservationDto } from './create-reservation.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Query } from '@nestjs/common';
 
 
 @ApiTags('Réservations')
@@ -10,6 +11,27 @@ import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 @Controller('reservations')
 export class ReservationsController {
   constructor(private readonly reservationsService: ReservationsService) {}
+
+  /**
+   * GET /events/upcoming
+   * Retourne arrivées/départs/nouvelles réservations pour la conciergerie authentifiée.
+   */
+  @Get('/events/upcoming')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'Liste des événements à venir.' })
+  async getEventsUpcoming(
+    @Query('days') days: string,
+    @Query('limit') limit: string,
+    @Query('page') page: string,
+    @Req() req: any,
+  ) {
+    const userId = req.user?.userId;
+    const d = days ? Number(days) : 7;
+    const l = limit ? Number(limit) : 50;
+    const p = page ? Number(page) : 1;
+    return this.reservationsService.getEventsUpcoming(Number(userId), d, l, p);
+  }
 
 
   //Méthode pour créer une réservation 

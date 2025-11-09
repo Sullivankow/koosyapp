@@ -14,6 +14,7 @@ import AddBienModal from '../components/AddBienModal';
 import AddTachesModal from '../components/AddTachesModal';
 import AddReservationsModal from '../components/AddReservationsModal';
 import { getBiens, createReservation, getReservations } from '../utils/api';
+import { getMe, getEventsUpcoming } from '../utils/api';
 import { Bien } from '../models/models';
 import { useReservationRefresh } from '../contexts/ReservationRefreshContext';
 import dayjs from 'dayjs';
@@ -58,6 +59,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         statut: 'en attente',
     });
     const [biens, setBiens] = useState<Bien[]>([]);
+    const [events, setEvents] = useState<any[]>([]);
+    const [eventsLoading, setEventsLoading] = useState(false);
     const [successMsg, setSuccessMsg] = useState<string>('');
     const { signalReservationAdded } = useReservationRefresh();
 
@@ -80,7 +83,35 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
   })
   .catch(() => setReservationsCount(0));
         getBiens().then(setBiens).catch(() => setBiens([]));
+        // Récupérer les préférences utilisateur puis les événements si activé
+        (async () => {
+            try {
+                const me = await getMe();
+                const eventsEnabled = me?.settings?.eventsEnabled ?? true;
+                if (eventsEnabled) {
+                    setEventsLoading(true);
+                    try {
+                        const res = await getEventsUpcoming(7, 10, 1);
+                        const items = Array.isArray(res) ? res : (res?.items ?? []);
+                        setEvents(items);
+                    } catch (err) {
+                        // erreur lors du fetch, on renvoie une liste vide
+                        setEvents([]);
+                    } finally {
+                        setEventsLoading(false);
+                    }
+                }
+            } catch (err) {
+                // erreur lors de la récupération de l'utilisateur ou des événements
+            }
+        })();
     }, [lastTacheAdded, lastBienAdded]);
+
+    // Debug: log events state when it changes to verify UI receives the items
+    // Retenu : suppression des logs de debug une fois la fonctionnalité validée
+    useEffect(() => {
+        // Intentionnellement vide — évite les logs de debug en production
+    }, [events]);
     // Les autres valeurs restent statiques pour l'instant
     // const locatairesCount = 12; // supprimé, remplacé par le nombre de réservations
     const prochainEvenement = 'Check-in demain à 10h';
@@ -183,10 +214,53 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                     </TouchableOpacity>
                 </View>
 
-                {/* Prochain événement */}
-                <View style={[styles.eventBox, { backgroundColor: colors.accent }]}>
-                    <MaterialCommunityIcons name="calendar" size={20} color={colors.text} style={{ marginRight: 8 }} />
-                    <Text style={[styles.eventText, { color: colors.text }]}>Prochain événement : {prochainEvenement}</Text>
+                {/* Prochain(s) événement(s) - structure réorganisée pour éviter overflow */}
+                <View style={[styles.eventBox, { backgroundColor: colors.accent, alignItems: 'flex-start' }]}>
+                    <View style={{ marginRight: 8, paddingTop: 2 }}>
+                        <MaterialCommunityIcons name="calendar" size={20} color={colors.text} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                        <Text style={[styles.eventText, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">Prochains événements :</Text>
+                        <View style={{ marginTop: 6 }}>
+                            {eventsLoading ? (
+                                <Text style={{ color: colors.text }}>Chargement...</Text>
+                            ) : events && events.length > 0 ? (
+                                // Affiche jusqu'à 3 prochains événements dans une liste concise
+                                <View>
+                    <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled={true}>
+                        {events.map((ev: any, idx: number) => {
+                                        const humanType = (() => {
+                                            const t = (ev.type || '').toLowerCase();
+                                            if (t.includes('new') || t.includes('nouveau') || t.includes('reservation')) return 'Nouvelle réservation';
+                                            if (t.includes('arrival') || t.includes('arrive') || t.includes('arrivée')) return 'Arrivée';
+                                            if (t.includes('departure') || t.includes('depart') || t.includes('départ')) return 'Départ';
+                                            return ev.type || 'Événement';
+                                        })();
+
+                                        const dateStr = (() => {
+                                            if (ev.dateDebut) return dayjs(ev.dateDebut).format('DD/MM/YYYY');
+                                            if (ev.dateFin) return dayjs(ev.dateFin).format('DD/MM/YYYY');
+                                            if (ev.createdAt) return dayjs(ev.createdAt).format('DD/MM/YYYY');
+                                            if (ev.date) return dayjs(ev.date).format('DD/MM/YYYY');
+                                            return '';
+                                        })();
+
+                                        const locataireName = ev.locataire ? `${ev.locataire.prenom ?? ''} ${ev.locataire.nom ?? ''}`.trim() : (ev.locataireNom ? `${ev.locatairePrenom ?? ''} ${ev.locataireNom ?? ''}`.trim() : 'Locataire inconnu');
+
+                                        return (
+                                            <View key={`ev-${idx}`} style={styles.eventRow}>
+                                                <Text style={[styles.eventRowTitle, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">{humanType} · {ev.bien?.nom ?? ev.bienNom ?? 'Bien inconnu'}</Text>
+                                                <Text style={[styles.eventRowSubtitle, { color: colors.textSecondary }]} numberOfLines={1} ellipsizeMode="tail">{locataireName}{dateStr ? ` — ${dateStr}` : ''}</Text>
+                                            </View>
+                                        );
+                                    })}
+                                </ScrollView>
+                                    </View>
+                                ) : (
+                                <Text style={{ color: colors.text }}>Aucun événement prévu</Text>
+                            )}
+                        </View>
+                    </View>
                 </View>
 
                 {/* Actions principales en grille 2x2 */}
@@ -325,6 +399,20 @@ const styles = StyleSheet.create({
     eventText: {
         fontSize: 16,
         fontWeight: 'bold',
+    },
+    eventRow: {
+        paddingVertical: 6,
+        borderBottomWidth: 0.5,
+        borderBottomColor: '#00000010',
+        marginRight: 6,
+    },
+    eventRowTitle: {
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    eventRowSubtitle: {
+        fontSize: 12,
+        marginTop: 2,
     },
     quickActionsGrid: {
         width: '100%',

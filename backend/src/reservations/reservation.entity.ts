@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
 import { Bien } from '../biens/bien.entity';
 import { Locataire } from '../locataires/locataire.entity';
 
@@ -23,4 +23,19 @@ export class Reservation {
 
   @Column({ default: 'en attente' })
   statut: 'en attente' | 'confirmée' | 'terminée' | 'annulée';
+
+  /**
+   * Date de création automatique de la réservation.
+   * Utilisée pour détecter les "nouvelles réservations" côté backend
+   * (par ex. event type `new_reservation`).
+   
+   */
+  @CreateDateColumn({ name: 'created_at' })
+  createdAt: Date;
+
+  /**
+   * Date de dernière mise à jour automatique (utile pour audits et sync).
+   */
+  @UpdateDateColumn({ name: 'updated_at' })
+  updatedAt: Date;
 }

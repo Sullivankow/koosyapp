@@ -343,6 +343,16 @@ export async function getNotificationsUnreadCount(): Promise<{ unread: number }>
   return apiFetch('/notifications/unread-count');
 }
 
+// Récupère les informations de l'utilisateur connecté (incluant settings)
+export async function getMe(): Promise<any> {
+  return apiFetch('/users/me');
+}
+
+// Récupère les événements à venir (arrivées/départs/nouvelles réservations)
+export async function getEventsUpcoming(days = 7, limit = 50, page = 1) {
+  return apiFetch(`/reservations/events/upcoming?days=${days}&limit=${limit}&page=${page}`);
+}
+
 /**
  * Récupère la liste paginée des notifications pour l'utilisateur connecté.
  * page: numéro de page (1-based), limit: éléments par page.

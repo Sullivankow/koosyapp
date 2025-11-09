@@ -47,8 +47,8 @@ const NotificationsScreen: React.FC = () => {
                 const granted = (perm as any).granted || (perm as any).status === 'granted';
                 setPrefs(prev => ({ ...prev, push: !!granted }));
             } catch (err) {
-                console.warn('Erreur getPermissionsAsync', err);
-            }
+                    // ignore permission check errors en prod
+                }
         })();
     }, []);
 

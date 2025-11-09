@@ -39,8 +39,8 @@ export const NotificationCountProvider = ({ children }: { children: ReactNode })
 					const json = await getNotificationsUnreadCount();
 					if (json && typeof json.unread === 'number') setUnread(json.unread);
 				} catch (err) {
-					console.warn('Could not refresh notifications unread count', err);
-				}
+								// ignore refresh errors in prod
+							}
 	};
 
 	useEffect(() => {

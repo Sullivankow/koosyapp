@@ -39,7 +39,7 @@ export default function NotificationScreen() {
       // res.items attendu: tableau de notifications
       setItems(res.items ?? []);
     } catch (err: any) {
-      console.warn('Erreur récupération notifications', err);
+      // Erreur lors de la récupération des notifications (silencieuse en prod)
       Alert.alert('Erreur', err?.message ?? String(err));
     } finally {
       setLoading(false);
@@ -62,7 +62,7 @@ export default function NotificationScreen() {
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current as any);
       toastTimerRef.current = setTimeout(() => setToast(null), 2200) as any;
     } catch (err: any) {
-      console.warn('markRead error', err);
+      // Erreur markRead (affichée à l'utilisateur)
       Alert.alert('Erreur', err?.message ?? String(err));
     }
   };
@@ -74,7 +74,7 @@ export default function NotificationScreen() {
       // update local state
       setItems(prev => prev.map(i => ({ ...i, read: true })));
     } catch (err: any) {
-      console.warn('markAllRead error', err);
+      // Erreur markAllRead
       Alert.alert('Erreur', err?.message ?? String(err));
     }
   };
@@ -85,7 +85,7 @@ export default function NotificationScreen() {
       {
         text: 'Supprimer',
         style: 'destructive',
-        onPress: async () => {
+          onPress: async () => {
           try {
             await deleteNotification(id);
             await refreshCount();
@@ -95,7 +95,7 @@ export default function NotificationScreen() {
             if (toastTimerRef.current) clearTimeout(toastTimerRef.current as any);
             toastTimerRef.current = setTimeout(() => setToast(null), 2200) as any;
           } catch (err: any) {
-            console.warn('deleteNotification error', err);
+            // erreur suppression
             Alert.alert('Erreur', err?.message ?? String(err));
           }
         },

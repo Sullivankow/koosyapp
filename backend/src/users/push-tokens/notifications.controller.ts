@@ -182,8 +182,7 @@ export class NotificationsController {
     },
   })
   async savePushToken(@Request() req, @Body() body: { token: string | null, platform?: string }) {
-    const userId = req.user?.userId;
-    console.log('[notifications.controller] savePushToken called, userId=', userId, 'body=', body);
+  const userId = req.user?.userId;
     const hasTokenProp = body && Object.prototype.hasOwnProperty.call(body, 'token');
     if (!hasTokenProp) {
       console.warn('[notifications.controller] Missing token property in request body');
@@ -230,9 +229,7 @@ export class NotificationsController {
       console.warn('[notifications.controller] No expoPushToken registered for user', userId);
       throw new BadRequestException('No expoPushToken registered for user');
     }
-    console.log('[notifications.controller] testPush called for user', userId, 'expoPushToken=', user.expoPushToken);
-    const res = await this.tachesService.sendExpoPushNotification(user.expoPushToken, 'Test Koosy', `Notification test pour ${user.email}`);
-    console.log('[notifications.controller] testPush expo response:', res);
+  const res = await this.tachesService.sendExpoPushNotification(user.expoPushToken, 'Test Koosy', `Notification test pour ${user.email}`);
     return res;
   }
 
