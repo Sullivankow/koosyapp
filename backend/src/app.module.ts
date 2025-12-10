@@ -12,6 +12,7 @@ import { ReservationsModule } from './reservations/reservations.module';
 import { TachesModule } from './taches/taches.module';
 import { BienImageModule } from './Image/bien-image/bien-image.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
+import { PrestationsModule } from './prestations/prestation.module';
 import { join } from 'path';
 
 
@@ -42,6 +43,7 @@ import { join } from 'path';
     ReservationsModule,
     TachesModule,
     BienImageModule,
+    PrestationsModule,
 
 
 
