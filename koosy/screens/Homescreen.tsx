@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image, Modal } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+// Ce fichier contient l'écran d'accueil (Dashboard) de l'application.
+// Il affiche un résumé des compteurs (biens, réservations, tâches),
+// une zone "Prochains événements" (arrivées/départs/nouvelles réservations)
+// et des actions rapides pour créer un bien, une tâche, une réservation ou une prestation.
+//
+// Les commentaires ci-dessous expliquent le rôle des hooks, handlers et sections principales
+// pour faciliter la maintenance et la relecture du code.
 import { clearSession } from '../utils/session';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useTheme } from '../contexts/ThemeContext';
@@ -13,7 +19,7 @@ import { useTache } from '../contexts/TacheContext';
 import AddBienModal from '../components/AddBienModal';
 import AddTachesModal from '../components/AddTachesModal';
 import AddReservationsModal from '../components/AddReservationsModal';
-import { getBiens, createReservation, getReservations } from '../utils/api';
+import { getBiens, createReservation } from '../utils/api';
 import { getMe, getEventsUpcoming } from '../utils/api';
 import { Bien } from '../models/models';
 import { useReservationRefresh } from '../contexts/ReservationRefreshContext';
@@ -26,11 +32,13 @@ type HomeScreenProps = {
 const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const { tacheCount, refreshTacheCount } = useTacheCount();
     const { lastTacheAdded } = useTache();
+    // Theme et couleurs fournis par le contexte `ThemeContext`
     const { colors, isDarkMode, toggleTheme } = useTheme();
-    const navigation = useNavigation();
+    // États liés à l'utilisateur affiché (prénom et avatar généré)
     const [userName, setUserName] = useState('');
     const [avatarUrl, setAvatarUrl] = useState('');
     const { biensCount, refreshBiensCount, lastBienAdded, signalBienAdded } = useBienCount();
+    // Nombre total de réservations (affiché dans le résumé)
     const [reservationsCount, setReservationsCount] = useState(0);
     const [addBienModalVisible, setAddBienModalVisible] = useState(false);
     const [addTacheModalVisible, setAddTacheModalVisible] = useState(false);
@@ -58,12 +66,20 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         heureDepart: '',
         statut: 'en attente',
     });
+    // Liste de biens (pour alimenter la modale d'ajout de réservation)
     const [biens, setBiens] = useState<Bien[]>([]);
+    // Événements à venir récupérés via l'API (arrivées, départs, nouvelles réservations)
     const [events, setEvents] = useState<any[]>([]);
     const [eventsLoading, setEventsLoading] = useState(false);
+    // Message de succès temporaire affiché en haut de l'écran
     const [successMsg, setSuccessMsg] = useState<string>('');
     const { signalReservationAdded } = useReservationRefresh();
 
+    // Effet d'initialisation :
+    // - rafraîchit les compteurs gérés par les contextes
+    // - récupère les infos utilisateur depuis AsyncStorage (affichage)
+    // - charge la liste de biens et compte des réservations
+    // - si l'utilisateur a activé les événements, récupère les événements à venir
     useEffect(() => {
         refreshTacheCount();
         refreshBiensCount();
@@ -76,14 +92,18 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                 } catch {}
             }
         });
-        // Le compteur de biens est géré par le contexte
+
+        // Récupère le nombre total de réservations (pour l'affichage synthétique)
        getReservationsCount()
   .then((data: { total: number }) => {
     setReservationsCount(data.total ?? 0);
   })
   .catch(() => setReservationsCount(0));
+
+        // Charge les biens disponibles (utilisé par la modale d'ajout de réservation)
         getBiens().then(setBiens).catch(() => setBiens([]));
-        // Récupérer les préférences utilisateur puis les événements si activé
+
+        // Vérifie les préférences utilisateur puis charge les événements à venir
         (async () => {
             try {
                 const me = await getMe();
@@ -95,27 +115,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                         const items = Array.isArray(res) ? res : (res?.items ?? []);
                         setEvents(items);
                     } catch (err) {
-                        // erreur lors du fetch, on renvoie une liste vide
+                        // En cas d'erreur réseau ou serveur, on affiche une liste vide
                         setEvents([]);
                     } finally {
                         setEventsLoading(false);
                     }
                 }
             } catch (err) {
-                // erreur lors de la récupération de l'utilisateur ou des événements
+                // Si la récupération de l'utilisateur échoue, on ignore silencieusement
             }
         })();
     }, [lastTacheAdded, lastBienAdded]);
 
-    // Debug: log events state when it changes to verify UI receives the items
-    // Retenu : suppression des logs de debug une fois la fonctionnalité validée
-    useEffect(() => {
-        // Intentionnellement vide — évite les logs de debug en production
-    }, [events]);
     // Les autres valeurs restent statiques pour l'instant
-    // const locatairesCount = 12; // supprimé, remplacé par le nombre de réservations
-    const prochainEvenement = 'Check-in demain à 10h';
 
+    // Handler de déconnexion : efface la session côté client et notifie le parent
     const handleLogout = async () => {
         await clearSession();
         if (onLogout) {
@@ -123,14 +137,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         }
     };
 
-    // Ajout réservation depuis la modale
+    // Handler pour créer une réservation depuis la modale d'ajout
+    // Valide les champs requis, convertit les dates si besoin, puis appelle l'API
     const handleAddReservation = async () => {
         if (!reservationForm.bienId || !reservationForm.locataireNom || !reservationForm.locatairePrenom || !reservationForm.locataireEmail || !reservationForm.dateArrivee || !reservationForm.dateDepart) {
             alert('Merci de remplir tous les champs obligatoires.');
             return;
         }
         try {
-            // Conversion ISO -> JJ/MM/AAAA pour le backend (comme CalendrierScreen)
+            // Conversion ISO -> JJ/MM/AAAA pour le backend (cohérence avec CalendrierScreen)
             const formatToFR = (iso: string) => {
                 if (/^(\d{4})-(\d{2})-(\d{2})$/.test(iso)) {
                     return dayjs(iso).format('DD/MM/YYYY');
@@ -149,7 +164,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
             });
             setAddReservationModalVisible(false);
             setReservationForm({ bienId: '', locataireNom: '', locatairePrenom: '', locataireEmail: '', locataireTelephone: '', dateArrivee: '', dateDepart: '', heureArrivee: '', heureDepart: '', statut: 'en attente' });
-            // Rafraîchir le compteur et la liste via le contexte
+            // Rafraîchir les compteurs et listes via les contextes et signaux
             refreshBiensCount();
             signalBienAdded();
             getReservationsCount().then((data: { total: number }) => setReservationsCount(data.total ?? 0));
@@ -159,7 +174,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
             setSuccessMsg('Réservation ajoutée avec succès !');
             setTimeout(() => setSuccessMsg(''), 2000);
         } catch (e) {
-            // erreur lors de l'ajout de la réservation (gérée par l'alerte utilisateur)
+            // En cas d'erreur serveur, informer l'utilisateur
             alert("Erreur lors de l'ajout de la réservation");
         }
     };
