@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseGuards, Req, Get, Query } from '@nestjs/comm
 import { PrestationService } from './prestation.service';
 import { CreatePrestationDto } from './create-prestation.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
-import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 
 /**
  * Controller exposant les endpoints REST pour les prestations.
@@ -10,11 +10,13 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
  * - GET /prestations: lister (filtre par bien)
  * - GET /prestations/summary: totaux par période
  */
+@ApiBearerAuth()
 @ApiTags('Prestations')
 @Controller('prestations')
 export class PrestationController {
 	constructor(private readonly service: PrestationService) {}
 
+	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post()
 	@ApiOperation({ summary: 'Créer une prestation' })

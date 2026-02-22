@@ -92,5 +92,11 @@ export class PrestationService {
 			global: { total_cents: globalTotalCents, total_euros: globalTotalCents / 100 },
 		};
 	}
+
+
+
+
+
+	
 }
 
