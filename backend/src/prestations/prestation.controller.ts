@@ -1,9 +1,12 @@
 import { Controller, Post, Body, UseGuards, Req, Get, Query, Patch, Param, Delete } from '@nestjs/common';
-import { PrestationService } from './prestation.service';
+import { PrestationService, PrestationStatus } from './prestation.service';
 import { CreatePrestationDto } from './create-prestation.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { UpdatePrestationDto } from './create-prestation.dto';
+import { ChangeStatusDto } from './create-prestation.dto';
+
+
 
 
 /**
@@ -65,7 +68,6 @@ export class PrestationController {
 	}
 
 	// Endpoint pour modifier une prestation, nécessite une authentification JWT
-	
 	@UseGuards(JwtAuthGuard)
 	@Patch(':id')
 	@ApiOperation({ summary: 'Modifier une prestation' })
@@ -83,5 +85,23 @@ export class PrestationController {
 	async remove(@Param('id') id: number) {
 		return this.service.remove(id);
 	}
+
+//Endpoint pour changer le status de la prestation
+
+// Endpoint pour changer le statut d'une prestation
+	@UseGuards(JwtAuthGuard)
+	@Patch(':id/status')
+	@ApiOperation({ summary: 'Changer le statut d\'une prestation' })
+	@ApiResponse({ status: 200, description: 'Statut modifié.' })
+	@ApiResponse({ status: 400, description: 'Statut invalide.' })
+	@ApiResponse({ status: 404, description: 'Prestation non trouvée.' })
+	async changeStatus(@Param('id') id: number, @Body() dto: ChangeStatusDto) {
+		return this.service.changeStatus(id, dto.status);
+	}
+
+
+
+
+
 }
 

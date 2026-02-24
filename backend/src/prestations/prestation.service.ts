@@ -6,6 +6,18 @@ import { CreatePrestationDto } from './create-prestation.dto';
 import { Bien } from '../biens/bien.entity';
 import { UpdatePrestationDto } from './create-prestation.dto';
 
+
+export enum PrestationStatus {
+  PENDING = 'En attente',
+  CONFIRMED = 'Confirmée',
+  CANCELLED = 'Annulée',
+  COMPLETED = 'Terminée',
+  
+}
+
+
+
+
 /**
  * Service gérant la logique métier des prestations.
  * - création (conversion euros -> centimes)
@@ -162,7 +174,17 @@ async remove(id: number) {
 }
 
 
+//Méthode pour changer le status de la prestation 
 
 
+async changeStatus(id: number, status: PrestationStatus) {
+	if (!Object.values(PrestationStatus).includes(status)) {
+		throw new BadRequestException('Statut invalide');
+	}
+	const prestation = await this.prestationRepo.findOne({ where: { id } });
+	if (!prestation) throw new NotFoundException('Prestation non trouvée');
+	prestation.status = status;
+	return this.prestationRepo.save(prestation);
+}
 
 }

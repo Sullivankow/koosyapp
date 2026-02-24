@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsNumber, Min, IsOptional, IsString, IsDateString } from 'class-validator';
-import {PartialType} from '@nestjs/mapped-types';
+import { PrestationStatus } from './prestation.service';
 
 
 /**
@@ -28,10 +28,10 @@ export class CreatePrestationDto {
 	date_prestation?: string;
 
 	
-	@ApiProperty({ example: 'confirmed', description: 'Statut de la prestation', required: false })
-	@IsOptional()
-	@IsString()
-	status?: string;
+	@ApiProperty({ example: 'en attente', required: false })
+@IsOptional()
+@IsString()
+status?: 'en attente' | 'confirmée' | 'terminée' | 'annulée';
 }
 
 
@@ -60,5 +60,11 @@ export class UpdatePrestationDto {
   @ApiProperty({ example: 'confirmed', required: false })
   @IsOptional()
   @IsString()
-  status?: string;
+  status?: 'en attente' | 'confirmée' | 'terminée' | 'annulée';
+}
+
+// DTO pour le changement de statut
+export class ChangeStatusDto {
+  @ApiProperty({ example: PrestationStatus.PENDING, enum: PrestationStatus })
+  status: PrestationStatus;
 }
