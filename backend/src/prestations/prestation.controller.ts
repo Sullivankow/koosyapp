@@ -1,9 +1,10 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Query, Patch, Param } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Query, Patch, Param, Delete } from '@nestjs/common';
 import { PrestationService } from './prestation.service';
 import { CreatePrestationDto } from './create-prestation.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
 import { UpdatePrestationDto } from './create-prestation.dto';
+
 
 /**
  * Controller exposant les endpoints REST pour les prestations.
@@ -60,6 +61,16 @@ export class PrestationController {
 	@ApiResponse({ status: 200, description: 'Prestation modifiée.' })
 	async update(@Body() dto: UpdatePrestationDto, @Param('id') id: number, @Req() req: any) {
 		return this.service.update(id, dto);
+	}
+
+	// Endpoint pour supprimer une prestation, nécessite une authentification JWT
+	@UseGuards(JwtAuthGuard)
+	@Delete(':id')
+	@ApiOperation({ summary: 'Supprimer une prestation' })
+	@ApiResponse({ status: 200, description: 'Prestation supprimée.' })
+	@ApiResponse({ status: 404, description: 'Prestation non trouvée.' })
+	async remove(@Param('id') id: number) {
+		return this.service.remove(id);
 	}
 }
 

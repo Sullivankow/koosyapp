@@ -117,4 +117,18 @@ async update(id: number, dto: UpdatePrestationDto) {
 
   return this.prestationRepo.save(prestation);
 }
+
+
+//Méthode pour supprimer une prestation 
+async remove(id: number) {
+  const prestation = await this.prestationRepo.findOne({ where: { id } });
+  if (!prestation) throw new NotFoundException('Prestation non trouvée');
+  await this.prestationRepo.remove(prestation);
+  return { message: 'Prestation supprimée avec succès' };
+}
+
+
+
+
+
 }
