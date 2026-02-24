@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity, Switch } from 'react-native';
-import { login } from '../utils/api';
+import { login } from '../../utils/api';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 
 
@@ -54,7 +54,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
                 const { access_token } = res;
                 const { prenom } = res;
                 // Stocke le token et l'email dans la session
-                const { saveSession } = require('../utils/session');
+                const { saveSession } = require('../../utils/session');
                 await saveSession(email, access_token);
                 // Stocke le prénom pour l'accueil
                 if (prenom) {

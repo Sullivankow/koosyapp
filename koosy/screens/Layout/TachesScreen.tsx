@@ -1,12 +1,12 @@
-import { deleteAllTachesTerminees } from '../utils/api';
+import { deleteAllTachesTerminees } from '../../utils/api';
 
-import { getTaches, deleteTache, markTacheAsTerminee, updateTacheStatut } from '../utils/api';
-import { useTacheCount } from '../contexts/TacheCountContext';
-import { useTache } from '../contexts/TacheContext';
+import { getTaches, deleteTache, markTacheAsTerminee, updateTacheStatut } from '../../utils/api';
+import { useTacheCount } from '../../contexts/TacheCountContext';
+import { useTache } from '../../contexts/TacheContext';
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
-import AddTachesModal from '../components/AddTachesModal';
+import { useTheme } from '../../contexts/ThemeContext';
+import AddTachesModal from '../../components/AddTachesModal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 

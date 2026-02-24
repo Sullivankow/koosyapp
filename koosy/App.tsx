@@ -1,17 +1,17 @@
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
-import HomeScreen from './screens/Homescreen';
+import HomeScreen from './screens/Layout/Homescreen';
 
-import BiensScreen from './screens/BiensScreen';
-import TachesScreen from './screens/TachesScreen';
-import CalendrierScreen from './screens/CalendrierScreen';
-import CarteScreen from './screens/CarteScreen';
-import PrestationsScreen from './screens/PrestationsScreen';
+import BiensScreen from './screens/Layout/BiensScreen';
+import TachesScreen from './screens/Layout/TachesScreen';
+import ReservationScreen from './screens/Layout/ReservationScreen';
+import CarteScreen from './screens/Layout/CarteScreen';
+import PrestationsScreen from './screens/Layout/PrestationsScreen';
 import SplashScreen from './components/SplashScreen';
-import LoginScreen from './screens/LoginScreen';
-import SignupScreen from './screens/SignupScreen';
-import WelcomeScreen from './screens/WelcomeScreen';
+import LoginScreen from './screens/Auth/LoginScreen';
+import SignupScreen from './screens/Auth/SignupScreen';
+import WelcomeScreen from './screens/Layout/WelcomeScreen';
 import React, { useState, useEffect } from 'react';
 import { useTheme } from './contexts/ThemeContext';
 import { getSession, saveSession, clearSession, generateToken } from './utils/session';
@@ -24,8 +24,8 @@ import { TacheCountProvider } from './contexts/TacheCountContext';
 import { ReservationRefreshProvider } from './contexts/ReservationRefreshContext';
 import { NotificationCountProvider } from './contexts/NotificationCountContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import ParametresStack from './screens/navigation/ParametresStack';
-import NotificationScreen from './screens/NotificationScreen';
+import ParametresStack from './screens/Navigation/ParametresStack';
+import NotificationScreen from './screens/Layout/NotificationScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -180,7 +180,7 @@ export default function App() {
                             </Tab.Screen>
                             <Tab.Screen name="Biens" component={BiensScreen} />
                             <Tab.Screen name="Tâches" component={TachesScreen} />
-                            <Tab.Screen name="Réserv." component={CalendrierScreen}
+                            <Tab.Screen name="Réserv." component={ReservationScreen}
                               options={{
                                 tabBarIcon: ({ color, size }) => (
                                   <MaterialCommunityIcons name="calendar-check" size={size} color={color} />

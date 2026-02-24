@@ -1,10 +1,12 @@
+// Page qui affiche la liste des notifications reçues par l'utilisateur (messages, alertes, etc.)
+// Permet de marquer comme lue, supprimer, ou tout marquer comme lu
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { listNotifications, markNotificationRead, markAllNotificationsRead } from '../utils/api';
-import { deleteNotification } from '../utils/api';
-import { useNotificationCount } from '../contexts/NotificationCountContext';
+import { listNotifications, markNotificationRead, markAllNotificationsRead } from '../../utils/api';
+import { deleteNotification } from '../../utils/api';
+import { useNotificationCount } from '../../contexts/NotificationCountContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import dayjs from 'dayjs';
 
 type NotificationItem = {
@@ -16,18 +18,19 @@ type NotificationItem = {
   createdAt: string;
 };
 
+// Composant principal d'affichage des notifications reçues
 export default function NotificationScreen() {
   const { colors, isDarkMode } = useTheme();
   const [toast, setToast] = useState<string | null>(null);
   const toastTimerRef = React.useRef<number | null>(null);
-  // Liste des notifications locales
+  // Liste des notifications locales (affichées à l'écran)
   const [items, setItems] = useState<NotificationItem[]>([]);
-  // Indique si la liste est en cours de chargement
+  // Indique si la liste est en cours de chargement (spinner)
   const [loading, setLoading] = useState(false);
   // Accès à la fonction de refresh du compteur global (context)
   const { refresh: refreshCount } = useNotificationCount();
 
-  // --- Fonction qui récupère la liste des notifications depuis l'API ---
+  // Récupère la liste des notifications depuis l'API (backend)
   async function fetchList() {
     try {
       setLoading(true);
@@ -46,11 +49,12 @@ export default function NotificationScreen() {
     }
   }
 
-  // Chargement initial
+  // Chargement initial de la liste au montage du composant
   useEffect(() => {
     fetchList();
   }, []);
 
+  // Marque une notification comme lue (API + mise à jour locale)
   const markRead = async (id: number) => {
     try {
       await markNotificationRead(id);
@@ -67,6 +71,7 @@ export default function NotificationScreen() {
     }
   };
 
+  // Marque toutes les notifications comme lues
   const markAllRead = async () => {
     try {
       await markAllNotificationsRead();
@@ -79,6 +84,7 @@ export default function NotificationScreen() {
     }
   };
 
+  // Supprime une notification après confirmation
   const handleDelete = async (id: number) => {
     Alert.alert('Supprimer', "Supprimer cette notification ?", [
       { text: 'Annuler', style: 'cancel' },
@@ -103,6 +109,7 @@ export default function NotificationScreen() {
     ]);
   };
 
+  // Affiche chaque notification (titre, corps, date, actions)
   const renderItem = ({ item }: { item: NotificationItem }) => (
     <View style={[
       styles.item,
@@ -127,6 +134,7 @@ export default function NotificationScreen() {
     </View>
   );
 
+  // Rendu principal de la page : header, liste, actions, toast
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
       <View style={styles.headerRow}>

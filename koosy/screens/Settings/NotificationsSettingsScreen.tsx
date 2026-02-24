@@ -1,10 +1,12 @@
+// Page de gestion des préférences de notifications (push, événements, etc.)
+// Permet d'activer/désactiver les notifications push et les alertes d'événements
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Switch, ScrollView, Alert, Linking } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
-import { savePushToken, updateUserSettings } from '../utils/api';
+import { savePushToken, updateUserSettings } from '../../utils/api';
 
 type PrefsKeys = keyof typeof initialPrefs;
 const initialPrefs = {
@@ -25,10 +27,12 @@ const notificationTypes: NotificationType[] = [
 
 // éléments retirés temporairement pour simplifier l'écran
 
-const NotificationsScreen: React.FC = () => {
+// Composant principal pour gérer les préférences de notifications utilisateur
+const NotificationsSettingsScreen: React.FC = () => {
     const { colors } = useTheme();
     const [prefs, setPrefs] = useState<typeof initialPrefs>(initialPrefs);
 
+    // Vérifie les permissions de notifications à l'ouverture de la page
     useEffect(() => {
         // check current notification permission on mount and update the switch
         (async () => {
@@ -42,6 +46,7 @@ const NotificationsScreen: React.FC = () => {
         })();
     }, []);
 
+    // Gère le changement d'état d'un switch (push ou event)
     const handleSwitch = async (key: PrefsKeys) => {
         // toggle locally first for immediate UI feedback
         const newPrefs = { ...prefs, [key]: !prefs[key] };
@@ -98,6 +103,7 @@ const NotificationsScreen: React.FC = () => {
     };
     // fréquence retirée — gestion désactivée pour l'instant
 
+    // Rendu principal de la page : switches pour chaque type de notification
     return (
         <ScrollView style={[styles.container, { backgroundColor: colors.background }]}
             contentContainerStyle={{ paddingBottom: 30 }}
@@ -156,4 +162,4 @@ const styles = StyleSheet.create({
     // styles pour la fréquence et le bouton de sauvegarde retirés
 });
 
-export default NotificationsScreen;
+export default NotificationsSettingsScreen;

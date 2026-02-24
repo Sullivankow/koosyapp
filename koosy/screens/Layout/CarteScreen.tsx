@@ -1,10 +1,10 @@
 import React, { useEffect, useState, useRef } from 'react';
-import SearchBar from '../components/SearchBar';
-import GpsTracker from '../components/GpsTracker';
-import { useBienCount } from '../contexts/BienCountContext';
+import SearchBar from '../../components/SearchBar';
+import GpsTracker from '../../components/GpsTracker';
+import { useBienCount } from '../../contexts/BienCountContext';
 import * as Location from 'expo-location';
 import MapView, { Marker, Callout } from 'react-native-maps';
-import { Bien } from '../models/models';
+import { Bien } from '../../models/models';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 // Itinéraire removed — ce fichier affiche uniquement les biens sur la carte
@@ -100,7 +100,7 @@ const CarteScreen = () => {
 
   // Récupère la liste des biens à chaque ajout ou modification
   useEffect(() => {
-    import('../utils/api').then(({ getBiens }) => {
+    import('../../utils/api').then(({ getBiens }) => {
       getBiens().then((data) => {
         // Normalize lat/lng in case backend returns strings
         const normalized = Array.isArray(data)

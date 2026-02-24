@@ -1,5 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
 // Ce fichier contient l'écran d'accueil (Dashboard) de l'application.
 // Il affiche un résumé des compteurs (biens, réservations, tâches),
 // une zone "Prochains événements" (arrivées/départs/nouvelles réservations)
@@ -7,22 +5,25 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'rea
 //
 // Les commentaires ci-dessous expliquent le rôle des hooks, handlers et sections principales
 // pour faciliter la maintenance et la relecture du code.
-import { clearSession } from '../utils/session';
+
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { clearSession } from '../../utils/session';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import NotificationBell from '../components/NotificationBell';
-import { getReservationsCount } from '../utils/api';
-import { useBienCount } from '../contexts/BienCountContext';
-import { useTacheCount } from '../contexts/TacheCountContext';
-import { useTache } from '../contexts/TacheContext';
-import AddBienModal from '../components/AddBienModal';
-import AddTachesModal from '../components/AddTachesModal';
-import AddReservationsModal from '../components/AddReservationsModal';
-import { getBiens, createReservation } from '../utils/api';
-import { getMe, getEventsUpcoming } from '../utils/api';
-import { Bien } from '../models/models';
-import { useReservationRefresh } from '../contexts/ReservationRefreshContext';
+import NotificationBell from '../../components/NotificationBell';
+import { getReservationsCount } from '../../utils/api';
+import { useBienCount } from '../../contexts/BienCountContext';
+import { useTacheCount } from '../../contexts/TacheCountContext';
+import { useTache } from '../../contexts/TacheContext';
+import AddBienModal from '../../components/AddBienModal';
+import AddTachesModal from '../../components/AddTachesModal';
+import AddReservationsModal from '../../components/AddReservationsModal';
+import { getBiens, createReservation } from '../../utils/api';
+import { getMe, getEventsUpcoming } from '../../utils/api';
+import { Bien } from '../../models/models';
+import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
 import dayjs from 'dayjs';
 
 type HomeScreenProps = {
@@ -190,7 +191,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                 {/* Avatar et message personnalisé */}
                 <View style={styles.avatarRow}>
                     <Image
-                        source={avatarUrl && avatarUrl.trim() !== '' ? { uri: avatarUrl } : require('../assets/house.jpg')}
+                        source={avatarUrl && avatarUrl.trim() !== '' ? { uri: avatarUrl } : require('../../assets/house.jpg')}
                         style={styles.avatar}
                     />
                     <View style={{ marginLeft: 12 }}>

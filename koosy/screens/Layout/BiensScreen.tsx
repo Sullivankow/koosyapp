@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal, Dimensions, TextInput } from 'react-native';
-import StatusModal from '../components/StatusModal';
-import { useTheme } from '../contexts/ThemeContext';
+import StatusModal from '../../components/StatusModal';
+import { useTheme } from '../../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { Bien } from '../models/models';
-import { getBiens, updateBien, deleteBien } from '../utils/api';
-import AddBienModal from '../components/AddBienModal';
+import { Bien } from '../../models/models';
+import { getBiens, updateBien, deleteBien } from '../../utils/api';
+import AddBienModal from '../../components/AddBienModal';
 const SCREEN_WIDTH = Dimensions.get('window').width;
-import { getImageUrl } from '../utils/api';
-import { useBienCount } from '../contexts/BienCountContext';
-import { useTache } from '../contexts/TacheContext';
+import { getImageUrl } from '../../utils/api';
+import { useBienCount } from '../../contexts/BienCountContext';
+import { useTache } from '../../contexts/TacheContext';
 
 // Les biens seront récupérés dynamiquement depuis le backend
 
@@ -60,7 +60,7 @@ const BiensScreen: React.FC = () => {
         // Log pour tous les biens
   // photos processed for UI
         if (photos.length === 0) {
-          photos = [require('../assets/house.jpg')];
+          photos = [require('../../assets/house.jpg')];
         }
         return {
           ...bien,
@@ -180,7 +180,7 @@ const BiensScreen: React.FC = () => {
     if (!currentStatusBienId) return;
     try {
       // Récupère le bien complet pour construire un payload conforme au DTO du backend
-      const fullBien = await (await import('../utils/api')).getBienById(currentStatusBienId);
+      const fullBien = await (await import('../../utils/api')).getBienById(currentStatusBienId);
       if (!fullBien) throw new Error('Bien introuvable');
       const payload = {
         proprietaireNom: fullBien.proprietaireNom || fullBien.proprio?.nom || '',
@@ -232,7 +232,7 @@ const BiensScreen: React.FC = () => {
         let source = photo;
         let key = (photo && photo.uri) ? photo.uri : `photo-${idx}`;
         if (photo && photo.uri !== undefined && (!photo.uri || photo.uri.trim() === '')) {
-          source = require('../assets/house.jpg');
+          source = require('../../assets/house.jpg');
           key = `default-photo-${idx}`;
         }
         return (

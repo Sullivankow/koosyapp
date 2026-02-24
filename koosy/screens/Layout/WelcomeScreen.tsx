@@ -2,7 +2,7 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const WelcomeScreen = ({ onFinish }: { onFinish?: () => void }) => {
   const rotateAnim = useRef(new Animated.Value(0)).current;

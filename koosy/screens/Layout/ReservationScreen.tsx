@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { useBienCount } from '../contexts/BienCountContext';
+import { useBienCount } from '../../contexts/BienCountContext';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
-import { Reservation, Bien, Locataire } from '../models/models';
+import { useTheme } from '../../contexts/ThemeContext';
+import { Reservation, Bien, Locataire } from '../../models/models';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getBiens, createReservation, getReservations } from '../utils/api';
-import { useReservationRefresh } from '../contexts/ReservationRefreshContext';
+import { getBiens, createReservation, getReservations } from '../../utils/api';
+import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
 import dayjs from 'dayjs';
-import AddReservationsModal from '../components/AddReservationsModal';
+import AddReservationsModal from '../../components/AddReservationsModal';
 
 const statutColor = {
   'confirmée': '#43A047',
@@ -24,7 +24,7 @@ function formatDateFR(dateStr: string) {
   return d.toLocaleDateString('fr-FR');
 }
 
-function CalendrierScreen() {
+function ReservationScreen() {
   const { colors } = useTheme();
   const { signalBienAdded } = useBienCount();
   const { lastReservationAdded } = useReservationRefresh();
@@ -89,7 +89,7 @@ function CalendrierScreen() {
       fetchData();
       signalBienAdded();
       // Signale le rafraîchissement global
-      import('../contexts/ReservationRefreshContext').then(ctx => ctx.useReservationRefresh().signalReservationAdded());
+      import('../../contexts/ReservationRefreshContext').then(ctx => ctx.useReservationRefresh().signalReservationAdded());
     } catch (e) {
       Alert.alert('Erreur', 'Impossible d\'ajouter la réservation.');
     }
@@ -193,7 +193,7 @@ function CalendrierScreen() {
                                 }}
                                 onPress={async () => {
                                   try {
-                                    await import('../utils/api').then(api => api.updateReservationStatut(r.id, 'confirmée'));
+                                    await import('../../utils/api').then(api => api.updateReservationStatut(r.id, 'confirmée'));
                                     fetchData();
                                     signalBienAdded();
                                   } catch (e: any) {
@@ -216,7 +216,7 @@ function CalendrierScreen() {
                                     { text: 'Annuler', style: 'cancel' },
                                     { text: 'Supprimer', style: 'destructive', onPress: async () => {
                                         try {
-                                          await import('../utils/api').then(api => api.deleteReservation(r.id));
+                                          await import('../../utils/api').then(api => api.deleteReservation(r.id));
                                           fetchData();
                                           signalBienAdded();
                                         } catch (e) {
@@ -272,4 +272,4 @@ const styles = StyleSheet.create({
   modalBtn: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 10 },
 });
 
-export default CalendrierScreen;
+export default ReservationScreen;

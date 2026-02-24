@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { signup } from '../utils/api';
+import { signup } from '../../utils/api';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 type SignupScreenProps = {
     onSignupSuccess?: (email?: string, password?: string) => void;

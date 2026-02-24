@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
-import { Utilisateur } from '../models/models';
+import { Utilisateur } from '../../models/models';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const initialUser: Utilisateur = {
     id: 'u1',
@@ -78,7 +78,7 @@ const ProfilScreen: React.FC = () => {
                         source={
                             (modeEdition ? editUser.avatar : user.avatar)
                                 ? { uri: modeEdition ? editUser.avatar : user.avatar }
-                                : require('../assets/house.jpg')
+                                : require('../../assets/house.jpg')
                         }
                         style={styles.avatar}
                     />

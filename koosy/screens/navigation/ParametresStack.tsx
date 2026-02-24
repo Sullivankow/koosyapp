@@ -1,13 +1,13 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import ParametresScreen from '../ParametresScreen';
-import ProfilScreen from '../ProfilScreen';
+import ParametresScreen from '../Layout/ParametresScreen';
+import ProfilScreen from '../Settings/ProfilScreen';
 import PreferencesScreen from '../PreferencesScreen';
-import NotificationsScreen from '../NotificationsScreen';
-import SecuriteScreen from '../SecuriteScreen';
-import AProposScreen from '../AProposScreen';
-import ConfidentialiteScreen from '../ConfidentialiteScreen';
-import SupportScreen from '../SupportScreen';
+import NotificationsScreen from '../Settings/NotificationsSettingsScreen';
+import SecuriteScreen from '../Settings/SecuriteScreen';
+import AProposScreen from '../Settings/AProposScreen';
+import ConfidentialiteScreen from '../Settings/ConfidentialiteScreen';
+import SupportScreen from '../Settings/SupportScreen';
 
 const Stack = createStackNavigator();
 
