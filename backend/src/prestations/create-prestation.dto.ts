@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsInt, IsNumber, Min, IsOptional, IsString, IsDateString } from 'class-validator';
+import {PartialType} from '@nestjs/mapped-types';
+
 
 /**
  * DTO utilisé pour la création d'une prestation via l'API.
@@ -24,5 +26,39 @@ export class CreatePrestationDto {
 	@IsOptional()
 	@IsDateString()
 	date_prestation?: string;
+
+	
+	@ApiProperty({ example: 'confirmed', description: 'Statut de la prestation', required: false })
+	@IsOptional()
+	@IsString()
+	status?: string;
 }
 
+
+// DTO pour la mise à jour d'une prestation, tous les champs sont optionnels
+export class UpdatePrestationDto {
+  @ApiProperty({ example: 3, required: false })
+  @IsOptional()
+  @IsInt()
+  bienId?: number;
+
+  @ApiProperty({ example: 12.5, required: false })
+  @IsOptional()
+  @IsNumber({ maxDecimalPlaces: 2 })
+  amount?: number;
+
+  @ApiProperty({ example: 'Nettoyage', required: false })
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @ApiProperty({ example: '2025-12-10', required: false })
+  @IsOptional()
+  @IsDateString()
+  date_prestation?: string;
+
+  @ApiProperty({ example: 'confirmed', required: false })
+  @IsOptional()
+  @IsString()
+  status?: string;
+}

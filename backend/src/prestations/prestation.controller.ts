@@ -1,8 +1,9 @@
-import { Controller, Post, Body, UseGuards, Req, Get, Query } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, Get, Query, Patch, Param } from '@nestjs/common';
 import { PrestationService } from './prestation.service';
 import { CreatePrestationDto } from './create-prestation.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@nestjs/swagger';
+import { UpdatePrestationDto } from './create-prestation.dto';
 
 /**
  * Controller exposant les endpoints REST pour les prestations.
@@ -16,6 +17,8 @@ import { ApiTags, ApiOperation, ApiResponse, ApiQuery, ApiBearerAuth } from '@ne
 export class PrestationController {
 	constructor(private readonly service: PrestationService) {}
 
+
+	// Endpoint pour créer une prestation, nécessite une authentification JWT
 	@ApiBearerAuth()
 	@UseGuards(JwtAuthGuard)
 	@Post()
@@ -26,6 +29,8 @@ export class PrestationController {
 		return this.service.create(dto, userId);
 	}
 
+
+	// Endpoint pour lister les prestations, avec pagination et filtre optionnel par bien
 	@UseGuards(JwtAuthGuard)
 	@Get()
 	@ApiOperation({ summary: 'Lister les prestations (paginé)' })
@@ -36,6 +41,8 @@ export class PrestationController {
 		return this.service.list({ bienId: bienId ? Number(bienId) : undefined, page: Number(page), limit: Number(limit) });
 	}
 
+
+	// Endpoint pour récupérer le chiffre d'affaires agrégé sur une période
 	@UseGuards(JwtAuthGuard)
 	@Get('summary')
 	@ApiOperation({ summary: "Récupérer le chiffre d'affaires agrégé sur une période" })
@@ -43,6 +50,16 @@ export class PrestationController {
 	@ApiQuery({ name: 'to', required: true })
 	async summary(@Query('from') from: string, @Query('to') to: string) {
 		return this.service.summary({ from, to });
+	}
+
+	// Endpoint pour modifier une prestation, nécessite une authentification JWT
+	
+	@UseGuards(JwtAuthGuard)
+	@Patch(':id')
+	@ApiOperation({ summary: 'Modifier une prestation' })
+	@ApiResponse({ status: 200, description: 'Prestation modifiée.' })
+	async update(@Body() dto: UpdatePrestationDto, @Param('id') id: number, @Req() req: any) {
+		return this.service.update(id, dto);
 	}
 }
 

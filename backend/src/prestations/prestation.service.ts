@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Prestation } from './prestation.entity';
 import { CreatePrestationDto } from './create-prestation.dto';
 import { Bien } from '../biens/bien.entity';
+import { UpdatePrestationDto } from './create-prestation.dto';
 
 /**
  * Service gérant la logique métier des prestations.
@@ -40,6 +41,7 @@ export class PrestationService {
 			amount_cents,
 			currency: 'EUR',
 			date_prestation: dto.date_prestation ?? new Date().toISOString().slice(0, 10),
+			  status: dto.status ?? 'confirmed',
 		});
 
 		return this.prestationRepo.save(p);
@@ -94,10 +96,25 @@ export class PrestationService {
 	}
 
 
-// Méthode pour modifer une prestation 
+// Méthode pour modifer une prestation, les champs sont optionnels
 
+async update(id: number, dto: UpdatePrestationDto) {
+  const prestation = await this.prestationRepo.findOne({ where: { id } });
+  if (!prestation) throw new NotFoundException('Prestation non trouvée');
 
+  if (dto.bienId) {
+    const bien = await this.bienRepo.findOne({ where: { id: dto.bienId } });
+    if (!bien) throw new NotFoundException('Bien non trouvé');
+    prestation.bien = bien;
+  }
 
-	
+  Object.assign(prestation, dto);
+
+  if (dto.amount !== undefined) {
+    if (typeof dto.amount !== 'number' || isNaN(dto.amount)) throw new BadRequestException('Montant invalide');
+    prestation.amount_cents = Math.round(dto.amount * 100);
+  }
+
+  return this.prestationRepo.save(prestation);
 }
-
+}
