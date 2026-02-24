@@ -53,6 +53,17 @@ export class PrestationController {
 		return this.service.summary({ from, to });
 	}
 
+	// Endpoint pour récupérer le CA mensuel sur une période
+	@UseGuards(JwtAuthGuard)
+	@Get('monthly-summary')
+	@ApiOperation({ summary: "Récupérer le chiffre d'affaires mensuel sur une période" })
+	@ApiQuery({ name: 'from', required: true })
+	@ApiQuery({ name: 'to', required: true })
+	@ApiResponse({ status: 200, description: 'Liste du CA par mois.' })
+	async monthlySummary(@Query('from') from: string, @Query('to') to: string) {
+		return this.service.monthlySummary({ from, to });
+	}
+
 	// Endpoint pour modifier une prestation, nécessite une authentification JWT
 	
 	@UseGuards(JwtAuthGuard)

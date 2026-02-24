@@ -95,6 +95,40 @@ export class PrestationService {
 		};
 	}
 
+	// Retourne le CA par mois sur une période donnée
+	async monthlySummary({ from, to }: { from: string; to: string }) {
+		const results: { mois: string; total_cents: number; total_euros: number }[] = [];
+		let current = new Date(from);
+		const end = new Date(to);
+
+		while (current <= end) {
+			const year = current.getFullYear();
+			const month = current.getMonth();
+			const firstDay = new Date(year, month, 1);
+			const lastDay = new Date(year, month + 1, 0); // dernier jour du mois
+			const fromStr = firstDay.toISOString().slice(0, 10);
+			const toStr = lastDay.toISOString().slice(0, 10);
+
+			const row = await this.prestationRepo
+				.createQueryBuilder('p')
+				.select('SUM(p.amount_cents)', 'total_cents')
+				.where('p.date_prestation BETWEEN :from AND :to', { from: fromStr, to: toStr })
+				.andWhere("p.status = :st", { st: 'confirmed' })
+				.getRawOne();
+
+			const totalCents = Number(row?.total_cents ?? 0);
+			results.push({
+				mois: `${year}-${String(month + 1).padStart(2, '0')}`,
+				total_cents: totalCents,
+				total_euros: totalCents / 100,
+			});
+
+			// Passe au mois suivant
+			current = new Date(year, month + 1, 1);
+		}
+
+		return results;
+	}
 
 // Méthode pour modifer une prestation, les champs sont optionnels
 
