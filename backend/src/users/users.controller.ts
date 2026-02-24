@@ -19,22 +19,28 @@ export class UsersController {
   ) {}
 
 //Ajouter un nouvel utilisateur
-    @Post()
-    async create(@Body() createUserDto: CreateUserDto) {
-        return this.userService.create(createUserDto);
-    }
+
+  @Post()
+  @ApiOperation({ summary: 'Créer un nouvel utilisateur' })
+  async create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
+  }
+
 
     //Afficher la liste de tous les utilisateurs
     @Get()
-findAll() {
-  return this.userService.findAll();
-}
+    @ApiOperation({ summary: 'Afficher la liste de tous les utilisateurs' })
+    findAll() {
+      return this.userService.findAll();
+    }
 
 
-// Retourne les informations du user authentifié (incluant settings si présent).
+
+  // Retourne les informations du user authentifié (incluant settings si présent).
   @Get('me')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Retourne les informations de l’utilisateur authentifié (incluant les préférences si présentes)' })
   async getMe(@Request() req) {
     const userId = req.user?.userId;
     const idNum = Number(userId);
@@ -56,31 +62,37 @@ findAll() {
 
 
 
-//Affiche un utilisateur par son id 
-@Get(':id')
-findOne(@Param('id') id : number) {
-return this.userService.findOne(Number (id));
-}
 
-//Modifier un utilisateur par son id, seulement les champs que tu envoies
-@Patch(':id')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
-async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
-  return this.userService.update(id, updateUserDto);
-}
+    //Affiche un utilisateur par son id 
+    @Get(':id')
+    @ApiOperation({ summary: 'Afficher un utilisateur par son id' })
+    findOne(@Param('id') id : number) {
+      return this.userService.findOne(Number(id));
+    }
 
 
-//Supprimer un utilisateur par son id 
-@Delete(':id')
-@ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
-async remove(@Param('id') id: number, @Request() req) {
-  if (req.user.userId !== Number(id)) {
-    throw new ForbiddenException('Vous ne pouvez supprimer que votre propre compte.');
-  }
-  return this.userService.remove(Number(id));
-}
+    //Modifier un utilisateur par son id, seulement les champs que tu envoies
+    @Patch(':id')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Modifier un utilisateur par son id (partiel)' })
+    async update(@Param('id') id: number, @Body() updateUserDto: UpdateUserDto) {
+      return this.userService.update(id, updateUserDto);
+    }
+
+
+
+    //Supprimer un utilisateur par son id 
+    @Delete(':id')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard)
+    @ApiOperation({ summary: 'Supprimer un utilisateur par son id (seulement soi-même)' })
+    async remove(@Param('id') id: number, @Request() req) {
+      if (req.user.userId !== Number(id)) {
+        throw new ForbiddenException('Vous ne pouvez supprimer que votre propre compte.');
+      }
+      return this.userService.remove(Number(id));
+    }
 
 
   /**

@@ -1,6 +1,6 @@
 import { Controller, Post, UseGuards, Request, Body, Get, Delete, BadRequestException, Param, Query, NotFoundException, HttpCode } from '@nestjs/common';
 import { TachesService } from '../../taches/taches.service';
-import { ApiBearerAuth, ApiBody, ApiTags, ApiQuery, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiTags, ApiQuery, ApiParam, ApiOperation } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/jwt-auth.guard';
 import { PushTokensService } from './push-tokens.service';
 import { UsersService } from '../users.service';
@@ -19,6 +19,7 @@ export class NotificationsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Post('rappel-taches')
+  @ApiOperation({ summary: 'Lancer les rappels de tâches pour demain (manuel)' })
   async lancerRappelTaches() {
     // Endpoint manuel aligné avec le scheduler : crée la notification en DB et envoie les pushes
     try {
@@ -49,6 +50,7 @@ export class NotificationsController {
   @Get('debug/rappels-candidates')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @ApiOperation({ summary: 'Lister les tâches candidates au rappel (debug)' })
   async debugRappelsCandidates(@Request() req) {
     // calculer les mêmes dates que getTachesRappelPourDemain pour diagnostic
     const today = new Date();
@@ -84,6 +86,7 @@ export class NotificationsController {
   @Get('unread-count')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Nombre de notifications non lues' })
   async getUnreadCount(@Request() req) {
     const userId = req.user?.userId;
     if (!userId) throw new BadRequestException('User not authenticated');
@@ -101,6 +104,7 @@ export class NotificationsController {
   @UseGuards(JwtAuthGuard)
   @ApiQuery({ name: 'page', required: false, type: 'number', example: 1 })
   @ApiQuery({ name: 'limit', required: false, type: 'number', example: 20 })
+  @ApiOperation({ summary: 'Lister les notifications de l’utilisateur connecté (paginé)' })
   async listNotifications(@Request() req, @Query('page') page = '1', @Query('limit') limit = '20') {
     const userId = req.user?.userId;
     if (!userId) throw new BadRequestException('User not authenticated');
@@ -119,6 +123,7 @@ export class NotificationsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
+  @ApiOperation({ summary: 'Marquer une notification comme lue' })
   async markRead(@Request() req, @Param('id') idParam: string) {
     const userId = req.user?.userId;
     if (!userId) throw new BadRequestException('User not authenticated');
@@ -137,6 +142,7 @@ export class NotificationsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
+  @ApiOperation({ summary: 'Marquer toutes les notifications comme lues' })
   async markAllRead(@Request() req) {
     const userId = req.user?.userId;
     if (!userId) throw new BadRequestException('User not authenticated');
@@ -154,6 +160,7 @@ export class NotificationsController {
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
   @HttpCode(200)
+  @ApiOperation({ summary: 'Supprimer une notification' })
   async deleteNotification(@Request() req, @Param('id') idParam: string) {
     const userId = req.user?.userId;
     if (!userId) throw new BadRequestException('User not authenticated');
@@ -173,6 +180,7 @@ export class NotificationsController {
   @Post('me/push-token')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Enregistrer ou supprimer le token push de l’utilisateur connecté' })
   @ApiBody({ schema: {
       type: 'object',
       properties: {
@@ -209,6 +217,7 @@ export class NotificationsController {
   @Post('debug/echo')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Debug : renvoie user et body' })
   debugEcho(@Request() req, @Body() body: any) {
     return {
       user: req.user || null,
@@ -221,6 +230,7 @@ export class NotificationsController {
   @Post('me/test-push')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Tester l’envoi d’une notification push à soi-même' })
   async testPush(@Request() req) {
     const userId = req.user?.userId;
     if (!userId) throw new BadRequestException('User not authenticated');
@@ -237,6 +247,7 @@ export class NotificationsController {
   @Post('admin/send')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Envoyer une notification à un utilisateur (admin/test)' })
   @ApiBody({ schema: {
       type: 'object',
       properties: {
@@ -268,6 +279,7 @@ export class NotificationsController {
   @Get('me/push-tokens')
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Lister les tokens push de l’utilisateur connecté' })
   async listMyPushTokens(@Request() req) {
     const userId = req.user?.userId;
     if (!userId) throw new BadRequestException('User not authenticated');
@@ -279,6 +291,7 @@ export class NotificationsController {
   @ApiQuery({ name: 'token', required: true, type: 'string', description: "Expo push token à supprimer (ex: ExponentPushToken[...])" })
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Supprimer un token push précis de l’utilisateur connecté' })
   async deleteMyPushToken(@Request() req) {
     const userId = req.user?.userId;
     const token = req.query?.token as string | undefined;

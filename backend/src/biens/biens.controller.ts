@@ -3,7 +3,7 @@ import { Param } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { BiensService } from './biens.service';
 import { CreateBienDto } from './create-bien.dto';
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags, ApiQuery, ApiOperation } from '@nestjs/swagger';
 
 
 import { UpdateBienDto } from './create-bien.dto';
@@ -23,23 +23,26 @@ export class BiensController {
   @ApiBody({ type: CreateBienDto })
   @ApiResponse({ status: 201, description: 'Bien créé avec succès.' })
   @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Créer un bien (utilisateur authentifié)' })
   async createBien(@Body() createBienDto: CreateBienDto, @Request() req) {
     return this.biensService.createBien(createBienDto, req.user.userId);
   }
 
   //Méthode pour géocoder une adresse en latitude et longitude
   @Get('geocode')
-async geocodeAdresse(@Query('adresse') adresse: string) {
-  if (!adresse) {
-    throw new BadRequestException('Adresse requise');
+  @ApiOperation({ summary: 'Géocoder une adresse en latitude/longitude' })
+  async geocodeAdresse(@Query('adresse') adresse: string) {
+    if (!adresse) {
+      throw new BadRequestException('Adresse requise');
+    }
+    return await this.biensService.geocodeAdresse(adresse);
   }
-  return await this.biensService.geocodeAdresse(adresse);
-}
 
 //Affiche la liste des biens de l'utilisateur connecté
  @UseGuards(JwtAuthGuard)
   @Get()
   @ApiResponse({ status: 200, description: 'Liste des biens.' })
+  @ApiOperation({ summary: 'Afficher la liste des biens de l’utilisateur connecté' })
   async getAllBiens(@Request() req) {
     return this.biensService.getAllBiens(req.user.userId);
   }
@@ -49,6 +52,7 @@ async geocodeAdresse(@Query('adresse') adresse: string) {
 @UseGuards(JwtAuthGuard)
 @ApiResponse({ status: 200, description: 'Nombre total de biens.' })
 @ApiResponse({ status: 401, description: 'Non authentifié.' })
+@ApiOperation({ summary: 'Compter le nombre total de biens de l’utilisateur connecté' })
 async getBiensCount(@Request() req) {
   // Utilise l'ID de l'utilisateur connecté
   return { total: await this.biensService.countBiens(req.user.userId) };
@@ -58,6 +62,7 @@ async getBiensCount(@Request() req) {
 
 
 //Méthode pour rechercher un bien par mot clé (LIKE)
+
     @Get('search')
     @UseGuards(JwtAuthGuard)
     @ApiQuery({ name: 'motCle', required: true, description: 'Mot clé à rechercher dans le nom du bien' })
@@ -66,6 +71,7 @@ async getBiensCount(@Request() req) {
     @ApiResponse({ status: 404, description: 'Aucun bien trouvé.' })
     @ApiResponse({ status: 401, description: 'Non authentifié.' })
     @ApiResponse({ status: 500, description: 'Erreur serveur.' })
+    @ApiOperation({ summary: 'Rechercher un bien par mot clé' })
     async searchBiens(@Query('motCle') motCle: string) {
       if (!motCle || motCle.trim() === '') {
         throw new BadRequestException('Le paramètre motCle est requis');
@@ -80,11 +86,12 @@ async getBiensCount(@Request() req) {
 
 
   // Affiche un bien par son id (accessible à l'utilisateur connecté)
+
    @UseGuards(JwtAuthGuard)
   @Get(':id')
   @ApiResponse({ status: 200, description: 'Bien trouvé.' })
   @ApiResponse({ status: 404, description: 'Bien non trouvé.' })
-    
+  @ApiOperation({ summary: 'Afficher un bien par son id (utilisateur connecté)' })
   async getBienById(@Request() req, @Param('id') id: string) {
     const idNum = Number(id);
     if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
@@ -98,11 +105,13 @@ async getBiensCount(@Request() req) {
 
 
     // Modification d'un bien par son id (utilisateur connecté)
+
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   @ApiBody({ type: UpdateBienDto })
   @ApiResponse({ status: 200, description: 'Bien mis à jour.' })
   @ApiResponse({ status: 404, description: 'Bien non trouvé.' })
+  @ApiOperation({ summary: 'Modifier un bien par son id (utilisateur connecté)' })
   async updateBien(
     @Request() req,
     @Param('id') id: string,
@@ -112,17 +121,21 @@ async getBiensCount(@Request() req) {
   }
 
 //Méthode pour ajouter ou mettre à jour une remarque sur un bien *
+
 @ApiBody({ schema: { type: 'object', properties: { remarque: { type: 'string' } } } })
 @Patch(':id/remarque')
 @UseGuards(JwtAuthGuard)
+@ApiOperation({ summary: 'Ajouter ou modifier une remarque sur un bien' })
 async addOrUpdateRemarque(@Param('id') id: string, @Body('remarque') remarque: string) {
   return this.biensService.addOrUpdateRemarqueBien(Number(id), remarque);
 }
 
 
 //Méthode pour supprimer une remarque dans un bien
+
 @Delete(':id/remarque')
 @UseGuards(JwtAuthGuard)
+@ApiOperation({ summary: 'Supprimer une remarque sur un bien' })
 async deleteRemarque(@Param('id') id: string) {
   return this.biensService.deleteRemarqueBien(Number(id));
 }
@@ -131,10 +144,12 @@ async deleteRemarque(@Param('id') id: string) {
 
 
 //Suppression d'un bien par son id (utilisateur doit être connecté)
+
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   @ApiResponse({ status: 204, description: 'Bien supprimé.' })
   @ApiResponse({ status: 404, description: 'Bien non trouvé.' })
+  @ApiOperation({ summary: 'Supprimer un bien par son id (utilisateur connecté)' })
   async deleteBien(@Request() req, @Param('id') id: string) {
     await this.biensService.deleteBien(Number(id), req.user.userId);
     return { success: true };

@@ -2,7 +2,7 @@ import { Controller, Post, Body, UseGuards, Req, Get, Patch, Param, BadRequestEx
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ReservationsService } from './reservations.service';
 import { CreateReservationDto, UpdateReservationDto } from './create-reservation.dto';
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags, ApiOperation } from '@nestjs/swagger';
 import { Query } from '@nestjs/common';
 
 
@@ -20,6 +20,7 @@ export class ReservationsController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiResponse({ status: 200, description: 'Liste des événements à venir.' })
+  @ApiOperation({ summary: 'Retourner les arrivées/départs/nouvelles réservations à venir pour la conciergerie authentifiée' })
   async getEventsUpcoming(
     @Query('days') days: string,
     @Query('limit') limit: string,
@@ -40,6 +41,7 @@ export class ReservationsController {
   @ApiBody({ type: CreateReservationDto })
   @ApiResponse({ status: 201, description: 'Réservation créée avec succès.' })
   @ApiResponse({ status: 404, description: 'Bien ou locataire non trouvé.' })
+  @ApiOperation({ summary: 'Créer une réservation' })
   async createReservation(
     @Body() dto: CreateReservationDto,
     @Req() req: any
@@ -55,6 +57,7 @@ export class ReservationsController {
   @ApiResponse({ status: 200, description: 'Liste des réservations.' })
   @ApiResponse({ status: 401, description: 'Non authentifié.' })
   @ApiResponse({ status: 500, description: 'Erreur serveur.' })
+  @ApiOperation({ summary: 'Récupérer la liste de toutes les réservations' })
   async getAllReservations() {
     return this.reservationsService.findAll();
   }
@@ -64,6 +67,7 @@ export class ReservationsController {
 @UseGuards(JwtAuthGuard)
 @ApiResponse({ status: 200, description: 'Nombre total de réservations.' })
 @ApiResponse({ status: 401, description: 'Non authentifié.' })
+@ApiOperation({ summary: 'Compter le nombre total de réservations' })
 async getReservationsCount() {
   return { total: await this.reservationsService.countReservations() };
 }
@@ -75,6 +79,7 @@ async getReservationsCount() {
 @ApiResponse({ status: 400, description: "Id de réservation invalide." })
 @ApiResponse({ status: 401, description: 'Non authentifié.' })
 @ApiResponse({ status: 404, description: 'Réservation non trouvée.' })
+@ApiOperation({ summary: 'Récupérer une réservation par son id' })
 async getReservationById(@Param('id') id: string) {
   const idNum = Number(id);
   if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
@@ -95,6 +100,7 @@ async getReservationById(@Param('id') id: string) {
     @ApiResponse({ status: 401, description: 'Non authentifié.' })
     @ApiResponse({ status: 404, description: 'Réservation non trouvée.' })
     @ApiResponse({ status: 500, description: 'Erreur serveur.' })
+    @ApiOperation({ summary: 'Mettre à jour une réservation par son id' })
     async updateReservation(
       @Param('id') id: string,
       @Body() updateDto: UpdateReservationDto
@@ -113,6 +119,7 @@ async getReservationById(@Param('id') id: string) {
 @ApiResponse({ status: 400, description: "Id de réservation invalide." })
 @ApiResponse({ status: 401, description: 'Non authentifié.' })
 @ApiResponse({ status: 404, description: 'Réservation non trouvée.' })
+@ApiOperation({ summary: 'Supprimer une réservation par son id' })
 async deleteReservation(@Param('id') id: string) {
   const idNum = Number(id);
   if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
