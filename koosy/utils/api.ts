@@ -1,5 +1,6 @@
 
 
+
 import { getSession } from './session';
 const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
 
@@ -394,4 +395,32 @@ export async function deleteNotification(id: number) {
  */
 export async function adminSendNotification(payload: { userId: number; title: string; body?: string; data?: any }) {
   return apiFetch('/notifications/admin/send', { method: 'POST', body: JSON.stringify(payload) });
+}
+
+
+
+
+
+// Fonction pour créer une prestation
+export async function createPrestation(data: {
+  bienId: number;
+  amount: number;
+  description?: string;
+  date_prestation?: string;
+  status?: 'en attente' | 'confirmée' | 'terminée' | 'annulée';
+}): Promise<{ id: number }> {
+  const res = await apiFetch('/prestations', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  return { id: res.id ?? res.prestation?.id ?? res["id"] };
+}
+
+
+// Fonction pour récupérer la liste des prestations
+export async function getPrestations(): Promise<any[]> {
+  const data = await apiFetch('/prestations');
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.items)) return data.items;
+  return [];
 }
