@@ -1,3 +1,5 @@
+import type { User } from '../utils/users';
+
 export interface Commentaire {
   id: string;
   texte: string;
@@ -90,4 +92,21 @@ export type Utilisateur = {
   telephone?: string;
   avatar?: string; //URL ou chemin vers l'image 
   formule: 'gratuit' | 'payant';
+}
+
+
+
+
+
+export interface Prestation {
+  id: number;
+  bien: Bien;
+  user?: User; // utilisateur ou conciergerie
+  description?: string;
+  amount_cents: number;
+  currency: string;
+  date_prestation: string;
+  status: string;
+  created_at: string;
+  updated_at: string;
 }
