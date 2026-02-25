@@ -1,6 +1,7 @@
 
 
 
+
 import { getSession } from './session';
 const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
 
@@ -423,4 +424,21 @@ export async function getPrestations(): Promise<any[]> {
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.items)) return data.items;
   return [];
+}
+
+
+// Fonction pour changer le statut d'une prestation
+export async function updatePrestationStatut(id: number, status: string) {
+  return apiFetch(`/prestations/${id}/status`, {
+    method: 'PATCH',
+    body: JSON.stringify({ status }),
+  });
+}
+
+
+// Fonction pour supprimer une prestation
+export async function deletePrestation(id: number) {
+  return apiFetch(`/prestations/${id}`, {
+    method: 'DELETE',
+  });
 }
