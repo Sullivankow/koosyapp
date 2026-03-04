@@ -49,24 +49,23 @@ const PrestationsScreen: React.FC = () => {
 			<Text style={{ fontSize: 32, fontWeight: 'bold', color: '#fff', marginTop: 32, marginBottom: 8, textAlign: 'center', letterSpacing: 0.5 }}>
 				Mes prestations
 			</Text>
-			<View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 18, marginBottom: 8 }}>
+			<View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 18, marginBottom: 8 }}>
 				{TABS.map(tabObj => (
 					<TouchableOpacity
 						key={tabObj.key}
 						style={{
-							paddingHorizontal: 14,
-							paddingVertical: 10,
-							borderRadius: 20,
-							marginHorizontal: 6,
-							marginVertical: 6,
-							minWidth: 80,
+							paddingHorizontal: 8,
+							paddingVertical: 4,
+							borderRadius: 10,
+							marginHorizontal: 3,
+							minWidth: 0,
 							backgroundColor: tab === tabObj.key ? statutColor[tabObj.key] : colors.surface,
 							borderWidth: 1,
 							borderColor: tab === tabObj.key ? statutColor[tabObj.key] : colors.border,
 						}}
 						onPress={() => setTab(tabObj.key as any)}
 					>
-						<Text style={{ color: tab === tabObj.key ? '#fff' : colors.text, fontWeight: 'bold' }}>{tabObj.label}</Text>
+						<Text style={{ color: tab === tabObj.key ? '#fff' : colors.text, fontWeight: 'bold', fontSize: 12 }}>{tabObj.label}</Text>
 					</TouchableOpacity>
 				))}
 			</View>
@@ -143,9 +142,6 @@ const PrestationsScreen: React.FC = () => {
 							</View>
 						))
 					)}
-					<TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={() => setModalVisible(true)}>
-						<MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
-					</TouchableOpacity>
 					<AddPrestationModal
 						visible={modalVisible}
 						onClose={() => setModalVisible(false)}
@@ -153,8 +149,11 @@ const PrestationsScreen: React.FC = () => {
 					/>
 				</ScrollView>
 			)}
+			<TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={() => setModalVisible(true)}>
+				<MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
+			</TouchableOpacity>
 		</View>
-	);
+		);
 };
 
 const styles = StyleSheet.create({
