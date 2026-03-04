@@ -49,15 +49,17 @@ const PrestationsScreen: React.FC = () => {
 			<Text style={{ fontSize: 32, fontWeight: 'bold', color: '#fff', marginTop: 32, marginBottom: 8, textAlign: 'center', letterSpacing: 0.5 }}>
 				Mes prestations
 			</Text>
-			<View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 18, marginBottom: 8 }}>
+			<View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 18, marginBottom: 8 }}>
 				{TABS.map(tabObj => (
 					<TouchableOpacity
 						key={tabObj.key}
 						style={{
-							paddingHorizontal: 22,
+							paddingHorizontal: 14,
 							paddingVertical: 10,
 							borderRadius: 20,
-							marginHorizontal: 8,
+							marginHorizontal: 6,
+							marginVertical: 6,
+							minWidth: 80,
 							backgroundColor: tab === tabObj.key ? statutColor[tabObj.key] : colors.surface,
 							borderWidth: 1,
 							borderColor: tab === tabObj.key ? statutColor[tabObj.key] : colors.border,
