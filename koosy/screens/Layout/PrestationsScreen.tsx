@@ -93,7 +93,11 @@ const PrestationsScreen: React.FC = () => {
 								<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Montant : {(p.amount_cents / 100).toFixed(2)} €</Text>
 								<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Date : {p.date_prestation}</Text>
 								<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Créée le : {p.created_at?.slice(0, 10)}</Text>
-									<View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
+									<ScrollView
+										horizontal
+										showsHorizontalScrollIndicator={false}
+										contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}
+									>
 										{(() => {
 											const statusMap: Record<'en attente' | 'confirmée' | 'terminée' | 'annulée', 'En attente' | 'Confirmée' | 'Terminée' | 'Annulée'> = {
 												'en attente': 'En attente',
@@ -135,7 +139,7 @@ const PrestationsScreen: React.FC = () => {
 												);
 											});
 										})()}
-									</View>
+									</ScrollView>
 							</View>
 						))
 					)}
