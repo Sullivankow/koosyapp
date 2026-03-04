@@ -1,4 +1,3 @@
-
 // Ce fichier contient l'écran d'accueil (Dashboard) de l'application.
 // Il affiche un résumé des compteurs (biens, réservations, tâches),
 // une zone "Prochains événements" (arrivées/départs/nouvelles réservations)
@@ -15,6 +14,7 @@ import { useUserInfo } from '../../hooks/useUserInfo';
 import { useTheme } from '../../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import SummaryCounters from '../../components/SummaryCounters';
+import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import NotificationBell from '../../components/NotificationBell';
 import { getReservationsCount } from '../../utils/api';
 import { useBienCount } from '../../contexts/BienCountContext';
@@ -65,6 +65,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const { events, loading: eventsLoading, error: eventsError, refresh: refreshEvents } = useUpcomingEvents();
     // Message de succès temporaire via hook personnalisé
     const { signalReservationAdded } = useReservationRefresh();
+    // Ajout du hook pour le compteur de prestations terminées
+    const { prestationsTerminees } = usePrestationsCount();
 
     // Effet d'initialisation :
     // - rafraîchit les compteurs gérés par les contextes
@@ -133,6 +135,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                   biensCount={biensCount}
                   reservationsCount={reservationsCount}
                   tacheCount={tacheCount}
+                  prestationsTerminees={prestationsTerminees}
                   colors={colors}
                   styles={styles}
                 />

@@ -187,4 +187,16 @@ async changeStatus(id: number, status: PrestationStatus) {
 	return this.prestationRepo.save(prestation);
 }
 
+
+
+
+//Méthode pour afficher uniquement les prestations terminées 
+
+/**
+ * Retourne toutes les prestations terminées (non paginé)
+ */
+ async findAllTerminees(): Promise<Prestation[]> {
+	return this.prestationRepo.find({ where: { status: PrestationStatus.COMPLETED } });
+}
+
 }

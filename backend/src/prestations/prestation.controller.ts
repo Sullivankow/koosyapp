@@ -46,6 +46,7 @@ export class PrestationController {
 	}
 
 
+
 	// Endpoint pour récupérer le chiffre d'affaires agrégé sur une période
 	@UseGuards(JwtAuthGuard)
 	@Get('summary')
@@ -101,6 +102,14 @@ export class PrestationController {
 
 
 
+// Endpoint pour lister toutes les prestations terminées
+	@UseGuards(JwtAuthGuard)
+	@Get('terminees')
+	@ApiOperation({ summary: 'Lister toutes les prestations terminées' })
+	@ApiResponse({ status: 200, description: 'Liste des prestations terminées.' })
+	async findAllTerminees() {
+		return this.service.findAllTerminees();
+	}
 
 
 }

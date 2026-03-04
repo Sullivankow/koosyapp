@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { usePrestationsCount } from '../contexts/PrestationsCountContext';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, KeyboardAvoidingView, ScrollView } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 import { getBiens, createPrestation } from '../utils/api';
@@ -13,16 +14,19 @@ interface AddPrestationModalProps {
   bienId?: number;
 }
 
+
 const PRESTATION_STATUTS = [
-  { label: 'En attente', value: 'en attente' },
-  { label: 'Confirmée', value: 'confirmée' },
-  { label: 'Terminée', value: 'terminée' },
-  { label: 'Annulée', value: 'annulée' },
+  { label: 'En attente', value: 'En attente' },
+  { label: 'Confirmée', value: 'Confirmée' },
+  { label: 'Terminée', value: 'Terminée' },
+  { label: 'Annulée', value: 'Annulée' },
 ];
+
+export type PrestationStatus = 'En attente' | 'Confirmée' | 'Terminée' | 'Annulée';
 
 const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClose, onSuccess, bienId }) => {
   const { colors } = useTheme();
-  type PrestationStatus = 'en attente' | 'confirmée' | 'terminée' | 'annulée';
+  const { refreshPrestationsTerminees } = usePrestationsCount();
   const [form, setForm] = useState<{
     bienId: number | '';
     amount: string;
@@ -34,7 +38,7 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
     amount: '',
     description: '',
     date_prestation: dayjs().format('YYYY-MM-DD'),
-    status: 'confirmée',
+    status: 'Confirmée',
   });
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -60,9 +64,10 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
       setSuccessMsg('Prestation ajoutée !');
       setTimeout(() => {
         setSuccessMsg('');
-        setForm({ bienId: bienId || '', amount: '', description: '', date_prestation: dayjs().format('YYYY-MM-DD'), status: 'confirmée' });
+        setForm({ bienId: bienId || '', amount: '', description: '', date_prestation: dayjs().format('YYYY-MM-DD'), status: 'Confirmée' });
         setLoading(false);
         onClose();
+        if (refreshPrestationsTerminees && form.status === 'Terminée') refreshPrestationsTerminees();
         if (onSuccess) onSuccess();
       }, 1200);
     } catch (err) {

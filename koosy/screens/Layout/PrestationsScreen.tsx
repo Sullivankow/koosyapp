@@ -4,6 +4,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { getPrestations, updatePrestationStatut, deletePrestation } from '../../utils/api';
 import { Prestation } from '../../models/models';
 import AddPrestationModal from '../../components/AddPrestationModal';
+import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
@@ -22,6 +23,7 @@ const TABS = [
 ];
 
 const PrestationsScreen: React.FC = () => {
+	const { refreshPrestationsTerminees } = usePrestationsCount();
 	const { colors } = useTheme();
 	const [prestations, setPrestations] = useState<Prestation[]>([]);
 	const [loading, setLoading] = useState(true);
@@ -109,12 +111,13 @@ const PrestationsScreen: React.FC = () => {
 												return (
 													<TouchableOpacity
 														key={s}
-														onPress={async () => {
-															if (!isActive) {
-																await updatePrestationStatut(p.id, statusMap[s]);
-																await fetchPrestations();
-															}
-														}}
+														  onPress={async () => {
+															  if (!isActive) {
+																  await updatePrestationStatut(p.id, statusMap[s]);
+																  await fetchPrestations();
+																  if (refreshPrestationsTerminees) refreshPrestationsTerminees();
+															  }
+														  }}
 														style={{
 															backgroundColor: isActive ? statutColor[s] : '#eee',
 															opacity: isActive ? 1 : 0.5,

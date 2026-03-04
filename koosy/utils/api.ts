@@ -1,3 +1,7 @@
+/* -------------------------------------------------------------------------- */
+/*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
+/*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
+/* -------------------------------------------------------------------------- */
 
 
 
@@ -332,10 +336,6 @@ export async function updateUserSettings(settings: Record<string, any>) {
   });
 }
 
-/* -------------------------------------------------------------------------- */
-/*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
-/*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
-/* -------------------------------------------------------------------------- */
 
 /**
  * Récupère le nombre de notifications non lues pour l'utilisateur connecté.
@@ -403,12 +403,14 @@ export async function adminSendNotification(payload: { userId: number; title: st
 
 
 // Fonction pour créer une prestation
+import type { PrestationStatus } from '../components/AddPrestationModal';
+
 export async function createPrestation(data: {
   bienId: number;
   amount: number;
   description?: string;
   date_prestation?: string;
-  status?: 'en attente' | 'confirmée' | 'terminée' | 'annulée';
+  status?: PrestationStatus;
 }): Promise<{ id: number }> {
   const res = await apiFetch('/prestations', {
     method: 'POST',
@@ -424,6 +426,20 @@ export async function getPrestations(): Promise<any[]> {
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.items)) return data.items;
   return [];
+}
+
+// Fonction pour récupérer la liste des prestations terminées via le nouvel endpoint
+export async function getPrestationsTerminees(): Promise<any[]> {
+  const data = await apiFetch('/prestations/terminees');
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.items)) return data.items;
+  return [];
+}
+
+// Fonction pour compter le nombre de prestations terminées
+export async function getPrestationsTermineesCount(): Promise<number> {
+  const prestations = await getPrestationsTerminees();
+  return prestations.length;
 }
 
 
