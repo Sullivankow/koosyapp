@@ -29,7 +29,8 @@ import { useReservationForm } from '../../hooks/useReservationForm';
 import { useUpcomingEvents } from '../../hooks/useUpcomingEvents';
 import { Bien } from '../../models/models';
 import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
-
+import { useChiffreAffaire } from '../../hooks/useChiffreAffaire';
+import ChiffreAffaireCard from '../../components/ChiffreAffaireCard';
 
 type HomeScreenProps = {
     onLogout?: () => void;
@@ -69,6 +70,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const { signalReservationAdded } = useReservationRefresh();
     // Ajout du hook pour le compteur de prestations terminées
     const { prestationsTerminees } = usePrestationsCount();
+   const { caMois, caGlobal } = useChiffreAffaire();
 
     // Effet d'initialisation :
     // - rafraîchit les compteurs gérés par les contextes
@@ -133,6 +135,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                 </View>
 
                 {/* Résumé interactif */}
+                <ChiffreAffaireCard caMois={caMois} caGlobal={caGlobal} />
                 <SummaryCounters
                   biensCount={biensCount}
                   reservationsCount={reservationsCount}

@@ -78,14 +78,15 @@ export class PrestationService {
 	 * Renvoie par bien et un total global. Les montants renvoyés incluent
 	 * `total_cents` et `total_euros` pour faciliter l'affichage côté client.
 	 */
-	async summary({ from, to }: { from: string; to: string }) {
+	async summary({ from, to, status }: { from: string; to: string; status?: string }) {
+		const st = status || 'Terminée';
 		// Totaux par bien
 		const perBien = await this.prestationRepo
 			.createQueryBuilder('p')
 			.select('p.bien_id', 'bienId')
 			.addSelect('SUM(p.amount_cents)', 'total_cents')
 			.where('p.date_prestation BETWEEN :from AND :to', { from, to })
-			.andWhere("p.status = :st", { st: 'confirmed' })
+			.andWhere("p.status = :st", { st })
 			.groupBy('p.bien_id')
 			.getRawMany();
 
@@ -96,7 +97,7 @@ export class PrestationService {
 			.createQueryBuilder('p')
 			.select('SUM(p.amount_cents)', 'total_cents')
 			.where('p.date_prestation BETWEEN :from AND :to', { from, to })
-			.andWhere("p.status = :st", { st: 'confirmed' })
+			.andWhere("p.status = :st", { st })
 			.getRawOne();
 
 		const globalTotalCents = Number(globalRow?.total_cents ?? 0);

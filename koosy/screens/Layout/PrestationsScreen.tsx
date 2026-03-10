@@ -5,6 +5,7 @@ import { getPrestations, updatePrestationStatut, deletePrestation } from '../../
 import { Prestation } from '../../models/models';
 import AddPrestationModal from '../../components/AddPrestationModal';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
+import { useChiffreAffaireRefresh } from '../../contexts/ChiffreAffaireRefreshContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 
@@ -25,6 +26,7 @@ const TABS = [
 const PrestationsScreen: React.FC = () => {
 	const { refreshPrestationsTerminees } = usePrestationsCount();
 	const { colors } = useTheme();
+	const { signalRefresh } = useChiffreAffaireRefresh(); // Ajout du contexte CA
 	const [prestations, setPrestations] = useState<Prestation[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [modalVisible, setModalVisible] = useState(false);
@@ -116,6 +118,7 @@ const PrestationsScreen: React.FC = () => {
 																  await updatePrestationStatut(p.id, statusMap[s]);
 																  await fetchPrestations();
 																  if (refreshPrestationsTerminees) refreshPrestationsTerminees();
+																  signalRefresh(); // Déclenche le rafraîchissement du CA
 															  }
 														  }}
 														style={{

@@ -458,3 +458,11 @@ export async function deletePrestation(id: number) {
     method: 'DELETE',
   });
 }
+
+
+
+// Fonction pour récupérer le chiffre d'affaires total sur une période donnée
+export async function getChiffreAffaire(from: string, to: string, status = 'Terminée') {
+  // Si le paramètre status n'est pas géré par le backend, retire-le de l'URL
+  return apiFetch(`/prestations/summary?from=${from}&to=${to}&status=${status}`);
+}

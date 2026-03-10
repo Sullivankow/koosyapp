@@ -53,8 +53,9 @@ export class PrestationController {
 	@ApiOperation({ summary: "Récupérer le chiffre d'affaires agrégé sur une période" })
 	@ApiQuery({ name: 'from', required: true })
 	@ApiQuery({ name: 'to', required: true })
-	async summary(@Query('from') from: string, @Query('to') to: string) {
-		return this.service.summary({ from, to });
+	@ApiQuery({ name: 'status', required: false })
+	async summary(@Query('from') from: string, @Query('to') to: string, @Query('status') status?: string) {
+		return this.service.summary({ from, to, status });
 	}
 
 	// Endpoint pour récupérer le CA mensuel sur une période
