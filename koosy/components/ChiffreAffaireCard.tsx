@@ -6,9 +6,10 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 interface ChiffreAffaireCardProps {
   caMois: number;
   caGlobal: number;
+  caAnnee: number; // Ajout CA année
 }
 
-const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({ caMois, caGlobal }) => {
+const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({ caMois, caGlobal, caAnnee }) => {
   const { colors } = useTheme();
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.primary, shadowColor: colors.shadow }]}> 
@@ -16,14 +17,22 @@ const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({ caMois, caGloba
         <MaterialCommunityIcons name="chart-bar" size={28} color={colors.primary} style={{ marginRight: 8 }} />
         <Text style={[styles.title, { color: colors.primary }]}>Chiffre d'affaires</Text>
       </View>
-      <View style={styles.valuesRow}>
-        <View style={styles.valueBox}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Du mois</Text>
-          <Text style={[styles.value, { color: colors.success }]}>{caMois.toFixed(2)} €</Text>
+      <View style={styles.valuesGrid}>
+        <View style={styles.rowGrid}>
+          <View style={[styles.valueBoxGrid, { backgroundColor: colors.success, borderColor: colors.success }]}> 
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Mois en cours</Text>
+            <Text style={[styles.valueGrid, { color: colors.surface }]}>{caMois.toFixed(2)} €</Text>
+          </View>
+          <View style={[styles.valueBoxGrid, { backgroundColor: colors.info, borderColor: colors.info }]}> 
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Année en cours</Text>
+            <Text style={[styles.valueGrid, { color: colors.surface }]}>{caAnnee.toFixed(2)} €</Text>
+          </View>
         </View>
-        <View style={styles.valueBox}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>Total</Text>
-          <Text style={[styles.value, { color: colors.primary }]}>{caGlobal.toFixed(2)} €</Text>
+        <View style={styles.rowGrid}>
+          <View style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary, flex: 1 }]}> 
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Total global</Text>
+            <Text style={[styles.valueGrid, { color: colors.surface }]}>{caGlobal.toFixed(2)} €</Text>
+          </View>
         </View>
       </View>
     </View>
@@ -40,30 +49,48 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.12,
     shadowRadius: 8,
     elevation: 3,
+    width: '98%',
+    alignSelf: 'center',
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 10,
   },
-  valuesRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+  valuesGrid: {
     width: '100%',
-    marginTop: 6,
+    marginTop: 12,
   },
-  valueBox: {
+  rowGrid: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 16,
+    marginBottom: 12,
+  },
+  valueBoxGrid: {
     flex: 1,
     alignItems: 'center',
+    borderRadius: 14,
+    borderWidth: 1.5,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    marginHorizontal: 4,
+    shadowOpacity: 0.10,
+    shadowRadius: 4,
+    elevation: 2,
+    minWidth: 120,
+    maxWidth: 260,
   },
-  label: {
-    fontSize: 14,
-    fontWeight: '600',
-    marginBottom: 2,
+  labelGrid: {
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 6,
+    letterSpacing: 0.2,
   },
-  value: {
-    fontSize: 20,
+  valueGrid: {
+    fontSize: 26,
     fontWeight: 'bold',
+    letterSpacing: 0.5,
   },
   title: {
     fontWeight: 'bold',
