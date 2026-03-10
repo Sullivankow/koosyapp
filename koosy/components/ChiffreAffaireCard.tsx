@@ -34,9 +34,9 @@ const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({ caMois, caGloba
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mois précédent</Text>
             <Text style={[styles.valueGrid, { color: colors.surface }]}>{caMoisN1.toFixed(2)} €</Text>
           </View>
-          <View style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary, flex: 1 }]}> 
-            <Text style={[styles.labelGrid, { color: colors.surface }]}>Total global</Text>
-            <Text style={[styles.valueGrid, { color: colors.surface }]}>{caGlobal.toFixed(2)} €</Text>
+          <View style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary, flex: 1, justifyContent: 'center' }]}> 
+            <Text style={[styles.labelGrid, { color: colors.surface, textAlign: 'center' }]}>Total global</Text>
+            <Text style={[styles.valueGrid, { color: colors.surface, textAlign: 'center' }]}>{caGlobal.toFixed(2)} €</Text>
           </View>
         </View>
       </View>
