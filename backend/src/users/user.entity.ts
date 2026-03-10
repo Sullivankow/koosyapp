@@ -1,7 +1,8 @@
-import {Entity , PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm'; 
+import {Entity , PrimaryGeneratedColumn, Column, OneToMany, OneToOne } from 'typeorm'; 
 import { Bien } from '../biens/bien.entity';
 import { UserPushToken } from './push-tokens/user-push-token.entity';
 import { Notification } from './push-tokens/notifications.entity';
+import { Entreprise } from '../entreprise/entreprise.entity';
 
 
 @Entity()
@@ -19,8 +20,15 @@ export class User {
   nom: string;
 
   @Column()
-  prenom: string;
+  prenom: string; 
+  
+  // Numéro de téléphone de l'utilisateur (utilisé pour contact et notifications)
+@Column({ nullable: true })
+telephone: string;
 
+    // Relation OneToOne vers l'entreprise de l'utilisateur
+    @OneToOne(() => Entreprise)
+    entreprise: Entreprise;
   
    @Column({ default: 'gratuit' })
   abonnement: 'gratuit' | 'premium';

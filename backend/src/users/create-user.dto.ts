@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsString, MinLength, MaxLength } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 
@@ -24,6 +24,12 @@ export class CreateUserDto {
 
   @ApiProperty({ example: 'premium', required: false })
   abonnement?: 'gratuit' | 'premium';
+    // Numéro SIRET de l'entreprise (14 chiffres, utilisé pour la gestion de factures)
+    @ApiProperty({ example: '12345678901234', required: false })
+    @IsString()
+    @MinLength(14)
+    @MaxLength(14)
+    siret?: string;
 }
 
 
@@ -48,4 +54,10 @@ export class UpdateUserDto {
 
     @ApiProperty({ example: 'premium', required: false })
   abonnement?: 'gratuit' | 'premium';
+    // Numéro SIRET de l'entreprise (14 chiffres, utilisé pour la gestion de factures)
+    @ApiProperty({ example: '12345678901234', required: false })
+    @IsString()
+    @MinLength(14)
+    @MaxLength(14)
+    siret?: string;
 }

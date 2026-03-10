@@ -14,9 +14,7 @@ import { BienImageModule } from './Image/bien-image/bien-image.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { PrestationsModule } from './prestations/prestation.module';
 import { join } from 'path';
-
-
-
+import { EntrepriseModule } from './entreprise/entreprise.module';
 
 @Module({
   imports: [
@@ -44,6 +42,7 @@ import { join } from 'path';
     TachesModule,
     BienImageModule,
     PrestationsModule,
+    EntrepriseModule,
 
 
 
