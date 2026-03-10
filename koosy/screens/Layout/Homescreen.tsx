@@ -23,6 +23,7 @@ import { useTache } from '../../contexts/TacheContext';
 import AddBienModal from '../../components/AddBienModal';
 import AddTachesModal from '../../components/AddTachesModal';
 import AddReservationsModal from '../../components/AddReservationsModal';
+import AddPrestationModal from '../../components/AddPrestationModal';
 import { getBiens } from '../../utils/api';
 import { useReservationForm } from '../../hooks/useReservationForm';
 import { useUpcomingEvents } from '../../hooks/useUpcomingEvents';
@@ -47,6 +48,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const [addBienModalVisible, setAddBienModalVisible] = useState(false);
     const [addTacheModalVisible, setAddTacheModalVisible] = useState(false);
     const [addReservationModalVisible, setAddReservationModalVisible] = useState(false);
+    const [addPrestationModalVisible, setAddPrestationModalVisible] = useState(false);
     // Formulaire de réservation via hook personnalisé
     const { successMsg, showSuccess } = useSuccessMessage();
     const { form: reservationForm, setForm: setReservationForm, handleAddReservation, loading: reservationLoading, resetForm } = useReservationForm(
@@ -149,15 +151,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                 />
 
                 {/* Actions principales en grille 2x2 */}
-                <QuickActionsGrid
-                  colors={colors}
-                  styles={styles}
-                  onAddBien={() => setAddBienModalVisible(true)}
-                  onAddTache={() => setAddTacheModalVisible(true)}
-                  onAddReservation={() => setAddReservationModalVisible(true)}
-                />
+                                <QuickActionsGrid
+                                    colors={colors}
+                                    styles={styles}
+                                    onAddBien={() => setAddBienModalVisible(true)}
+                                    onAddTache={() => setAddTacheModalVisible(true)}
+                                    onAddReservation={() => setAddReservationModalVisible(true)}
+                                    onAddPrestation={() => setAddPrestationModalVisible(true)}
+                                />
             </ScrollView>
-            {/* Modales gérées séparément (AddBien/AddTaches/AddReservations) — modale de notifications statique supprimée */}
+            {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}
         {/* Modal d'ajout de bien */}
         <AddBienModal
             visible={addBienModalVisible}
@@ -179,6 +182,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
             setForm={setReservationForm}
             biens={biens}
             colors={colors}
+        />
+        {/* Modal d'ajout de prestation */}
+        <AddPrestationModal
+            visible={addPrestationModalVisible}
+            onClose={() => setAddPrestationModalVisible(false)}
+            onSuccess={() => setAddPrestationModalVisible(false)}
         />
         </>
     );

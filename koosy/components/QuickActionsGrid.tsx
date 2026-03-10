@@ -8,9 +8,10 @@ interface QuickActionsGridProps {
   onAddBien: () => void;
   onAddTache: () => void;
   onAddReservation: () => void;
+  onAddPrestation: () => void;
 }
 
-const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onAddBien, onAddTache, onAddReservation }) => (
+const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onAddBien, onAddTache, onAddReservation, onAddPrestation }) => (
   <View style={styles.quickActionsGrid}>
     <View style={styles.quickActionsRow}>
       <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]} onPress={onAddBien}>
@@ -33,7 +34,7 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
           <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une résa</Text>
         </View>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.success || '#4CAF50' }]}> 
+      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.success || '#4CAF50' }]} onPress={onAddPrestation}> 
         <View style={styles.centerContent}>
           <FontAwesome5 name="user-plus" size={22} color={colors.surface} style={styles.icon} />
           <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une prestation</Text>

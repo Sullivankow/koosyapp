@@ -31,13 +31,13 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
     bienId: number | '';
     amount: string;
     description: string;
-    date_prestation: string;
+    date_prestation: string; // format français
     status: PrestationStatus;
   }>({
     bienId: bienId || '',
     amount: '',
     description: '',
-    date_prestation: dayjs().format('YYYY-MM-DD'),
+    date_prestation: dayjs().format('DD/MM/YYYY'),
     status: 'Confirmée',
   });
   const [loading, setLoading] = useState(false);
@@ -54,17 +54,30 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
     setLoading(true);
     setSuccessMsg('');
     try {
+      // Conversion explicite de la date au format backend
+      let dateBackend = '';
+      if (form.date_prestation && form.date_prestation.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+        // Format JJ/MM/AAAA
+        const [jour, mois, annee] = form.date_prestation.split('/');
+        dateBackend = `${annee}-${mois}-${jour}`;
+      } else if (form.date_prestation && form.date_prestation.match(/^\d{4}-\d{2}-\d{2}$/)) {
+        // Format déjà backend
+        dateBackend = form.date_prestation;
+      } else {
+        // Format inconnu, on tente dayjs
+        dateBackend = dayjs(form.date_prestation).format('YYYY-MM-DD');
+      }
       await createPrestation({
         bienId: Number(form.bienId),
         amount: Number(form.amount),
         description: form.description || undefined,
-        date_prestation: form.date_prestation,
+        date_prestation: dateBackend,
         status: form.status,
       });
       setSuccessMsg('Prestation ajoutée !');
       setTimeout(() => {
         setSuccessMsg('');
-        setForm({ bienId: bienId || '', amount: '', description: '', date_prestation: dayjs().format('YYYY-MM-DD'), status: 'Confirmée' });
+        setForm({ bienId: bienId || '', amount: '', description: '', date_prestation: dayjs().format('DD/MM/YYYY'), status: 'Confirmée' });
         setLoading(false);
         onClose();
         if (refreshPrestationsTerminees && form.status === 'Terminée') refreshPrestationsTerminees();
@@ -104,7 +117,7 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
               </View>
               <TextInput style={[styles.input, { color: '#111' }]} placeholder="Montant (€)" placeholderTextColor="#888" value={form.amount} onChangeText={v => setForm(f => ({ ...f, amount: v }))} keyboardType="decimal-pad" />
               <TextInput style={[styles.input, { color: '#111' }]} placeholder="Description (optionnelle)" placeholderTextColor="#888" value={form.description} onChangeText={v => setForm(f => ({ ...f, description: v }))} multiline />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Date de la prestation (YYYY-MM-DD)" placeholderTextColor="#888" value={form.date_prestation} onChangeText={v => setForm(f => ({ ...f, date_prestation: v }))} />
+              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Date de la prestation (JJ/MM/AAAA)" placeholderTextColor="#888" value={form.date_prestation} onChangeText={v => setForm(f => ({ ...f, date_prestation: v }))} />
               <View style={{ width: SCREEN_WIDTH * 0.8, marginBottom: 10 }}>
                 <Text style={{ color: colors.textSecondary, marginBottom: 4 }}>Statut</Text>
                 {PRESTATION_STATUTS.map(opt => (
