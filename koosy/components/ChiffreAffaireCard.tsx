@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.2,
   },
   valueGrid: {
-    fontSize: 26,
+    fontSize: 18, // taille réduite
     fontWeight: 'bold',
     letterSpacing: 0.5,
   },
