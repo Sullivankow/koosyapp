@@ -7,9 +7,10 @@ interface ChiffreAffaireCardProps {
   caMois: number;
   caGlobal: number;
   caAnnee: number; // Ajout CA année
+  caMoisN1: number; // Ajout CA mois n-1
 }
 
-const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({ caMois, caGlobal, caAnnee }) => {
+const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({ caMois, caGlobal, caAnnee, caMoisN1 }) => {
   const { colors } = useTheme();
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.primary, shadowColor: colors.shadow }]}> 
@@ -29,6 +30,10 @@ const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({ caMois, caGloba
           </View>
         </View>
         <View style={styles.rowGrid}>
+          <View style={[styles.valueBoxGrid, { backgroundColor: '#FFA07A', borderColor: '#FFA07A' }]}> 
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Mois précédent</Text>
+            <Text style={[styles.valueGrid, { color: colors.surface }]}>{caMoisN1.toFixed(2)} €</Text>
+          </View>
           <View style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary, flex: 1 }]}> 
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Total global</Text>
             <Text style={[styles.valueGrid, { color: colors.surface }]}>{caGlobal.toFixed(2)} €</Text>

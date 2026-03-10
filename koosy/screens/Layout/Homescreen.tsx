@@ -70,7 +70,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     const { signalReservationAdded } = useReservationRefresh();
     // Ajout du hook pour le compteur de prestations terminées
     const { prestationsTerminees } = usePrestationsCount();
-   const { caMois, caGlobal, caAnnee } = useChiffreAffaire();
+   const { caMois, caGlobal, caAnnee, caMoisN1 } = useChiffreAffaire();
 
     // Effet d'initialisation :
     // - rafraîchit les compteurs gérés par les contextes
@@ -135,7 +135,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                 </View>
 
                 {/* Résumé interactif */}
-                <ChiffreAffaireCard caMois={caMois} caGlobal={caGlobal} caAnnee={caAnnee} />
+                <ChiffreAffaireCard caMois={caMois} caGlobal={caGlobal} caAnnee={caAnnee} caMoisN1={caMoisN1} />
                 <SummaryCounters
                   biensCount={biensCount}
                   reservationsCount={reservationsCount}
