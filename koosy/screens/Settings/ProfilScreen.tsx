@@ -2,6 +2,22 @@ import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Utilisateur } from '../../models/models';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
+import EntrepriseProfileCard, { Entreprise } from '../../components/EntrepriseProfileCard';
+// À remplacer par la récupération réelle depuis l'API
+const initialEntreprise: Entreprise = {
+    id: 1,
+    nom: 'SARL Dupont',
+    siret: '12345678901234',
+    tva: 'FR12345678901',
+    adresse: '12 rue de Paris',
+    codePostal: '75001',
+    ville: 'Paris',
+    pays: 'France',
+    email: 'contact@dupont.fr',
+    telephone: '+33123456789',
+    siteWeb: 'https://dupont.fr',
+    logo: '',
+};
 import { useTheme } from '../../contexts/ThemeContext';
 import { getMe, updateMe, apiFetch, deleteMe } from '../../utils/api';
 import { clearSession } from '../../utils/session';
@@ -142,7 +158,8 @@ const ProfilScreen: React.FC = () => {
                 style={{ backgroundColor: colors.background }}
                 contentContainerStyle={{ alignItems: 'center', padding: 18 }}
             >
-                <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
+                {/* Carte utilisateur native */}
+                <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.text }]}> 
                     <View style={{ alignItems: 'center', marginBottom: 18 }}>
                         <Image
                             source={
@@ -301,6 +318,8 @@ const ProfilScreen: React.FC = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
+                {/* Carte entreprise (à remplacer par la vraie donnée API) */}
+                <EntrepriseProfileCard entreprise={initialEntreprise} />
             </ScrollView>
         </KeyboardAvoidingView>
     );
