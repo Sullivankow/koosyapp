@@ -86,11 +86,11 @@ export default function App() {
                           <WelcomeScreen onFinish={() => { setShowWelcomeLogin(false); setIsLoggedIn(true); }} />
                         ) : showSignup ? (
                           <SignupScreen
-                            onSignupSuccess={async (email?: string) => {
+                            onSignupSuccess={async () => {
                               setShowSignup(false);
-                              const token = generateToken();
-                              await saveSession(email || '', token);
-                              setShowWelcome(true);
+                              setShowWelcome(false);
+                              setShowWelcomeLogin(false);
+                              setIsLoggedIn(false);
                             }}
                             onBack={() => setShowSignup(false)}
                           />

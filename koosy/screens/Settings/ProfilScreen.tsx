@@ -122,7 +122,7 @@ const ProfilScreen: React.FC = () => {
                             await clearSession();
                             appContext?.setIsLoggedIn(false);
                         } catch (error) {
-                            console.log('Erreur suppression compte:', error);
+                            // ...log supprimé...
                             Alert.alert('Erreur', 'Impossible de supprimer le compte.');
                         }
                     },
