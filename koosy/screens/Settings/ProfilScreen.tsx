@@ -28,6 +28,11 @@ const ProfilScreen: React.FC = () => {
     const [editUser, setEditUser] = useState<Utilisateur>(user);
     const [bankInfo, setBankInfo] = useState(initialBank);
     const [showBank, setShowBank] = useState(false);
+    const [showPasswordInput, setShowPasswordInput] = useState(false);
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    // Nouveau regex : accepte lettres, chiffres, majuscule, minuscule, caractères spéciaux
+    const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=\-{}\[\]:;"'<>,.?/]).{8,}$/;
 
     // Récupération des infos utilisateur via API
     React.useEffect(() => {
@@ -45,16 +50,37 @@ const ProfilScreen: React.FC = () => {
 
     const handleSave = async () => {
         try {
-            await updateMe({
+            if (showPasswordInput && newPassword.length > 0) {
+                if (newPassword !== confirmPassword) {
+                    Alert.alert('Erreur', 'Les mots de passe ne correspondent pas.');
+                    return;
+                }
+                if (!passwordRegex.test(newPassword)) {
+                    Alert.alert('Erreur', 'Le mot de passe doit contenir au moins 8 caractères, une majuscule et un chiffre.');
+                    return;
+                }
+            }
+            const payload: any = {
                 nom: editUser.nom,
                 prenom: editUser.prenom,
                 email: editUser.email,
                 telephone: editUser.telephone,
                 avatar: editUser.avatar
-            });
+            };
+            if (showPasswordInput && newPassword.length > 0) {
+                payload.password = newPassword;
+            }
+            await updateMe(payload);
             setUser(editUser);
             setModeEdition(false);
-            Alert.alert('Profil mis à jour', 'Vos informations ont été enregistrées.');
+            setShowPasswordInput(false);
+            setNewPassword('');
+            setConfirmPassword('');
+            if (payload.password) {
+                Alert.alert('Succès', 'Votre mot de passe a été modifié avec succès.');
+            } else {
+                Alert.alert('Profil mis à jour', 'Vos informations ont été enregistrées.');
+            }
         } catch (error) {
             Alert.alert('Erreur', "Impossible d'enregistrer les modifications.");
         }
@@ -169,6 +195,33 @@ const ProfilScreen: React.FC = () => {
                             />
                         ) : <Text style={[styles.infoText, { color: colors.text }]}>{user.telephone}</Text>}
                     </View>
+                    {/* Champ mot de passe */}
+                    {showPasswordInput && modeEdition && (
+                        <>
+                        <View style={styles.infoRow}>
+                            <MaterialCommunityIcons name="lock" size={20} color={colors.primary} />
+                            <TextInput
+                                style={[styles.input, { color: colors.text, borderColor: colors.primary, marginLeft: 8, flex: 1 }]}
+                                value={newPassword}
+                                onChangeText={setNewPassword}
+                                placeholder="Nouveau mot de passe"
+                                placeholderTextColor={colors.text}
+                                secureTextEntry
+                            />
+                        </View>
+                        <View style={styles.infoRow}>
+                            <MaterialCommunityIcons name="lock-check" size={20} color={colors.primary} />
+                            <TextInput
+                                style={[styles.input, { color: colors.text, borderColor: colors.primary, marginLeft: 8, flex: 1 }]}
+                                value={confirmPassword}
+                                onChangeText={setConfirmPassword}
+                                placeholder="Confirmation du mot de passe"
+                                placeholderTextColor={colors.text}
+                                secureTextEntry
+                            />
+                        </View>
+                        </>
+                    )}
                     {/* Section abonnement */}
                     <View style={{ marginVertical: 16 }}>
                         {user.formule === 'gratuit' ? (
@@ -221,11 +274,15 @@ const ProfilScreen: React.FC = () => {
                             <MaterialCommunityIcons name={modeEdition ? "content-save" : "account-edit"} size={20} color={colors.surface} />
                             <Text style={[styles.btnText, { color: colors.surface }]}>{modeEdition ? 'Enregistrer' : 'Modifier le profil'}</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.btnSecondary, { backgroundColor: colors.secondary }]} onPress={() => {/* action */ }}>
+                        <TouchableOpacity style={[styles.btnSecondary, { backgroundColor: colors.secondary }]} onPress={() => {
+                            setShowPasswordInput(true);
+                        }}>
                             <MaterialCommunityIcons name="lock-reset" size={20} color="#000" />
                             <Text style={[styles.btnText, { color: '#000' }]}>Modifier le mot de passe</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.btnDanger, { backgroundColor: '#d32f2f' }]} onPress={() => {/* action */ }}>
+                        <TouchableOpacity style={[styles.btnDanger, { backgroundColor: '#d32f2f' }]} onPress={() => {
+                            handleDeleteAccount();
+                        }}>
                             <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
                             <Text style={[styles.btnText, { color: colors.surface }]}>Supprimer mon compte</Text>
                         </TouchableOpacity>
