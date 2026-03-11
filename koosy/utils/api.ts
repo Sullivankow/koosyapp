@@ -466,3 +466,14 @@ export async function getChiffreAffaire(from: string, to: string, status = 'Term
   // Si le paramètre status n'est pas géré par le backend, retire-le de l'URL
   return apiFetch(`/prestations/summary?from=${from}&to=${to}&status=${status}`);
 }
+
+// Fonction pour modifier le profil utilisateur principal (champ telephone, etc.) via PATCH /users/:id.
+export async function updateMe(data: any) {
+  const user = await getMe();
+  const userId = user?.id;
+  if (!userId) throw new Error('Utilisateur non authentifié');
+  return apiFetch(`/users/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}

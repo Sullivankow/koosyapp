@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import { Utilisateur } from '../../models/models';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
+import { getMe, updateMe } from '../../utils/api';
 
 const initialUser: Utilisateur = {
     id: 'u1',
@@ -28,10 +29,35 @@ const ProfilScreen: React.FC = () => {
     const [bankInfo, setBankInfo] = useState(initialBank);
     const [showBank, setShowBank] = useState(false);
 
-    const handleSave = () => {
-        setUser(editUser);
-        setModeEdition(false);
-        Alert.alert('Profil mis à jour', 'Vos informations ont été enregistrées.');
+    // Récupération des infos utilisateur via API
+    React.useEffect(() => {
+        const fetchUser = async () => {
+            try {
+                const data = await getMe();
+                setUser(data);
+                setEditUser(data);
+            } catch (error) {
+                console.error('Erreur API utilisateur:', error);
+            }
+        };
+        fetchUser();
+    }, []);
+
+    const handleSave = async () => {
+        try {
+            await updateMe({
+                nom: editUser.nom,
+                prenom: editUser.prenom,
+                email: editUser.email,
+                telephone: editUser.telephone,
+                avatar: editUser.avatar
+            });
+            setUser(editUser);
+            setModeEdition(false);
+            Alert.alert('Profil mis à jour', 'Vos informations ont été enregistrées.');
+        } catch (error) {
+            Alert.alert('Erreur', "Impossible d'enregistrer les modifications.");
+        }
     };
 
     const handleSubscribe = () => {
@@ -63,7 +89,7 @@ const ProfilScreen: React.FC = () => {
                     onPress: () => {
                         // Implémenter la logique de suppression de compte ici
                         Alert.alert('Compte supprimé', 'Votre compte a été supprimé avec succès.');
-                    },
+                    }, 
                 },
             ],
             { cancelable: false }
@@ -71,136 +97,142 @@ const ProfilScreen: React.FC = () => {
     };
 
     return (
-        <View style={[styles.bg, { backgroundColor: colors.background }]}>
-            <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
-                <View style={{ alignItems: 'center', marginBottom: 18 }}>
-                    <Image
-                        source={
-                            (modeEdition ? editUser.avatar : user.avatar)
-                                ? { uri: modeEdition ? editUser.avatar : user.avatar }
-                                : require('../../assets/house.jpg')
-                        }
-                        style={styles.avatar}
-                    />
-                    {modeEdition ? (
-                        <TextInput
-                            style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
-                            value={editUser.avatar}
-                            onChangeText={v => setEditUser({ ...editUser, avatar: v })}
-                            placeholder="URL de l'avatar"
-                            placeholderTextColor={colors.text}
+        <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            keyboardVerticalOffset={80}
+        >
+            <View style={[styles.bg, { backgroundColor: colors.background }]}>
+                <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
+                    <View style={{ alignItems: 'center', marginBottom: 18 }}>
+                        <Image
+                            source={
+                                (modeEdition ? editUser.avatar : user.avatar)
+                                    ? { uri: modeEdition ? editUser.avatar : user.avatar }
+                                    : require('../../assets/house.jpg')
+                            }
+                            style={styles.avatar}
                         />
-                    ) : null}
-                    {modeEdition ? (
-                        <TextInput
-                            style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
-                            value={editUser.nom}
-                            onChangeText={v => setEditUser({ ...editUser, nom: v })}
-                            placeholder="Nom"
-                            placeholderTextColor={colors.text}
-                        />
-                    ) : <Text style={[styles.nom, { color: colors.text }]}>{user.nom}</Text>}
-                    {modeEdition ? (
-                        <TextInput
-                            style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
-                            value={editUser.prenom}
-                            onChangeText={v => setEditUser({ ...editUser, prenom: v })}
-                            placeholder="Prénom"
-                            placeholderTextColor={colors.text}
-                        />
-                    ) : <Text style={[styles.nom, { color: colors.text }]}>{user.prenom}</Text>}
-                    <Text style={[styles.formuleBadge, { backgroundColor: colors.secondary, color: '#000' }]}>{user.formule === 'gratuit' ? 'Formule gratuite' : 'Formule payante'}</Text>
-                </View>
-                <View style={styles.infoRow}>
-                    <MaterialCommunityIcons name="email" size={20} color={colors.primary} />
-                    {modeEdition ? (
-                        <TextInput
-                            style={[styles.input, { color: colors.text, borderColor: colors.primary, marginLeft: 8, flex: 1 }]}
-                            value={editUser.email}
-                            onChangeText={v => setEditUser({ ...editUser, email: v })}
-                            placeholder="Email"
-                            placeholderTextColor={colors.text}
-                            keyboardType="email-address"
-                            autoCapitalize="none"
-                        />
-                    ) : <Text style={[styles.infoText, { color: colors.text }]}>{user.email}</Text>}
-                </View>
-                <View style={styles.infoRow}>
-                    <FontAwesome name="phone" size={20} color={colors.primary} />
-                    {modeEdition ? (
-                        <TextInput
-                            style={[styles.input, { color: colors.text, borderColor: colors.primary, marginLeft: 8, flex: 1 }]}
-                            value={editUser.telephone || ''}
-                            onChangeText={v => setEditUser({ ...editUser, telephone: v })}
-                            placeholder="Téléphone"
-                            placeholderTextColor={colors.text}
-                            keyboardType="phone-pad"
-                        />
-                    ) : <Text style={[styles.infoText, { color: colors.text }]}>{user.telephone}</Text>}
-                </View>
-                {/* Section abonnement */}
-                <View style={{ marginVertical: 16 }}>
-                    {user.formule === 'gratuit' ? (
-                        <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={() => setShowBank(!showBank)}>
-                            <MaterialCommunityIcons name="credit-card" size={20} color={colors.surface} />
-                            <Text style={[styles.btnText, { color: colors.surface }]}>Passer à la formule payante</Text>
-                        </TouchableOpacity>
-                    ) : (
-                        <TouchableOpacity style={[styles.btnSecondary, { backgroundColor: colors.secondary }]} onPress={handleUnsubscribe}>
-                            <MaterialCommunityIcons name="credit-card-remove" size={20} color="#000" />
-                            <Text style={[styles.btnText, { color: '#000' }]}>Se désabonner</Text>
-                        </TouchableOpacity>
-                    )}
-                    {showBank && (
-                        <View style={styles.bankCard}>
-                            <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.primary, marginBottom: 8 }}>Informations bancaires</Text>
-                            <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>Titulaire du compte</Text>
+                        {modeEdition ? (
                             <TextInput
                                 style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
-                                value={bankInfo.titulaire}
-                                onChangeText={v => setBankInfo({ ...bankInfo, titulaire: v })}
-                                placeholder="Ex : Jean Dupont"
+                                value={editUser.avatar}
+                                onChangeText={v => setEditUser({ ...editUser, avatar: v })}
+                                placeholder="URL de l'avatar"
                                 placeholderTextColor={colors.text}
                             />
-                            <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>IBAN</Text>
+                        ) : null}
+                        {modeEdition ? (
                             <TextInput
                                 style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
-                                value={bankInfo.iban}
-                                onChangeText={v => setBankInfo({ ...bankInfo, iban: v })}
-                                placeholder="Ex : FR76 3000 6000 0112 3456 7890 189"
+                                value={editUser.nom}
+                                onChangeText={v => setEditUser({ ...editUser, nom: v })}
+                                placeholder="Nom"
                                 placeholderTextColor={colors.text}
                             />
-                            <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>BIC</Text>
+                        ) : <Text style={[styles.nom, { color: colors.text }]}>{user.nom}</Text>}
+                        {modeEdition ? (
                             <TextInput
                                 style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
-                                value={bankInfo.bic}
-                                onChangeText={v => setBankInfo({ ...bankInfo, bic: v })}
-                                placeholder="Ex : AGRIFRPP"
+                                value={editUser.prenom}
+                                onChangeText={v => setEditUser({ ...editUser, prenom: v })}
+                                placeholder="Prénom"
                                 placeholderTextColor={colors.text}
                             />
-                            <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary, marginTop: 8 }]} onPress={handleSubscribe}>
-                                <MaterialCommunityIcons name="check-circle" size={20} color={colors.surface} />
-                                <Text style={[styles.btnText, { color: colors.surface }]}>Valider l'abonnement</Text>
+                        ) : <Text style={[styles.nom, { color: colors.text }]}>{user.prenom}</Text>}
+                        <Text style={[styles.formuleBadge, { backgroundColor: colors.secondary, color: '#000' }]}>{user.formule === 'gratuit' ? 'Formule gratuite' : 'Formule payante'}</Text>
+                    </View>
+                    <View style={styles.infoRow}>
+                        <MaterialCommunityIcons name="email" size={20} color={colors.primary} />
+                        {modeEdition ? (
+                            <TextInput
+                                style={[styles.input, { color: colors.text, borderColor: colors.primary, marginLeft: 8, flex: 1 }]}
+                                value={editUser.email}
+                                onChangeText={v => setEditUser({ ...editUser, email: v })}
+                                placeholder="Email"
+                                placeholderTextColor={colors.text}
+                                keyboardType="email-address"
+                                autoCapitalize="none"
+                            />
+                        ) : <Text style={[styles.infoText, { color: colors.text }]}>{user.email}</Text>}
+                    </View>
+                    <View style={styles.infoRow}>
+                        <FontAwesome name="phone" size={20} color={colors.primary} />
+                        {modeEdition ? (
+                            <TextInput
+                                style={[styles.input, { color: colors.text, borderColor: colors.primary, marginLeft: 8, flex: 1 }]}
+                                value={editUser.telephone || ''}
+                                onChangeText={v => setEditUser({ ...editUser, telephone: v })}
+                                placeholder="Téléphone"
+                                placeholderTextColor={colors.text}
+                                keyboardType="phone-pad"
+                            />
+                        ) : <Text style={[styles.infoText, { color: colors.text }]}>{user.telephone}</Text>}
+                    </View>
+                    {/* Section abonnement */}
+                    <View style={{ marginVertical: 16 }}>
+                        {user.formule === 'gratuit' ? (
+                            <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={() => setShowBank(!showBank)}>
+                                <MaterialCommunityIcons name="credit-card" size={20} color={colors.surface} />
+                                <Text style={[styles.btnText, { color: colors.surface }]}>Passer à la formule payante</Text>
                             </TouchableOpacity>
-                        </View>
-                    )}
-                </View>
-                <View style={styles.actions}>
-                    <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={() => modeEdition ? handleSave() : setModeEdition(true)}>
-                        <MaterialCommunityIcons name={modeEdition ? "content-save" : "account-edit"} size={20} color={colors.surface} />
-                        <Text style={[styles.btnText, { color: colors.surface }]}>{modeEdition ? 'Enregistrer' : 'Modifier le profil'}</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.btnSecondary, { backgroundColor: colors.secondary }]} onPress={() => {/* action */ }}>
-                        <MaterialCommunityIcons name="lock-reset" size={20} color="#000" />
-                        <Text style={[styles.btnText, { color: '#000' }]}>Modifier le mot de passe</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.btnDanger, { backgroundColor: '#d32f2f' }]} onPress={() => {/* action */ }}>
-                        <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
-                        <Text style={[styles.btnText, { color: colors.surface }]}>Supprimer mon compte</Text>
-                    </TouchableOpacity>
+                        ) : (
+                            <TouchableOpacity style={[styles.btnSecondary, { backgroundColor: colors.secondary }]} onPress={handleUnsubscribe}>
+                                <MaterialCommunityIcons name="credit-card-remove" size={20} color="#000" />
+                                <Text style={[styles.btnText, { color: '#000' }]}>Se désabonner</Text>
+                            </TouchableOpacity>
+                        )}
+                        {showBank && (
+                            <View style={styles.bankCard}>
+                                <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.primary, marginBottom: 8 }}>Informations bancaires</Text>
+                                <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>Titulaire du compte</Text>
+                                <TextInput
+                                    style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
+                                    value={bankInfo.titulaire}
+                                    onChangeText={v => setBankInfo({ ...bankInfo, titulaire: v })}
+                                    placeholder="Ex : Jean Dupont"
+                                    placeholderTextColor={colors.text}
+                                />
+                                <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>IBAN</Text>
+                                <TextInput
+                                    style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
+                                    value={bankInfo.iban}
+                                    onChangeText={v => setBankInfo({ ...bankInfo, iban: v })}
+                                    placeholder="Ex : FR76 3000 6000 0112 3456 7890 189"
+                                    placeholderTextColor={colors.text}
+                                />
+                                <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>BIC</Text>
+                                <TextInput
+                                    style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
+                                    value={bankInfo.bic}
+                                    onChangeText={v => setBankInfo({ ...bankInfo, bic: v })}
+                                    placeholder="Ex : AGRIFRPP"
+                                    placeholderTextColor={colors.text}
+                                />
+                                <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary, marginTop: 8 }]} onPress={handleSubscribe}>
+                                    <MaterialCommunityIcons name="check-circle" size={20} color={colors.surface} />
+                                    <Text style={[styles.btnText, { color: colors.surface }]}>Valider l'abonnement</Text>
+                                </TouchableOpacity>
+                            </View>
+                        )}
+                    </View>
+                    <View style={styles.actions}>
+                        <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={() => modeEdition ? handleSave() : setModeEdition(true)}>
+                            <MaterialCommunityIcons name={modeEdition ? "content-save" : "account-edit"} size={20} color={colors.surface} />
+                            <Text style={[styles.btnText, { color: colors.surface }]}>{modeEdition ? 'Enregistrer' : 'Modifier le profil'}</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.btnSecondary, { backgroundColor: colors.secondary }]} onPress={() => {/* action */ }}>
+                            <MaterialCommunityIcons name="lock-reset" size={20} color="#000" />
+                            <Text style={[styles.btnText, { color: '#000' }]}>Modifier le mot de passe</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.btnDanger, { backgroundColor: '#d32f2f' }]} onPress={() => {/* action */ }}>
+                            <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
+                            <Text style={[styles.btnText, { color: colors.surface }]}>Supprimer mon compte</Text>
+                        </TouchableOpacity>
+                    </View>
                 </View>
             </View>
-        </View>
+        </KeyboardAvoidingView>
     );
 };
 
