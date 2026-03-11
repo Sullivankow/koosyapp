@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Utilisateur } from '../../models/models';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -128,7 +128,10 @@ const ProfilScreen: React.FC = () => {
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             keyboardVerticalOffset={80}
         >
-            <View style={[styles.bg, { backgroundColor: colors.background }]}>
+            <ScrollView
+                style={{ backgroundColor: colors.background }}
+                contentContainerStyle={{ alignItems: 'center', padding: 18 }}
+            >
                 <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.text }]}>
                     <View style={{ alignItems: 'center', marginBottom: 18 }}>
                         <Image
@@ -288,7 +291,7 @@ const ProfilScreen: React.FC = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
-            </View>
+            </ScrollView>
         </KeyboardAvoidingView>
     );
 };
