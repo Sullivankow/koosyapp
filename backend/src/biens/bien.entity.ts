@@ -1,4 +1,3 @@
- 
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
 import { User } from '../users/user.entity';
 import { OneToMany } from 'typeorm';
@@ -52,7 +51,7 @@ export class Bien {
 expoPushToken?: string;
 
   // Pour la relation avec la conciergerie (utilisateur)
-  @ManyToOne(() => User, user => user.biens)
+  @ManyToOne(() => User, user => user.biens, { onDelete: 'CASCADE' })
   conciergerie: User;
 //Pour la relation avec le propriétaire
   @OneToMany(() => Reservation, reservation => reservation.bien)

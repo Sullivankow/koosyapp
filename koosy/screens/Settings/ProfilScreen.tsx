@@ -3,7 +3,10 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, Keyb
 import { Utilisateur } from '../../models/models';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { getMe, updateMe } from '../../utils/api';
+import { getMe, updateMe, apiFetch, deleteMe } from '../../utils/api';
+import { clearSession } from '../../utils/session';
+import { useContext } from 'react';
+import { AppContext } from '../../contexts/AppContext';
 
 const initialUser: Utilisateur = {
     id: 'u1',
@@ -23,6 +26,7 @@ const initialBank = {
 
 const ProfilScreen: React.FC = () => {
     const { colors } = useTheme();
+    const appContext = useContext(AppContext);
     const [modeEdition, setModeEdition] = useState(false);
     const [user, setUser] = useState<Utilisateur>(initialUser);
     const [editUser, setEditUser] = useState<Utilisateur>(user);
@@ -100,7 +104,7 @@ const ProfilScreen: React.FC = () => {
         Alert.alert('Abonnement', 'Vous êtes repassé à la formule gratuite.');
     };
 
-    const handleDeleteAccount = () => {
+    const handleDeleteAccount = async () => {
         Alert.alert(
             'Suppression du compte',
             'Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible.',
@@ -112,10 +116,16 @@ const ProfilScreen: React.FC = () => {
                 {
                     text: 'Supprimer',
                     style: 'destructive',
-                    onPress: () => {
-                        // Implémenter la logique de suppression de compte ici
-                        Alert.alert('Compte supprimé', 'Votre compte a été supprimé avec succès.');
-                    }, 
+                    onPress: async () => {
+                        try {
+                            await deleteMe();
+                            await clearSession();
+                            appContext?.setIsLoggedIn(false);
+                        } catch (error) {
+                            console.log('Erreur suppression compte:', error);
+                            Alert.alert('Erreur', 'Impossible de supprimer le compte.');
+                        }
+                    },
                 },
             ],
             { cancelable: false }

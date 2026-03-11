@@ -2,7 +2,6 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './screens/Layout/Homescreen';
-
 import BiensScreen from './screens/Layout/BiensScreen';
 import TachesScreen from './screens/Layout/TachesScreen';
 import ReservationScreen from './screens/Layout/ReservationScreen';
@@ -28,12 +27,12 @@ import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import ParametresStack from './screens/Navigation/ParametresStack';
 import NotificationScreen from './screens/Layout/NotificationScreen';
 import { PrestationsCountProvider } from './contexts/PrestationsCountContext';
+import { AppContext } from './contexts/AppContext';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 const HomeStack = createStackNavigator();
 
-// Composant Stack dédié à l'écran Accueil + notifications afin de garder la TabBar
 function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
@@ -45,6 +44,7 @@ function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
   );
 }
 
+
 export default function App() {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -53,11 +53,8 @@ export default function App() {
   const [showWelcome, setShowWelcome] = useState(false);
   const [showWelcomeLogin, setShowWelcomeLogin] = useState(false);
 
-
   useEffect(() => {
-    // Initialise les utilisateurs par défaut au démarrage
     initDefaultUsers();
-    // Simule le chargement (ex: 1.2 secondes)
     const timer = setTimeout(async () => {
       const sess = await getSession();
       if (sess?.token) {
@@ -70,156 +67,141 @@ export default function App() {
 
   if (isLoading) return <SplashScreen />;
 
-  // Auth flow
-  if (!isLoggedIn) {
-    if (showWelcome) {
-      return <WelcomeScreen onFinish={() => { setShowWelcome(false); setIsLoggedIn(true); }} />;
-    }
-    if (showWelcomeLogin) {
-      return <WelcomeScreen onFinish={() => { setShowWelcomeLogin(false); setIsLoggedIn(true); }} />;
-    }
-    if (showSignup) {
-      return (
-        <SignupScreen
-          onSignupSuccess={async (email?: string) => {
-            setShowSignup(false);
-            const token = generateToken();
-            await saveSession(email || '', token);
-            setShowWelcome(true);
-          }}
-          onBack={() => setShowSignup(false)}
-        />
-      );
-    }
-    if (showForgotPassword) {
-      return (
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ fontSize: 22, marginBottom: 20 }}>Mot de passe oublié (à créer)</Text>
-          <Button title="Retour" onPress={() => setShowForgotPassword(false)} />
-        </View>
-      );
-    }
-    return (
-      <LoginScreen
-        onLogin={async (email?: string) => {
-          const sess = await getSession();
-          if (sess?.token && sess?.email === email) {
-            setShowWelcomeLogin(true);
-          } else {
-            const token = generateToken();
-            await saveSession(email || '', token);
-            setShowWelcomeLogin(true);
-          }
-        }}
-        onSignup={() => setShowSignup(true)}
-        onForgotPassword={() => setShowForgotPassword(true)}
-      />
-    );
-  }
-
-  // App principale
+  // Fournit le contexte global
   return (
-    <ThemeProvider>
-      <PrestationsCountProvider>
-        <BienCountProvider>
-          <TacheProvider>
-            <TacheCountProvider>
-              <ReservationRefreshProvider>
-                <NotificationCountProvider>
-                  <ChiffreAffaireRefreshProvider>
-                    <NavigationContainer>
-                      {/* On utilise une stack racine qui contient les onglets (Tab.Navigator)
-                  et l'écran de notifications. Plutôt que d'enregistrer
-                  `NotificationScreen` comme un onglet caché (qui laissait un trou),
-                  on l'enregistre dans la Stack pour qu'elle ne prenne pas de place
-                  dans la tabBar.
-                */}
-                      <Stack.Navigator screenOptions={{ headerShown: false }}>
-                        <Stack.Screen name="MainTabs">
-                          {() => {
-                            // Tab navigator wrapped in a component that can use the ThemeContext
-                            const TabNav: React.FC = () => {
-                              const { colors } = useTheme();
-                              return (
-                                <Tab.Navigator
-                                  screenOptions={({ route }) => ({
-                                    tabBarIcon: ({ color, size }) => {
-                                      switch (route.name) {
-                                        case 'Accueil':
-                                          return <MaterialCommunityIcons name="home" size={size} color={color} />;
-                                        case 'Biens':
-                                          return <FontAwesome5 name="building" size={size} color={color} />;
-                                        case 'Tâches':
-                                          return <MaterialCommunityIcons name="clipboard-list" size={size} color={color} />;
-                                        case 'Calendrier':
-                                          return <MaterialCommunityIcons name="calendar" size={size} color={color} />;
-                                        case 'Carte':
-                                          return <MaterialCommunityIcons name="map-marker" size={size} color={color} />;
-                                        case 'Prestations':
-                                          return <FontAwesome5 name="briefcase" size={size} color={color} />;
-                                        case 'Locataire':
-                                          return <FontAwesome5 name="users" size={size} color={color} />;
-                                        default:
-                                          return null;
-                                      }
-                                    },
-                                    tabBarActiveTintColor: colors.primary,
-                                    tabBarInactiveTintColor: colors.textSecondary,
-                                    tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
-                                    headerTitleAlign: 'center',
-                                    headerStyle: { height: 48, backgroundColor: colors.surface },
-                                    headerTitleStyle: { fontSize: 20, fontWeight: 'bold', color: colors.text },
-                                  })}
-                                  >
-                                  <Tab.Screen name="Accueil">
-                                    {() => (
-                                      <HomeStackScreen
-                                        onLogout={async () => {
-                                          await clearSession();
-                                          setIsLoggedIn(false);
+    <AppContext.Provider value={{ setIsLoggedIn }}>
+      <ThemeProvider>
+        <PrestationsCountProvider>
+          <BienCountProvider>
+            <TacheProvider>
+              <TacheCountProvider>
+                <ReservationRefreshProvider>
+                  <NotificationCountProvider>
+                    <ChiffreAffaireRefreshProvider>
+                      {/* Auth flow */}
+                      {!isLoggedIn ? (
+                        showWelcome ? (
+                          <WelcomeScreen onFinish={() => { setShowWelcome(false); setIsLoggedIn(true); }} />
+                        ) : showWelcomeLogin ? (
+                          <WelcomeScreen onFinish={() => { setShowWelcomeLogin(false); setIsLoggedIn(true); }} />
+                        ) : showSignup ? (
+                          <SignupScreen
+                            onSignupSuccess={async (email?: string) => {
+                              setShowSignup(false);
+                              const token = generateToken();
+                              await saveSession(email || '', token);
+                              setShowWelcome(true);
+                            }}
+                            onBack={() => setShowSignup(false)}
+                          />
+                        ) : showForgotPassword ? (
+                          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+                            <Text style={{ fontSize: 22, marginBottom: 20 }}>Mot de passe oublié (à créer)</Text>
+                            <Button title="Retour" onPress={() => setShowForgotPassword(false)} />
+                          </View>
+                        ) : (
+                          <LoginScreen
+                            onLogin={async (email?: string) => {
+                              const sess = await getSession();
+                              if (sess?.token && sess?.email === email) {
+                                setShowWelcomeLogin(true);
+                              } else {
+                                const token = generateToken();
+                                await saveSession(email || '', token);
+                                setShowWelcomeLogin(true);
+                              }
+                            }}
+                            onSignup={() => setShowSignup(true)}
+                            onForgotPassword={() => setShowForgotPassword(true)}
+                          />
+                        )
+                      ) : (
+                        <NavigationContainer>
+                          <Stack.Navigator screenOptions={{ headerShown: false }}>
+                            <Stack.Screen name="MainTabs">
+                              {() => {
+                                const TabNav: React.FC = () => {
+                                  const { colors } = useTheme();
+                                  return (
+                                    <Tab.Navigator
+                                      screenOptions={({ route }) => ({
+                                        tabBarIcon: ({ color, size }) => {
+                                          switch (route.name) {
+                                            case 'Accueil':
+                                              return <MaterialCommunityIcons name="home" size={size} color={color} />;
+                                            case 'Biens':
+                                              return <FontAwesome5 name="building" size={size} color={color} />;
+                                            case 'Tâches':
+                                              return <MaterialCommunityIcons name="clipboard-list" size={size} color={color} />;
+                                            case 'Calendrier':
+                                              return <MaterialCommunityIcons name="calendar" size={size} color={color} />;
+                                            case 'Carte':
+                                              return <MaterialCommunityIcons name="map-marker" size={size} color={color} />;
+                                            case 'Prestations':
+                                              return <FontAwesome5 name="briefcase" size={size} color={color} />;
+                                            case 'Locataire':
+                                              return <FontAwesome5 name="users" size={size} color={color} />;
+                                            default:
+                                              return null;
+                                          }
+                                        },
+                                        tabBarActiveTintColor: colors.primary,
+                                        tabBarInactiveTintColor: colors.textSecondary,
+                                        tabBarStyle: { backgroundColor: colors.surface, borderTopColor: colors.border },
+                                        headerTitleAlign: 'center',
+                                        headerStyle: { height: 48, backgroundColor: colors.surface },
+                                        headerTitleStyle: { fontSize: 20, fontWeight: 'bold', color: colors.text },
+                                      })}
+                                    >
+                                      <Tab.Screen name="Accueil">
+                                        {() => (
+                                          <HomeStackScreen
+                                            onLogout={async () => {
+                                              await clearSession();
+                                              setIsLoggedIn(false);
+                                            }}
+                                          />
+                                        )}
+                                      </Tab.Screen>
+                                      <Tab.Screen name="Biens" component={BiensScreen} />
+                                      <Tab.Screen name="Tâches" component={TachesScreen} />
+                                      <Tab.Screen name="Réserv." component={ReservationScreen}
+                                        options={{
+                                          tabBarIcon: ({ color, size }) => (
+                                            <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
+                                          ),
+                                          tabBarLabel: 'Réserv.'
                                         }}
                                       />
-                                    )}
-                                  </Tab.Screen>
-                                  <Tab.Screen name="Biens" component={BiensScreen} />
-                                  <Tab.Screen name="Tâches" component={TachesScreen} />
-                                  <Tab.Screen name="Réserv." component={ReservationScreen}
-                                    options={{
-                                      tabBarIcon: ({ color, size }) => (
-                                        <MaterialCommunityIcons name="calendar-check" size={size} color={color} />
-                                      ),
-                                      tabBarLabel: 'Réserv.'
-                                    }}
-                                  />
-                                  <Tab.Screen name="Prestations" component={PrestationsScreen} />
-                                  <Tab.Screen name="Param." component={ParametresStack}
-                                    options={{
-                                      tabBarIcon: ({ color, size }) => (
-                                        <MaterialCommunityIcons name="cog" size={size} color={color} />
-                                      ),
-                                      tabBarLabel: 'Param.'
-                                    }}
-                                  />
-                                </Tab.Navigator>
-                              );
-                            };
-                            return <TabNav />;
-                          }}
-                        </Stack.Screen>
-                        {/* écran accessible via navigation.navigate('NotificationsScreen') */}
-                        <Stack.Screen name="NotificationsScreen" component={NotificationScreen} />
-                        {/* Garder la page Carte accessible via navigation.navigate('Carte') mais la retirer de la tabBar */}
-                        <Stack.Screen name="Carte" component={CarteScreen} />
-                      </Stack.Navigator>
-                    </NavigationContainer>
-                  </ChiffreAffaireRefreshProvider>
-                </NotificationCountProvider>
-              </ReservationRefreshProvider>
-            </TacheCountProvider>
-          </TacheProvider>
-        </BienCountProvider>
-      </PrestationsCountProvider>
-    </ThemeProvider>
+                                      <Tab.Screen name="Prestations" component={PrestationsScreen} />
+                                      <Tab.Screen name="Param." component={ParametresStack}
+                                        options={{
+                                          tabBarIcon: ({ color, size }) => (
+                                            <MaterialCommunityIcons name="cog" size={size} color={color} />
+                                          ),
+                                          tabBarLabel: 'Param.'
+                                        }}
+                                      />
+                                    </Tab.Navigator>
+                                  );
+                                };
+                                return <TabNav />;
+                              }}
+                            </Stack.Screen>
+                            <Stack.Screen name="NotificationsScreen" component={NotificationScreen} />
+                            <Stack.Screen name="Carte" component={CarteScreen} />
+                          </Stack.Navigator>
+                        </NavigationContainer>
+                      )}
+                    </ChiffreAffaireRefreshProvider>
+                  </NotificationCountProvider>
+                </ReservationRefreshProvider>
+              </TacheCountProvider>
+            </TacheProvider>
+          </BienCountProvider>
+        </PrestationsCountProvider>
+      </ThemeProvider>
+    </AppContext.Provider>
   );
 }
 

@@ -398,10 +398,6 @@ export async function adminSendNotification(payload: { userId: number; title: st
   return apiFetch('/notifications/admin/send', { method: 'POST', body: JSON.stringify(payload) });
 }
 
-
-
-
-
 // Fonction pour créer une prestation
 import type { PrestationStatus } from '../components/AddPrestationModal';
 
@@ -476,11 +472,14 @@ export async function updateMe(data: any) {
     method: 'PATCH',
     body: JSON.stringify(data),
   });
+}
 
-
-
-
-
-
-  
+// Fonction pour supprimer le compte utilisateur
+export async function deleteMe() {
+  const user = await getMe();
+  const userId = user?.id;
+  if (!userId) throw new Error('Utilisateur non authentifié');
+  return apiFetch(`/users/${userId}`, {
+    method: 'DELETE',
+  });
 }

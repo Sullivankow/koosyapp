@@ -8,7 +8,7 @@ export class Reservation {
   id: number;
 
   //Relation avec le bien et locataire
-  @ManyToOne(() => Bien, bien => bien.reservations)
+  @ManyToOne(() => Bien, bien => bien.reservations, { onDelete: 'CASCADE' })
   bien: Bien;
 
   //Relation avec le locataire

@@ -27,7 +27,7 @@ export class User {
 telephone: string;
 
     // Relation OneToOne vers l'entreprise de l'utilisateur
-    @OneToOne(() => Entreprise)
+    @OneToOne(() => Entreprise, { onDelete: 'CASCADE' })
     entreprise: Entreprise;
   
    @Column({ default: 'gratuit' })
