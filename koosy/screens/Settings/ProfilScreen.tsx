@@ -9,12 +9,12 @@ import { useContext } from 'react';
 import { AppContext } from '../../contexts/AppContext';
 
 const initialUser: Utilisateur = {
-    id: 'u1',
-    nom: 'Dupont',
-    prenom: 'Jean',
-    email: 'jean.dupont@email.com',
-    telephone: '0601020304',
-    avatar: 'https://randomuser.me/api/portraits/men/1.jpg',
+    id: '',
+    nom: '',
+    prenom: '',
+    email: '',
+    telephone: '',
+    avatar: '',
     formule: 'gratuit',
 };
 
@@ -418,4 +418,5 @@ const styles = StyleSheet.create({
 });
 
 export default ProfilScreen;
+
 

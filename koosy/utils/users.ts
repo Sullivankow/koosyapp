@@ -9,11 +9,8 @@ const STORAGE_KEY = 'koosy_users';
 
 // Initialise avec 2 utilisateurs par défaut
 export async function initDefaultUsers() {
-  const users: User[] = [
-    { email: 'demo1@koosy.com', password: 'Azerty_123' },
-    { email: 'demo2@koosy.com', password: 'Koosy_2025' },
-  ];
-  await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(users));
+  // Cette fonction ne fait plus rien : les utilisateurs doivent être récupérés depuis la base de données.
+  return;
 }
 
 export async function getUsers(): Promise<User[]> {

@@ -54,11 +54,22 @@ export default function App() {
   const [showWelcomeLogin, setShowWelcomeLogin] = useState(false);
 
   useEffect(() => {
-    initDefaultUsers();
+    // Récupération des infos utilisateur depuis la base de données (API)
     const timer = setTimeout(async () => {
       const sess = await getSession();
       if (sess?.token) {
-        setIsLoggedIn(true);
+        try {
+          const user = await import('./utils/api').then(m => m.getMe());
+          // Sauvegarder les infos utilisateur en local si besoin
+          // await AsyncStorage.setItem('koosy_user', JSON.stringify(user));
+          setIsLoggedIn(true);
+        } catch (err) {
+          // Si erreur 401, forcer la déconnexion
+          setIsLoggedIn(false);
+          await clearSession();
+        }
+      } else {
+        setIsLoggedIn(false);
       }
       setIsLoading(false);
     }, 1200);
