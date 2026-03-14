@@ -1,12 +1,11 @@
-
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Image } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
+import { deleteEntreprise } from '../utils/api';
 
 // Type Entreprise strictement aligné sur le backend
 export interface Entreprise {
-	id: number;
 	nom: string;
 	siret: string;
 	tva?: string;
@@ -26,26 +25,67 @@ interface EntrepriseProfileCardProps {
 	onDelete?: () => void;
 }
 
+
+import { updateEntreprise } from '../utils/api';
+
 const EntrepriseProfileCard: React.FC<EntrepriseProfileCardProps> = ({ entreprise, onEdit, onDelete }) => {
 	const { colors } = useTheme();
 	const [modeEdition, setModeEdition] = useState(false);
-	const [editEntreprise, setEditEntreprise] = useState(entreprise);
 
-	const handleSave = () => {
-		setModeEdition(false);
-		Alert.alert('Succès', 'Informations de l’entreprise mises à jour.');
-		if (onEdit) onEdit();
+		const [editEntreprise, setEditEntreprise] = useState(entreprise);
+
+		// Synchronise le formulaire avec la prop entreprise à chaque mise à jour
+		React.useEffect(() => {
+			setEditEntreprise(entreprise);
+		}, [entreprise]);
+
+	// Fonction appelée lors de la sauvegarde des modifications de l'entreprise
+	const handleSave = async () => {
+		try {
+			// On ne garde que les champs attendus par le backend
+			const data = {
+				nom: editEntreprise.nom,
+				siret: editEntreprise.siret,
+				tva: editEntreprise.tva,
+				adresse: editEntreprise.adresse,
+				codePostal: editEntreprise.codePostal,
+				ville: editEntreprise.ville,
+				pays: editEntreprise.pays,
+				email: editEntreprise.email,
+				telephone: editEntreprise.telephone,
+				siteWeb: editEntreprise.siteWeb,
+				logo: editEntreprise.logo,
+			};
+			// Vérification rapide côté front (SIRET)
+			if (!data.siret || data.siret.length !== 14) {
+				Alert.alert('Erreur', 'Le SIRET doit contenir exactement 14 chiffres.');
+				return;
+			}
+			// On caste temporairement pour l'appel API car id n'est plus dans le type Entreprise (mais il est bien présent dans l'objet reçu)
+			await updateEntreprise((editEntreprise as any).id, data);
+			setModeEdition(false);
+			Alert.alert('Succès', 'Informations de l’entreprise mises à jour.');
+			if (onEdit) onEdit();
+		} catch (error: any) {
+			console.error('Erreur updateEntreprise:', error);
+			let msg = "Impossible de mettre à jour l'entreprise.";
+			if (error && error.message) {
+				msg += `\n${error.message}`;
+			}
+			Alert.alert('Erreur', msg);
+		}
 	};
 
-	const handleDelete = () => {
-		Alert.alert(
-			'Suppression',
-			'Supprimer cette entreprise ? Cette action est irréversible.',
-			[
-				{ text: 'Annuler', style: 'cancel' },
-				{ text: 'Supprimer', style: 'destructive', onPress: () => onDelete && onDelete() },
-			]
-		);
+	const handleDelete = async () => {
+		console.log('Suppression entreprise id:', (entreprise as any).id);
+		try {
+			await deleteEntreprise((entreprise as any).id);
+			Alert.alert('Succès', 'Entreprise supprimée avec succès.');
+			if (onEdit) onEdit();
+		} catch (error: any) {
+			console.error('Erreur suppression entreprise:', error);
+			Alert.alert('Erreur', "Impossible de supprimer l'entreprise.\n" + (typeof error === 'string' ? error : error && error.toString ? error.toString() : ''));
+		}
 	};
 
 	return (
@@ -99,17 +139,17 @@ const EntrepriseProfileCard: React.FC<EntrepriseProfileCardProps> = ({ entrepris
 			</View>
 			<View style={styles.infoRow}>
 				<MaterialCommunityIcons name="map-marker" size={20} color={colors.primary} />
-				{modeEdition ? (
-					<TextInput
-						style={[styles.input, { color: colors.text, borderColor: colors.primary, marginLeft: 8, flex: 1 }]}
-						value={editEntreprise.adresse || ''}
-						onChangeText={v => setEditEntreprise({ ...editEntreprise, adresse: v })}
-						placeholder="Adresse"
-						placeholderTextColor={colors.text}
-					/>
-				) : (
-					<Text style={[styles.infoText, { color: colors.text }]}>{entreprise.adresse || '-'}</Text>
-				)}
+				   {modeEdition ? (
+					   <TextInput
+						   style={[styles.input, { color: colors.text, borderColor: colors.primary, marginLeft: 8, flex: 1 }]}
+						   value={editEntreprise.adresse || ''}
+						   onChangeText={v => setEditEntreprise({ ...editEntreprise, adresse: v })}
+						   placeholder="Adresse"
+						   placeholderTextColor={colors.text}
+					   />
+				   ) : (
+					   <Text style={[styles.infoText, { color: colors.text }]}>{entreprise.adresse || '-'}</Text>
+				   )}
 			</View>
 			<View style={styles.infoRow}>
 				<MaterialCommunityIcons name="map-marker-radius" size={20} color={colors.primary} />
@@ -171,18 +211,18 @@ const EntrepriseProfileCard: React.FC<EntrepriseProfileCardProps> = ({ entrepris
 			</View>
 			<View style={styles.infoRow}>
 				<FontAwesome name="phone" size={20} color={colors.primary} />
-				{modeEdition ? (
-					<TextInput
-						style={[styles.input, { color: colors.text, borderColor: colors.primary, marginLeft: 8, flex: 1 }]}
-						value={editEntreprise.telephone || ''}
-						onChangeText={v => setEditEntreprise({ ...editEntreprise, telephone: v })}
-						placeholder="Téléphone"
-						placeholderTextColor={colors.text}
-						keyboardType="phone-pad"
-					/>
-				) : (
-					<Text style={[styles.infoText, { color: colors.text }]}>{entreprise.telephone || '-'}</Text>
-				)}
+				   {modeEdition ? (
+					   <TextInput
+						   style={[styles.input, { color: colors.text, borderColor: colors.primary, marginLeft: 8, flex: 1 }]}
+						   value={editEntreprise.telephone || ''}
+						   onChangeText={v => setEditEntreprise({ ...editEntreprise, telephone: v })}
+						   placeholder="Téléphone"
+						   placeholderTextColor={colors.text}
+						   keyboardType="phone-pad"
+					   />
+				   ) : (
+					   <Text style={[styles.infoText, { color: colors.text }]}>{entreprise.telephone || '-'}</Text>
+				   )}
 			</View>
 			<View style={styles.infoRow}>
 				<MaterialCommunityIcons name="web" size={20} color={colors.primary} />

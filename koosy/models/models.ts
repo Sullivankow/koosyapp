@@ -94,7 +94,20 @@ export type Utilisateur = {
   formule: 'gratuit' | 'payant';
 }
 
-
+export interface Entreprise {
+  id: number;
+  nom: string;
+  siret: string;
+  tva?: string;
+  adresse?: string;
+  codePostal?: string;
+  ville?: string;
+  pays?: string;
+  email?: string;
+  telephone?: string;
+  siteWeb?: string;
+  logo?: string;
+}
 
 
 

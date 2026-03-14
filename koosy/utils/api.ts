@@ -485,6 +485,37 @@ export async function deleteMe() {
 }
 
 // Fonction pour récupérer une entreprise par son ID
+
 export async function getEntrepriseById(id: number | string): Promise<any> {
   return apiFetch(`/entreprise/${id}`);
 }
+
+// --------------------------------------------------------------------------
+// Fonction pour modifier une entreprise (PATCH /entreprise/:id)
+// Utiliser cette fonction pour mettre à jour les informations d'une entreprise
+// Paramètres : id de l'entreprise et données à modifier (objet)
+// Retourne l'objet entreprise mis à jour
+// --------------------------------------------------------------------------
+export async function updateEntreprise(id: number | string, data: Partial<any>): Promise<any> {
+  // Utilise PUT car le backend n'accepte que PUT pour la mise à jour
+  return apiFetch(`/entreprise/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+// Supprime une entreprise par son id
+export async function deleteEntreprise(id: number): Promise<void> {
+  const session = await getSession();
+  const token = session?.token;
+  return apiFetch(`/entreprise/${id}`, {
+    method: 'DELETE',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  });
+}
+
+
+
+

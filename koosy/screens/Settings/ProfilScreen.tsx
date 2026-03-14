@@ -313,8 +313,16 @@ const ProfilScreen: React.FC = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                {/* Carte entreprise (affiche la vraie donnée API si dispo) */}
-                {entreprise && <EntrepriseProfileCard entreprise={entreprise} />}
+                                {/* Carte entreprise (affiche la vraie donnée API si dispo) */}
+                                {entreprise && (
+                                    <EntrepriseProfileCard 
+                                        entreprise={entreprise} 
+                                        onEdit={async () => {
+                                            setEntreprise(null);
+                                            Alert.alert('Succès', 'Entreprise supprimée avec succès.');
+                                        }}
+                                    />
+                                )}
             </ScrollView>
         </KeyboardAvoidingView>
     );
