@@ -9,6 +9,7 @@ import { getMe, updateMe, apiFetch, deleteMe } from '../../utils/api';
 import { clearSession } from '../../utils/session';
 import { useContext } from 'react';
 import { AppContext } from '../../contexts/AppContext';
+import { createEntreprise } from '../../utils/api';
 
 const initialUser: Utilisateur = {
     id: '',
@@ -26,6 +27,19 @@ const initialBank = {
     bic: '',
 };
 
+const initialEntreprise: Omit<Entreprise, 'id'> = {
+    nom: '',
+    siret: '',
+    tva: '',
+    adresse: '',
+    codePostal: '',
+    ville: '',
+    pays: '',
+    email: '',
+    telephone: '',
+    siteWeb: '',
+    logo: '',
+};
 
 const ProfilScreen: React.FC = () => {
     const { colors } = useTheme();
@@ -38,6 +52,8 @@ const ProfilScreen: React.FC = () => {
     const [showPasswordInput, setShowPasswordInput] = useState(false);
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
+    const [showEntrepriseForm, setShowEntrepriseForm] = useState(false);
+    const [newEntreprise, setNewEntreprise] = useState<Omit<Entreprise, 'id'>>(initialEntreprise);
     // Nouveau regex : accepte lettres, chiffres, majuscule, minuscule, caractères spéciaux
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=\-{}\[\]:;"'<>,.?/]).{8,}$/;
 
@@ -141,6 +157,28 @@ const ProfilScreen: React.FC = () => {
             ],
             { cancelable: false }
         );
+    };
+
+    {/* Bouton ajouter une entreprise */}
+    const handleAddEntreprise = () => {
+        setShowEntrepriseForm(true);
+    };
+
+    const handleCreateEntreprise = async () => {
+        try {
+            if (!newEntreprise.nom || !newEntreprise.siret || newEntreprise.siret.length !== 14) {
+                Alert.alert('Erreur', 'Le nom et un SIRET valide (14 chiffres) sont obligatoires.');
+                return;
+            }
+            // DEBUG : log des données envoyées
+            console.log('Données envoyées à createEntreprise:', newEntreprise);
+            const created = await createEntreprise(newEntreprise);
+            setEntreprise(created);
+            setShowEntrepriseForm(false);
+            Alert.alert('Succès', 'Entreprise créée avec succès.');
+        } catch (error) {
+            Alert.alert('Erreur', "Impossible de créer l'entreprise.");
+        }
     };
 
     return (
@@ -323,6 +361,38 @@ const ProfilScreen: React.FC = () => {
                                         }}
                                     />
                                 )}
+                {/* Formulaire d'ajout d'entreprise */}
+                {!entreprise && showEntrepriseForm && (
+                    <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.text, marginTop: 24 }]}> 
+                        <Text style={{ fontWeight: 'bold', fontSize: 18, marginBottom: 12, color: colors.primary }}>Nouvelle entreprise</Text>
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Nom de l'entreprise" placeholderTextColor={colors.text} value={newEntreprise.nom} onChangeText={v => setNewEntreprise({ ...newEntreprise, nom: v })} />
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="SIRET" placeholderTextColor={colors.text} value={newEntreprise.siret} onChangeText={v => setNewEntreprise({ ...newEntreprise, siret: v })} keyboardType="numeric" />
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="TVA (optionnel)" placeholderTextColor={colors.text} value={newEntreprise.tva} onChangeText={v => setNewEntreprise({ ...newEntreprise, tva: v })} />
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Adresse" placeholderTextColor={colors.text} value={newEntreprise.adresse} onChangeText={v => setNewEntreprise({ ...newEntreprise, adresse: v })} />
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Code postal" placeholderTextColor={colors.text} value={newEntreprise.codePostal} onChangeText={v => setNewEntreprise({ ...newEntreprise, codePostal: v })} />
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Ville" placeholderTextColor={colors.text} value={newEntreprise.ville} onChangeText={v => setNewEntreprise({ ...newEntreprise, ville: v })} />
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Pays" placeholderTextColor={colors.text} value={newEntreprise.pays} onChangeText={v => setNewEntreprise({ ...newEntreprise, pays: v })} />
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Email professionnel" placeholderTextColor={colors.text} value={newEntreprise.email} onChangeText={v => setNewEntreprise({ ...newEntreprise, email: v })} keyboardType="email-address" autoCapitalize="none" />
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Téléphone" placeholderTextColor={colors.text} value={newEntreprise.telephone} onChangeText={v => setNewEntreprise({ ...newEntreprise, telephone: v })} keyboardType="phone-pad" />
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Site web" placeholderTextColor={colors.text} value={newEntreprise.siteWeb} onChangeText={v => setNewEntreprise({ ...newEntreprise, siteWeb: v })} autoCapitalize="none" />
+                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Logo (URL)" placeholderTextColor={colors.text} value={newEntreprise.logo} onChangeText={v => setNewEntreprise({ ...newEntreprise, logo: v })} />
+                        <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary, marginTop: 12 }]} onPress={handleCreateEntreprise}>
+                            <MaterialCommunityIcons name="content-save" size={20} color={colors.surface} />
+                            <Text style={[styles.btnText, { color: colors.surface }]}>Enregistrer</Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity style={[styles.btnSecondary, { backgroundColor: colors.secondary, marginTop: 8 }]} onPress={() => setShowEntrepriseForm(false)}>
+                            <MaterialCommunityIcons name="close" size={20} color="#000" />
+                            <Text style={[styles.btnText, { color: '#000' }]}>Annuler</Text>
+                        </TouchableOpacity>
+                    </View>
+                )}
+                {/* Bouton ajouter une entreprise */}
+                {!entreprise && !showEntrepriseForm && (
+                    <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary, marginTop: 24, marginBottom: 18 }]} onPress={() => setShowEntrepriseForm(true)}>
+                        <MaterialCommunityIcons name="plus-circle" size={20} color={colors.surface} />
+                        <Text style={[styles.btnText, { color: colors.surface }]}>Ajouter une entreprise</Text>
+                    </TouchableOpacity>
+                )}
             </ScrollView>
         </KeyboardAvoidingView>
     );

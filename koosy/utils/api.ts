@@ -21,8 +21,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     ...options.headers,
   };
   const response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
-  if (!response.ok) throw new Error(await response.text());
-  // Si la réponse est vide ou status 204, ne pas parser en JSON
+  if (!response.ok) throw new Error(await response.text() || `Erreur API: ${response.status}`);
   if (response.status === 204) return;
   const text = await response.text();
   if (!text) return;
@@ -488,6 +487,19 @@ export async function deleteMe() {
 
 export async function getEntrepriseById(id: number | string): Promise<any> {
   return apiFetch(`/entreprise/${id}`);
+}
+
+// Crée une nouvelle entreprise
+export async function createEntreprise(data: Omit<import('../models/models').Entreprise, 'id'>): Promise<any> {
+  const session = await getSession();
+  const token = session?.token;
+  return apiFetch('/entreprise', {
+    method: 'POST',
+    headers: {
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: JSON.stringify(data),
+  });
 }
 
 // --------------------------------------------------------------------------
