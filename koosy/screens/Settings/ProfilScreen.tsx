@@ -3,21 +3,7 @@ import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, Keyb
 import { Utilisateur } from '../../models/models';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import EntrepriseProfileCard, { Entreprise } from '../../components/EntrepriseProfileCard';
-// À remplacer par la récupération réelle depuis l'API
-const initialEntreprise: Entreprise = {
-    id: 1,
-    nom: 'SARL Dupont',
-    siret: '12345678901234',
-    tva: 'FR12345678901',
-    adresse: '12 rue de Paris',
-    codePostal: '75001',
-    ville: 'Paris',
-    pays: 'France',
-    email: 'contact@dupont.fr',
-    telephone: '+33123456789',
-    siteWeb: 'https://dupont.fr',
-    logo: '',
-};
+import { getEntrepriseById } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getMe, updateMe, apiFetch, deleteMe } from '../../utils/api';
 import { clearSession } from '../../utils/session';
@@ -40,6 +26,7 @@ const initialBank = {
     bic: '',
 };
 
+
 const ProfilScreen: React.FC = () => {
     const { colors } = useTheme();
     const appContext = useContext(AppContext);
@@ -54,18 +41,26 @@ const ProfilScreen: React.FC = () => {
     // Nouveau regex : accepte lettres, chiffres, majuscule, minuscule, caractères spéciaux
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=\-{}\[\]:;"'<>,.?/]).{8,}$/;
 
-    // Récupération des infos utilisateur via API
+    // État pour l'entreprise réelle
+    const [entreprise, setEntreprise] = useState<Entreprise | null>(null);
+
+    // Récupération des infos utilisateur et entreprise via API
     React.useEffect(() => {
-        const fetchUser = async () => {
+        const fetchUserAndEntreprise = async () => {
             try {
                 const data = await getMe();
                 setUser(data);
                 setEditUser(data);
+                // Si l'utilisateur a une entreprise liée, on la récupère
+                if (data.entreprise && data.entreprise.id) {
+                    const ent = await getEntrepriseById(data.entreprise.id);
+                    setEntreprise(ent);
+                }
             } catch (error) {
-                console.error('Erreur API utilisateur:', error);
+                console.error('Erreur API utilisateur/entreprise:', error);
             }
         };
-        fetchUser();
+        fetchUserAndEntreprise();
     }, []);
 
     const handleSave = async () => {
@@ -318,8 +313,8 @@ const ProfilScreen: React.FC = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
-                {/* Carte entreprise (à remplacer par la vraie donnée API) */}
-                <EntrepriseProfileCard entreprise={initialEntreprise} />
+                {/* Carte entreprise (affiche la vraie donnée API si dispo) */}
+                {entreprise && <EntrepriseProfileCard entreprise={entreprise} />}
             </ScrollView>
         </KeyboardAvoidingView>
     );

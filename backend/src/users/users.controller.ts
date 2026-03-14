@@ -66,8 +66,14 @@ export class UsersController {
     //Affiche un utilisateur par son id 
     @Get(':id')
     @ApiOperation({ summary: 'Afficher un utilisateur par son id' })
-    findOne(@Param('id') id : number) {
-      return this.userService.findOne(Number(id));
+    async findOne(@Param('id') id : number) {
+      const user = await this.userService.findOne(Number(id));
+      if (user) {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { password, ...safe } = user as any;
+        return safe;
+      }
+      return null;
     }
 
 

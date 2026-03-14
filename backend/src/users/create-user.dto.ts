@@ -49,9 +49,12 @@ export class UpdateUserDto {
   @IsString()
   prenom?: string;
 
-    @ApiProperty({ example: 'premium', required: false })
+  @ApiProperty({ example: 'premium', required: false })
   abonnement?: 'gratuit' | 'premium';
-    
+
   @ApiProperty({ example: '0601020304', required: false })
   telephone?: string;
+
+  @ApiProperty({ example: 1, required: false, description: 'ID de l\'entreprise associée' })
+  entreprise?: number;
 }

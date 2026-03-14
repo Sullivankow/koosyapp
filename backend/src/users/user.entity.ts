@@ -1,4 +1,4 @@
-import {Entity , PrimaryGeneratedColumn, Column, OneToMany, OneToOne } from 'typeorm'; 
+import {Entity , PrimaryGeneratedColumn, Column, OneToMany, OneToOne, JoinColumn } from 'typeorm'; 
 import { Bien } from '../biens/bien.entity';
 import { UserPushToken } from './push-tokens/user-push-token.entity';
 import { Notification } from './push-tokens/notifications.entity';
@@ -28,6 +28,7 @@ telephone: string;
 
     // Relation OneToOne vers l'entreprise de l'utilisateur
     @OneToOne(() => Entreprise, { onDelete: 'CASCADE' })
+    @JoinColumn()
     entreprise: Entreprise;
   
    @Column({ default: 'gratuit' })

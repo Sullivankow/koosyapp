@@ -483,3 +483,8 @@ export async function deleteMe() {
     method: 'DELETE',
   });
 }
+
+// Fonction pour récupérer une entreprise par son ID
+export async function getEntrepriseById(id: number | string): Promise<any> {
+  return apiFetch(`/entreprise/${id}`);
+}

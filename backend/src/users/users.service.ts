@@ -28,12 +28,12 @@ export class UsersService {
 
   // Méthode pour récupérer tous les utilisateurs
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find();
+    return this.usersRepository.find({ relations: ['entreprise'] });
   }
 
 //Méthode pour trouver un utilisateur par son id
 async findOne(id: number): Promise<User | null> {
-  const user = await this.usersRepository.findOne({ where: { id } });
+  const user = await this.usersRepository.findOne({ where: { id }, relations: ['entreprise'] });
   if (!user) {
     throw new Error('L\'utilisateur n\'éxiste pas');
   }
