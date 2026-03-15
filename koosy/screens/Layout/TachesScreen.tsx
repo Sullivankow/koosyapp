@@ -98,11 +98,17 @@ function TachesScreen() {
         ListEmptyComponent={<Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 40 }}>Aucune tâche</Text>}
         renderItem={({ item }) => {
           const dateAffichee = item.dateEcheance ? formatDateFr(item.dateEcheance) : '';
+          // Couleur de bordure gauche selon le statut
+          const statutColor = {
+            'à faire': '#FF7043',
+            'en cours': '#FFA726',
+            'terminée': '#43A047',
+          };
           return (
-            <View style={[styles.card, { backgroundColor: colors.surface }]}> 
+            <View style={[styles.card, { backgroundColor: '#fff', borderLeftWidth: 6, borderLeftColor: statutColor[item.statut] || colors.primary }]}> 
               {/* Header avec titre et corbeille */}
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={[styles.cardTitle, { color: colors.text }]}>{item.titre}</Text>
+                <Text style={[styles.cardTitle, { color: '#000' }]}>{item.titre}</Text>
                 <TouchableOpacity
                   style={{ padding: 4 }}
                   onPress={() => {
@@ -128,30 +134,27 @@ function TachesScreen() {
                 <Text style={[styles.cardBien, { color: '#1976D2' }]}>Bien : {item.bienTitre}</Text>
               ) : null}
               <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{item.description}</Text>
-              <BadgeStatus statut={item.statut} style={{ marginTop: 4, marginBottom: 2 }} />
               {dateAffichee ? (
                 <Text style={[styles.cardDate, { color: colors.textSecondary }]}>Échéance : {dateAffichee}</Text>
               ) : null}
-              <View style={styles.cardActions}> 
-                {/* Badges interactifs pour changer le statut */}
-                {item.statut === 'à faire' && (
-                  <TouchableOpacity
-                    onPress={() => handleMarkTerminee(item.id)}
-                    activeOpacity={0.7}
-                    style={{ marginLeft: 8 }}
-                  >
-                    <BadgeStatus statut={'terminée'} />
-                  </TouchableOpacity>
-                )}
-                {item.statut === 'terminée' && (
-                  <TouchableOpacity
-                    onPress={() => handleMarkStatut(item.id, 'à faire')}
-                    activeOpacity={0.7}
-                    style={{ marginLeft: 8 }}
-                  >
-                    <BadgeStatus statut={'à faire'} />
-                  </TouchableOpacity>
-                )}
+              {/* Les deux badges côte à côte, toujours visibles */}
+              <View style={[styles.cardActions, { flexDirection: 'row', justifyContent: 'flex-end', gap: 8 }]}> 
+                <TouchableOpacity
+                  onPress={() => handleMarkStatut(item.id, 'à faire')}
+                  activeOpacity={0.7}
+                  disabled={item.statut === 'à faire'}
+                  style={{ opacity: item.statut === 'à faire' ? 1 : 0.5 }}
+                >
+                  <BadgeStatus statut={'à faire'} />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => handleMarkTerminee(item.id)}
+                  activeOpacity={0.7}
+                  disabled={item.statut === 'terminée'}
+                  style={{ opacity: item.statut === 'terminée' ? 1 : 0.5 }}
+                >
+                  <BadgeStatus statut={'terminée'} />
+                </TouchableOpacity>
               </View>
             </View>
           );

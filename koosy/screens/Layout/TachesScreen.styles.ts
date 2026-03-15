@@ -1,4 +1,3 @@
-
 import { StyleSheet } from 'react-native';
 
 const styles = StyleSheet.create({
@@ -42,14 +41,18 @@ const styles = StyleSheet.create({
 		color: '#fff',
 	},
 	card: {
-		borderRadius: 16,
+		borderRadius: 12,
+		marginBottom: 16,
 		padding: 16,
-		marginBottom: 18,
-		elevation: 2,
+		// Ajout de la bordure gauche colorée
+		borderLeftWidth: 6,
+		borderLeftColor: '#FF7043', // Couleur par défaut, sera override dynamiquement
+		backgroundColor: '#fff',
 		shadowColor: '#000',
 		shadowOffset: { width: 0, height: 2 },
-		shadowOpacity: 0.10,
-		shadowRadius: 6,
+		shadowOpacity: 0.08,
+		shadowRadius: 4,
+		elevation: 2,
 	},
 	cardHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
 	cardTitle: { fontSize: 18, fontWeight: 'bold' },
