@@ -11,32 +11,61 @@ export class LigneFactureService {
     private ligneFactureRepository: Repository<LigneFacture>,
   ) {}
 
+  /**
+   * Crée une nouvelle ligne de facture.
+   * Calcule automatiquement le montant TTC à partir du HT et du taux de TVA.
+   */
   create(createLigneFactureDto: CreateLigneFactureDto) {
-    const { facture, ...rest } = createLigneFactureDto;
+    const { facture, totalLigneHT, tva, ...rest } = createLigneFactureDto;
+    // Calcul automatique du TTC
+    const totalLigneTTC = totalLigneHT + (totalLigneHT * (tva ?? 0) / 100);
+    // Création de l'entité LigneFacture avec la relation vers la facture
     const ligne = this.ligneFactureRepository.create({
       ...rest,
+      totalLigneHT,
+      tva,
+      totalLigneTTC,
       facture: { id: facture },
     });
     return this.ligneFactureRepository.save(ligne);
   }
 
+  /**
+   * Récupère toutes les lignes de facture avec leur facture associée.
+   */
   findAll() {
     return this.ligneFactureRepository.find({ relations: ['facture'] });
   }
 
+  /**
+   * Récupère une ligne de facture par son identifiant (avec la facture associée).
+   */
   findOne(id: number) {
     return this.ligneFactureRepository.findOne({ where: { id }, relations: ['facture'] });
   }
 
+  /**
+   * Met à jour une ligne de facture existante.
+   * Recalcule le montant TTC si le HT ou la TVA changent.
+   */
   update(id: number, updateLigneFactureDto: Partial<CreateLigneFactureDto>) {
-    const { facture, ...rest } = updateLigneFactureDto;
+    const { facture, totalLigneHT, tva, ...rest } = updateLigneFactureDto;
     const updatePayload: any = { ...rest };
+    // Si le HT ou la TVA sont fournis, on recalcule le TTC
+    if (typeof totalLigneHT === 'number' && typeof tva === 'number') {
+      updatePayload.totalLigneTTC = totalLigneHT + (totalLigneHT * tva / 100);
+      updatePayload.totalLigneHT = totalLigneHT;
+      updatePayload.tva = tva;
+    }
     if (facture) {
       updatePayload.facture = { id: facture };
     }
     return this.ligneFactureRepository.update(id, updatePayload);
   }
 
+  /**
+   * Supprime une ligne de facture par son identifiant.
+   */
   remove(id: number) {
     return this.ligneFactureRepository.delete(id);
   }
