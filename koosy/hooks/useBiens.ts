@@ -1,0 +1,116 @@
+import { useState, useEffect, useCallback } from 'react';
+import { getBiens, updateBien, deleteBien } from '../utils/api';
+
+/**
+ * Hook personnalisé pour gérer la liste des biens et les opérations associées
+ * Fournit :
+ * - biens : liste des biens
+ * - fetchBiens : fonction pour rafraîchir la liste
+ * - updateBienById : fonction pour mettre à jour un bien
+ * - deleteBienById : fonction pour supprimer un bien
+ * - loading : booléen de chargement
+ * - error : message d'erreur éventuel
+ */
+export default function useBiens(deps: any[] = []) {
+  const [biens, setBiens] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Récupération des biens depuis l'API
+  const fetchBiens = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const biensData = await getBiens();
+      // Mapping et sécurisation des données (reprend la logique de BiensScreen)
+      const mappedBiens = biensData.map((bien: any) => {
+        let photos = [];
+        if (bien.images && bien.images.length > 0) {
+          photos = bien.images
+            .map((img: any) => {
+              const uri = img.url ? require('../utils/api').getImageUrl(img.url.replace(/\\|\//g, '/')) : '';
+              return uri && uri.trim() !== '' ? { uri } : null;
+            })
+            .filter((img: any) => img && img.uri && img.uri.trim() !== '');
+        }
+        if (photos.length === 0) {
+          photos = [require('../assets/house.jpg')];
+        }
+        return {
+          ...bien,
+          photos,
+          proprio: {
+            nom: bien.proprietaireNom || 'N/A',
+            email: bien.proprietaireEmail || '',
+            telephone: bien.proprietaireTelephone || '',
+          },
+          locataires: Array.isArray(bien.locataires)
+            ? bien.locataires.map((loc: any) => ({
+                id: loc.id?.toString() || '',
+                nom: loc.nom || 'N/A',
+                dateArrivee: loc.dateArrivee || '',
+                dateDepart: loc.dateDepart || '',
+              }))
+            : [],
+          taches: Array.isArray(bien.taches)
+            ? bien.taches.map((tache: any) => ({
+                id: tache.id?.toString() || '',
+                titre: tache.titre || 'N/A',
+                statut: tache.statut || '',
+                dateEcheance: tache.dateEcheance || '',
+              }))
+            : [],
+        };
+      });
+      setBiens(mappedBiens);
+    } catch (err: any) {
+      setError('Erreur lors de la récupération des biens');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  // Rafraîchit la liste à chaque changement de dépendances
+  useEffect(() => {
+    fetchBiens();
+    // eslint-disable-next-line
+  }, deps);
+
+  // Mise à jour d'un bien
+  const updateBienById = async (id: string, payload: any) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await updateBien(id, payload);
+      await fetchBiens();
+    } catch (err: any) {
+      setError('Erreur lors de la mise à jour du bien');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Suppression d'un bien
+  const deleteBienById = async (id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      await deleteBien(id);
+      await fetchBiens();
+    } catch (err: any) {
+      setError('Erreur lors de la suppression du bien');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return {
+    biens,
+    fetchBiens,
+    updateBienById,
+    deleteBienById,
+    loading,
+    error,
+    setBiens, // optionnel si besoin de manipuler directement
+  };
+}
