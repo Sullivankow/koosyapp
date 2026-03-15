@@ -61,7 +61,6 @@ const EntrepriseProfileCard: React.FC<EntrepriseProfileCardProps> = ({ entrepris
 				Alert.alert('Erreur', 'Le SIRET doit contenir exactement 14 chiffres.');
 				return;
 			}
-			// On caste temporairement pour l'appel API car id n'est plus dans le type Entreprise (mais il est bien présent dans l'objet reçu)
 			await updateEntreprise((editEntreprise as any).id, data);
 			setModeEdition(false);
 			Alert.alert('Succès', 'Informations de l’entreprise mises à jour.');
@@ -81,7 +80,7 @@ const EntrepriseProfileCard: React.FC<EntrepriseProfileCardProps> = ({ entrepris
 		try {
 			await deleteEntreprise((entreprise as any).id);
 			Alert.alert('Succès', 'Entreprise supprimée avec succès.');
-			if (onEdit) onEdit();
+			if (onDelete) onDelete();
 		} catch (error: any) {
 			console.error('Erreur suppression entreprise:', error);
 			Alert.alert('Erreur', "Impossible de supprimer l'entreprise.\n" + (typeof error === 'string' ? error : error && error.toString ? error.toString() : ''));

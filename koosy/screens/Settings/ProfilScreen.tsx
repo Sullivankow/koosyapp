@@ -60,23 +60,26 @@ const ProfilScreen: React.FC = () => {
     // État pour l'entreprise réelle
     const [entreprise, setEntreprise] = useState<Entreprise | null>(null);
 
-    // Récupération des infos utilisateur et entreprise via API
-    React.useEffect(() => {
-        const fetchUserAndEntreprise = async () => {
-            try {
-                const data = await getMe();
-                setUser(data);
-                setEditUser(data);
-                // Si l'utilisateur a une entreprise liée, on la récupère
-                if (data.entreprise && data.entreprise.id) {
-                    const ent = await getEntrepriseById(data.entreprise.id);
-                    setEntreprise(ent);
-                }
-            } catch (error) {
-                console.error('Erreur API utilisateur/entreprise:', error);
+    // Fonction pour rafraîchir l'entreprise depuis l'API
+    const refreshEntreprise = async () => {
+        try {
+            const data = await getMe();
+            setUser(data);
+            setEditUser(data);
+            if (data.entreprise && data.entreprise.id) {
+                const ent = await getEntrepriseById(data.entreprise.id);
+                setEntreprise(ent);
+            } else {
+                setEntreprise(null);
             }
-        };
-        fetchUserAndEntreprise();
+        } catch (error) {
+            console.error('Erreur API utilisateur/entreprise:', error);
+        }
+    };
+
+    // Récupération initiale
+    React.useEffect(() => {
+        refreshEntreprise();
     }, []);
 
     const handleSave = async () => {
@@ -356,7 +359,11 @@ const ProfilScreen: React.FC = () => {
                                     <EntrepriseProfileCard 
                                         entreprise={entreprise} 
                                         onEdit={async () => {
-                                            setEntreprise(null);
+                                            await refreshEntreprise();
+                                            Alert.alert('Succès', 'Informations de l’entreprise mises à jour.');
+                                        }}
+                                        onDelete={async () => {
+                                            await refreshEntreprise();
                                             Alert.alert('Succès', 'Entreprise supprimée avec succès.');
                                         }}
                                     />
