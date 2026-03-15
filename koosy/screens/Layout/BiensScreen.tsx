@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ScrollView, Image, Modal, Dimensions, TextInput } from 'react-native';
+import BienCard from '../../components/BienCard';
 import StatusModal from '../../components/StatusModal';
 import { useTheme } from '../../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
@@ -301,100 +302,15 @@ const BiensScreen: React.FC = () => {
         contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
         getItemLayout={(_, index) => ({ length: CARD_HEIGHT, offset: CARD_HEIGHT * index, index })}
         renderItem={({ item }) => (
-          <View style={[styles.card, { backgroundColor: colors.surface }]}> 
-            {/* Nom du bien */}
-            <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 2 }}>{item.nom || 'Sans nom'}</Text>
-            <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 6 }}>
-              Créé le {item.dateCreation ? formatDateFR(item.dateCreation) : formatDateFR(new Date().toISOString().slice(0, 10))}
-            </Text>
-            {Array.isArray(item.photos) && item.photos.length > 0 && renderCarousel(item.photos)}
-            <View style={styles.infoGrid}>
-              <View style={styles.infoCol}>
-                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Type</Text>
-                <Text style={[styles.infoValue, { color: colors.text }]}>{item.type || '-'}</Text>
-              </View>
-              <View style={styles.infoCol}>
-                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Superficie</Text>
-                <Text style={[styles.infoValue, { color: colors.text }]}>{item.superficie ? item.superficie + ' m²' : '-'}</Text>
-              </View>
-              <View style={styles.infoCol}>
-                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Pièces</Text>
-                <Text style={[styles.infoValue, { color: colors.text }]}>{item.pieces || '-'}</Text>
-              </View>
-              <View style={styles.infoCol}>
-                <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Statut</Text>
-                <TouchableOpacity onPress={() => openStatusModal(item)}>
-                  <Text style={[styles.infoValue, { color: item.statut === 'disponible' ? 'green' : item.statut === 'occupé' ? 'red' : colors.accent }]}>{item.statut || '-'}</Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-            {/* Propriétaire */}
-            <View style={styles.proprioBox}>
-              <View style={styles.avatarCircle}>
-                <FontAwesome5 name="user-tie" size={18} color={colors.secondary} />
-              </View>
-              <View style={{ flex: 1 }}>
-                <>
-                  <Text style={{ color: colors.text, fontWeight: 'bold' }}>{item.proprio?.nom || 'N/A'}</Text>
-                  <Text style={{ color: colors.textSecondary }}>{item.proprio?.email || ''}</Text>
-                  <Text style={{ color: colors.textSecondary }}>{item.proprio?.telephone || ''}</Text>
-                </>
-              </View>
-            </View>
-
-            {/* Réservations */}
-            <View style={styles.sectionRow}>
-              <MaterialCommunityIcons name="calendar-check" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
-              <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 6 }}>Réservations :</Text>
-            </View>
-            {/* Liste verticale des réservations, sous le titre */}
-            <View style={{ width: '100%', flexDirection: 'column', gap: 8, marginBottom: 8 }}>
-              {Array.isArray(item.reservations) && item.reservations.length > 0 ? item.reservations.map((resa: any) => (
-                <View key={resa.id} style={{ flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.accent + '22', borderColor: colors.accent, borderWidth: 1, borderRadius: 12, padding: 8, marginBottom: 2, maxWidth: '100%' }}>
-                  <MaterialCommunityIcons name="account" size={16} color={colors.accent} style={{ marginRight: 8, marginTop: 2 }} />
-                  <View style={{ flex: 1 }}>
-                    <Text style={{ color: colors.accent, fontWeight: 'bold', fontSize: 13 }}>{resa.locataire?.nom || ''} {resa.locataire?.prenom || ''}</Text>
-                    {resa.locataire?.email ? (
-                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.locataire.email}</Text>
-                    ) : null}
-                    {resa.locataire?.telephone ? (
-                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.locataire.telephone}</Text>
-                    ) : null}
-                    <Text style={{ color: '#1976D2', fontSize: 12, fontWeight: 'bold', marginTop: 2 }}>{formatDateFR(resa.dateDebut)} → {formatDateFR(resa.dateFin)}</Text>
-                    <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.statut ? resa.statut.charAt(0).toUpperCase() + resa.statut.slice(1) : ''}</Text>
-                  </View>
-                </View>
-              )) : <Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune réservation</Text>}
-            </View>
-            {/* Tâches */}
-            <View style={styles.sectionRow}>
-              <MaterialCommunityIcons name="clipboard-list" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
-              <Text style={{ color: colors.text, fontWeight: 'bold' }}>Tâches :</Text>
-              <View style={styles.timeline}>
-                {Array.isArray(item.taches) && item.taches.length > 0 ? item.taches.map(tache => (
-                  <View key={tache.id} style={styles.timelineItem}>
-                    <MaterialCommunityIcons name="circle" size={10} color={tache.statut === 'à faire' ? colors.error : colors.accent} style={{ marginRight: 6 }} />
-                    <View style={{ flex: 1 }}>
-                      <Text style={{ color: colors.text, fontWeight: '500' }}>{tache.titre || 'N/A'}</Text>
-                      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{tache.statut} {tache.dateEcheance ? `- ${formatDateFR(tache.dateEcheance)}` : ''}</Text>
-                    </View>
-                  </View>
-                )) : <Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune tâche</Text>}
-              </View>
-            </View>
-            {/* Actions */}
-            <View style={styles.floatingActions}>
-                <>
-                  <TouchableOpacity style={[styles.fab, { backgroundColor: colors.secondary }]} onPress={() => openEditModal(item)}>
-                    <MaterialCommunityIcons name="pencil" size={20} color={colors.surface} />
-                  </TouchableOpacity>
-                  <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={() => handleSupprimerBien(item.id)}>
-                    <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
-                  </TouchableOpacity>
-                  {/* map icon removed as requested */}
-                </>
-            </View>
-          </View>
+          <BienCard
+            bien={item}
+            colors={colors}
+            onEdit={openEditModal}
+            onDelete={handleSupprimerBien}
+            onStatus={openStatusModal}
+            onPhotoPress={handlePhotoPress}
+            formatDateFR={formatDateFR}
+          />
         )}
       />
       {/* Edit modal using AddBienModal */}
@@ -423,167 +339,8 @@ const BiensScreen: React.FC = () => {
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: 0,
-  },
-  headerSticky: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderColor: '#eee',
-    // position: 'sticky', // Non supporté RN
-    // top: 0,
-    zIndex: 10,
-  },
-  title: {
-    fontSize: 26,
-    fontWeight: 'bold',
-  },
-  addBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 24,
-    paddingVertical: 8,
-    paddingHorizontal: 18,
-    elevation: 2,
-  },
-  card: {
-    borderRadius: 18,
-    padding: 18,
-    marginHorizontal: 16,
-    marginBottom: 24,
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-  },
-  carousel: {
-    marginBottom: 12,
-    borderRadius: 14,
-    // overflow: 'hidden', // Non supporté sur ScrollView
-  },
-  carouselPhoto: {
-    width: SCREEN_WIDTH - 32,
-    height: 180,
-    borderRadius: 14,
-    marginRight: 4,
-    // Pas de style View/Text ici
-  },
-  infoGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 10,
-    gap: 12,
-  },
-  infoCol: {
-    width: '48%',
-    marginBottom: 4,
-  },
-  infoLabel: {
-    color: '#888',
-    fontSize: 13,
-  },
-  infoValue: {
-    fontSize: 15,
-    fontWeight: 'bold',
-  },
-  proprioBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.04)',
-    borderRadius: 12,
-    padding: 10,
-    marginBottom: 10,
-    gap: 10,
-  },
-  avatarCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: 'rgba(0,0,0,0.08)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginRight: 10,
-  },
-  sectionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 8,
-    marginBottom: 2,
-    gap: 6,
-  },
-  chipsRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-    marginLeft: 8,
-  },
-  chip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderRadius: 16,
-    borderWidth: 1,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    marginBottom: 4,
-    marginRight: 4,
-    minWidth: 90,
-    gap: 4,
-  },
-  timeline: {
-    flex: 1,
-    flexDirection: 'column',
-    gap: 6,
-    marginLeft: 8,
-  },
-  timelineItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 2,
-    gap: 6,
-  },
-  floatingActions: {
-    flexDirection: 'row',
-    justifyContent: 'flex-end',
-    gap: 16,
-    marginTop: 16,
-  },
-  fab: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    elevation: 2,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.8)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  modalPhoto: {
-    width: '90%',
-    height: '70%',
-    borderRadius: 12,
-    // Pas de style View/Text ici
-  },
-  closeBtn: {
-    position: 'absolute',
-    top: 30,
-    right: 30,
-    zIndex: 2,
-    backgroundColor: 'rgba(0,0,0,0.3)',
-    borderRadius: 20,
-    padding: 6,
-  },
-});
+
+import { styles } from './BienScreen.styles';
 
 export default BiensScreen;
 

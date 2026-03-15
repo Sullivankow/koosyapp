@@ -197,14 +197,14 @@ const ProfilScreen: React.FC = () => {
                 {/* Carte utilisateur native */}
                 <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.text }]}> 
                     <View style={{ alignItems: 'center', marginBottom: 18 }}>
-                        <Image
-                            source={
-                                (modeEdition ? editUser.avatar : user.avatar)
-                                    ? { uri: modeEdition ? editUser.avatar : user.avatar }
-                                    : require('../../assets/house.jpg')
-                            }
-                            style={styles.avatar}
-                        />
+                        {(modeEdition ? editUser.avatar : user.avatar) ? (
+                            <Image
+                                source={{ uri: modeEdition ? editUser.avatar : user.avatar }}
+                                style={styles.avatar}
+                            />
+                        ) : (
+                            <MaterialCommunityIcons name="account-circle" size={80} color={colors.primary} style={{ marginBottom: 8 }} />
+                        )}
                         {modeEdition ? (
                             <TextInput
                                 style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
