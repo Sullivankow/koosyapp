@@ -13,17 +13,15 @@ import PlusButton from '../../components/PlusButton';
 
 
 const statutColor: Record<string, string> = {
-  'confirmée': '#43A047',
-  'en attente': '#FF7043',
-  'annulée': '#B71C1C',
-  'terminée': '#1976D2',
+	'confirmée': '#43A047',
+	'en attente': '#FF7043',
+	'terminée': '#1976D2',
 };
 
 const TABS = [
-	{ key: 'en attente', label: 'En attente' },
-	{ key: 'confirmée', label: 'Confirmée' },
-	{ key: 'terminée', label: 'Terminée' },
-	{ key: 'annulée', label: 'Annulée' },
+  { key: 'en attente', label: 'En attente' },
+  { key: 'confirmée', label: 'Confirmée' },
+  { key: 'terminée', label: 'Terminée' },
 ];
 
 const PrestationsScreen: React.FC = () => {
@@ -100,7 +98,7 @@ const PrestationsScreen: React.FC = () => {
 									<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Date : {p.date_prestation}</Text>
 									<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Créée le : {p.created_at?.slice(0, 10)}</Text>
 																<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4, marginBottom: 2 }}>
-																	{['en attente', 'confirmée', 'terminée', 'annulée'].map((s) => {
+																	{['en attente', 'confirmée', 'terminée'].map((s) => {
 																		const isActive = p.status === STATUS_CONFIG[s]?.label || p.status === s;
 																		return (
 																			<TouchableOpacity

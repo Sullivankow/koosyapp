@@ -18,16 +18,16 @@ const BadgeStatus: React.FC<BadgeStatusProps> = ({ statut, style }) => {
 
 const styles = StyleSheet.create({
 	badge: {
-		borderRadius: 10,
-		paddingHorizontal: 7,
-		paddingVertical: 2,
+		borderRadius: 12,
+		paddingHorizontal: 12,
+		paddingVertical: 4,
 		alignSelf: 'flex-start',
-		marginVertical: 1,
+		marginVertical: 2,
 	},
 	text: {
 		color: '#fff',
 		fontWeight: 'bold',
-		fontSize: 11,
+		fontSize: 13,
 	},
 });
 

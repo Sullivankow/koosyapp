@@ -134,7 +134,7 @@ function ReservationScreen() {
               </TouchableOpacity>
             ))}
           </View>
-          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={{ paddingBottom: 32 }}>
+          <ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={{ paddingBottom: 100 }}>
             <Text style={[styles.title, { color: colors.primary }]}>Réservations {tab === 'en attente' ? 'en attente' : 'confirmées'}</Text>
             {/* Liste filtrée */}
             {reservations.length === 0 ? (
@@ -183,7 +183,7 @@ function ReservationScreen() {
                                     disabled={isActive}
                                     onPress={async () => {
                                       if (!isActive) {
-                                        await import('../../utils/api').then(api => api.updateReservationStatut(r.id, STATUS_CONFIG[s]?.label || s));
+                                        await import('../../utils/api').then(api => api.updateReservationStatut(r.id, s as 'en attente' | 'confirmée' | 'terminée' | 'annulée'));
                                         fetchData();
                                         signalBienAdded();
                                       }
@@ -228,7 +228,7 @@ function ReservationScreen() {
                 )}
               </>
             )}
-            <PlusButton onPress={openModal} backgroundColor={colors.primary} iconColor={colors.surface} />
+          {/* Le bouton est déplacé en dehors du ScrollView pour être en bas de page */}
           </ScrollView>
           <AddReservationsModal
             visible={modalVisible}
@@ -239,6 +239,7 @@ function ReservationScreen() {
             biens={biens}
             colors={colors}
           />
+          <PlusButton onPress={openModal} backgroundColor={colors.primary} iconColor={colors.surface} />
         </>
       )}
     </View>
