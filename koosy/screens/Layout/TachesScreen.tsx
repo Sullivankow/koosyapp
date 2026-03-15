@@ -90,6 +90,10 @@ function TachesScreen() {
           <Text style={[styles.tabText, selectedTab === 'terminée' && styles.tabTextActive]}>Terminée</Text>
         </TouchableOpacity>
       </View>
+      {/* Titre bleu sous les onglets, comme sur ReservationScreen */}
+      <Text style={{ fontSize: 26, fontWeight: 'bold', color: colors.primary, margin: 18, marginTop: 8, marginBottom: 8 }}>
+        {selectedTab === 'à faire' ? 'Tâches à faire' : 'Tâches terminées'}
+      </Text>
       {/* Liste des tâches */}
       <FlatList
         data={sortedTaches}
