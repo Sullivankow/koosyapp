@@ -157,7 +157,35 @@ function ReservationScreen() {
                       const dateFin = r.dateFin || r.dateDepart || '';
                       return (
                         <View key={r.id} style={[styles.card, { borderLeftColor: statutColor[r.statut] || colors.primary }]}> 
-                          <Text style={styles.cardTitle}>{bienNom}</Text>
+                          {/* Header avec titre et corbeille */}
+                          <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Text style={styles.cardTitle}>{bienNom}</Text>
+                            <TouchableOpacity
+                              style={{ padding: 4 }}
+                              onPress={async () => {
+                                Alert.alert(
+                                  'Supprimer',
+                                  'Voulez-vous vraiment supprimer cette réservation ?',
+                                  [
+                                    { text: 'Annuler', style: 'cancel' },
+                                    { text: 'Supprimer', style: 'destructive', onPress: async () => {
+                                        try {
+                                          await import('../../utils/api').then(api => api.deleteReservation(r.id));
+                                          fetchData();
+                                          signalBienAdded();
+                                        } catch (e) {
+                                          Alert.alert('Erreur', 'Impossible de supprimer la réservation.');
+                                        }
+                                      }
+                                    }
+                                  ]
+                                );
+                              }}
+                            >
+                              <MaterialCommunityIcons name="delete" size={22} color="#B71C1C" />
+                            </TouchableOpacity>
+                          </View>
+                          {/* Le reste de la card */}
                           <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 16 }}>
                             {locNom}{locPrenom ? ' ' + locPrenom : ''}
                           </Text>
@@ -195,31 +223,6 @@ function ReservationScreen() {
                                 );
                               })}
                             </View>
-                            {/* Icône de suppression */}
-                            <TouchableOpacity
-                              style={{ marginLeft: 14, padding: 4 }}
-                              onPress={async () => {
-                                Alert.alert(
-                                  'Supprimer',
-                                  'Voulez-vous vraiment supprimer cette réservation ?',
-                                  [
-                                    { text: 'Annuler', style: 'cancel' },
-                                    { text: 'Supprimer', style: 'destructive', onPress: async () => {
-                                        try {
-                                          await import('../../utils/api').then(api => api.deleteReservation(r.id));
-                                          fetchData();
-                                          signalBienAdded();
-                                        } catch (e) {
-                                          Alert.alert('Erreur', 'Impossible de supprimer la réservation.');
-                                        }
-                                      }
-                                    }
-                                  ]
-                                );
-                              }}
-                            >
-                              <MaterialCommunityIcons name="trash-can-outline" size={22} color="#B71C1C" />
-                            </TouchableOpacity>
                           </View>
                         </View>
                       );
