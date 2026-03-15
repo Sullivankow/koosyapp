@@ -1,5 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { Entreprise } from '../entreprise/entreprise.entity';
+import { LigneDevis } from '../ligne-devis/ligne-devis.entity';
 
 @Entity()
 export class Devis {
@@ -33,8 +34,12 @@ export class Devis {
 	@Column({ type: 'text', nullable: true })
 	notes: string;
 
+
 	@ManyToOne(() => Entreprise, { nullable: false, onDelete: 'CASCADE' })
 	entreprise: Entreprise;
+
+	@OneToMany(() => LigneDevis, ligne => ligne.devis, { cascade: true })
+	lignes: LigneDevis[];
 
 	@UpdateDateColumn()
 	updatedAt: Date;

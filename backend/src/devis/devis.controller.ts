@@ -4,7 +4,7 @@ import { CreateDevisDto } from './create-devis.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
-@ApiTags('devis')
+@ApiTags('Devis')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
 @Controller('devis')

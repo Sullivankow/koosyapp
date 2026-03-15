@@ -16,6 +16,7 @@ import { PrestationsModule } from './prestations/prestation.module';
 import { join } from 'path';
 import { EntrepriseModule } from './entreprise/entreprise.module';
 import { DevisModule } from './devis/devis.module';
+import { LigneDevisModule } from './ligne-devis/ligne-devis.module';
 
 @Module({
   imports: [
@@ -45,6 +46,7 @@ import { DevisModule } from './devis/devis.module';
     PrestationsModule,
     EntrepriseModule,
     DevisModule,
+    LigneDevisModule,
     
 
 
