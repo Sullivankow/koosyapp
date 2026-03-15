@@ -1,3 +1,4 @@
+import { LigneFactureModule } from './ligne-facture/ligne-facture.module';
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -16,6 +17,7 @@ import { PrestationsModule } from './prestations/prestation.module';
 import { join } from 'path';
 import { EntrepriseModule } from './entreprise/entreprise.module';
 import { DevisModule } from './devis/devis.module';
+import { FactureModule } from './facture/facture.module';
 import { LigneDevisModule } from './ligne-devis/ligne-devis.module';
 
 @Module({
@@ -46,6 +48,8 @@ import { LigneDevisModule } from './ligne-devis/ligne-devis.module';
     PrestationsModule,
     EntrepriseModule,
     DevisModule,
+    FactureModule,
+    LigneFactureModule,
     LigneDevisModule,
     
 
