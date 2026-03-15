@@ -1,3 +1,5 @@
+import BadgeStatus from '../../components/BadgeStatus';
+import { STATUS_CONFIG } from '../../constants/Status';
 import React, { useState, useEffect } from 'react';
 import { useBienCount } from '../../contexts/BienCountContext';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
@@ -139,11 +141,11 @@ function ReservationScreen() {
               <Text style={{ textAlign: 'center', color: colors.textSecondary, marginTop: 24 }}>Aucune réservation</Text>
             ) : (
               <>
-                {reservations.filter((r: Reservation) => r.statut === tab).length === 0 ? (
+                {reservations.filter((r: Reservation) => (r.statut || '').toLowerCase() === tab.toLowerCase()).length === 0 ? (
                   <Text style={{ textAlign: 'center', color: colors.textSecondary, marginTop: 24 }}>Aucune réservation {tab}</Text>
                 ) : (
                   <>
-                    {reservations.filter((r: Reservation) => r.statut === tab).map((r: Reservation) => {
+                    {reservations.filter((r: Reservation) => (r.statut || '').toLowerCase() === tab.toLowerCase()).map((r: Reservation) => {
                       // Utilisation des champs imbriqués renvoyés par l'API (relations TypeORM)
                       const bienNom = r.bien?.nom || 'Bien inconnu';
                       const locNom = r.locataire?.nom || '';
@@ -172,40 +174,27 @@ function ReservationScreen() {
                             {formatDateFR(dateDebut)} → {formatDateFR(dateFin)}
                           </Text>
                           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
-                            <Text style={{
-                              backgroundColor: statutColor[r.statut] || colors.primary,
-                              color: '#fff',
-                              borderRadius: 12,
-                              paddingHorizontal: 12,
-                              paddingVertical: 4,
-                              fontWeight: 'bold',
-                              fontSize: 13,
-                              marginRight: 8
-                            }}>{r.statut.charAt(0).toUpperCase() + r.statut.slice(1)}</Text>
-                            {/* Badge vert pour confirmer la réservation si en attente */}
-                            {r.statut === 'en attente' && (
-                              <TouchableOpacity
-                                style={{
-                                  backgroundColor: '#43A047',
-                                  borderRadius: 12,
-                                  paddingHorizontal: 10,
-                                  paddingVertical: 4,
-                                  marginLeft: 10,
-                                }}
-                                onPress={async () => {
-                                  try {
-                                    await import('../../utils/api').then(api => api.updateReservationStatut(r.id, 'confirmée'));
-                                    fetchData();
-                                    signalBienAdded();
-                                  } catch (e: any) {
-                                    const msg = e?.message || e?.toString() || 'Impossible de confirmer la réservation.';
-                                    Alert.alert('Erreur', msg);
-                                  }
-                                }}
-                              >
-                                <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>Confirmer</Text>
-                              </TouchableOpacity>
-                            )}
+                            <View style={{ flexDirection: 'row', marginTop: 4, marginBottom: 2 }}>
+                              {['en attente', 'confirmée'].map((s) => {
+                                const isActive = r.statut === STATUS_CONFIG[s]?.label || r.statut === s;
+                                return (
+                                  <TouchableOpacity
+                                    key={s}
+                                    disabled={isActive}
+                                    onPress={async () => {
+                                      if (!isActive) {
+                                        await import('../../utils/api').then(api => api.updateReservationStatut(r.id, STATUS_CONFIG[s]?.label || s));
+                                        fetchData();
+                                        signalBienAdded();
+                                      }
+                                    }}
+                                    style={{ opacity: isActive ? 1 : 0.5, marginRight: 6 }}
+                                  >
+                                    <BadgeStatus statut={s} />
+                                  </TouchableOpacity>
+                                );
+                              })}
+                            </View>
                             {/* Icône de suppression */}
                             <TouchableOpacity
                               style={{ marginLeft: 14, padding: 4 }}

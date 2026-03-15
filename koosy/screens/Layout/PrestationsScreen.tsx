@@ -1,3 +1,5 @@
+import BadgeStatus from '../../components/BadgeStatus';
+import { STATUS_CONFIG } from '../../constants/Status';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -79,76 +81,49 @@ const PrestationsScreen: React.FC = () => {
 			) : (
 				<ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={{ paddingBottom: 32 }}>
 					  <Text style={[styles.title, { color: colors.primary }]}>Prestations {tab}</Text>
-					{prestations.filter(p => p.status === TABS.find(t => t.key === tab)?.label).length === 0 ? (
-						<Text style={{ textAlign: 'center', color: colors.textSecondary, marginTop: 24 }}>Aucune prestation {TABS.find(t => t.key === tab)?.label.toLowerCase()}</Text>
-					) : (
-						prestations.filter(p => p.status === TABS.find(t => t.key === tab)?.label).map((p: Prestation) => (
-							<View key={p.id} style={[styles.card, { borderLeftColor: statutColor[p.status] || colors.primary }]}> 
-								<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-									<Text style={styles.cardTitle}>{p.bien?.nom || 'Bien inconnu'}</Text>
-									<TouchableOpacity onPress={async () => {
-										await deletePrestation(p.id);
-										await fetchPrestations();
-									}} style={{ marginLeft: 8, padding: 4 }}>
-										<MaterialCommunityIcons name="delete" size={22} color={colors.error || '#e53935'} />
-									</TouchableOpacity>
+						{prestations.filter(p => p.status === TABS.find(t => t.key === tab)?.label).length === 0 ? (
+							<Text style={{ textAlign: 'center', color: colors.textSecondary, marginTop: 24 }}>Aucune prestation {TABS.find(t => t.key === tab)?.label.toLowerCase()}</Text>
+						) : (
+							prestations.filter(p => p.status === TABS.find(t => t.key === tab)?.label).map((p: Prestation) => (
+								<View key={p.id} style={[styles.card, { borderLeftColor: statutColor[p.status] || colors.primary }]}> 
+									<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+										<Text style={styles.cardTitle}>{p.bien?.nom || 'Bien inconnu'}</Text>
+										<TouchableOpacity onPress={async () => {
+											await deletePrestation(p.id);
+											await fetchPrestations();
+										}} style={{ marginLeft: 8, padding: 4 }}>
+											<MaterialCommunityIcons name="delete" size={22} color={colors.error || '#e53935'} />
+										</TouchableOpacity>
+									</View>
+									<Text style={{ color: '#111', fontWeight: 'bold', fontSize: 16 }}>{p.description || 'Sans description'}</Text>
+									<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Montant : {(p.amount_cents / 100).toFixed(2)} €</Text>
+									<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Date : {p.date_prestation}</Text>
+									<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Créée le : {p.created_at?.slice(0, 10)}</Text>
+																<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4, marginBottom: 2 }}>
+																	{['en attente', 'confirmée', 'terminée', 'annulée'].map((s) => {
+																		const isActive = p.status === STATUS_CONFIG[s]?.label || p.status === s;
+																		return (
+																			<TouchableOpacity
+																				key={s}
+																				disabled={isActive}
+																				onPress={async () => {
+																					if (!isActive) {
+																						await updatePrestationStatut(p.id, STATUS_CONFIG[s]?.label || s);
+																						await fetchPrestations();
+																						if (refreshPrestationsTerminees) refreshPrestationsTerminees();
+																						signalRefresh();
+																					}
+																				}}
+																				style={{ opacity: isActive ? 1 : 0.5, marginRight: 6 }}
+																			>
+																				<BadgeStatus statut={s} />
+																			</TouchableOpacity>
+																		);
+																	})}
+																</View>
 								</View>
-								<Text style={{ color: '#111', fontWeight: 'bold', fontSize: 16 }}>{p.description || 'Sans description'}</Text>
-								<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Montant : {(p.amount_cents / 100).toFixed(2)} €</Text>
-								<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Date : {p.date_prestation}</Text>
-								<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Créée le : {p.created_at?.slice(0, 10)}</Text>
-									<ScrollView
-										horizontal
-										showsHorizontalScrollIndicator={false}
-										contentContainerStyle={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}
-									>
-										{(() => {
-											const statusMap: Record<'en attente' | 'confirmée' | 'terminée' | 'annulée', 'En attente' | 'Confirmée' | 'Terminée' | 'Annulée'> = {
-												'en attente': 'En attente',
-												'confirmée': 'Confirmée',
-												'terminée': 'Terminée',
-												'annulée': 'Annulée',
-											};
-											return (['en attente', 'confirmée', 'terminée', 'annulée'] as const).map((s) => {
-												const isActive = p.status === statusMap[s];
-												return (
-													<TouchableOpacity
-														key={s}
-														  onPress={async () => {
-															  if (!isActive) {
-																  await updatePrestationStatut(p.id, statusMap[s]);
-																  await fetchPrestations();
-																  if (refreshPrestationsTerminees) refreshPrestationsTerminees();
-																  signalRefresh(); // Déclenche le rafraîchissement du CA
-															  }
-														  }}
-														style={{
-															backgroundColor: isActive ? statutColor[s] : '#eee',
-															opacity: isActive ? 1 : 0.5,
-															borderRadius: 12,
-															paddingHorizontal: 14,
-															paddingVertical: 6,
-															marginRight: 8,
-															minWidth: 0,
-															alignItems: 'center',
-															justifyContent: 'center',
-															borderWidth: isActive ? 3 : 1,
-															borderColor: isActive ? statutColor[s] : '#ccc',
-															shadowColor: isActive ? statutColor[s] : 'transparent',
-															shadowOpacity: isActive ? 0.3 : 0,
-															shadowRadius: isActive ? 6 : 0,
-															elevation: isActive ? 4 : 0,
-														}}
-													>
-														<Text style={{ color: isActive ? '#fff' : '#444', fontWeight: 'bold', fontSize: 13 }}>{s.charAt(0).toUpperCase() + s.slice(1)}</Text>
-													</TouchableOpacity>
-												);
-											});
-										})()}
-									</ScrollView>
-							</View>
-						))
-					)}
+							))
+						)}
 					<AddPrestationModal
 						visible={modalVisible}
 						onClose={() => setModalVisible(false)}
