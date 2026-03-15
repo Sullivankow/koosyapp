@@ -7,6 +7,7 @@ import AddPrestationModal from '../../components/AddPrestationModal';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useChiffreAffaireRefresh } from '../../contexts/ChiffreAffaireRefreshContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import PlusButton from '../../components/PlusButton';
 
 
 const statutColor: Record<string, string> = {
@@ -155,9 +156,7 @@ const PrestationsScreen: React.FC = () => {
 					/>
 				</ScrollView>
 			)}
-			<TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={() => setModalVisible(true)}>
-				<MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
-			</TouchableOpacity>
+			<PlusButton onPress={() => setModalVisible(true)} backgroundColor={colors.primary} iconColor={colors.surface} />
 		</View>
 		);
 };

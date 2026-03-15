@@ -4,6 +4,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Scr
 import { useTheme } from '../../contexts/ThemeContext';
 import { Reservation, Bien, Locataire } from '../../models/models';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import PlusButton from '../../components/PlusButton';
 import { getBiens, createReservation, getReservations } from '../../utils/api';
 import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
 import dayjs from 'dayjs';
@@ -238,9 +239,7 @@ function ReservationScreen() {
                 )}
               </>
             )}
-            <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={openModal}>
-              <MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
-            </TouchableOpacity>
+            <PlusButton onPress={openModal} backgroundColor={colors.primary} iconColor={colors.surface} />
           </ScrollView>
           <AddReservationsModal
             visible={modalVisible}

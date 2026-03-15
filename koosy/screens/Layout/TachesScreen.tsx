@@ -1,13 +1,16 @@
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { deleteAllTachesTerminees } from '../../utils/api';
 
 import { getTaches, deleteTache, markTacheAsTerminee, updateTacheStatut } from '../../utils/api';
 import { useTacheCount } from '../../contexts/TacheCountContext';
 import { useTache } from '../../contexts/TacheContext';
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
+import styles from './TachesScreen.styles';
 import { useTheme } from '../../contexts/ThemeContext';
 import AddTachesModal from '../../components/AddTachesModal';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+import PlusButton from '../../components/PlusButton';
 
 
 
@@ -292,9 +295,7 @@ function formatDateFr(dateStr?: string) {
           <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>Tout supprimer</Text>
         </TouchableOpacity>
       )}
-      <TouchableOpacity style={[styles.fab, { backgroundColor: colors.primary }]} onPress={openModal}>
-        <MaterialCommunityIcons name="plus" size={28} color={colors.surface} />
-      </TouchableOpacity>
+      <PlusButton onPress={openModal} backgroundColor={colors.primary} iconColor={colors.surface} />
       <AddTachesModal
         visible={modalVisible}
         onClose={closeModal}
@@ -305,82 +306,5 @@ function formatDateFr(dateStr?: string) {
 }
 
 
-// Styles du composant
-const styles = StyleSheet.create({
-  container: { flex: 1 },
-  pageTitle: {
-    fontSize: 26,
-    fontWeight: 'bold',
-    color: '#fff',
-    textAlign: 'center',
-    marginTop: 28,
-    marginBottom: 8,
-    letterSpacing: 0.5,
-  },
-  tabsContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: 16,
-    marginBottom: 8,
-    gap: 8,
-  },
-  tabBtn: {
-    flex: 1,
-    paddingVertical: 10,
-    backgroundColor: '#eee',
-    borderRadius: 16,
-    marginHorizontal: 4,
-    alignItems: 'center',
-  },
-  tabBtnActive: {
-    backgroundColor: '#FF7043',
-  },
-  tabBtnTermineeActive: {
-    backgroundColor: '#43A047',
-  },
-  tabText: {
-    color: '#888',
-    fontWeight: 'bold',
-    fontSize: 15,
-  },
-  tabTextActive: {
-    color: '#fff',
-  },
-  card: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 18,
-    elevation: 2,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.10,
-    shadowRadius: 6,
-  },
-  cardHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 },
-  cardTitle: { fontSize: 18, fontWeight: 'bold' },
-  cardDesc: { fontSize: 14, marginBottom: 6 },
-  cardBien: { fontSize: 13, fontWeight: 'bold', marginBottom: 2 },
-  cardDate: { fontSize: 12, marginBottom: 2 },
-  statutBadge: { borderRadius: 12, paddingHorizontal: 10, paddingVertical: 4 },
-  cardActions: { flexDirection: 'row', alignItems: 'center', marginTop: 10 },
-  actionBtn: { padding: 8, borderRadius: 16, backgroundColor: 'rgba(0,0,0,0.04)' },
-  fab: { position: 'absolute', right: 24, bottom: 24, width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', elevation: 4 },
-  successMsgBox: {
-    backgroundColor: '#43A047',
-    paddingVertical: 10,
-    paddingHorizontal: 24,
-    borderRadius: 18,
-    alignSelf: 'center',
-    marginTop: 18,
-    marginBottom: 2,
-    zIndex: 10,
-  },
-  successMsgText: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 15,
-    textAlign: 'center',
-  },
-});
 
 export default TachesScreen;
