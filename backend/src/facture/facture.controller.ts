@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Res } from '@nestjs/common';
 import { FactureService } from './facture.service';
 import { CreateFactureDto } from './create-facture.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
+import type { Response } from 'express';
 
 @ApiTags('Facture')
 @ApiBearerAuth()
@@ -54,5 +55,22 @@ export class FactureController {
   @ApiOperation({ summary: 'Supprimer une facture', description: 'Supprime une facture par son identifiant.' })
   remove(@Param('id') id: string) {
     return this.factureService.remove(+id);
+  }
+  /**
+   * Génère et télécharge le PDF de la facture (utilisateur connecté)
+   */
+  @Get(':id/pdf')
+  @ApiOperation({ summary: 'Télécharger le PDF de la facture', description: 'Génère et télécharge le PDF de la facture.' })
+  async downloadPdf(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const pdfBuffer = await this.factureService.generatePdf(+id);
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="facture_${id}.pdf"`,
+      });
+      res.end(pdfBuffer);
+    } catch (err) {
+      res.status(404).json({ message: err.message || 'Erreur lors de la génération du PDF' });
+    }
   }
 }
