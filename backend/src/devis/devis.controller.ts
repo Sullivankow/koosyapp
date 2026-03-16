@@ -4,6 +4,9 @@ import { CreateDevisDto } from './create-devis.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
+import type { Response } from 'express';
+import { Res } from '@nestjs/common';
+
 @ApiTags('Devis')
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)
@@ -58,5 +61,24 @@ export class DevisController {
   @ApiOperation({ summary: 'Supprimer un devis', description: 'Supprime un devis par son identifiant.' })
   remove(@Param('id') id: string) {
     return this.devisService.remove(+id);
+  }
+
+
+  /**
+   * Génère et télécharge le PDF du devis (utilisateur connecté)
+   */
+  @Get(':id/pdf')
+  @ApiOperation({ summary: 'Télécharger le PDF du devis', description: 'Génère et télécharge le PDF du devis.' })
+  async downloadPdf(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const pdfBuffer = await this.devisService.generatePdf(+id);
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="devis_${id}.pdf"`,
+      });
+      res.end(pdfBuffer);
+    } catch (err) {
+      res.status(404).json({ message: err.message || 'Erreur lors de la génération du PDF' });
+    }
   }
 }
