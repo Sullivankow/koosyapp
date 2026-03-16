@@ -5,8 +5,6 @@ import { Devis } from './devis.entity';
 import { CreateDevisDto } from './create-devis.dto';
 
 import PDFDocument from 'pdfkit';
-import { Response } from 'express';
-import { Inject } from '@nestjs/common';
 import { LigneDevis } from '../ligne-devis/ligne-devis.entity';
 
 @Injectable()
@@ -75,54 +73,113 @@ export class DevisService {
       throw new Error('Devis non trouvé');
     }
 
+
     // Création du PDF en mémoire
-    const doc = new PDFDocument({ margin: 40 });
+    const doc = new PDFDocument({ margin: 50, size: 'A4' });
     const buffers: Buffer[] = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', () => {});
 
-    // En-tête
-    doc.fontSize(20).text('DEVIS', { align: 'center' });
-    doc.moveDown();
-    doc.fontSize(12).text(`Numéro : ${devis.numero}`);
-    doc.text(`Date : ${devis.dateCreation.toLocaleDateString()}`);
-    if (devis.dateValidite) doc.text(`Valide jusqu'au : ${devis.dateValidite.toLocaleDateString()}`);
-    doc.text(`Statut : ${devis.statut}`);
-    doc.moveDown();
 
-    // Entreprise
-    doc.fontSize(14).text('Entreprise', { underline: true });
-    doc.fontSize(12).text(devis.entreprise?.nom || '');
-    doc.text(devis.entreprise?.adresse || '');
-    doc.moveDown();
+    // === EN-TÊTE DU DOCUMENT ===
+    // Logo (optionnel)
+    // if (devis.entreprise?.logo) doc.image(devis.entreprise.logo, 250, 30, { width: 100 });
 
-    // Lignes du devis
-    doc.fontSize(14).text('Détail', { underline: true });
-    doc.moveDown(0.5);
-    devis.lignes.forEach((ligne: LigneDevis, idx: number) => {
-      doc.fontSize(12).text(
-        `${idx + 1}. ${ligne.description} - Qté: ${ligne.quantite} x ${ligne.prixUnitaireHT}€ HT (TVA: ${ligne.tva}%) = ${ligne.totalLigneHT}€ HT / ${ligne.totalLigneTTC}€ TTC`
+    // Titre principal
+    const mainColor = '#009688'; // bleu-vert principal Koosy
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(28)
+      .fillColor(mainColor)
+      .text('DEVIS', { align: 'center', underline: true });
+    doc.moveDown(1);
+
+    // Bloc informations en deux colonnes
+    const infoY = doc.y;
+    doc.fontSize(11).fillColor('black');
+    // Colonne entreprise
+    doc.text(devis.entreprise?.nom || '', 60, infoY);
+    if (devis.entreprise?.adresse) doc.text(devis.entreprise.adresse, 60);
+    if (devis.entreprise?.codePostal || devis.entreprise?.ville)
+      doc.text(
+        `${devis.entreprise.codePostal || ''} ${devis.entreprise.ville || ''}`.trim(),
+        60
       );
+    if (devis.entreprise?.pays) doc.text(devis.entreprise.pays, 60);
+    if (devis.entreprise?.email) doc.text(devis.entreprise.email, 60);
+
+    // Colonne devis
+    doc.text(`Numéro : ${devis.numero}`, 350, infoY);
+    doc.text(`Date : ${devis.dateCreation.toLocaleDateString()}`, 350);
+    if (devis.dateValidite)
+      doc.text(`Valide jusqu'au : ${devis.dateValidite.toLocaleDateString()}`, 350);
+    doc.text(`Statut : ${devis.statut}`, 350);
+    doc.moveDown(2);
+
+    // Ligne de séparation
+    doc.moveTo(60, doc.y).lineTo(535, doc.y).stroke(mainColor);
+    doc.moveDown(1);
+
+
+
+    // === TABLEAU DES LIGNES DE DEVIS ===
+    // Fond léger pour le tableau
+    const tableY = doc.y;
+    doc.rect(60, tableY, 475, 25 + 25 * devis.lignes.length).fill('#F4F7FA'); // fond du front
+    doc.font('Helvetica-Bold').fontSize(13).fillColor(mainColor);
+    doc.text('Désignation', 65, tableY + 5, { continued: true });
+    doc.text('Qté', 230, tableY + 5, { continued: true });
+    doc.text('PU HT', 280, tableY + 5, { continued: true });
+    doc.text('TVA %', 350, tableY + 5, { continued: true });
+    doc.text('Total HT', 420, tableY + 5, { continued: true });
+    doc.text('Total TTC', 495, tableY + 5);
+    doc.moveDown(0.5);
+    doc.moveTo(65, tableY + 25).lineTo(535, tableY + 25).stroke('#BFC9CA');
+
+    // Lignes du tableau
+    doc.font('Helvetica').fontSize(11).fillColor('black');
+    let rowY = tableY + 30;
+    devis.lignes.forEach((ligne: LigneDevis) => {
+      doc.text(ligne.description, 65, rowY, { width: 150, continued: true });
+      doc.text(ligne.quantite.toString(), 230, rowY, { width: 40, continued: true, align: 'right' });
+      doc.text(Number(ligne.prixUnitaireHT).toFixed(2) + ' €', 280, rowY, { width: 60, continued: true, align: 'right' });
+      doc.text(ligne.tva.toString(), 350, rowY, { width: 50, continued: true, align: 'right' });
+      doc.text(Number(ligne.totalLigneHT).toFixed(2) + ' €', 420, rowY, { width: 60, continued: true, align: 'right' });
+      doc.text(Number(ligne.totalLigneTTC).toFixed(2) + ' €', 495, rowY, { width: 60, align: 'right' });
+      rowY += 25;
     });
-    doc.moveDown();
+    doc.moveDown(1);
 
-    // Totaux
-    doc.fontSize(12).text(`Montant HT : ${devis.montantHT} €`);
-    doc.text(`Montant TVA : ${devis.montantTVA} €`);
-    doc.text(`Montant TTC : ${devis.montantTTC} €`);
-    doc.moveDown();
+    // Bordure du tableau
+    doc.rect(60, tableY, 475, rowY - tableY).stroke(mainColor);
+    doc.moveDown(1);
 
-    // Conditions et notes
+
+    // === TOTAUX ===
+    // Bloc totaux avec fond
+    const totalY = doc.y;
+    doc.rect(350, totalY, 185, 60).fill(mainColor);
+    doc.font('Helvetica').fontSize(12).fillColor('white');
+    doc.text(`Montant HT : ${Number(devis.montantHT).toFixed(2)} €`, 355, totalY + 5);
+    doc.text(`Montant TVA : ${Number(devis.montantTVA).toFixed(2)} €`, 355, totalY + 25);
+    doc.font('Helvetica-Bold').text(`Montant TTC : ${Number(devis.montantTTC).toFixed(2)} €`, 355, totalY + 45);
+    doc.font('Helvetica').moveDown(2);
+
+
+    // === CONDITIONS ET NOTES ===
     if (devis.conditions) {
-      doc.fontSize(12).text('Conditions :', { underline: true });
-      doc.text(devis.conditions);
+      doc.fontSize(11).fillColor(mainColor).text('Conditions de paiement :', 60, doc.y);
+      doc.fontSize(10).fillColor('black').text(devis.conditions, 60, doc.y, { width: 475 });
       doc.moveDown();
     }
     if (devis.notes) {
-      doc.fontSize(12).text('Notes :', { underline: true });
-      doc.text(devis.notes);
+      doc.fontSize(11).fillColor(mainColor).text('Notes :', 60, doc.y);
+      doc.fontSize(10).fillColor('black').text(devis.notes, 60, doc.y, { width: 475 });
       doc.moveDown();
     }
+
+    // Pied de page (optionnel)
+    doc.fontSize(9).fillColor(mainColor).text('Document généré automatiquement par KOOSY - Merci pour votre confiance.', 60, 780, { align: 'center', width: 475 });
 
     doc.end();
     // Attendre la fin de la génération du PDF et retourner le buffer
