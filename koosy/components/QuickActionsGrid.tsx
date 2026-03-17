@@ -53,7 +53,7 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
       <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.warning || '#FFA726' }]}> 
         <View style={styles.centerContent}>
           <MaterialCommunityIcons name="file-document-outline" size={24} color={colors.surface} style={styles.icon} />
-          <Text style={[styles.actionText, { color: colors.surface }]}>Mes facture</Text>
+          <Text style={[styles.actionText, { color: colors.surface }]}>Mes factures</Text>
         </View>
       </TouchableOpacity>
     </View>

@@ -1,3 +1,4 @@
+
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
@@ -553,7 +554,12 @@ export async function getDevis(): Promise<Devis[]> {
   return [];
 }
 
-
+// Fonction pour supprimer un devis par son ID
+export async function deleteDevis(id: number): Promise<void> {
+  return apiFetch(`/devis/${id}`, {
+    method: 'DELETE',
+  });
+}
 
 
 

@@ -1,18 +1,35 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
 import { getDevis } from '../../utils/api';
+import { deleteDevis } from '../../utils/api';
 import type { Devis } from '../../models/models';
 import { useAddDevisModal } from '../../hooks/useAddDevisModal';
 import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import PlusButton from '../../components/PlusButton';
 import { Dimensions } from 'react-native';
 
 export default function ListeDevisScreen() {
-	const { colors } = useTheme();
-	const [devis, setDevis] = useState<Devis[]>([]);
-	const { open, modal, lastDevis } = useAddDevisModal([]);
-	const screenWidth = Dimensions.get('window').width;
+		const { colors } = useTheme();
+		const [devis, setDevis] = useState<Devis[]>([]);
+		const { open, modal, lastDevis } = useAddDevisModal([]);
+		const screenWidth = Dimensions.get('window').width;
+
+		const handleDeleteDevis = async (id: number) => {
+			try {
+				await deleteDevis(id);
+				setDevis(devis.filter(d => d.id !== id));
+			} catch (e) {
+				alert("Erreur lors de la suppression du devis");
+			}
+		};
+
+		const handlePreviewDevis = (item: Devis) => {
+			// À remplacer par la navigation ou l'affichage d'une modale d'aperçu
+			alert(`Aperçu du devis n°${item.numero || item.id}`);
+		};
 
 	useEffect(() => {
 		getDevis().then(setDevis).catch(() => setDevis([]));
@@ -39,22 +56,26 @@ export default function ListeDevisScreen() {
 			<FlatList
 				data={devis}
 				keyExtractor={item => item.id?.toString() ?? Math.random().toString()}
-				renderItem={({ item }) => (
-					<View style={[styles.devisItem, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
-						<Text style={[styles.devisTitle, { color: colors.primary }]}>{item.numero || `Devis #${item.id}`}</Text>
-								<Text style={[styles.devisDate, { color: colors.textSecondary }]}>Date validité : {item.dateValidite ? new Date(item.dateValidite).toLocaleDateString('fr-FR') : '-'}</Text>
-								<Text style={[styles.devisMontant, { color: colors.text }]}>{'Montant TTC : '}{item.montantTTC !== undefined && item.montantTTC !== null ? Number(item.montantTTC).toFixed(2) : '0.00'} €</Text>
-					</View>
-				)}
+				   renderItem={({ item }) => (
+					   <View style={[styles.devisItem, { backgroundColor: colors.surface, borderBottomColor: colors.border, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }]}> 
+						   <View style={{ flex: 1 }}>
+							   <Text style={[styles.devisTitle, { color: colors.primary }]}>{item.numero || `Devis #${item.id}`}</Text>
+							   <Text style={[styles.devisDate, { color: colors.textSecondary }]}>Date validité : {item.dateValidite ? new Date(item.dateValidite).toLocaleDateString('fr-FR') : '-'}</Text>
+							   <Text style={[styles.devisMontant, { color: colors.text }]}>{'Montant TTC : '}{item.montantTTC !== undefined && item.montantTTC !== null ? Number(item.montantTTC).toFixed(2) : '0.00'} €</Text>
+						   </View>
+						   <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
+							   <TouchableOpacity onPress={() => handlePreviewDevis(item)} style={{ marginHorizontal: 4 }}>
+								   <Ionicons name="eye-outline" size={24} color={colors.primary} />
+							   </TouchableOpacity>
+							   <TouchableOpacity onPress={() => handleDeleteDevis(item.id)} style={{ marginHorizontal: 4 }}>
+								   <MaterialIcons name="delete-outline" size={24} color="#d32f2f" />
+							   </TouchableOpacity>
+						   </View>
+					   </View>
+				   )}
 				ListEmptyComponent={<Text style={{ textAlign: 'center', marginTop: 40, color: colors.textSecondary }}>Aucun devis pour l'instant.</Text>}
 			/>
-			<TouchableOpacity
-				onPress={open}
-				style={[styles.fab, { backgroundColor: colors.primary, shadowColor: colors.shadow }]}
-				activeOpacity={0.8}
-			>
-				<MaterialIcons name="add" size={32} color={colors.surface} />
-			</TouchableOpacity>
+			   <PlusButton onPress={open} backgroundColor={colors.primary} iconColor={colors.surface} />
 			{modal}
 		</SafeAreaView>
 	);
