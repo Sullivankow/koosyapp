@@ -47,13 +47,13 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
       <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.info || '#1976D2' }]} onPress={onAddDevis}> 
         <View style={styles.centerContent}>
           <MaterialCommunityIcons name="file-document-edit" size={24} color={colors.surface} style={styles.icon} />
-          <Text style={[styles.actionText, { color: colors.surface }]}>Créer un devis</Text>
+          <Text style={[styles.actionText, { color: colors.surface }]}>Mes devis</Text>
         </View>
       </TouchableOpacity>
       <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.warning || '#FFA726' }]}> 
         <View style={styles.centerContent}>
           <MaterialCommunityIcons name="file-document-outline" size={24} color={colors.surface} style={styles.icon} />
-          <Text style={[styles.actionText, { color: colors.surface }]}>Créer une facture</Text>
+          <Text style={[styles.actionText, { color: colors.surface }]}>Mes facture</Text>
         </View>
       </TouchableOpacity>
     </View>
