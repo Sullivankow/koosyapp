@@ -1,4 +1,5 @@
 
+
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
@@ -562,6 +563,9 @@ export async function deleteDevis(id: number): Promise<void> {
 }
 
 
-
+// Retourne l'URL du PDF d'un devis
+export function getDevisPdfUrl(id: number) {
+  return `${BASE_URL}/devis/${id}/pdf`;
+}
 
 

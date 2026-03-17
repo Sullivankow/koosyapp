@@ -15,9 +15,6 @@ export class DevisService {
   ) {}
 
 
- 
-
-
   // Lors de la récupération, on veut aussi les données de l'entreprise associée
   findAll() {
     return this.devisRepository.find({ relations: ['entreprise'] });
@@ -75,112 +72,113 @@ export class DevisService {
 
 
     // Création du PDF en mémoire
-    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    const doc = new PDFDocument({ margin: 30, size: 'A4' }); // marges pro
     const buffers: Buffer[] = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', () => {});
 
 
     // === EN-TÊTE DU DOCUMENT ===
-    // Logo (optionnel)
-    // if (devis.entreprise?.logo) doc.image(devis.entreprise.logo, 250, 30, { width: 100 });
-
-    // Titre principal
-    const mainColor = '#009688'; // bleu-vert principal Koosy
+    const mainColor = '#009688';
     doc
       .font('Helvetica-Bold')
-      .fontSize(28)
+      .fontSize(22)
       .fillColor(mainColor)
-      .text('DEVIS', { align: 'center', underline: true });
-    doc.moveDown(1);
-
-    // Bloc informations en deux colonnes
+      .text('DEVIS', { align: 'left' });
+    doc.moveDown(0.2);
+    // Bloc infos entreprise et client
     const infoY = doc.y;
-    doc.fontSize(11).fillColor('black');
-    // Colonne entreprise
-    doc.text(devis.entreprise?.nom || '', 60, infoY);
-    if (devis.entreprise?.adresse) doc.text(devis.entreprise.adresse, 60);
+    doc.fontSize(10).fillColor('black');
+    // Colonne entreprise à gauche
+    let xLeft = 30;
+    doc.text(devis.entreprise?.nom || '', xLeft, infoY);
+    if (devis.entreprise?.adresse) doc.text(devis.entreprise.adresse, xLeft);
     if (devis.entreprise?.codePostal || devis.entreprise?.ville)
       doc.text(
         `${devis.entreprise.codePostal || ''} ${devis.entreprise.ville || ''}`.trim(),
-        60
+        xLeft
       );
-    if (devis.entreprise?.pays) doc.text(devis.entreprise.pays, 60);
-    if (devis.entreprise?.email) doc.text(devis.entreprise.email, 60);
-
-    // Colonne devis
-    doc.text(`Numéro : ${devis.numero}`, 350, infoY);
-    doc.text(`Date : ${devis.dateCreation.toLocaleDateString()}`, 350);
+    if (devis.entreprise?.pays) doc.text(devis.entreprise.pays, xLeft);
+    if (devis.entreprise?.email) doc.text(devis.entreprise.email, xLeft);
+    // Colonne devis à droite
+    let xRight = 350;
+    doc.text(`Numéro : ${devis.numero}`, xRight, infoY);
+    doc.text(`Date : ${devis.dateCreation.toLocaleDateString()}`, xRight);
     if (devis.dateValidite)
-      doc.text(`Valide jusqu'au : ${devis.dateValidite.toLocaleDateString()}`, 350);
-    doc.text(`Statut : ${devis.statut}`, 350);
-    doc.moveDown(2);
-
+      doc.text(`Valide jusqu'au : ${devis.dateValidite.toLocaleDateString()}`, xRight);
+    doc.text(`Statut : ${devis.statut}`, xRight);
+    doc.moveDown(0.8);
     // Ligne de séparation
-    doc.moveTo(60, doc.y).lineTo(535, doc.y).stroke(mainColor);
-    doc.moveDown(1);
-
-
+    doc.moveTo(30, doc.y).lineTo(565, doc.y).stroke(mainColor);
+    doc.moveDown(0.5);
 
     // === TABLEAU DES LIGNES DE DEVIS ===
-    // Fond léger pour le tableau
+    // En-tête tableau
     const tableY = doc.y;
-    doc.rect(60, tableY, 475, 25 + 25 * devis.lignes.length).fill('#F4F7FA'); // fond du front
-    doc.font('Helvetica-Bold').fontSize(13).fillColor(mainColor);
-    doc.text('Désignation', 65, tableY + 5, { continued: true });
-    doc.text('Qté', 230, tableY + 5, { continued: true });
-    doc.text('PU HT', 280, tableY + 5, { continued: true });
-    doc.text('TVA %', 350, tableY + 5, { continued: true });
-    doc.text('Total HT', 420, tableY + 5, { continued: true });
-    doc.text('Total TTC', 495, tableY + 5);
-    doc.moveDown(0.5);
-    doc.moveTo(65, tableY + 25).lineTo(535, tableY + 25).stroke('#BFC9CA');
-
+    doc.save();
+    doc.rect(30, tableY, 535, 22).fill('#F4F7FA');
+    doc.restore();
+    doc.font('Helvetica-Bold').fontSize(11).fillColor(mainColor);
+    doc.text('Désignation', 35, tableY + 6, { width: 180 });
+    doc.text('Qté', 220, tableY + 6, { width: 35, align: 'right' });
+    doc.text('PU HT', 265, tableY + 6, { width: 60, align: 'right' });
+    doc.text('TVA %', 335, tableY + 6, { width: 45, align: 'right' });
+    doc.text('Total HT', 390, tableY + 6, { width: 70, align: 'right' });
+    doc.text('Total TTC', 470, tableY + 6, { width: 85, align: 'right' });
+    doc.moveTo(30, tableY + 22).lineTo(565, tableY + 22).stroke(mainColor);
     // Lignes du tableau
-    doc.font('Helvetica').fontSize(11).fillColor('black');
-    let rowY = tableY + 30;
+    doc.font('Helvetica').fontSize(10).fillColor('black');
+    let rowY = tableY + 24;
+    const rowHeight = 18;
     devis.lignes.forEach((ligne: LigneDevis) => {
-      doc.text(ligne.description, 65, rowY, { width: 150, continued: true });
-      doc.text(ligne.quantite.toString(), 230, rowY, { width: 40, continued: true, align: 'right' });
-      doc.text(Number(ligne.prixUnitaireHT).toFixed(2) + ' €', 280, rowY, { width: 60, continued: true, align: 'right' });
-      doc.text(ligne.tva.toString(), 350, rowY, { width: 50, continued: true, align: 'right' });
-      doc.text(Number(ligne.totalLigneHT).toFixed(2) + ' €', 420, rowY, { width: 60, continued: true, align: 'right' });
-      doc.text(Number(ligne.totalLigneTTC).toFixed(2) + ' €', 495, rowY, { width: 60, align: 'right' });
-      rowY += 25;
+      doc.text(ligne.description, 35, rowY, { width: 180 });
+      doc.text(ligne.quantite.toString(), 220, rowY, { width: 35, align: 'right' });
+      doc.text(Number(ligne.prixUnitaireHT).toFixed(2) + ' €', 265, rowY, { width: 60, align: 'right' });
+      doc.text(ligne.tva.toString(), 335, rowY, { width: 45, align: 'right' });
+      doc.text(Number(ligne.totalLigneHT).toFixed(2) + ' €', 390, rowY, { width: 70, align: 'right' });
+      doc.text(Number(ligne.totalLigneTTC).toFixed(2) + ' €', 470, rowY, { width: 85, align: 'right' });
+      rowY += rowHeight;
     });
-    doc.moveDown(1);
-
     // Bordure du tableau
-    doc.rect(60, tableY, 475, rowY - tableY).stroke(mainColor);
-    doc.moveDown(1);
-
-
+    doc.rect(30, tableY, 535, rowY - tableY).stroke(mainColor);
     // === TOTAUX ===
-    // Bloc totaux avec fond
-    const totalY = doc.y;
-    doc.rect(350, totalY, 185, 60).fill(mainColor);
-    doc.font('Helvetica').fontSize(12).fillColor('white');
-    doc.text(`Montant HT : ${Number(devis.montantHT).toFixed(2)} €`, 355, totalY + 5);
-    doc.text(`Montant TVA : ${Number(devis.montantTVA).toFixed(2)} €`, 355, totalY + 25);
-    doc.font('Helvetica-Bold').text(`Montant TTC : ${Number(devis.montantTTC).toFixed(2)} €`, 355, totalY + 45);
-    doc.font('Helvetica').moveDown(2);
-
-
+    // Bloc totaux aligné à droite sous le tableau
+    const totalY = rowY + 8;
+    doc.save();
+    doc.rect(350, totalY, 215, 48).fill(mainColor);
+    doc.restore();
+    doc.font('Helvetica').fontSize(11).fillColor('white');
+    doc.text(`Montant HT : ${Number(devis.montantHT).toFixed(2)} €`, 360, totalY + 6);
+    doc.text(`Montant TVA : ${Number(devis.montantTVA).toFixed(2)} €`, 360, totalY + 22);
+    doc.font('Helvetica-Bold').text(`Montant TTC : ${Number(devis.montantTTC).toFixed(2)} €`, 360, totalY + 36);
+    doc.font('Helvetica').fillColor('black');
     // === CONDITIONS ET NOTES ===
+    let yCond = totalY + 56;
     if (devis.conditions) {
-      doc.fontSize(11).fillColor(mainColor).text('Conditions de paiement :', 60, doc.y);
-      doc.fontSize(10).fillColor('black').text(devis.conditions, 60, doc.y, { width: 475 });
-      doc.moveDown();
+      doc.fontSize(10).fillColor(mainColor).text('Conditions de paiement :', 30, yCond);
+      doc.fontSize(9).fillColor('black').text(devis.conditions, 30, doc.y, { width: 535 });
+      yCond = doc.y + 6;
     }
     if (devis.notes) {
-      doc.fontSize(11).fillColor(mainColor).text('Notes :', 60, doc.y);
-      doc.fontSize(10).fillColor('black').text(devis.notes, 60, doc.y, { width: 475 });
-      doc.moveDown();
+      doc.fontSize(10).fillColor(mainColor).text('Notes :', 30, yCond);
+      doc.fontSize(9).fillColor('black').text(devis.notes, 30, doc.y, { width: 535 });
+      yCond = doc.y + 6;
     }
-
-    // Pied de page (optionnel)
-    doc.fontSize(9).fillColor(mainColor).text('Document généré automatiquement par KOOSY - Merci pour votre confiance.', 60, 780, { align: 'center', width: 475 });
-
+    // Pied de page dynamique (juste après le contenu, mais jamais hors page)
+    // Pied de page toujours en bas de la page (A4 = 842pt, marge 30)
+    // Pied de page fiable : toujours en bas de la première page, sans manipulations avancées
+    const pageHeight = 842;
+    const margin = 30;
+    // On remonte la phrase de 40 points pour éviter le saut de page
+    const footerY = pageHeight - margin - 40;
+    if (doc.page && typeof doc.switchToPage === 'function') {
+      doc.switchToPage(0);
+    }
+    doc.fontSize(8).fillColor(mainColor);
+    doc.text('Document généré automatiquement par KOOSY - Merci pour votre confiance.', 30, footerY, {
+      align: 'center',
+      width: 535
+    });
     doc.end();
     // Attendre la fin de la génération du PDF et retourner le buffer
     return new Promise((resolve, reject) => {
