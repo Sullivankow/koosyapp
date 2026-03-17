@@ -36,9 +36,10 @@ import { apiFetchMyEntreprise } from '../../utils/api';
 
 type HomeScreenProps = {
     onLogout?: () => void;
+    navigation?: any;
 };
 
-const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
+const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
     const { tacheCount, refreshTacheCount } = useTacheCount();
     const { lastTacheAdded } = useTache();
     // Theme et couleurs fournis par le contexte `ThemeContext`
@@ -111,7 +112,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
         }
     };
 
-  
+    // Handler pour ouvrir la page ListeDevisScreen
+    const handleGoToListeDevis = () => {
+        if (navigation) navigation.navigate('ListeDevisScreen');
+    };
 
     return (
         <>
@@ -171,7 +175,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                                     onAddTache={() => setAddTacheModalVisible(true)}
                                     onAddReservation={() => setAddReservationModalVisible(true)}
                                     onAddPrestation={() => setAddPrestationModalVisible(true)}
-                                    onAddDevis={openAddDevisModal}
+                                    onAddDevis={handleGoToListeDevis}
                                 />
             </ScrollView>
             {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}

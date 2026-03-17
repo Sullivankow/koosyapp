@@ -1,4 +1,3 @@
-
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
@@ -544,6 +543,14 @@ export async function createDevis(data: Omit<Devis, 'id' | 'entreprise'>): Promi
 // Récupère l'entreprise liée à l'utilisateur connecté
 export async function apiFetchMyEntreprise() {
   return apiFetch('/entreprise/mienne');
+}
+
+// Fonction pour récupérer la liste des devis
+export async function getDevis(): Promise<Devis[]> {
+  const data = await apiFetch('/devis');
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.items)) return data.items;
+  return [];
 }
 
 
