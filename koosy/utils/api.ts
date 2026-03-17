@@ -1,3 +1,4 @@
+
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
@@ -5,7 +6,7 @@
 
 
 
-
+import { Devis } from '../models/models';
 import { getSession } from './session';
 const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
 
@@ -527,6 +528,26 @@ export async function deleteEntreprise(id: number): Promise<void> {
     },
   });
 }
+
+// Fonction pour créer un devis lié à l'utilisateur connecté (l'entreprise est gérée côté backend)
+
+export async function createDevis(data: Omit<Devis, 'id' | 'entreprise'>): Promise<{ id: number }> {
+  const res = await apiFetch('/devis', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  return { id: res.id ?? res.devis?.id ?? res["id"] };
+}
+
+
+
+// Récupère l'entreprise liée à l'utilisateur connecté
+export async function apiFetchMyEntreprise() {
+  return apiFetch('/entreprise/mienne');
+}
+
+
+
 
 
 

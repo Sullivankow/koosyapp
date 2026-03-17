@@ -123,3 +123,58 @@ export interface Prestation {
   created_at: string;
   updated_at: string;
 }
+
+
+// === Devis & Facture ===
+export interface Devis {
+  id: number;
+  numero: string;
+  dateCreation: string;
+  dateValidite?: string;
+  statut: 'brouillon' | 'envoyé' | 'accepté' | 'refusé' | 'expiré';
+  montantHT: number;
+  montantTVA: number;
+  montantTTC: number;
+  conditions?: string;
+  notes?: string;
+  entreprise: Entreprise;
+  lignes?: LigneDevis[];
+}
+
+export interface Facture {
+  id: number;
+  numero: string;
+  dateEmission: string;
+  dateEcheance?: string;
+  statut: 'brouillon' | 'envoyée' | 'payée' | 'en retard' | 'annulée';
+  montantHT: number;
+  montantTVA: number;
+  montantTTC: number;
+  conditionsPaiement?: string;
+  notes?: string;
+  entreprise: Entreprise;
+  lignes?: LigneFacture[];
+}
+
+
+export interface LigneDevis {
+  id: number;
+  description: string;
+  quantite: number;
+  prixUnitaireHT: number;
+  tva: number;
+  totalLigneHT: number;
+  totalLigneTTC: number;
+  devis?: Devis;
+}
+
+export interface LigneFacture {
+  id: number;
+  description: string;
+  quantite: number;
+  prixUnitaireHT: number;
+  tva: number;
+  totalLigneHT: number;
+  totalLigneTTC: number;
+  facture?: Facture;
+}

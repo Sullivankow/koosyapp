@@ -35,7 +35,7 @@ export class UsersService {
 async findOne(id: number): Promise<User | null> {
   const user = await this.usersRepository.findOne({ where: { id }, relations: ['entreprise'] });
   if (!user) {
-    throw new Error('L\'utilisateur n\'éxiste pas');
+    throw new NotFoundException("L'utilisateur n'existe pas");
   }
   return user;
 }

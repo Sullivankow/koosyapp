@@ -2,6 +2,7 @@ import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 
+
 interface QuickActionsGridProps {
   colors: any;
   styles: any;
@@ -9,9 +10,10 @@ interface QuickActionsGridProps {
   onAddTache: () => void;
   onAddReservation: () => void;
   onAddPrestation: () => void;
+  onAddDevis: () => void;
 }
 
-const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onAddBien, onAddTache, onAddReservation, onAddPrestation }) => (
+const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onAddBien, onAddTache, onAddReservation, onAddPrestation, onAddDevis }) => (
   <View style={styles.quickActionsGrid}>
     <View style={styles.quickActionsRow}>
       <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]} onPress={onAddBien}>
@@ -42,7 +44,7 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
       </TouchableOpacity>
     </View>
     <View style={styles.quickActionsRow}>
-      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.info || '#1976D2' }]}> 
+      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.info || '#1976D2' }]} onPress={onAddDevis}> 
         <View style={styles.centerContent}>
           <MaterialCommunityIcons name="file-document-edit" size={24} color={colors.surface} style={styles.icon} />
           <Text style={[styles.actionText, { color: colors.surface }]}>Créer un devis</Text>

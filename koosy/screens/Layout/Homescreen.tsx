@@ -27,10 +27,12 @@ import AddPrestationModal from '../../components/AddPrestationModal';
 import { getBiens } from '../../utils/api';
 import { useReservationForm } from '../../hooks/useReservationForm';
 import { useUpcomingEvents } from '../../hooks/useUpcomingEvents';
-import { Bien } from '../../models/models';
+import { Bien, Entreprise } from '../../models/models';
 import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
 import { useChiffreAffaire } from '../../hooks/useChiffreAffaire';
 import ChiffreAffaireCard from '../../components/ChiffreAffaireCard';
+import { useAddDevisModal } from '../../hooks/useAddDevisModal';
+import { apiFetchMyEntreprise } from '../../utils/api';
 
 type HomeScreenProps = {
     onLogout?: () => void;
@@ -64,6 +66,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     );
     // Liste de biens (pour alimenter la modale d'ajout de réservation)
     const [biens, setBiens] = useState<Bien[]>([]);
+    // Liste des entreprises (pour alimenter la modale d'ajout de réservation)
+    const [entreprises, setEntreprises] = useState<Entreprise[]>([]);
     // Événements à venir via hook personnalisé
     const { events, loading: eventsLoading, error: eventsError, refresh: refreshEvents } = useUpcomingEvents();
     // Message de succès temporaire via hook personnalisé
@@ -71,6 +75,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
     // Ajout du hook pour le compteur de prestations terminées
     const { prestationsTerminees } = usePrestationsCount();
    const { caMois, caGlobal, caAnnee, caMoisN1 } = useChiffreAffaire();
+    const [addDevisModalVisible, setAddDevisModalVisible] = useState(false);
+    const { open: openAddDevisModal, modal: addDevisModal } = useAddDevisModal(entreprises);
 
     // Effet d'initialisation :
     // - rafraîchit les compteurs gérés par les contextes
@@ -88,6 +94,10 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
 
         // Charge les biens disponibles (utilisé par la modale d'ajout de réservation)
         getBiens().then(setBiens).catch(() => setBiens([]));
+        // Charge les entreprises (utilisé par la modale d'ajout de réservation)
+        apiFetchMyEntreprise()
+            .then((entreprise) => setEntreprises(entreprise ? [entreprise] : []))
+            .catch(() => setEntreprises([]));
         // Les événements sont désormais gérés par le hook useUpcomingEvents
     }, [lastTacheAdded, lastBienAdded]);
 
@@ -161,6 +171,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
                                     onAddTache={() => setAddTacheModalVisible(true)}
                                     onAddReservation={() => setAddReservationModalVisible(true)}
                                     onAddPrestation={() => setAddPrestationModalVisible(true)}
+                                    onAddDevis={openAddDevisModal}
                                 />
             </ScrollView>
             {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}
@@ -192,6 +203,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout }) => {
             onClose={() => setAddPrestationModalVisible(false)}
             onSuccess={() => setAddPrestationModalVisible(false)}
         />
+                {/* Modale d'ajout de devis via hook */}
+                {addDevisModal}
         </>
     );
 };

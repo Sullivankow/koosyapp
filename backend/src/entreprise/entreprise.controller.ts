@@ -30,6 +30,16 @@ export class EntrepriseController {
     return entreprise;
   }
 
+  @Get('mienne')
+@ApiOperation({ summary: "Récupérer l'entreprise de l'utilisateur connecté" })
+async getMyEntreprise(@Request() req): Promise<Entreprise | null> {
+  const user = await this.usersService.findOne(req.user.userId);
+  if (user && user.entreprise) {
+    return user.entreprise;
+  }
+  return null;
+}
+
   @Get(':id')
   @ApiOperation({ summary: 'Récupérer une entreprise par ID (authentifié)' })
   async findOne(@Param('id') id: number): Promise<Entreprise | null> {
@@ -47,4 +57,6 @@ export class EntrepriseController {
   async remove(@Param('id') id: number): Promise<void> {
     return this.entrepriseService.remove(id);
   }
+
+ 
 }
