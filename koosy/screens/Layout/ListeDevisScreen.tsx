@@ -13,9 +13,34 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PlusButton from '../../components/PlusButton';
 import { Dimensions } from 'react-native';
+import * as Sharing from 'expo-sharing';
+import * as FileSystem from 'expo-file-system';
+import * as FileSystemLegacy from 'expo-file-system/legacy';
+// ...existing code...
 import { getSession } from '../../utils/session';
 
 export default function ListeDevisScreen() {
+	   // Fonction pour exporter le PDF sur le téléphone
+	   const handleExportPdf = async () => {
+		   if (!previewId) return;
+		   try {
+			   const pdfUrl = getDevisPdfUrl(previewId);
+			   const { Directory, File, Paths } = FileSystem;
+			   const directory = new Directory(Paths.document);
+			   const info = await FileSystemLegacy.getInfoAsync(directory.uri);
+			   const exists = info.exists;
+			   if (!exists) {
+				   await directory.create();
+			   }
+			   const file = new File(directory, `devis_${previewId}.pdf`);
+			   const headers: Record<string, string> = {};
+			   if (pdfToken) headers['Authorization'] = `Bearer ${pdfToken}`;
+			   await File.downloadFileAsync(pdfUrl, file, { headers });
+			   await Sharing.shareAsync(file.uri);
+		   } catch (err: any) {
+			   alert('Erreur lors de l’export : ' + (err.message || err));
+		   }
+	   };
 	// Couleurs du thème
 	const { colors } = useTheme();
 	// Liste des devis
@@ -43,6 +68,9 @@ export default function ListeDevisScreen() {
 	const handlePreviewDevis = (item: Devis) => {
 		setPreviewId(item.id);
 	};
+
+
+   // ...existing code...
 
 	useEffect(() => {
 		getDevis().then(setDevis).catch(() => setDevis([]));
@@ -88,7 +116,8 @@ export default function ListeDevisScreen() {
 							</View>
 							{/* Actions : Aperçu et suppression */}
 							<View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: 8 }}>
-								{/* Icône œil pour aperçu PDF */}
+								   {/* Icône de téléchargement supprimée */}
+								   {/* Icône œil pour aperçu PDF */}
 								<TouchableOpacity onPress={() => handlePreviewDevis(item)} style={{ marginHorizontal: 4 }}>
 									<Ionicons name="eye-outline" size={24} color={colors.primary} />
 								</TouchableOpacity>
@@ -108,41 +137,41 @@ export default function ListeDevisScreen() {
 				{/* Modale d'ajout de devis */}
 				{modal}
 
-				   {/* Modale d'aperçu PDF du devis */}
-				   <Modal
-					   visible={!!previewId}
-					   animationType="slide"
-					   onRequestClose={() => setPreviewId(null)}
-					   presentationStyle="fullScreen"
-				   >
-					   <View style={{ flex: 1, backgroundColor: '#fff' }}>
-						   <WebView
-							   source={{
-								   uri: previewId ? getDevisPdfUrl(previewId) : '',
-								   headers: pdfToken ? { Authorization: `Bearer ${pdfToken}` } : {},
-							   }}
-							   style={{ flex: 1, backgroundColor: '#fff' }}
-							   originWhitelist={['*']}
-							   onLoadStart={syntheticEvent => {
-								   const { nativeEvent } = syntheticEvent;
-								   console.log('WebView: Début du chargement', nativeEvent.url);
-							   }}
-							   onLoadEnd={syntheticEvent => {
-								   const { nativeEvent } = syntheticEvent;
-								   console.log('WebView: Fin du chargement', nativeEvent.url);
-							   }}
-							   onError={syntheticEvent => {
-								   const { nativeEvent } = syntheticEvent;
-								   console.log('WebView: Erreur de chargement', nativeEvent);
-								   alert('Erreur lors du chargement du PDF : ' + nativeEvent.description);
-							   }}
-						   />
-						   {/* Bouton pour fermer la modale */}
-						   <TouchableOpacity onPress={() => setPreviewId(null)} style={{ position: 'absolute', top: 40, right: 20, zIndex: 10 }}>
-							   <MaterialIcons name="close" size={32} color="#000" />
-						   </TouchableOpacity>
-					   </View>
-				   </Modal>
+				{/* Modale d'aperçu PDF du devis */}
+				<Modal
+					visible={!!previewId}
+					animationType="slide"
+					onRequestClose={() => setPreviewId(null)}
+					presentationStyle="fullScreen"
+				>
+					{/* WebView pour afficher le PDF du devis avec logs de debug et header Authorization */}
+					<WebView
+						source={{
+							uri: previewId ? getDevisPdfUrl(previewId) : '',
+							headers: pdfToken ? { Authorization: `Bearer ${pdfToken}` } : {},
+						}}
+						style={{ flex: 1 }}
+						originWhitelist={['*']}
+						onLoadStart={syntheticEvent => {
+							// Handler sans log
+						}}
+						onLoadEnd={syntheticEvent => {
+							// Handler sans log
+						}}
+						onError={syntheticEvent => {
+							const { nativeEvent } = syntheticEvent;
+							alert('Erreur lors du chargement du PDF : ' + nativeEvent.description);
+						}}
+					/>
+					   {/* Bouton pour exporter le PDF en bas à droite */}
+					   <TouchableOpacity onPress={handleExportPdf} style={{ position: 'absolute', bottom: 30, right: 30, zIndex: 10, backgroundColor: colors.primary, borderRadius: 30, padding: 16, elevation: 4 }}>
+						   <MaterialIcons name="file-upload" size={32} color={colors.surface} />
+					   </TouchableOpacity>
+					   {/* Bouton pour fermer la modale */}
+					   <TouchableOpacity onPress={() => setPreviewId(null)} style={{ position: 'absolute', top: 40, right: 20, zIndex: 10 }}>
+						   <MaterialIcons name="close" size={32} color="#000" />
+					   </TouchableOpacity>
+				</Modal>
 			</SafeAreaView>
 		);
 }
