@@ -89,6 +89,7 @@ const PrestationsScreen: React.FC = () => {
 										<TouchableOpacity onPress={async () => {
 											await deletePrestation(p.id);
 											await fetchPrestations();
+											if (refreshPrestationsTerminees) refreshPrestationsTerminees();
 										}} style={{ marginLeft: 8, padding: 4 }}>
 											<MaterialCommunityIcons name="delete" size={22} color={colors.error || '#e53935'} />
 										</TouchableOpacity>
@@ -125,7 +126,11 @@ const PrestationsScreen: React.FC = () => {
 					<AddPrestationModal
 						visible={modalVisible}
 						onClose={() => setModalVisible(false)}
-						onSuccess={fetchPrestations}
+						onSuccess={async () => {
+							setModalVisible(false);
+							await fetchPrestations();
+							if (refreshPrestationsTerminees) refreshPrestationsTerminees();
+						}}
 					/>
 				</ScrollView>
 			)}

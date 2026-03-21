@@ -60,6 +60,16 @@ export default function useBiens(deps: any[] = []) {
                 dateEcheance: tache.dateEcheance || '',
               }))
             : [],
+          prestations: Array.isArray(bien.prestations)
+            ? bien.prestations.map((prestation: any) => ({
+                id: prestation.id,
+                description: prestation.description || '',
+                status: prestation.status || '',
+                date_prestation: prestation.date_prestation || '',
+                amount_cents: prestation.amount_cents ?? 0,
+                currency: prestation.currency || 'EUR',
+              }))
+            : [],
         };
       });
       setBiens(mappedBiens);

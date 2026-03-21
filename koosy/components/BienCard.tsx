@@ -121,6 +121,25 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
           )) : <Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune tâche</Text>}
         </View>
       </View>
+      {/* Prestations */}
+      <View style={styles.sectionRow}>
+        <MaterialCommunityIcons name="handshake" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
+        <Text style={{ color: colors.text, fontWeight: 'bold' }}>Prestations :</Text>
+        <View style={styles.timeline}>
+          {Array.isArray(bien.prestations) && bien.prestations.length > 0 ? bien.prestations.map((prestation: any) => (
+            <View key={prestation.id} style={styles.timelineItem}>
+              <MaterialCommunityIcons name="circle" size={10} color={prestation.status === 'terminée' ? colors.accent : colors.error} style={{ marginRight: 6 }} />
+              <View style={{ flex: 1 }}>
+                <Text style={{ color: colors.text, fontWeight: '500' }}>{prestation.description || 'N/A'}</Text>
+                <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+                  {prestation.status} {prestation.date_prestation ? `- ${formatDateFR(prestation.date_prestation)}` : ''}
+                  {typeof prestation.amount_cents === 'number' && prestation.amount_cents > 0 ? ` - ${(prestation.amount_cents / 100).toFixed(2)} €` : ''}
+                </Text>
+              </View>
+            </View>
+          )) : <Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune prestation</Text>}
+        </View>
+      </View>
       {/* Actions principales */}
       <View style={styles.floatingActions}>
         <TouchableOpacity style={[styles.fab, { backgroundColor: colors.secondary }]} onPress={() => onEdit(bien)}>

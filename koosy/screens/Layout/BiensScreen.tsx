@@ -15,6 +15,7 @@ import SuccesMessage from '../../components/SuccesMessage';
 import { useBienCount } from '../../contexts/BienCountContext';
 import { useTache } from '../../contexts/TacheContext';
 import { useTacheCount } from '../../contexts/TacheCountContext';
+import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { styles } from './BienScreen.styles';
 
@@ -26,6 +27,7 @@ const BiensScreen: React.FC = () => {
   const { lastBienAdded, signalBienAdded } = useBienCount();
   const { lastTacheAdded } = useTache();
   const { tacheCount } = useTacheCount();
+  const { prestationsTerminees } = usePrestationsCount();
   const [statutModalVisible, setStatutModalVisible] = useState(false);
   const [currentStatusBienId, setCurrentStatusBienId] = useState<string | null>(null);
   const [currentBienStatus, setCurrentBienStatus] = useState<string | undefined>(undefined);
@@ -38,7 +40,7 @@ const BiensScreen: React.FC = () => {
   const { colors } = useTheme();
 
   // Récupération des biens (ajout de tacheCount comme dépendance)
-  const { biens, fetchBiens, updateBienById, deleteBienById } = useBiens([lastBienAdded, lastTacheAdded, tacheCount]);
+  const { biens, fetchBiens, updateBienById, deleteBienById } = useBiens([lastBienAdded, lastTacheAdded, tacheCount, prestationsTerminees]);
 
   // Handler pour changer le statut d'une tâche et rafraîchir les biens
   const handleChangeTacheStatus = async (tacheId: string | number, statut: string) => {

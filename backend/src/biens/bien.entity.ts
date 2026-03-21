@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Prestation } from '../prestations/prestation.entity';
 import { User } from '../users/user.entity';
 import { OneToMany } from 'typeorm';
 import { Reservation } from '../reservations/reservation.entity';
@@ -75,6 +76,11 @@ images: BienImage[];
 
   @Column('float', { nullable: true })
   lng: number;
+
+
+  // Relation avec les prestations
+  @OneToMany(() => Prestation, prestation => prestation.bien)
+  prestations: Prestation[];
 
   // Les autres relations (locataires, taches, commentaires, historique) peuvent être ajoutées plus tard
 }
