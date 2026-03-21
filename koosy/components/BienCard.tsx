@@ -17,9 +17,10 @@ interface BienCardProps {
   onStatus: (bien: any) => void;
   onPhotoPress: (photo: any) => void;
   formatDateFR: (dateStr?: string) => string;
+  onChangeTacheStatus?: (tacheId: string | number, statut: string) => void;
 }
 
-const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR }) => {
+const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR, onChangeTacheStatus }) => {
   // Carrousel responsive avec largeur dynamique
   const { Dimensions } = require('react-native');
   const SCREEN_WIDTH = Dimensions.get('window').width;

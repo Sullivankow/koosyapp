@@ -1,3 +1,4 @@
+import { updateTacheStatut } from '../../utils/api';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, Modal } from 'react-native';
 import BienCard from '../../components/BienCard';
@@ -13,6 +14,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SuccesMessage from '../../components/SuccesMessage';
 import { useBienCount } from '../../contexts/BienCountContext';
 import { useTache } from '../../contexts/TacheContext';
+import { useTacheCount } from '../../contexts/TacheCountContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { styles } from './BienScreen.styles';
 
@@ -23,6 +25,7 @@ const BiensScreen: React.FC = () => {
   const listRef = useRef<any>(null);
   const { lastBienAdded, signalBienAdded } = useBienCount();
   const { lastTacheAdded } = useTache();
+  const { tacheCount } = useTacheCount();
   const [statutModalVisible, setStatutModalVisible] = useState(false);
   const [currentStatusBienId, setCurrentStatusBienId] = useState<string | null>(null);
   const [currentBienStatus, setCurrentBienStatus] = useState<string | undefined>(undefined);
@@ -34,8 +37,21 @@ const BiensScreen: React.FC = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const { colors } = useTheme();
 
-  // Récupération des biens
-  const { biens, fetchBiens, updateBienById, deleteBienById } = useBiens([lastBienAdded, lastTacheAdded]);
+  // Récupération des biens (ajout de tacheCount comme dépendance)
+  const { biens, fetchBiens, updateBienById, deleteBienById } = useBiens([lastBienAdded, lastTacheAdded, tacheCount]);
+
+  // Handler pour changer le statut d'une tâche et rafraîchir les biens
+  const handleChangeTacheStatus = async (tacheId: string | number, statut: string) => {
+    try {
+      await updateTacheStatut(tacheId, statut);
+      await fetchBiens();
+      setSuccessMsg('Statut de la tâche mis à jour');
+      setTimeout(() => setSuccessMsg(''), 1800);
+    } catch (err) {
+      setSuccessMsg("Erreur lors de la mise à jour du statut de la tâche");
+      setTimeout(() => setSuccessMsg(''), 1800);
+    }
+  };
 
   // Recherche locale
   const filteredBiens = biens.filter(b =>
@@ -174,6 +190,7 @@ const BiensScreen: React.FC = () => {
             onStatus={openStatusModal}
             onPhotoPress={handlePhotoPress}
             formatDateFR={formatDateFR}
+            onChangeTacheStatus={handleChangeTacheStatus}
           />
         )}
       />

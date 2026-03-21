@@ -7,12 +7,14 @@ import React, { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import styles from './TachesScreen.styles';
 import { useTaches } from '../../hooks/useTaches';
+import { useTacheCount } from '../../contexts/TacheCountContext';
 
 // Écran principal des tâches
 function TachesScreen() {
   const { colors } = useTheme();
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'à faire' | 'terminée'>('à faire');
+  const { refreshTacheCount } = useTacheCount();
 
   // Utilisation du hook personnalisé pour la gestion des tâches
   const {
