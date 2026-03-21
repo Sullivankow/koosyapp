@@ -146,7 +146,7 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
           <MaterialCommunityIcons name="pencil" size={20} color={colors.surface} />
         </TouchableOpacity>
         <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={() => onDelete(bien.id)}>
-          <MaterialCommunityIcons name="delete" size={20} color="#B71C1C" />
+          <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
         </TouchableOpacity>
       </View>
     </View>
