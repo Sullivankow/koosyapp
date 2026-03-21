@@ -1,6 +1,4 @@
 
-
-
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
@@ -573,7 +571,8 @@ export function getDevisPdfUrl(id: number) {
 import { Facture } from '../models/models';
 // Fonction pour récupérer la liste des factures
 export async function getFactures(): Promise<Facture[]> {
-  const data = await apiFetch('/factures');
+  // Correction : endpoint au singulier pour correspondre au backend
+  const data = await apiFetch('/facture');
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.items)) return data.items;
   return [];
@@ -584,4 +583,14 @@ export async function deleteFacture(id: number): Promise<void> {
   return apiFetch(`/factures/${id}`, {
     method: 'DELETE',
   });
+}
+
+// Fonction pour créer une facture liée à l'utilisateur connecté (l'entreprise est gérée côté backend)
+// Correction : endpoint au singulier pour correspondre au backend
+export async function createFacture(data: Omit<Facture, 'id' | 'entreprise'>): Promise<{ id: number }> {
+  const res = await apiFetch('/facture', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+  return { id: res.id ?? res.facture?.id ?? res["id"] };
 }

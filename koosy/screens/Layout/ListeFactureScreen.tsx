@@ -6,6 +6,8 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Dimensions } from 'react-native';
 import { useFactureManager } from '../../hooks/useFactureManager';
+import { useEntreprises } from '../../hooks/useEntreprises';
+import { useAddFactureModal } from '../../hooks/useAddFactureModal';
 import useFactureSearchSort from '../../hooks/useFactureSearchSort';
 import { FactureList } from '../../components/FactureList';
 import SearchBar from '../../components/SearchBar';
@@ -17,9 +19,15 @@ function getFacturePdfUrl(id: number) {
 }
 
 
+// Écran principal de la liste des factures
 export default function ListeFactureScreen() {
+	// Récupération des entreprises de l'utilisateur
+	const entreprises = useEntreprises();
+	// Hook pour gérer la modale d'ajout de facture (doit être avant useFactureManager)
+	const { open: openAddFacture, modal: addFactureModal, lastFacture } = useAddFactureModal(entreprises);
 	// Gestion centralisée des factures, token et aperçu via hook personnalisé
-	const { factures, pdfToken, previewId, setPreviewId, handleDeleteFacture, handlePreviewFacture } = useFactureManager([]);
+	// On passe lastFacture pour forcer le rafraîchissement après création
+	const { factures, pdfToken, previewId, setPreviewId, handleDeleteFacture, handlePreviewFacture } = useFactureManager(lastFacture);
 	// Couleurs du thème
 	const { colors } = useTheme();
 	const screenWidth = Dimensions.get('window').width;
@@ -91,8 +99,10 @@ export default function ListeFactureScreen() {
 			 {/* Liste des factures (extrait dans un composant) */}
 			 <FactureList factures={sortedFactures} colors={colors} handlePreviewFacture={handlePreviewFacture} handleDeleteFacture={handleDeleteFacture} />
 
-			 {/* Bouton flottant pour ajouter une facture (sans modale) */}
-			 <PlusButton onPress={() => {}} backgroundColor={colors.primary} iconColor={colors.surface} />
+			 {/* Bouton flottant pour ajouter une facture (ouvre la modale) */}
+			 <PlusButton onPress={openAddFacture} backgroundColor={colors.primary} iconColor={colors.surface} />
+			 {/* Modale de création de facture */}
+			 {addFactureModal}
 
 			 {/* Modale d'aperçu PDF de la facture */}
 			 <Modal
