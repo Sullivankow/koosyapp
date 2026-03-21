@@ -3,12 +3,13 @@ import { View, Text, FlatList, TouchableOpacity, Image, Modal } from 'react-nati
 import BienCard from '../../components/BienCard';
 import StatusModal from '../../components/StatusModal';
 import { useTheme } from '../../contexts/ThemeContext';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import { Bien } from '../../models/models';
 import useBiens from '../../hooks/useBiens';
 import useBiensSearchSort from '../../hooks/useBiensSearchSort';
 import AddBienModal from '../../components/AddBienModal';
-import BiensSearchBar from '../../components/BiensSearchBar';
+import SearchBar from '../../components/SearchBar';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SuccesMessage from '../../components/SuccesMessage';
 import { useBienCount } from '../../contexts/BienCountContext';
 import { useTache } from '../../contexts/TacheContext';
@@ -138,13 +139,26 @@ const BiensScreen: React.FC = () => {
           <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
         </TouchableOpacity>
       </View>
-      <BiensSearchBar
-        value={search}
-        onChange={setSearch}
-        sortOrder={sortOrder}
-        onToggleSort={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-        colors={colors}
-      />
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, marginTop: 18 }}>
+        <View style={{ flex: 1 }}>
+          <SearchBar
+            value={search}
+            onChangeText={setSearch}
+            placeholder="Rechercher un bien..."
+            style={{ backgroundColor: 'transparent' }}
+          />
+        </View>
+        <TouchableOpacity
+          style={{ marginLeft: 8, padding: 8, backgroundColor: colors.primary, borderRadius: 8 }}
+          onPress={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+        >
+          <MaterialCommunityIcons
+            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+            size={24}
+            color={colors.surface}
+          />
+        </TouchableOpacity>
+      </View>
       <FlatList
         ref={listRef}
         data={sortedBiens}
