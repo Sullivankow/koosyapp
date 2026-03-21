@@ -41,6 +41,7 @@ export class BiensService {
     const bien = this.biensRepository.create({
       ...createBienDto,
       conciergerie: user,
+      proprietaire: { id: createBienDto.proprietaire },
     });
     return this.biensRepository.save(bien);
   }
@@ -57,16 +58,11 @@ async getAllBiens(userId: number): Promise<Bien[]> {
       'images',
       'reservations',
       'reservations.locataire',
-      'prestations' // Ajout de la relation prestations
+      'prestations',
+      'proprietaire', // On charge la relation propriétaire
     ],
   });
-  // On adapte la réponse pour inclure les coordonnées du propriétaire réel
-  return biens.map(bien => ({
-    ...bien,
-    proprietaireNom: bien.proprietaireNom,
-    proprietaireEmail: bien.proprietaireEmail,
-    proprietaireTelephone: bien.proprietaireTelephone,
-  }));
+  return biens;
 }
 
 // Méthode pour récupérer un bien par son id et vérifier qu'il appartient à l'utilisateur

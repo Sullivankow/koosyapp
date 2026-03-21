@@ -1,10 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
 import { Prestation } from '../prestations/prestation.entity';
 import { User } from '../users/user.entity';
-import { OneToMany } from 'typeorm';
 import { Reservation } from '../reservations/reservation.entity';
 import { Tache } from '../taches/tache.entity';
 import { BienImage } from '../Image/image.entity';
+import { Proprietaire } from '../proprietaire/proprietaire.entity';
 
 
 @Entity()
@@ -13,16 +13,8 @@ export class Bien {
 
   @PrimaryGeneratedColumn()
   id: number;
-  @Column()
-  proprietaireNom: string;
-
- 
-
-  @Column()
-  proprietaireEmail: string;
-
-  @Column()
-  proprietaireTelephone: string;
+  @ManyToOne(() => Proprietaire, proprietaire => proprietaire.biens, { nullable: true, onDelete: 'CASCADE' })
+  proprietaire: Proprietaire;
   @Column()
   nom: string;
 

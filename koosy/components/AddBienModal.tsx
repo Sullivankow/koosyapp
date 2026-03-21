@@ -3,6 +3,7 @@ import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions,
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../contexts/ThemeContext';
 import { createBien, updateBien, uploadBienImages, geocodeAdresse } from '../utils/api';
+import { createProprietaire } from '../utils/proprietaireApi';
 import { useBienCount } from '../contexts/BienCountContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -49,10 +50,14 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
     type: '',
     superficie: '',
     pieces: '',
-    proprietaireNom: '',
-    proprietaireEmail: '',
-    proprietaireTelephone: '',
     equipements: '',
+  });
+  const [proprietaire, setProprietaire] = useState({
+    nom: '',
+    prenom: '',
+    email: '',
+    adresse: '',
+    telephone: '',
   });
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
@@ -61,43 +66,35 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
     setLoading(true);
     setSuccessMsg('');
     try {
+      // 1. Création du propriétaire
+      const newProprio = await createProprietaire(proprietaire);
+      // 2. Création du bien avec l'id du propriétaire
       const data = {
         nom: form.nom,
         adresse: form.adresse,
         type: form.type,
         superficie: Number(form.superficie),
         pieces: Number(form.pieces),
-        proprietaireNom: form.proprietaireNom,
-        proprietaireEmail: form.proprietaireEmail,
-        proprietaireTelephone: form.proprietaireTelephone,
         equipements: form.equipements ? form.equipements.split(',').map(e => e.trim()) : [],
+        proprietaire: newProprio.id,
       };
       if (mode === 'add') {
-        // 1. Création du bien
         const { id: newBienId } = await createBien(data);
-        // 2. Si le backend n'a pas géocodé (ou si lat/lng manquent), demander géocodage via le backend et patcher
         if (newBienId) {
           try {
-            // On tente d'obtenir des coordonnées depuis le backend centralisé
             const coords = await geocodeAdresse(data.adresse);
             if (coords && (coords.lat !== undefined && coords.lng !== undefined)) {
-              // Patch le bien pour ajouter lat/lng
               await updateBien(String(newBienId), { lat: coords.lat, lng: coords.lng });
             }
-          } catch (e) {
-            // ignore geocoding failure silently
-          }
+          } catch (e) {}
         }
-        // 3. Upload des images si présentes
         if (newBienId && selectedImages.length > 0) {
           await uploadBienImages(newBienId, selectedImages);
         }
         setSuccessMsg('Bien ajouté avec succès !');
       } else {
-        // edit mode
         if (!bienId) throw new Error('bienId requis pour l\'édition');
         await updateBien(bienId, data);
-        // si ajout d'images, les uploader
         if (selectedImages.length > 0) {
           await uploadBienImages(Number(bienId), selectedImages);
         }
@@ -107,7 +104,8 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
       signalBienAdded();
       setTimeout(() => {
         setSuccessMsg('');
-        setForm({ nom: '', adresse: '', type: '', superficie: '', pieces: '', proprietaireNom: '', proprietaireEmail: '', proprietaireTelephone: '', equipements: '' });
+        setForm({ nom: '', adresse: '', type: '', superficie: '', pieces: '', equipements: '' });
+        setProprietaire({ nom: '', prenom: '', email: '', adresse: '', telephone: '' });
         setSelectedImages([]);
         setLoading(false);
         onClose();
@@ -154,9 +152,11 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
               <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Type (Appartement, Maison...)" placeholderTextColor="#888" value={form.type} onChangeText={v => setForm(f => ({ ...f, type: v }))} />
               <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Superficie (m²)" placeholderTextColor="#888" value={form.superficie} onChangeText={v => setForm(f => ({ ...f, superficie: v }))} keyboardType="numeric" />
               <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nombre de pièces" placeholderTextColor="#888" value={form.pieces} onChangeText={v => setForm(f => ({ ...f, pieces: v }))} keyboardType="numeric" />
-              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nom du propriétaire" placeholderTextColor="#888" value={form.proprietaireNom} onChangeText={v => setForm(f => ({ ...f, proprietaireNom: v }))} />
-              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Email du propriétaire" placeholderTextColor="#888" value={form.proprietaireEmail} onChangeText={v => setForm(f => ({ ...f, proprietaireEmail: v }))} keyboardType="email-address" />
-              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Téléphone du propriétaire" placeholderTextColor="#888" value={form.proprietaireTelephone} onChangeText={v => setForm(f => ({ ...f, proprietaireTelephone: v }))} keyboardType="phone-pad" />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nom du propriétaire" placeholderTextColor="#888" value={proprietaire.nom} onChangeText={v => setProprietaire(p => ({ ...p, nom: v }))} />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Prénom du propriétaire" placeholderTextColor="#888" value={proprietaire.prenom} onChangeText={v => setProprietaire(p => ({ ...p, prenom: v }))} />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Email du propriétaire" placeholderTextColor="#888" value={proprietaire.email} onChangeText={v => setProprietaire(p => ({ ...p, email: v }))} keyboardType="email-address" />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Adresse du propriétaire" placeholderTextColor="#888" value={proprietaire.adresse} onChangeText={v => setProprietaire(p => ({ ...p, adresse: v }))} />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Téléphone du propriétaire" placeholderTextColor="#888" value={proprietaire.telephone} onChangeText={v => setProprietaire(p => ({ ...p, telephone: v }))} keyboardType="phone-pad" />
               <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Équipements (séparés par des virgules)" placeholderTextColor="#888" value={form.equipements} onChangeText={v => setForm(f => ({ ...f, equipements: v }))} />
               {/* Sélecteur d'images */}
               <TouchableOpacity style={[styles.input, { backgroundColor: '#f5f5f5', alignItems: 'center', justifyContent: 'center' }]} onPress={pickImage}>

@@ -44,4 +44,8 @@ export class CreateDevisDto {
   @ApiProperty({ description: "ID de l'entreprise liée au devis" })
   @IsNotEmpty()
   entreprise: number; // id de l'entreprise
+
+  @ApiProperty({ description: "ID du propriétaire lié au devis" })
+  @IsNotEmpty()
+  proprietaire: number; // id du propriétaire
 }

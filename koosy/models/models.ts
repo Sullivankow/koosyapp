@@ -126,6 +126,8 @@ export interface Prestation {
 
 
 // === Devis & Facture ===
+import type { Proprietaire } from './proprietaire';
+
 export interface Devis {
   id: number;
   numero: string;
@@ -138,6 +140,7 @@ export interface Devis {
   conditions?: string;
   notes?: string;
   entreprise: Entreprise;
+  proprietaire: Proprietaire;
   lignes?: LigneDevis[];
 }
 

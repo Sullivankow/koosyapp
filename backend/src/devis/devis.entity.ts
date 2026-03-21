@@ -1,6 +1,8 @@
+
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { Entreprise } from '../entreprise/entreprise.entity';
 import { LigneDevis } from '../ligne-devis/ligne-devis.entity';
+import { Proprietaire } from '../proprietaire/proprietaire.entity';
 
 @Entity()
 export class Devis {
@@ -35,8 +37,15 @@ export class Devis {
 	notes: string;
 
 
+
 	@ManyToOne(() => Entreprise, { nullable: false, onDelete: 'CASCADE' })
 	entreprise: Entreprise;
+
+	/**
+	 * Propriétaire lié au devis
+	 */
+	@ManyToOne(() => Proprietaire, { nullable: true, onDelete: 'CASCADE' })
+	proprietaire: Proprietaire;
 
 	@OneToMany(() => LigneDevis, ligne => ligne.devis, { cascade: true })
 	lignes: LigneDevis[];

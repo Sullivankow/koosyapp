@@ -1,24 +1,13 @@
 
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNumber, IsOptional } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 
-
-
-// DTO pour la création d'un bien avec les informations du propriétaire
+// DTO pour la création d'un bien avec l'id du propriétaire
 export class CreateBienDto {
-@ApiProperty({ example: 'Jean Dupont' })
-	@IsString()
-	proprietaireNom: string;
-
-	@ApiProperty({ example: 'jean.dupont@email.com' })
-	@IsString()
-	proprietaireEmail: string;
-
-	@ApiProperty({ example: '0601020304', required: false })
-	@IsOptional()
-	@IsString()
-	proprietaireTelephone?: string;
+	@ApiProperty({ description: "ID du propriétaire du bien" })
+	@IsNumber()
+	proprietaire: number;
 
 	@ApiProperty({ example: 'Appartement T2 centre-ville' })
 	@IsString()
@@ -40,23 +29,23 @@ export class CreateBienDto {
 	@IsNumber()
 	pieces: number;
 
-	@ApiProperty({ example: ['cuisine équipée', 'balcon'], required: false })
+	@ApiPropertyOptional({ example: ['cuisine équipée', 'balcon'] })
 	@IsOptional()
 	equipements?: string[];
 
-	@ApiProperty({ example: ['photo1.jpg', 'photo2.jpg'], required: false })
+	@ApiPropertyOptional({ example: ['photo1.jpg', 'photo2.jpg'] })
 	@IsOptional()
 	photos?: string[];
 
-	@ApiProperty({ example: 'disponible', required: false })
+	@ApiPropertyOptional({ example: 'disponible' })
 	@IsOptional()
 	statut?: 'disponible' | 'occupé' | 'travaux';
 
-	@ApiProperty({ example: 48.8566, required: false })
+	@ApiPropertyOptional({ example: 48.8566 })
 	@IsOptional()
 	lat?: number;
 
-	@ApiProperty({ example: 2.3522, required: false })
+	@ApiPropertyOptional({ example: 2.3522 })
 	@IsOptional()
 	lng?: number;
 }

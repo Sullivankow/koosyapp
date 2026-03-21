@@ -19,6 +19,7 @@ import { EntrepriseModule } from './entreprise/entreprise.module';
 import { DevisModule } from './devis/devis.module';
 import { FactureModule } from './facture/facture.module';
 import { LigneDevisModule } from './ligne-devis/ligne-devis.module';
+import { ProprietaireModule } from './proprietaire/proprietaire.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { LigneDevisModule } from './ligne-devis/ligne-devis.module';
     FactureModule,
     LigneFactureModule,
     LigneDevisModule,
+    ProprietaireModule,
     
 
 

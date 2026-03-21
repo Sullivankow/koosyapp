@@ -15,24 +15,28 @@ export class DevisService {
   ) {}
 
 
-  // Lors de la récupération, on veut aussi les données de l'entreprise associée
+
+  // Lors de la récupération, on veut aussi les données de l'entreprise et du propriétaire associées
   findAll() {
-    return this.devisRepository.find({ relations: ['entreprise'] });
+    return this.devisRepository.find({ relations: ['entreprise', 'proprietaire'] });
   }
 
-
-  // Lors de la récupération d'un devis par id, on veut aussi les données de l'entreprise associée
+  // Lors de la récupération d'un devis par id, on veut aussi les données de l'entreprise et du propriétaire associées
   findOne(id: number) {
-    return this.devisRepository.findOne({ where: { id }, relations: ['entreprise'] });
+    return this.devisRepository.findOne({ where: { id }, relations: ['entreprise', 'proprietaire'] });
   }
 
 
-  // Lors de la mise à jour, on reçoit l'id de l'entreprise, mais on doit associer l'objet Entreprise à la relation
+
+  // Lors de la mise à jour, on reçoit les ids de l'entreprise et du propriétaire, mais on doit associer les objets à la relation
   update(id: number, updateDevisDto: Partial<CreateDevisDto>) {
-    const { entreprise, ...rest } = updateDevisDto;
+    const { entreprise, proprietaire, ...rest } = updateDevisDto;
     const updatePayload: any = { ...rest };
     if (entreprise) {
       updatePayload.entreprise = { id: entreprise };
+    }
+    if (proprietaire) {
+      updatePayload.proprietaire = { id: proprietaire };
     }
     return this.devisRepository.update(id, updatePayload);
   }
@@ -45,13 +49,14 @@ export class DevisService {
 
 
 
-   // Lors de la création, on reçoit l'id de l'entreprise, mais on doit associer l'objet Entreprise à la relation
+
+  // Lors de la création, on reçoit les ids de l'entreprise et du propriétaire, mais on doit associer les objets à la relation
   create(createDevisDto: CreateDevisDto) {
-    // On transforme l'id de l'entreprise en objet Entreprise
-    const { entreprise, ...rest } = createDevisDto;
+    const { entreprise, proprietaire, ...rest } = createDevisDto;
     const devis = this.devisRepository.create({
       ...rest,
       entreprise: { id: entreprise },
+      proprietaire: { id: proprietaire },
     });
     return this.devisRepository.save(devis);
   }

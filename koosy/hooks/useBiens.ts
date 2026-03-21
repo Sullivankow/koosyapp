@@ -39,11 +39,17 @@ export default function useBiens(deps: any[] = []) {
         return {
           ...bien,
           photos,
-          proprio: {
-            nom: bien.proprietaireNom || 'N/A',
-            email: bien.proprietaireEmail || '',
-            telephone: bien.proprietaireTelephone || '',
-          },
+          proprio: bien.proprietaire
+            ? {
+                nom: bien.proprietaire.nom || 'N/A',
+                email: bien.proprietaire.email || '',
+                telephone: bien.proprietaire.telephone || '',
+              }
+            : {
+                nom: bien.proprietaireNom || 'N/A',
+                email: bien.proprietaireEmail || '',
+                telephone: bien.proprietaireTelephone || '',
+              },
           locataires: Array.isArray(bien.locataires)
             ? bien.locataires.map((loc: any) => ({
                 id: loc.id?.toString() || '',
