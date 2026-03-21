@@ -96,8 +96,7 @@ const PrestationsScreen: React.FC = () => {
 									</View>
 									<Text style={{ color: '#111', fontWeight: 'bold', fontSize: 16 }}>{p.description || 'Sans description'}</Text>
 									<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Montant : {(p.amount_cents / 100).toFixed(2)} €</Text>
-									<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Date : {p.date_prestation}</Text>
-									<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Créée le : {p.created_at?.slice(0, 10)}</Text>
+									<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Créée le : {p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : ''}</Text>
 																<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4, marginBottom: 2 }}>
 																	{['en attente', 'confirmée', 'terminée'].map((s) => {
 																		const isActive = p.status === STATUS_CONFIG[s]?.label || p.status === s;
