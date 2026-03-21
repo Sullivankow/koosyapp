@@ -3,7 +3,7 @@ import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions,
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../contexts/ThemeContext';
 import { createBien, updateBien, uploadBienImages, geocodeAdresse } from '../utils/api';
-import { createProprietaire } from '../utils/proprietaireApi';
+import { createProprietaire } from '../utils/api';
 import { useBienCount } from '../contexts/BienCountContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -126,10 +126,14 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
         type: initialData.type || '',
         superficie: initialData.superficie ? String(initialData.superficie) : '',
         pieces: initialData.pieces ? String(initialData.pieces) : '',
-        proprietaireNom: initialData.proprietaireNom || initialData.proprio?.nom || '',
-        proprietaireEmail: initialData.proprietaireEmail || initialData.proprio?.email || '',
-        proprietaireTelephone: initialData.proprietaireTelephone || initialData.proprio?.telephone || '',
         equipements: Array.isArray(initialData.equipements) ? initialData.equipements.join(', ') : (initialData.equipements || ''),
+      });
+      setProprietaire({
+        nom: initialData.proprietaireNom || initialData.proprio?.nom || '',
+        prenom: initialData.proprietairePrenom || initialData.proprio?.prenom || '',
+        email: initialData.proprietaireEmail || initialData.proprio?.email || '',
+        adresse: initialData.proprietaireAdresse || initialData.proprio?.adresse || '',
+        telephone: initialData.proprietaireTelephone || initialData.proprio?.telephone || '',
       });
       // ne pré-remplit pas selectedImages (on ajoute seulement)
     }
@@ -152,11 +156,15 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
               <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Type (Appartement, Maison...)" placeholderTextColor="#888" value={form.type} onChangeText={v => setForm(f => ({ ...f, type: v }))} />
               <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Superficie (m²)" placeholderTextColor="#888" value={form.superficie} onChangeText={v => setForm(f => ({ ...f, superficie: v }))} keyboardType="numeric" />
               <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nombre de pièces" placeholderTextColor="#888" value={form.pieces} onChangeText={v => setForm(f => ({ ...f, pieces: v }))} keyboardType="numeric" />
-              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nom du propriétaire" placeholderTextColor="#888" value={proprietaire.nom} onChangeText={v => setProprietaire(p => ({ ...p, nom: v }))} />
-              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Prénom du propriétaire" placeholderTextColor="#888" value={proprietaire.prenom} onChangeText={v => setProprietaire(p => ({ ...p, prenom: v }))} />
-              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Email du propriétaire" placeholderTextColor="#888" value={proprietaire.email} onChangeText={v => setProprietaire(p => ({ ...p, email: v }))} keyboardType="email-address" />
-              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Adresse du propriétaire" placeholderTextColor="#888" value={proprietaire.adresse} onChangeText={v => setProprietaire(p => ({ ...p, adresse: v }))} />
-              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Téléphone du propriétaire" placeholderTextColor="#888" value={proprietaire.telephone} onChangeText={v => setProprietaire(p => ({ ...p, telephone: v }))} keyboardType="phone-pad" />
+              {mode === 'add' && (
+                <>
+                  <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nom du propriétaire" placeholderTextColor="#888" value={proprietaire.nom} onChangeText={v => setProprietaire(p => ({ ...p, nom: v }))} />
+                  <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Prénom du propriétaire" placeholderTextColor="#888" value={proprietaire.prenom} onChangeText={v => setProprietaire(p => ({ ...p, prenom: v }))} />
+                  <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Email du propriétaire" placeholderTextColor="#888" value={proprietaire.email} onChangeText={v => setProprietaire(p => ({ ...p, email: v }))} keyboardType="email-address" />
+                  <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Adresse du propriétaire" placeholderTextColor="#888" value={proprietaire.adresse} onChangeText={v => setProprietaire(p => ({ ...p, adresse: v }))} />
+                  <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Téléphone du propriétaire" placeholderTextColor="#888" value={proprietaire.telephone} onChangeText={v => setProprietaire(p => ({ ...p, telephone: v }))} keyboardType="phone-pad" />
+                </>
+              )}
               <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Équipements (séparés par des virgules)" placeholderTextColor="#888" value={form.equipements} onChangeText={v => setForm(f => ({ ...f, equipements: v }))} />
               {/* Sélecteur d'images */}
               <TouchableOpacity style={[styles.input, { backgroundColor: '#f5f5f5', alignItems: 'center', justifyContent: 'center' }]} onPress={pickImage}>

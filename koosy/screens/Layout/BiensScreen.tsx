@@ -145,11 +145,13 @@ const BiensScreen: React.FC = () => {
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
       <SuccesMessage message={successMsg} />
-      <AddBienModal
-        visible={addBienModalVisible}
-        onClose={() => setAddBienModalVisible(false)}
-        onSuccess={() => { fetchBiens(); signalBienAdded(); }}
-      />
+      {addBienModalVisible && !editModalData.visible && (
+        <AddBienModal
+          visible={addBienModalVisible}
+          onClose={() => setAddBienModalVisible(false)}
+          onSuccess={() => { fetchBiens(); signalBienAdded(); }}
+        />
+      )}
       <StatusModal visible={statutModalVisible} onClose={() => setStatutModalVisible(false)} onSelect={handleSelectStatus} currentStatus={currentBienStatus} />
       <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}> 
         <Text style={[styles.title, { color: colors.text }]}>Mes biens</Text>
@@ -196,14 +198,7 @@ const BiensScreen: React.FC = () => {
           />
         )}
       />
-      <AddBienModal
-        visible={editModalData.visible}
-        onClose={closeEditModal}
-        mode="edit"
-        bienId={editModalData.bienId}
-        initialData={editModalData.initialData}
-        onSuccess={async () => { await fetchBiens(); closeEditModal(); }}
-      />
+      {/* Suppression de la modale d'édition sur l'icône modifier */}
       <Modal visible={photoModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <TouchableOpacity style={styles.closeBtn} onPress={() => setPhotoModalVisible(false)}>

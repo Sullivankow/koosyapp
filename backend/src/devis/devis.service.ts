@@ -69,7 +69,7 @@ export class DevisService {
     // Récupérer le devis avec entreprise et lignes
     const devis = await this.devisRepository.findOne({
       where: { id },
-      relations: ['entreprise', 'lignes'],
+      relations: ['entreprise', 'lignes', 'proprietaire'],
     });
     if (!devis) {
       throw new Error('Devis non trouvé');
@@ -83,20 +83,35 @@ export class DevisService {
     doc.on('end', () => {});
 
 
-    // === EN-TÊTE DU DOCUMENT ===
+    // === EN-TÊTE DU DOCUMENT (NOUVELLE MISE EN PAGE CORRIGÉE) ===
     const mainColor = '#009688';
-    doc
-      .font('Helvetica-Bold')
-      .fontSize(22)
-      .fillColor(mainColor)
-      .text('DEVIS', { align: 'left' });
-    doc.moveDown(0.2);
-    // Bloc infos entreprise et client
+    // Titre "DEVIS" et numéro sur la même ligne, numéro collé
+    doc.font('Helvetica-Bold').fontSize(22).fillColor(mainColor);
+    doc.text('DEVIS', 30, doc.y, { continued: true });
+    doc.font('Helvetica-Bold').fontSize(16).text(` N°${devis.numero}`, undefined, undefined, { continued: false });
+
+    // Date de création juste sous le titre
+    doc.font('Helvetica').fontSize(10).fillColor('black');
+    doc.text(`Date de création : ${devis.dateCreation.toLocaleDateString()}`, 30, doc.y + 5);
+
+    // Date de validité en haut à droite
+    if (devis.dateValidite) {
+      doc.font('Helvetica').fontSize(10).fillColor(mainColor);
+      doc.text(`Valide jusqu'au : ${devis.dateValidite.toLocaleDateString()}`, 400, 30, { align: 'right' });
+    }
+
+    // Ajout d'un espace plus important avant les infos entreprise/proprio
+    doc.moveDown(3);
+
+    // Bloc infos entreprise à gauche et proprio à droite
     const infoY = doc.y;
     doc.fontSize(10).fillColor('black');
-    // Colonne entreprise à gauche
     let xLeft = 30;
-    doc.text(devis.entreprise?.nom || '', xLeft, infoY);
+    let xRight = 400;
+    // Entreprise à gauche
+    let yCursor = infoY;
+    doc.font('Helvetica-Bold').text(devis.entreprise?.nom || '', xLeft, yCursor);
+    doc.font('Helvetica');
     if (devis.entreprise?.adresse) doc.text(devis.entreprise.adresse, xLeft);
     if (devis.entreprise?.codePostal || devis.entreprise?.ville)
       doc.text(
@@ -105,14 +120,19 @@ export class DevisService {
       );
     if (devis.entreprise?.pays) doc.text(devis.entreprise.pays, xLeft);
     if (devis.entreprise?.email) doc.text(devis.entreprise.email, xLeft);
-    // Colonne devis à droite
-    let xRight = 350;
-    doc.text(`Numéro : ${devis.numero}`, xRight, infoY);
-    doc.text(`Date : ${devis.dateCreation.toLocaleDateString()}`, xRight);
-    if (devis.dateValidite)
-      doc.text(`Valide jusqu'au : ${devis.dateValidite.toLocaleDateString()}`, xRight);
-    doc.text(`Statut : ${devis.statut}`, xRight);
-    doc.moveDown(0.8);
+
+    // Propriétaire à droite, aligné avec l'entreprise
+    yCursor = infoY;
+    if (devis.proprietaire) {
+      doc.font('Helvetica-Bold').text('Propriétaire :', xRight, yCursor);
+      doc.font('Helvetica').text(`${devis.proprietaire.nom} ${devis.proprietaire.prenom}`, xRight);
+      if (devis.proprietaire.adresse) doc.text(devis.proprietaire.adresse, xRight);
+      // Ajout d'autres champs si besoin (email, téléphone)
+    }
+
+    // Ajout d'un espace plus important avant le tableau
+    doc.moveDown(2.5);
+
     // Ligne de séparation
     doc.moveTo(30, doc.y).lineTo(565, doc.y).stroke(mainColor);
     doc.moveDown(0.5);

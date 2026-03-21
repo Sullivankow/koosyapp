@@ -1,5 +1,3 @@
-
-
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
@@ -96,15 +94,12 @@ export function getImageUrl(url: string): string {
 
 //Fonction pour créer un nouveau bien
 export async function createBien(data: {
-
   nom: string;
   adresse: string;
   type?: string;
   superficie: number;
   pieces: number;
-  proprietaireNom: string;
-  proprietaireEmail: string;
-  proprietaireTelephone?: string;
+  proprietaire: number;
   equipements?: string[];
 }): Promise<{ id: number }> {
   // On attend un objet avec l'id du bien créé
@@ -599,4 +594,18 @@ export async function createFacture(data: Omit<Facture, 'id' | 'entreprise'>): P
 // Retourne l'URL du PDF d'une facture
 export function getFacturePdfUrl(id: number) {
   return `${BASE_URL}/facture/${id}/pdf`;
+}
+
+// Récupérer la liste des propriétaires existants
+import type { Proprietaire } from '../models/proprietaire';
+export async function getProprietaires(): Promise<Proprietaire[]> {
+  return apiFetch('/proprietaire');
+}
+
+// Fonction pour créer un propriétaire
+export async function createProprietaire(data: Omit<Proprietaire, 'id'>): Promise<Proprietaire> {
+  return apiFetch('/proprietaire', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
 }
