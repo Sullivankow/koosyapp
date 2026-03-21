@@ -6,6 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Dimensions } from 'react-native';
 import { useFactureManager } from '../../hooks/useFactureManager';
+import { getFacturePdfUrl } from '../../utils/api';
 import { useEntreprises } from '../../hooks/useEntreprises';
 import { useAddFactureModal } from '../../hooks/useAddFactureModal';
 import useFactureSearchSort from '../../hooks/useFactureSearchSort';
@@ -13,10 +14,7 @@ import { FactureList } from '../../components/FactureList';
 import SearchBar from '../../components/SearchBar';
 import PlusButton from '../../components/PlusButton';
 
-// À adapter selon ton backend
-function getFacturePdfUrl(id: number) {
-	return `http://192.168.1.67:3000/factures/${id}/pdf`;
-}
+
 
 
 // Écran principal de la liste des factures

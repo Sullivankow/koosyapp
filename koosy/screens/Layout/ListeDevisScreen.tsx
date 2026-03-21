@@ -4,6 +4,7 @@ import { Modal } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAddDevisModal } from '../../hooks/useAddDevisModal';
+import { useEntreprises } from '../../hooks/useEntreprises';
 import { useTheme } from '../../contexts/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import PlusButton from '../../components/PlusButton';
@@ -14,16 +15,21 @@ import { DevisList } from '../../components/DevisList';
 import { getDevisPdfUrl } from '../../utils/api';
 import useDevisSearchSort from '../../hooks/useDevisSearchSort';
 import SearchBar from '../../components/SearchBar';
+
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
+
 export default function ListeDevisScreen() {
-	// Gestion centralisée des devis, token et aperçu via hook personnalisé
-	const { devis, setDevis, pdfToken, setPdfToken, previewId, setPreviewId, handleDeleteDevis, handlePreviewDevis } = useDevisManager([]);
-	// Couleurs du thème
-	const { colors } = useTheme();
-	// Gestion modale d'ajout de devis
-	const { open, modal, lastDevis } = useAddDevisModal([]);
-	const screenWidth = Dimensions.get('window').width;
+    // Récupération des entreprises de l'utilisateur
+    const entreprises = useEntreprises();
+    // Gestion modale d'ajout de devis avec la vraie liste d'entreprises (doit être avant useDevisManager)
+    const { open, modal, lastDevis } = useAddDevisModal(entreprises);
+    // Gestion centralisée des devis, token et aperçu via hook personnalisé
+    // On passe lastDevis pour forcer le rafraîchissement après création
+    const { devis, setDevis, pdfToken, setPdfToken, previewId, setPreviewId, handleDeleteDevis, handlePreviewDevis } = useDevisManager(lastDevis);
+    // Couleurs du thème
+    const { colors } = useTheme();
+    const screenWidth = Dimensions.get('window').width;
 
 	// Recherche locale
 	const [search, setSearch] = useState('');

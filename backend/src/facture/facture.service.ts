@@ -139,13 +139,14 @@ export class FactureService {
     doc.text('Total TTC :', col3, totalY + 2 * rowHeight, { width: col4 - col3 - 10, align: 'right' });
     doc.text(`${facture.montantTTC !== undefined && facture.montantTTC !== null ? Number(facture.montantTTC).toFixed(2) : '0.00'} €`, col4 + 5, totalY + 2 * rowHeight, { width: col5 - col4 - 10, align: 'right' });
 
-    // --- Notes et conditions ---
-    doc.moveDown(4);
+    // --- Notes et conditions à gauche sous l'entreprise ---
+    let notesY = totalY + 3 * rowHeight + 30;
     if (facture.conditionsPaiement) {
-      doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666').text(`Conditions de paiement : ${facture.conditionsPaiement}`);
+      doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666').text(`Conditions de paiement : ${facture.conditionsPaiement}`, col1, notesY, { width: 400 });
+      notesY = doc.y + 4;
     }
     if (facture.notes) {
-      doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666').text(`Notes : ${facture.notes}`);
+      doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666').text(`Notes : ${facture.notes}`, col1, notesY, { width: 400 });
     }
 
     // Finir le PDF et retourner le buffer

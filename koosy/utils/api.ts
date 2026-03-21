@@ -1,4 +1,5 @@
 
+
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
@@ -593,4 +594,9 @@ export async function createFacture(data: Omit<Facture, 'id' | 'entreprise'>): P
     body: JSON.stringify(data),
   });
   return { id: res.id ?? res.facture?.id ?? res["id"] };
+}
+
+// Retourne l'URL du PDF d'une facture
+export function getFacturePdfUrl(id: number) {
+  return `${BASE_URL}/facture/${id}/pdf`;
 }

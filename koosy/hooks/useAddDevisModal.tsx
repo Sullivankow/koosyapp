@@ -5,7 +5,8 @@ import { Entreprise } from '../models/models';
 
 export const useAddDevisModal = (entreprises: Entreprise[]) => {
   const [visible, setVisible] = useState(false);
-  const [lastDevis, setLastDevis] = useState(null);
+  // Initialisation à [] pour éviter l'erreur de typage
+  const [lastDevis, setLastDevis] = useState<any[]>([]);
 
   const open = () => setVisible(true);
   const close = () => setVisible(false);
