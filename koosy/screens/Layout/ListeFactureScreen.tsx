@@ -1,0 +1,128 @@
+import React, { useState, useMemo } from 'react';
+import { View, Text, TouchableOpacity, Modal } from 'react-native';
+import { WebView } from 'react-native-webview';
+import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import { Dimensions } from 'react-native';
+import { useFactureManager } from '../../hooks/useFactureManager';
+import useFactureSearchSort from '../../hooks/useFactureSearchSort';
+import { FactureList } from '../../components/FactureList';
+import SearchBar from '../../components/SearchBar';
+import PlusButton from '../../components/PlusButton';
+
+// À adapter selon ton backend
+function getFacturePdfUrl(id: number) {
+	return `http://192.168.1.67:3000/factures/${id}/pdf`;
+}
+
+
+export default function ListeFactureScreen() {
+	// Gestion centralisée des factures, token et aperçu via hook personnalisé
+	const { factures, pdfToken, previewId, setPreviewId, handleDeleteFacture, handlePreviewFacture } = useFactureManager([]);
+	// Couleurs du thème
+	const { colors } = useTheme();
+	const screenWidth = Dimensions.get('window').width;
+
+	// Recherche locale
+	const [search, setSearch] = useState('');
+
+	// Filtrage local par numéro ou montant
+	const filteredFactures = useMemo(() =>
+		factures.filter(f =>
+			(f.numero && f.numero.toLowerCase().includes(search.toLowerCase())) ||
+			(f.montantTTC !== undefined && f.montantTTC !== null && f.montantTTC.toString().includes(search))
+		),
+		[factures, search]
+	);
+
+	// Tri via hook personnalisé
+	const { sortOrder, setSortOrder, sortedFactures } = useFactureSearchSort(filteredFactures);
+
+	// Fonction pour exporter le PDF sur le téléphone (placeholder, à implémenter si besoin)
+	const handleExportPdf = async () => {
+		if (!previewId) return;
+		const pdfUrl = getFacturePdfUrl(previewId);
+		// Implémenter l'export PDF si besoin
+	};
+
+	 return (
+		 <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
+			 {/* En-tête */}
+			 <View style={{
+				 height: 60,
+				 backgroundColor: colors.primary,
+				 justifyContent: 'center',
+				 alignItems: 'center',
+				 borderBottomWidth: 1,
+				 borderBottomColor: colors.border,
+				 width: screenWidth,
+				 elevation: 2,
+				 shadowColor: colors.shadow,
+				 shadowOffset: { width: 0, height: 2 },
+				 shadowOpacity: 0.12,
+				 shadowRadius: 2,
+			 }}>
+				 <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#fff', textAlign: 'center' }}>Mes factures</Text>
+			 </View>
+
+			 {/* Barre de recherche et bouton de tri */}
+			 <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, marginTop: 18 }}>
+				 <View style={{ flex: 1 }}>
+					 <SearchBar
+						 value={search}
+						 onChangeText={setSearch}
+						 placeholder="Rechercher une facture..."
+						 style={{ backgroundColor: 'transparent' }}
+					 />
+				 </View>
+				 <TouchableOpacity
+					 style={{ marginLeft: 8, padding: 8, backgroundColor: colors.primary, borderRadius: 8 }}
+					 onPress={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+				 >
+					 <MaterialCommunityIcons
+						 name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
+						 size={24}
+						 color={colors.surface}
+					 />
+				 </TouchableOpacity>
+			 </View>
+
+			 {/* Liste des factures (extrait dans un composant) */}
+			 <FactureList factures={sortedFactures} colors={colors} handlePreviewFacture={handlePreviewFacture} handleDeleteFacture={handleDeleteFacture} />
+
+			 {/* Bouton flottant pour ajouter une facture (sans modale) */}
+			 <PlusButton onPress={() => {}} backgroundColor={colors.primary} iconColor={colors.surface} />
+
+			 {/* Modale d'aperçu PDF de la facture */}
+			 <Modal
+				 visible={!!previewId}
+				 animationType="slide"
+				 onRequestClose={() => setPreviewId(null)}
+				 presentationStyle="fullScreen"
+			 >
+				 {/* WebView pour afficher le PDF de la facture avec header Authorization */}
+				 <WebView
+					 source={{
+						 uri: previewId ? getFacturePdfUrl(previewId) : '',
+						 headers: pdfToken ? { Authorization: `Bearer ${pdfToken}` } : {},
+					 }}
+					 style={{ flex: 1 }}
+					 originWhitelist={['*']}
+					 onError={syntheticEvent => {
+						 const { nativeEvent } = syntheticEvent;
+						 alert('Erreur lors du chargement du PDF : ' + nativeEvent.description);
+					 }}
+				 />
+				 {/* Bouton pour exporter le PDF en bas à droite (optionnel) */}
+				 <TouchableOpacity onPress={handleExportPdf} style={{ position: 'absolute', bottom: 30, right: 30, zIndex: 10, backgroundColor: colors.primary, borderRadius: 30, padding: 16, elevation: 4 }}>
+					 <MaterialIcons name="file-upload" size={32} color={colors.surface} />
+				 </TouchableOpacity>
+				 {/* Bouton pour fermer la modale */}
+				 <TouchableOpacity onPress={() => setPreviewId(null)} style={{ position: 'absolute', top: 40, right: 20, zIndex: 10 }}>
+					 <MaterialIcons name="close" size={32} color="#000" />
+				 </TouchableOpacity>
+			 </Modal>
+		 </SafeAreaView>
+	);
+}

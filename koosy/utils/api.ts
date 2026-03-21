@@ -1,5 +1,6 @@
 
 
+
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
@@ -569,3 +570,18 @@ export function getDevisPdfUrl(id: number) {
 }
 
 
+import { Facture } from '../models/models';
+// Fonction pour récupérer la liste des factures
+export async function getFactures(): Promise<Facture[]> {
+  const data = await apiFetch('/factures');
+  if (Array.isArray(data)) return data;
+  if (data && Array.isArray(data.items)) return data.items;
+  return [];
+}
+
+// Fonction pour supprimer une facture par son ID
+export async function deleteFacture(id: number): Promise<void> {
+  return apiFetch(`/factures/${id}`, {
+    method: 'DELETE',
+  });
+}

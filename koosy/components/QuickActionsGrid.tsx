@@ -11,9 +11,10 @@ interface QuickActionsGridProps {
   onAddReservation: () => void;
   onAddPrestation: () => void;
   onAddDevis: () => void;
+  onAddFacture?: () => void;
 }
 
-const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onAddBien, onAddTache, onAddReservation, onAddPrestation, onAddDevis }) => (
+const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onAddBien, onAddTache, onAddReservation, onAddPrestation, onAddDevis, onAddFacture }) => (
   <View style={styles.quickActionsGrid}>
     <View style={styles.quickActionsRow}>
       <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]} onPress={onAddBien}>
@@ -50,7 +51,11 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
           <Text style={[styles.actionText, { color: colors.surface }]}>Mes devis</Text>
         </View>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.warning || '#FFA726' }]}> 
+      <TouchableOpacity
+        style={[styles.actionBtn, { backgroundColor: colors.warning || '#FFA726' }]}
+        onPress={onAddFacture}
+        disabled={!onAddFacture}
+      >
         <View style={styles.centerContent}>
           <MaterialCommunityIcons name="file-document-outline" size={24} color={colors.surface} style={styles.icon} />
           <Text style={[styles.actionText, { color: colors.surface }]}>Mes factures</Text>

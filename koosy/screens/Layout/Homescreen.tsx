@@ -34,6 +34,7 @@ import ChiffreAffaireCard from '../../components/ChiffreAffaireCard';
 import { useAddDevisModal } from '../../hooks/useAddDevisModal';
 import { apiFetchMyEntreprise } from '../../utils/api';
 
+
 type HomeScreenProps = {
     onLogout?: () => void;
     navigation?: any;
@@ -112,9 +113,15 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
         }
     };
 
+
     // Handler pour ouvrir la page ListeDevisScreen
     const handleGoToListeDevis = () => {
         if (navigation) navigation.navigate('ListeDevisScreen');
+    };
+
+    // Handler pour ouvrir la page ListeFactureScreen
+    const handleGoToListeFacture = () => {
+        if (navigation) navigation.navigate('ListeFactureScreen');
     };
 
     return (
@@ -168,15 +175,16 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                 />
 
                 {/* Actions principales en grille 2x2 */}
-                                <QuickActionsGrid
-                                    colors={colors}
-                                    styles={styles}
-                                    onAddBien={() => setAddBienModalVisible(true)}
-                                    onAddTache={() => setAddTacheModalVisible(true)}
-                                    onAddReservation={() => setAddReservationModalVisible(true)}
-                                    onAddPrestation={() => setAddPrestationModalVisible(true)}
-                                    onAddDevis={handleGoToListeDevis}
-                                />
+                <QuickActionsGrid
+                    colors={colors}
+                    styles={styles}
+                    onAddBien={() => setAddBienModalVisible(true)}
+                    onAddTache={() => setAddTacheModalVisible(true)}
+                    onAddReservation={() => setAddReservationModalVisible(true)}
+                    onAddPrestation={() => setAddPrestationModalVisible(true)}
+                    onAddDevis={handleGoToListeDevis}
+                    onAddFacture={handleGoToListeFacture}
+                />
             </ScrollView>
             {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}
         {/* Modal d'ajout de bien */}

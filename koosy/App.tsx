@@ -29,6 +29,7 @@ import NotificationScreen from './screens/Layout/NotificationScreen';
 import { PrestationsCountProvider } from './contexts/PrestationsCountContext';
 import { AppContext } from './contexts/AppContext';
 import ListeDevisScreen from './screens/Layout/ListeDevisScreen';
+import ListeFactureScreen from './screens/Layout/ListeFactureScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -41,6 +42,7 @@ function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
         {({ navigation }) => <HomeScreen onLogout={onLogout} navigation={navigation} />}
       </HomeStack.Screen>
       <HomeStack.Screen name="ListeDevisScreen" component={ListeDevisScreen} />
+      <HomeStack.Screen name="ListeFactureScreen" component={ListeFactureScreen} />
       <HomeStack.Screen name="NotificationsScreen" component={NotificationScreen} />
     </HomeStack.Navigator>
   );
@@ -204,6 +206,7 @@ export default function App() {
                             <Stack.Screen name="NotificationsScreen" component={NotificationScreen} />
                             <Stack.Screen name="Carte" component={CarteScreen} />
                             <Stack.Screen name="ListeDevis" component={ListeDevisScreen} />
+                            <Stack.Screen name="ListeFactureScreen" component={ListeFactureScreen} />
                           </Stack.Navigator>
                         </NavigationContainer>
                       )}
