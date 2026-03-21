@@ -6,6 +6,7 @@ import { createBien, updateBien, uploadBienImages, geocodeAdresse } from '../uti
 import { useBienCount } from '../contexts/BienCountContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 
 interface AddBienModalProps {
   visible: boolean;
@@ -142,21 +143,21 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
         <KeyboardAvoidingView behavior="padding" style={{ flex: 1, width: '100%', alignItems: 'center', justifyContent: 'center' }}>
           <View style={[styles.modalContentAdd, { backgroundColor: colors.surface }]}> 
             <ScrollView
-              style={{ maxHeight: 400, width: '100%' }}
+              style={{ maxHeight: SCREEN_HEIGHT * 0.6, width: '100%' }}
               contentContainerStyle={{ alignItems: 'center', paddingBottom: 30 }}
               keyboardShouldPersistTaps="handled"
               horizontal={false}
             >
               <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12, color: colors.primary }}>Ajouter un bien</Text>
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Nom" placeholderTextColor="#888" value={form.nom} onChangeText={v => setForm(f => ({ ...f, nom: v }))} />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Adresse" placeholderTextColor="#888" value={form.adresse} onChangeText={v => setForm(f => ({ ...f, adresse: v }))} />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Type (Appartement, Maison...)" placeholderTextColor="#888" value={form.type} onChangeText={v => setForm(f => ({ ...f, type: v }))} />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Superficie (m²)" placeholderTextColor="#888" value={form.superficie} onChangeText={v => setForm(f => ({ ...f, superficie: v }))} keyboardType="numeric" />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Nombre de pièces" placeholderTextColor="#888" value={form.pieces} onChangeText={v => setForm(f => ({ ...f, pieces: v }))} keyboardType="numeric" />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Nom du propriétaire" placeholderTextColor="#888" value={form.proprietaireNom} onChangeText={v => setForm(f => ({ ...f, proprietaireNom: v }))} />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Email du propriétaire" placeholderTextColor="#888" value={form.proprietaireEmail} onChangeText={v => setForm(f => ({ ...f, proprietaireEmail: v }))} keyboardType="email-address" />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Téléphone du propriétaire" placeholderTextColor="#888" value={form.proprietaireTelephone} onChangeText={v => setForm(f => ({ ...f, proprietaireTelephone: v }))} keyboardType="phone-pad" />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Équipements (séparés par des virgules)" placeholderTextColor="#888" value={form.equipements} onChangeText={v => setForm(f => ({ ...f, equipements: v }))} />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nom" placeholderTextColor="#888" value={form.nom} onChangeText={v => setForm(f => ({ ...f, nom: v }))} />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Adresse" placeholderTextColor="#888" value={form.adresse} onChangeText={v => setForm(f => ({ ...f, adresse: v }))} />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Type (Appartement, Maison...)" placeholderTextColor="#888" value={form.type} onChangeText={v => setForm(f => ({ ...f, type: v }))} />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Superficie (m²)" placeholderTextColor="#888" value={form.superficie} onChangeText={v => setForm(f => ({ ...f, superficie: v }))} keyboardType="numeric" />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nombre de pièces" placeholderTextColor="#888" value={form.pieces} onChangeText={v => setForm(f => ({ ...f, pieces: v }))} keyboardType="numeric" />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nom du propriétaire" placeholderTextColor="#888" value={form.proprietaireNom} onChangeText={v => setForm(f => ({ ...f, proprietaireNom: v }))} />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Email du propriétaire" placeholderTextColor="#888" value={form.proprietaireEmail} onChangeText={v => setForm(f => ({ ...f, proprietaireEmail: v }))} keyboardType="email-address" />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Téléphone du propriétaire" placeholderTextColor="#888" value={form.proprietaireTelephone} onChangeText={v => setForm(f => ({ ...f, proprietaireTelephone: v }))} keyboardType="phone-pad" />
+              <TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Équipements (séparés par des virgules)" placeholderTextColor="#888" value={form.equipements} onChangeText={v => setForm(f => ({ ...f, equipements: v }))} />
               {/* Sélecteur d'images */}
               <TouchableOpacity style={[styles.input, { backgroundColor: '#f5f5f5', alignItems: 'center', justifyContent: 'center' }]} onPress={pickImage}>
                 <Text style={{ color: '#111', fontWeight: 'bold' }}>Ajouter une photo</Text>
@@ -218,7 +219,9 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     fontSize: 15,
     backgroundColor: '#fff',
-    width: SCREEN_WIDTH * 0.8,
+    width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
   },
 });
 
