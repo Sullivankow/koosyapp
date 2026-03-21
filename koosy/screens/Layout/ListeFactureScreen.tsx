@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Dimensions } from 'react-native';
 import { useFactureManager } from '../../hooks/useFactureManager';
 import { getFacturePdfUrl } from '../../utils/api';
+import { exportPdfToPhone } from '../../utils/pdfExport';
 import { useEntreprises } from '../../hooks/useEntreprises';
 import { useAddFactureModal } from '../../hooks/useAddFactureModal';
 import useFactureSearchSort from '../../hooks/useFactureSearchSort';
@@ -45,11 +46,11 @@ export default function ListeFactureScreen() {
 	// Tri via hook personnalisé
 	const { sortOrder, setSortOrder, sortedFactures } = useFactureSearchSort(filteredFactures);
 
-	// Fonction pour exporter le PDF sur le téléphone (placeholder, à implémenter si besoin)
+	// Fonction pour exporter le PDF sur le téléphone (identique à devis)
 	const handleExportPdf = async () => {
 		if (!previewId) return;
 		const pdfUrl = getFacturePdfUrl(previewId);
-		// Implémenter l'export PDF si besoin
+		await exportPdfToPhone(pdfUrl, `facture_${previewId}.pdf`, pdfToken || undefined);
 	};
 
 	 return (

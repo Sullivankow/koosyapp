@@ -103,51 +103,65 @@ export class FactureService {
     }
     doc.moveDown(2);
 
-    // --- TABLEAU DES LIGNES ---
-    const tableTop = doc.y + 10;
-    // Colonnes ajustées pour que "Total HT" soit bien visible et centré
-    const col1 = 50, col2 = 220, col3 = 340, col4 = 430, col5 = 570;
-    const rowHeight = 22;
-    // En-tête tableau
-    doc.rect(col1, tableTop, col5 - col1, rowHeight).fillAndStroke(mainColor, '#e0e0e0');
-    doc.fillColor('white').font('Helvetica-Bold').fontSize(12);
-    doc.text('Désignation', col1 + 5, tableTop + 6, { width: col2 - col1 - 10 });
-    doc.text('Quantité', col2 + 5, tableTop + 6, { width: col3 - col2 - 10, align: 'right' });
-    doc.text('PU HT', col3 + 5, tableTop + 6, { width: col4 - col3 - 10, align: 'right' });
-    doc.text('Total HT', col4 + 5, tableTop + 6, { width: col5 - col4 - 10, align: 'center' });
-    doc.fillColor('black').font('Helvetica').fontSize(11);
-
+    // --- TABLEAU DES LIGNES (style devis) ---
+    const tableX = 50;
+    const tableWidth = 520;
+    const tableY = doc.y + 10;
+    const rowHeight = 20;
+    // Header
+    doc.save();
+    doc.rect(tableX, tableY, tableWidth, rowHeight).fill('#F4F7FA');
+    doc.restore();
+    doc.font('Helvetica-Bold').fontSize(11).fillColor(mainColor);
+    doc.text('Désignation', tableX + 5, tableY + 6, { width: 170 });
+    doc.text('Qté', tableX + 180, tableY + 6, { width: 35, align: 'right' });
+    doc.text('PU HT', tableX + 225, tableY + 6, { width: 60, align: 'right' });
+    doc.text('Total HT', tableX + 295, tableY + 6, { width: 70, align: 'right' });
+    doc.text('Total TTC', tableX + 375, tableY + 6, { width: 85, align: 'right' });
+    doc.moveTo(tableX, tableY + rowHeight).lineTo(tableX + tableWidth, tableY + rowHeight).stroke(mainColor);
     // Lignes du tableau
-    let y = tableTop + rowHeight;
-    facture.lignes?.forEach((ligne: any, idx: number) => {
-      doc.rect(col1, y, col5 - col1, rowHeight).stroke('#e0e0e0');
-      doc.text(ligne.description, col1 + 5, y + 6, { width: col2 - col1 - 10 });
-      doc.text(ligne.quantite?.toString() || '', col2 + 5, y + 6, { width: col3 - col2 - 10, align: 'right' });
-      doc.text(ligne.prixUnitaireHT !== undefined && ligne.prixUnitaireHT !== null ? Number(ligne.prixUnitaireHT).toFixed(2) : '', col3 + 5, y + 6, { width: col4 - col3 - 10, align: 'right' });
-      doc.text(ligne.totalLigneHT !== undefined && ligne.totalLigneHT !== null ? Number(ligne.totalLigneHT).toFixed(2) : '', col4 + 5, y + 6, { width: col5 - col4 - 10, align: 'center' });
+    doc.font('Helvetica').fontSize(10).fillColor('black');
+    let y = tableY + rowHeight + 2;
+    facture.lignes?.forEach((ligne: any) => {
+      doc.text(ligne.description, tableX + 5, y, { width: 170 });
+      doc.text(ligne.quantite?.toString() || '', tableX + 180, y, { width: 35, align: 'right' });
+      doc.text(ligne.prixUnitaireHT !== undefined && ligne.prixUnitaireHT !== null ? Number(ligne.prixUnitaireHT).toFixed(2) + ' €' : '', tableX + 225, y, { width: 60, align: 'right' });
+      doc.text(ligne.totalLigneHT !== undefined && ligne.totalLigneHT !== null ? Number(ligne.totalLigneHT).toFixed(2) + ' €' : '', tableX + 295, y, { width: 70, align: 'right' });
+      doc.text(ligne.totalLigneTTC !== undefined && ligne.totalLigneTTC !== null ? Number(ligne.totalLigneTTC).toFixed(2) + ' €' : '', tableX + 375, y, { width: 85, align: 'right' });
       y += rowHeight;
     });
-    doc.moveDown(2);
-
-    // --- TOTAUX ---
-    const totalY = y + 10;
-    doc.font('Helvetica-Bold').fontSize(12);
-    doc.text('Total HT :', col3, totalY, { width: col4 - col3 - 10, align: 'right' });
-    doc.text(`${facture.montantHT !== undefined && facture.montantHT !== null ? Number(facture.montantHT).toFixed(2) : '0.00'} €`, col4 + 5, totalY, { width: col5 - col4 - 10, align: 'right' });
-    doc.text('TVA :', col3, totalY + rowHeight, { width: col4 - col3 - 10, align: 'right' });
-    doc.text(`${facture.montantTVA !== undefined && facture.montantTVA !== null ? Number(facture.montantTVA).toFixed(2) : '0.00'} €`, col4 + 5, totalY + rowHeight, { width: col5 - col4 - 10, align: 'right' });
-    doc.text('Total TTC :', col3, totalY + 2 * rowHeight, { width: col4 - col3 - 10, align: 'right' });
-    doc.text(`${facture.montantTTC !== undefined && facture.montantTTC !== null ? Number(facture.montantTTC).toFixed(2) : '0.00'} €`, col4 + 5, totalY + 2 * rowHeight, { width: col5 - col4 - 10, align: 'right' });
+    // Bordure du tableau
+    doc.rect(tableX, tableY, tableWidth, y - tableY).stroke(mainColor);
+    // --- TOTAUX (style devis) ---
+    const totalY = y + 8;
+    doc.save();
+    doc.rect(tableX + 300, totalY, 220, 48).fill(mainColor);
+    doc.restore();
+    doc.font('Helvetica').fontSize(11).fillColor('white');
+    doc.text(`Montant HT : ${facture.montantHT !== undefined && facture.montantHT !== null ? Number(facture.montantHT).toFixed(2) : '0.00'} €`, tableX + 310, totalY + 6);
+    doc.text(`Montant TVA : ${facture.montantTVA !== undefined && facture.montantTVA !== null ? Number(facture.montantTVA).toFixed(2) : '0.00'} €`, tableX + 310, totalY + 22);
+    doc.font('Helvetica-Bold').text(`Montant TTC : ${facture.montantTTC !== undefined && facture.montantTTC !== null ? Number(facture.montantTTC).toFixed(2) : '0.00'} €`, tableX + 310, totalY + 36);
+    doc.font('Helvetica').fillColor('black');
 
     // --- Notes et conditions à gauche sous l'entreprise ---
     let notesY = totalY + 3 * rowHeight + 30;
     if (facture.conditionsPaiement) {
-      doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666').text(`Conditions de paiement : ${facture.conditionsPaiement}`, col1, notesY, { width: 400 });
+      doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666').text(`Conditions de paiement : ${facture.conditionsPaiement}`, tableX, notesY, { width: 400 });
       notesY = doc.y + 4;
     }
     if (facture.notes) {
-      doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666').text(`Notes : ${facture.notes}`, col1, notesY, { width: 400 });
+      doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666').text(`Notes : ${facture.notes}`, tableX, notesY, { width: 400 });
     }
+
+    // Mention automatique en bas de page (comme devis)
+    const pageHeight = 842;
+    const margin = 50;
+    const footerY = pageHeight - margin - 40;
+    if (doc.page && typeof doc.switchToPage === 'function') {
+      doc.switchToPage(0);
+    }
+    doc.font('Helvetica-Oblique').fontSize(9).fillColor('#888');
+    doc.text('Facture générée automatiquement par Koosy, merci pour votre confiance.', tableX, footerY, { align: 'center', width: 520 });
 
     // Finir le PDF et retourner le buffer
     doc.end();

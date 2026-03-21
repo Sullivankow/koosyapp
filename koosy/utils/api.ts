@@ -581,7 +581,7 @@ export async function getFactures(): Promise<Facture[]> {
 
 // Fonction pour supprimer une facture par son ID
 export async function deleteFacture(id: number): Promise<void> {
-  return apiFetch(`/factures/${id}`, {
+  return apiFetch(`/facture/${id}`, {
     method: 'DELETE',
   });
 }
