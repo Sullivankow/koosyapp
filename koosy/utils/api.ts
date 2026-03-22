@@ -1,3 +1,4 @@
+
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
@@ -606,6 +607,14 @@ export async function getProprietaires(): Promise<Proprietaire[]> {
 export async function createProprietaire(data: Omit<Proprietaire, 'id'>): Promise<Proprietaire> {
   return apiFetch('/proprietaire', {
     method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// Fonction pour mettre à jour un propriétaire
+export async function updateProprietaire(id: number | string, data: Partial<Proprietaire>): Promise<Proprietaire> {
+  return apiFetch(`/proprietaire/${id}`, {
+    method: 'PUT',
     body: JSON.stringify(data),
   });
 }

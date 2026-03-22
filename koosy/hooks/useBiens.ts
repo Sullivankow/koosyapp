@@ -39,16 +39,22 @@ export default function useBiens(deps: any[] = []) {
         return {
           ...bien,
           photos,
-          proprio: bien.proprietaire
+          proprio: (bien.proprietaireNom || bien.proprietaireEmail || bien.proprietaireTelephone)
+            ? {
+                nom: bien.proprietaireNom || 'N/A',
+                email: bien.proprietaireEmail || '',
+                telephone: bien.proprietaireTelephone || '',
+              }
+            : bien.proprietaire
             ? {
                 nom: bien.proprietaire.nom || 'N/A',
                 email: bien.proprietaire.email || '',
                 telephone: bien.proprietaire.telephone || '',
               }
             : {
-                nom: bien.proprietaireNom || 'N/A',
-                email: bien.proprietaireEmail || '',
-                telephone: bien.proprietaireTelephone || '',
+                nom: 'N/A',
+                email: '',
+                telephone: '',
               },
           locataires: Array.isArray(bien.locataires)
             ? bien.locataires.map((loc: any) => ({
