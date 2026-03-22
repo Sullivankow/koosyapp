@@ -30,6 +30,7 @@ import { PrestationsCountProvider } from './contexts/PrestationsCountContext';
 import { AppContext } from './contexts/AppContext';
 import ListeDevisScreen from './screens/Layout/ListeDevisScreen';
 import ListeFactureScreen from './screens/Layout/ListeFactureScreen';
+import { GlobalRefreshProvider } from './contexts/GlobalRefreshContext';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -85,16 +86,17 @@ export default function App() {
   // Fournit le contexte global
   return (
     <AppContext.Provider value={{ setIsLoggedIn }}>
-      <ThemeProvider>
-        <PrestationsCountProvider>
-          <BienCountProvider>
-            <TacheProvider>
-              <TacheCountProvider>
-                <ReservationRefreshProvider>
-                  <NotificationCountProvider>
-                    <ChiffreAffaireRefreshProvider>
-                      {/* Auth flow */}
-                      {!isLoggedIn ? (
+      <GlobalRefreshProvider>
+        <ThemeProvider>
+          <PrestationsCountProvider>
+            <BienCountProvider>
+              <TacheProvider>
+                <TacheCountProvider>
+                  <ReservationRefreshProvider>
+                    <NotificationCountProvider>
+                      <ChiffreAffaireRefreshProvider>
+                        {/* Auth flow */}
+                        {!isLoggedIn ? (
                         showWelcome ? (
                           <WelcomeScreen onFinish={() => { setShowWelcome(false); setIsLoggedIn(true); }} />
                         ) : showWelcomeLogin ? (
@@ -210,14 +212,15 @@ export default function App() {
                           </Stack.Navigator>
                         </NavigationContainer>
                       )}
-                    </ChiffreAffaireRefreshProvider>
-                  </NotificationCountProvider>
-                </ReservationRefreshProvider>
-              </TacheCountProvider>
-            </TacheProvider>
-          </BienCountProvider>
-        </PrestationsCountProvider>
-      </ThemeProvider>
+                      </ChiffreAffaireRefreshProvider>
+                    </NotificationCountProvider>
+                  </ReservationRefreshProvider>
+                </TacheCountProvider>
+              </TacheProvider>
+            </BienCountProvider>
+          </PrestationsCountProvider>
+        </ThemeProvider>
+      </GlobalRefreshProvider>
     </AppContext.Provider>
   );
 }

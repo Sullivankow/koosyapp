@@ -3,11 +3,12 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import AddTachesModal from '../../components/AddTachesModal';
 import PlusButton from '../../components/PlusButton';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import styles from './TachesScreen.styles';
 import { useTaches } from '../../hooks/useTaches';
 import { useTacheCount } from '../../contexts/TacheCountContext';
+import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 
 // Écran principal des tâches
 function TachesScreen() {
@@ -15,6 +16,7 @@ function TachesScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'à faire' | 'terminée'>('à faire');
   const { refreshTacheCount } = useTacheCount();
+  const { lastRefresh } = useGlobalRefresh();
 
   // Utilisation du hook personnalisé pour la gestion des tâches
   const {
@@ -29,6 +31,11 @@ function TachesScreen() {
     setSuccessMsg,
     fetchTaches,
   } = useTaches();
+
+  // Rafraîchir les tâches quand le signal global change
+  useEffect(() => {
+    fetchTaches();
+  }, [lastRefresh]);
 
   // Formatage simple de la date en DD/MM/YYYY
   function formatDateFr(dateStr?: string) {

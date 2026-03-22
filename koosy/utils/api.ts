@@ -1,4 +1,3 @@
-
 /* -------------------------------------------------------------------------- */
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
@@ -618,3 +617,4 @@ export async function updateProprietaire(id: number | string, data: Partial<Prop
     body: JSON.stringify(data),
   });
 }
+

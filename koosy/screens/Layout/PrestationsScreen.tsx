@@ -8,6 +8,7 @@ import { Prestation } from '../../models/models';
 import AddPrestationModal from '../../components/AddPrestationModal';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useChiffreAffaireRefresh } from '../../contexts/ChiffreAffaireRefreshContext';
+import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import PlusButton from '../../components/PlusButton';
 
@@ -24,10 +25,12 @@ const TABS = [
   { key: 'terminée', label: 'Terminée' },
 ];
 
+
 const PrestationsScreen: React.FC = () => {
 	const { refreshPrestationsTerminees } = usePrestationsCount();
 	const { colors } = useTheme();
 	const { signalRefresh } = useChiffreAffaireRefresh(); // Ajout du contexte CA
+	const { lastRefresh } = useGlobalRefresh();
 	const [prestations, setPrestations] = useState<Prestation[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [modalVisible, setModalVisible] = useState(false);
@@ -47,7 +50,7 @@ const PrestationsScreen: React.FC = () => {
 
 	useEffect(() => {
 		fetchPrestations();
-	}, [modalVisible]);
+	}, [modalVisible, lastRefresh]);
 
 	return (
 		<View style={{ flex: 1, backgroundColor: colors.background }}>

@@ -9,6 +9,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import PlusButton from '../../components/PlusButton';
 import { getBiens, createReservation, getReservations } from '../../utils/api';
 import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
+import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 import dayjs from 'dayjs';
 import AddReservationsModal from '../../components/AddReservationsModal';
 
@@ -31,6 +32,7 @@ function ReservationScreen() {
   const { colors } = useTheme();
   const { signalBienAdded } = useBienCount();
   const { lastReservationAdded } = useReservationRefresh();
+  const { lastRefresh } = useGlobalRefresh();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [biens, setBiens] = useState<Bien[]>([]);
   // Pas de table locataires, on utilise uniquement les champs de la réservation
@@ -61,7 +63,7 @@ function ReservationScreen() {
 
   useEffect(() => {
     fetchData();
-  }, [lastReservationAdded]);
+  }, [lastReservationAdded, lastRefresh]);
 
   // Ajout réel via API
   const handleSave = async () => {

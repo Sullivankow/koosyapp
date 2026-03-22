@@ -260,11 +260,11 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
                 placeholder="Téléphone du propriétaire"
                 keyboardType="phone-pad"
               />
-              <View style={{ flexDirection: 'row', marginTop: 6 }}>
+              <View style={{ flexDirection: 'row', marginTop: 6, alignItems: 'center' }}>
                 <TouchableOpacity onPress={handleSaveProprio} style={{ marginRight: 12, backgroundColor: colors.primary, padding: 6, borderRadius: 8 }} disabled={loadingProprio}>
                   <MaterialCommunityIcons name="content-save" size={18} color={colors.surface} />
                 </TouchableOpacity>
-                <TouchableOpacity onPress={handleCancelEditProprio} style={{ backgroundColor: colors.error, padding: 6, borderRadius: 8 }} disabled={loadingProprio}>
+                <TouchableOpacity onPress={handleCancelEditProprio} style={{ backgroundColor: colors.error, padding: 6, borderRadius: 8, marginRight: 12 }} disabled={loadingProprio}>
                   <MaterialCommunityIcons name="close" size={18} color={colors.surface} />
                 </TouchableOpacity>
               </View>

@@ -142,11 +142,13 @@ const BiensScreen: React.FC = () => {
       setCurrentBienStatus(undefined);
     }
   };
+  const { signalRefresh } = require('../../contexts/GlobalRefreshContext').useGlobalRefresh();
   const handleSupprimerBien = async (bienId: string) => {
     try {
       await deleteBienById(bienId);
       setSuccessMsg('Bien supprimé avec succès !');
       signalBienAdded();
+      signalRefresh(); // Déclenche le rafraîchissement global
       setTimeout(() => setSuccessMsg(''), 2000);
     } catch {}
   };
