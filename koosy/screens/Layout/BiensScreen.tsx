@@ -94,8 +94,18 @@ const BiensScreen: React.FC = () => {
   };
 
   // Gestion modales et callbacks
-  const openEditModal = (bien: Bien) => setEditModalData({ visible: true, bienId: bien.id, initialData: bien });
-  const closeEditModal = () => setEditModalData({ visible: false });
+  // Nouvelle fonction pour édition inline
+  const handleEditBienInline = async (bienModifie: Bien) => {
+    try {
+      await updateBienById(bienModifie.id, bienModifie);
+      setSuccessMsg('Bien modifié avec succès !');
+      signalBienAdded();
+      setTimeout(() => setSuccessMsg(''), 1800);
+    } catch {
+      setSuccessMsg("Erreur lors de la modification du bien");
+      setTimeout(() => setSuccessMsg(''), 1800);
+    }
+  };
   const openStatusModal = (bien: Bien) => {
     setCurrentStatusBienId(bien.id);
     setCurrentBienStatus(bien.statut);
@@ -189,7 +199,7 @@ const BiensScreen: React.FC = () => {
           <BienCard
             bien={item}
             colors={colors}
-            onEdit={openEditModal}
+            onEdit={handleEditBienInline}
             onDelete={handleSupprimerBien}
             onStatus={openStatusModal}
             onPhotoPress={handlePhotoPress}

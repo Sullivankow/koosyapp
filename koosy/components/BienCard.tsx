@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, TouchableOpacity, Image, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, TouchableOpacity, Image, ScrollView, TextInput } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { styles } from '../screens/Layout/BienScreen.styles';
 
@@ -21,6 +21,56 @@ interface BienCardProps {
 }
 
 const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR, onChangeTacheStatus }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValues, setEditValues] = useState({
+    nom: bien.nom || '',
+    adresse: bien.adresse || '',
+    type: bien.type || '',
+    superficie: bien.superficie ? String(bien.superficie) : '',
+    pieces: bien.pieces ? String(bien.pieces) : '',
+    equipements: Array.isArray(bien.equipements) ? bien.equipements.join(', ') : (bien.equipements || ''),
+  });
+
+  const handleChange = (field: string, value: string) => {
+    setEditValues(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleEditPress = () => {
+    if (isEditing) {
+      // Prépare le payload selon le DTO backend
+      const proprio = bien.proprio || bien.proprietaire || {};
+      const payload: any = {
+        nom: editValues.nom,
+        adresse: editValues.adresse,
+        type: editValues.type,
+        superficie: Number(editValues.superficie),
+        pieces: Number(editValues.pieces),
+        equipements: editValues.equipements.split(',').map((e: string) => e.trim()).filter(Boolean),
+        proprietaireNom: proprio.nom || '',
+        proprietaireEmail: proprio.email || '',
+        proprietaireTelephone: proprio.telephone || '',
+      };
+      if (bien.statut) payload.statut = bien.statut;
+      if (bien.lat) payload.lat = bien.lat;
+      if (bien.lng) payload.lng = bien.lng;
+      onEdit({ id: bien.id, ...payload });
+      setIsEditing(false);
+    } else {
+      setIsEditing(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditValues({
+      nom: bien.nom || '',
+      adresse: bien.adresse || '',
+      type: bien.type || '',
+      superficie: bien.superficie ? String(bien.superficie) : '',
+      pieces: bien.pieces ? String(bien.pieces) : '',
+      equipements: Array.isArray(bien.equipements) ? bien.equipements.join(', ') : (bien.equipements || ''),
+    });
+    setIsEditing(false);
+  };
   // Carrousel responsive avec largeur dynamique
   const { Dimensions } = require('react-native');
   const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -45,7 +95,16 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
   return (
     <View style={[styles.card, { backgroundColor: colors.surface }]}> 
       {/* Nom du bien */}
-      <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 2 }}>{bien.nom || 'Sans nom'}</Text>
+      {isEditing ? (
+        <TextInput
+          style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 2, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.primary }}
+          value={editValues.nom}
+          onChangeText={v => handleChange('nom', v)}
+          placeholder="Nom du bien"
+        />
+      ) : (
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: colors.primary, marginBottom: 2 }}>{bien.nom || 'Sans nom'}</Text>
+      )}
       <Text style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 6 }}>
         Créé le {bien.dateCreation ? formatDateFR(bien.dateCreation) : formatDateFR(new Date().toISOString().slice(0, 10))}
       </Text>
@@ -54,22 +113,76 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
       <View style={styles.infoGrid}>
         <View style={styles.infoCol}>
           <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Type</Text>
-          <Text style={[styles.infoValue, { color: colors.text }]}>{bien.type || '-'}</Text>
+          {isEditing ? (
+            <TextInput
+              style={[styles.infoValue, { color: colors.text, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.primary }]}
+              value={editValues.type}
+              onChangeText={v => handleChange('type', v)}
+              placeholder="Type"
+            />
+          ) : (
+            <Text style={[styles.infoValue, { color: colors.text }]}>{bien.type || '-'}</Text>
+          )}
         </View>
         <View style={styles.infoCol}>
           <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Superficie</Text>
-          <Text style={[styles.infoValue, { color: colors.text }]}>{bien.superficie ? bien.superficie + ' m²' : '-'}</Text>
+          {isEditing ? (
+            <TextInput
+              style={[styles.infoValue, { color: colors.text, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.primary }]}
+              value={editValues.superficie}
+              onChangeText={v => handleChange('superficie', v)}
+              placeholder="Superficie (m²)"
+              keyboardType="numeric"
+            />
+          ) : (
+            <Text style={[styles.infoValue, { color: colors.text }]}>{bien.superficie ? bien.superficie + ' m²' : '-'}</Text>
+          )}
         </View>
         <View style={styles.infoCol}>
           <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Pièces</Text>
-          <Text style={[styles.infoValue, { color: colors.text }]}>{bien.pieces || '-'}</Text>
+          {isEditing ? (
+            <TextInput
+              style={[styles.infoValue, { color: colors.text, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.primary }]}
+              value={editValues.pieces}
+              onChangeText={v => handleChange('pieces', v)}
+              placeholder="Nb pièces"
+              keyboardType="numeric"
+            />
+          ) : (
+            <Text style={[styles.infoValue, { color: colors.text }]}>{bien.pieces || '-'}</Text>
+          )}
         </View>
         <View style={styles.infoCol}>
           <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Statut</Text>
-          <TouchableOpacity onPress={() => onStatus(bien)}>
+          <TouchableOpacity onPress={() => onStatus(bien)} disabled={isEditing}>
             <Text style={[styles.infoValue, { color: bien.statut === 'disponible' ? 'green' : bien.statut === 'occupé' ? 'red' : colors.accent }]}>{bien.statut || '-'}</Text>
           </TouchableOpacity>
         </View>
+      </View>
+      {/* Adresse et équipements */}
+      <View style={{ marginTop: 8 }}>
+        <Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Adresse</Text>
+        {isEditing ? (
+          <TextInput
+            style={[styles.infoValue, { color: colors.text, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.primary }]}
+            value={editValues.adresse}
+            onChangeText={v => handleChange('adresse', v)}
+            placeholder="Adresse"
+          />
+        ) : (
+          <Text style={[styles.infoValue, { color: colors.text }]}>{bien.adresse || '-'}</Text>
+        )}
+        <Text style={[styles.infoLabel, { color: colors.textSecondary, marginTop: 4 }]}>Équipements</Text>
+        {isEditing ? (
+          <TextInput
+            style={[styles.infoValue, { color: colors.text, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.primary }]}
+            value={editValues.equipements}
+            onChangeText={v => handleChange('equipements', v)}
+            placeholder="Équipements (séparés par des virgules)"
+          />
+        ) : (
+          <Text style={[styles.infoValue, { color: colors.text }]}>{Array.isArray(bien.equipements) ? bien.equipements.join(', ') : (bien.equipements || '-')}</Text>
+        )}
       </View>
       {/* Propriétaire */}
       <View style={styles.proprioBox}>
@@ -142,12 +255,18 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
       </View>
       {/* Actions principales */}
       <View style={styles.floatingActions}>
-        <TouchableOpacity style={[styles.fab, { backgroundColor: colors.secondary }]} onPress={() => onEdit(bien)}>
-          <MaterialCommunityIcons name="pencil" size={20} color={colors.surface} />
+        <TouchableOpacity style={[styles.fab, { backgroundColor: isEditing ? colors.primary : colors.secondary }]} onPress={handleEditPress}>
+          <MaterialCommunityIcons name={isEditing ? "content-save" : "pencil"} size={20} color={colors.surface} />
         </TouchableOpacity>
-        <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={() => onDelete(bien.id)}>
-          <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
-        </TouchableOpacity>
+        {isEditing ? (
+          <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={handleCancelEdit}>
+            <MaterialCommunityIcons name="close" size={20} color={colors.surface} />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={() => onDelete(bien.id)}>
+            <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
