@@ -49,4 +49,8 @@ export class CreateFactureDto {
   @ApiProperty({ description: "ID de l'entreprise liée à la facture" })
   @IsNotEmpty()
   entreprise: number; // id de l'entreprise
+
+  @ApiProperty({ description: "ID du propriétaire lié à la facture", required: false })
+  @IsOptional()
+  proprietaire?: number; // id du propriétaire
 }

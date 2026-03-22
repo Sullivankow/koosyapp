@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { Entreprise } from '../entreprise/entreprise.entity';
 import { LigneFacture } from '../ligne-facture/ligne-facture.entity';
+import { Proprietaire } from '../proprietaire/proprietaire.entity';
 
 @Entity()
 export class Facture {
@@ -39,6 +40,12 @@ export class Facture {
 
   @OneToMany(() => LigneFacture, (ligne: LigneFacture) => ligne.facture, { cascade: true })
   lignes: LigneFacture[];
+
+  /**
+   * Propriétaire lié à la facture
+   */
+  @ManyToOne(() => Proprietaire, { nullable: true, onDelete: 'CASCADE' })
+  proprietaire: Proprietaire;
 
   @UpdateDateColumn()
   updatedAt: Date;

@@ -11,13 +11,15 @@
 
 import React, { useState, useEffect } from 'react';
 import { Facture, LigneFacture, Entreprise } from '../models/models';
+import { Proprietaire } from '../models/proprietaire';
+import { getProprietaires } from '../utils/api';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface AddFactureModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (facture: Partial<Facture>) => void;
+  onSubmit: (facture: Partial<Facture> & { proprietaire?: number }) => void;
   entreprises: Entreprise[];
 }
 
@@ -37,6 +39,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
   const [dateEmission, setDateEmission] = useState('');
   const [dateEcheance, setDateEcheance] = useState('');
   const [entreprise, setEntreprise] = useState<Entreprise | null>(null);
+
   // Lignes de la facture (tableau dynamique)
   const [lignes, setLignes] = useState([ { ...defaultLigne } ]);
   // Champs optionnels
@@ -44,6 +47,10 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
   const [notes, setNotes] = useState('');
   // Gestion des erreurs
   const [error, setError] = useState('');
+  // Propriétaires
+  const [proprietaires, setProprietaires] = useState<Proprietaire[]>([]);
+  const [selectedProprioId, setSelectedProprioId] = useState<number | undefined>(undefined);
+  const [showProprioModal, setShowProprioModal] = useState(false);
   // Thème pour les couleurs
   const { colors } = useTheme();
   const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -54,6 +61,18 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
       setEntreprise(entreprises[0]);
     }
   }, [isOpen, entreprises]);
+
+  // Chargement des propriétaires à l'ouverture
+  useEffect(() => {
+    if (isOpen) {
+      getProprietaires()
+        .then((proprios) => {
+          setProprietaires(proprios);
+          if (proprios.length > 0) setSelectedProprioId(proprios[0].id);
+        })
+        .catch(() => setProprietaires([]));
+    }
+  }, [isOpen]);
 
   // Calcul automatique des totaux pour une ligne
   const calcLigne = (ligne: any) => {
@@ -86,6 +105,10 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
       setError("Aucune entreprise disponible");
       return;
     }
+    if (!selectedProprioId) {
+      setError("Veuillez sélectionner un propriétaire");
+      return;
+    }
     setError('');
     onSubmit({
       numero,
@@ -98,11 +121,12 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
       montantTTC,
       conditionsPaiement,
       notes,
-      statut: 'brouillon', // statut initial
+      statut: 'brouillon',
+      proprietaire: selectedProprioId,
     });
     onClose();
     // Reset du formulaire
-    setNumero(''); setDateEmission(''); setDateEcheance(''); setLignes([{ ...defaultLigne }]); setConditionsPaiement(''); setNotes('');
+    setNumero(''); setDateEmission(''); setDateEcheance(''); setLignes([{ ...defaultLigne }]); setConditionsPaiement(''); setNotes(''); setSelectedProprioId(undefined);
   };
 
   // Si la modale n'est pas ouverte, ne rien afficher
@@ -127,6 +151,57 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
                   <Text style={{ color: colors.text, fontWeight: 'bold' }}>{entreprise.nom}</Text>
                 ) : (
                   <Text style={{ color: colors.error, fontWeight: 'bold' }}>Aucune entreprise trouvée.</Text>
+                )}
+              </View>
+              {/* Sélection du propriétaire */}
+              <Text style={[styles.label, { color: colors.text }]}>Propriétaire</Text>
+              <View style={{ width: '100%', marginBottom: 10 }}>
+                {proprietaires.length > 0 ? (
+                  <>
+                    <TouchableOpacity
+                      style={{
+                        paddingVertical: 12,
+                        paddingHorizontal: 16,
+                        borderWidth: 1,
+                        borderColor: colors.border,
+                        borderRadius: 10,
+                        backgroundColor: colors.surface,
+                        width: '100%',
+                      }}
+                      onPress={() => setShowProprioModal(true)}
+                    >
+                      <Text style={{ color: colors.text }}>
+                        {selectedProprioId
+                          ? (proprietaires.find((p: any) => p.id === selectedProprioId)?.nom || '') +
+                            (proprietaires.find((p: any) => p.id === selectedProprioId)?.prenom
+                              ? ' ' + proprietaires.find((p: any) => p.id === selectedProprioId)?.prenom
+                              : '')
+                          : 'Sélectionner un propriétaire'}
+                      </Text>
+                    </TouchableOpacity>
+                    <Modal visible={showProprioModal} transparent animationType="fade">
+                      <TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' }} activeOpacity={1} onPress={() => setShowProprioModal(false)}>
+                        <View style={{
+                          position: 'absolute',
+                          top: '30%',
+                          left: '10%',
+                          width: '80%',
+                          backgroundColor: colors.surface,
+                          borderRadius: 12,
+                          padding: 16,
+                          elevation: 8,
+                        }}>
+                          {proprietaires.map((p) => (
+                            <TouchableOpacity key={p.id} onPress={() => { setSelectedProprioId(p.id); setShowProprioModal(false); }} style={{ paddingVertical: 10 }}>
+                              <Text style={{ color: colors.text }}>{p.nom} {p.prenom}</Text>
+                            </TouchableOpacity>
+                          ))}
+                        </View>
+                      </TouchableOpacity>
+                    </Modal>
+                  </>
+                ) : (
+                  <Text style={{ color: colors.error, fontWeight: 'bold' }}>Aucun propriétaire trouvé.</Text>
                 )}
               </View>
               {/* Numéro de facture (optionnel) */}

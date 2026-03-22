@@ -15,10 +15,11 @@ export class FactureService {
  
 
   create(createFactureDto: CreateFactureDto) {
-    const { entreprise, ...rest } = createFactureDto;
+    const { entreprise, proprietaire, ...rest } = createFactureDto;
     const facture = this.factureRepository.create({
       ...rest,
       entreprise: { id: entreprise },
+      ...(proprietaire ? { proprietaire: { id: proprietaire } } : {}),
     });
     return this.factureRepository.save(facture);
   }
@@ -32,10 +33,13 @@ export class FactureService {
   }
 
   update(id: number, updateFactureDto: Partial<CreateFactureDto>) {
-    const { entreprise, ...rest } = updateFactureDto;
+    const { entreprise, proprietaire, ...rest } = updateFactureDto;
     const updatePayload: any = { ...rest };
     if (entreprise) {
       updatePayload.entreprise = { id: entreprise };
+    }
+    if (proprietaire) {
+      updatePayload.proprietaire = { id: proprietaire };
     }
     return this.factureRepository.update(id, updatePayload);
   }
@@ -54,54 +58,66 @@ export class FactureService {
     // Récupérer la facture avec entreprise et lignes
     const facture = await this.factureRepository.findOne({
       where: { id },
-      relations: ['entreprise', 'lignes'],
+      relations: ['entreprise', 'lignes', 'proprietaire'],
     });
     if (!facture) {
       throw new Error('Facture non trouvée');
     }
 
     // Création du PDF en mémoire
-    const doc = new PDFDocument({ margin: 50, size: 'A4' });
+    const doc = new PDFDocument({ margin: 30, size: 'A4' });
     const buffers: Buffer[] = [];
     doc.on('data', buffers.push.bind(buffers));
     doc.on('end', () => {});
 
-    // === EN-TÊTE DU DOCUMENT ===
-    // Logo (optionnel)
-    // if (facture.entreprise?.logo) doc.image(facture.entreprise.logo, 250, 30, { width: 100 });
-
-    // --- DESIGN PRO ---
+    // === EN-TÊTE DU DOCUMENT (style devis) ===
     const mainColor = '#009688';
-    // Titre principal centré
-    doc
-      .font('Helvetica-Bold')
-      .fontSize(28)
-      .fillColor(mainColor)
-      .text('FACTURE', 0, 40, { align: 'center', underline: false });
+    // Titre "FACTURE" et numéro sur la même ligne, numéro collé
+    doc.font('Helvetica-Bold').fontSize(22).fillColor(mainColor);
+    doc.text('FACTURE', 30, doc.y, { continued: true });
+    doc.font('Helvetica-Bold').fontSize(16).text(` N°${facture.numero || facture.id}`, undefined, undefined, { continued: false });
 
-    // Bloc infos entreprise et facture, bien aligné
-    doc.moveDown(2);
-    doc.fontSize(12).fillColor('black');
-    const leftX = 50;
-    const rightX = 350;
-    const yStart = doc.y;
-    // Infos entreprise à gauche
-    doc.font('Helvetica-Bold').text(facture.entreprise?.nom || '', leftX, yStart);
-    doc.font('Helvetica').text(facture.entreprise?.adresse || '', leftX, doc.y);
-    doc.text(`SIRET : ${facture.entreprise?.siret || ''}`, leftX, doc.y);
-    if (facture.entreprise?.email) doc.text(`Email : ${facture.entreprise.email}`, leftX, doc.y);
+    // Date d'émission juste sous le titre
+    doc.font('Helvetica').fontSize(10).fillColor('black');
+    doc.text(`Date d'émission : ${facture.dateEmission ? new Date(facture.dateEmission).toLocaleDateString() : ''}`, 30, doc.y + 5);
 
-    // Infos facture à droite
-    let yRight = yStart;
-    doc.font('Helvetica-Bold').text(`Facture n° : ${facture.numero || facture.id}`, rightX, yRight);
-    yRight = doc.y;
-    doc.font('Helvetica').text(`Date d'émission : ${facture.dateEmission ? new Date(facture.dateEmission).toLocaleDateString() : ''}`, rightX, yRight);
-    yRight = doc.y;
+    // Date d'échéance en haut à droite
     if (facture.dateEcheance) {
-      doc.text(`Date d'échéance : ${new Date(facture.dateEcheance).toLocaleDateString()}`, rightX, yRight);
-      yRight = doc.y;
+      doc.font('Helvetica').fontSize(10).fillColor(mainColor);
+      doc.text(`Date d'échéance : ${new Date(facture.dateEcheance).toLocaleDateString()}`, 400, 30, { align: 'right' });
     }
-    doc.moveDown(2);
+
+    // Ajout d'un espace avant les infos entreprise/proprio
+    doc.moveDown(3);
+
+    // Bloc infos entreprise à gauche et proprio à droite
+    const infoY = doc.y;
+    doc.fontSize(10).fillColor('black');
+    let xLeft = 30;
+    let xRight = 400;
+    // Entreprise à gauche
+    let yCursor = infoY;
+    doc.font('Helvetica-Bold').text(facture.entreprise?.nom || '', xLeft, yCursor);
+    doc.font('Helvetica');
+    if (facture.entreprise?.adresse) doc.text(facture.entreprise.adresse, xLeft);
+    if (facture.entreprise?.siret) doc.text(`SIRET : ${facture.entreprise.siret}`, xLeft);
+    if (facture.entreprise?.email) doc.text(facture.entreprise.email, xLeft);
+
+    // Propriétaire à droite, aligné avec l'entreprise
+    yCursor = infoY;
+    if (facture.proprietaire) {
+      doc.font('Helvetica-Bold').text('Propriétaire :', xRight, yCursor);
+      doc.font('Helvetica').text(`${facture.proprietaire.nom} ${facture.proprietaire.prenom}`, xRight);
+      if (facture.proprietaire.adresse) doc.text(facture.proprietaire.adresse, xRight);
+      // Ajout d'autres champs si besoin (email, téléphone)
+    }
+
+    // Ajout d'un espace avant le tableau
+    doc.moveDown(2.5);
+
+    // Ligne de séparation
+    doc.moveTo(30, doc.y).lineTo(565, doc.y).stroke(mainColor);
+    doc.moveDown(0.5);
 
     // --- TABLEAU DES LIGNES (style devis) ---
     const tableX = 50;
@@ -165,11 +181,12 @@ export class FactureService {
 
     // Finir le PDF et retourner le buffer
     doc.end();
-    return await new Promise<Buffer>((resolve) => {
+    return await new Promise<Buffer>((resolve, reject) => {
       doc.on('end', () => {
         const pdfBuffer = Buffer.concat(buffers);
         resolve(pdfBuffer);
       });
+      doc.on('error', reject);
     });
   }
 
