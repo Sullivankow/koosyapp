@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, FlatList, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import type { Devis } from '../models/models';
 
@@ -34,7 +34,19 @@ export function DevisList({ devis, colors, handlePreviewDevis, handleDeleteDevis
               <Ionicons name="eye-outline" size={24} color={colors.primary} />
             </TouchableOpacity>
             {/* Icône corbeille pour suppression */}
-            <TouchableOpacity onPress={() => handleDeleteDevis(item.id)} style={{ marginHorizontal: 4 }}>
+            <TouchableOpacity
+              onPress={() => {
+                Alert.alert(
+                  'Confirmation',
+                  'Voulez-vous vraiment supprimer ce devis ?',
+                  [
+                    { text: 'Annuler', style: 'cancel' },
+                    { text: 'Supprimer', style: 'destructive', onPress: () => handleDeleteDevis(item.id) },
+                  ]
+                );
+              }}
+              style={{ marginHorizontal: 4 }}
+            >
               <MaterialIcons name="delete-outline" size={24} color="#d32f2f" />
             </TouchableOpacity>
           </View>

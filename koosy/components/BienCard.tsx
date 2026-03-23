@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Image, ScrollView, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, Image, ScrollView, TextInput, Alert } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { styles } from '../screens/Layout/BienScreen.styles';
 
@@ -351,7 +351,19 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
             <MaterialCommunityIcons name="close" size={20} color={colors.surface} />
           </TouchableOpacity>
         ) : (
-          <TouchableOpacity style={[styles.fab, { backgroundColor: colors.error }]} onPress={() => onDelete(bien.id)}>
+          <TouchableOpacity
+            style={[styles.fab, { backgroundColor: colors.error }]}
+            onPress={() => {
+              Alert.alert(
+                'Confirmation',
+                'Êtes-vous sûr de vouloir supprimer ce bien ?',
+                [
+                  { text: 'Annuler', style: 'cancel' },
+                  { text: 'Supprimer', style: 'destructive', onPress: () => onDelete(bien.id) },
+                ]
+              );
+            }}
+          >
             <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
           </TouchableOpacity>
         )}

@@ -89,11 +89,22 @@ const PrestationsScreen: React.FC = () => {
 								<View key={p.id} style={[styles.card, { borderLeftColor: statutColor[p.status] || colors.primary }]}> 
 									<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
 										<Text style={styles.cardTitle}>{p.bien?.nom || 'Bien inconnu'}</Text>
-										<TouchableOpacity onPress={async () => {
-											await deletePrestation(p.id);
-											await fetchPrestations();
-											if (refreshPrestationsTerminees) refreshPrestationsTerminees();
-										}} style={{ marginLeft: 8, padding: 4 }}>
+										<TouchableOpacity
+											onPress={() => {
+												Alert.alert(
+													'Confirmation',
+													'Voulez-vous vraiment supprimer cette prestation ?',
+													[
+														{ text: 'Annuler', style: 'cancel' },
+														{ text: 'Supprimer', style: 'destructive', onPress: async () => {
+															await deletePrestation(p.id);
+															await fetchPrestations();
+															if (refreshPrestationsTerminees) refreshPrestationsTerminees();
+														}},
+													]
+												);
+											}}
+											style={{ marginLeft: 8, padding: 4 }}>
 											<MaterialCommunityIcons name="delete" size={22} color={colors.error || '#e53935'} />
 										</TouchableOpacity>
 									</View>
