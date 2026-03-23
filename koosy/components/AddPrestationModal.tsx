@@ -19,10 +19,9 @@ const PRESTATION_STATUTS = [
   { label: 'En attente', value: 'En attente' },
   { label: 'Confirmée', value: 'Confirmée' },
   { label: 'Terminée', value: 'Terminée' },
-  { label: 'Annulée', value: 'Annulée' },
 ];
 
-export type PrestationStatus = 'En attente' | 'Confirmée' | 'Terminée' | 'Annulée';
+export type PrestationStatus = 'En attente' | 'Confirmée' | 'Terminée';
 
 const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClose, onSuccess, bienId }) => {
   const { colors } = useTheme();

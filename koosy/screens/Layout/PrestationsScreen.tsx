@@ -132,6 +132,7 @@ const PrestationsScreen: React.FC = () => {
 							setModalVisible(false);
 							await fetchPrestations();
 							if (refreshPrestationsTerminees) refreshPrestationsTerminees();
+							signalRefresh();
 						}}
 					/>
 				</ScrollView>
