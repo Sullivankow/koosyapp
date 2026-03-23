@@ -149,7 +149,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
           <View style={[styles.modalContentAdd, { backgroundColor: colors.surface }]}> 
             <ScrollView
               style={{ maxHeight: 500, width: '100%' }}
-              contentContainerStyle={{ alignItems: 'center', paddingBottom: 30 }}
+              contentContainerStyle={{ alignItems: 'flex-start', paddingBottom: 30 }}
               keyboardShouldPersistTaps="handled"
               horizontal={false}
             >
