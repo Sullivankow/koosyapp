@@ -12,8 +12,8 @@
 import React, { useState, useEffect } from 'react';
 import { Facture, LigneFacture, Entreprise } from '../models/models';
 import { Proprietaire } from '../models/proprietaire';
-import { getProprietaires } from '../utils/api';
-import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions } from 'react-native';
+import { getBiens } from '../utils/api';
+import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions, FlatList } from 'react-native';
 import { useTheme } from '../contexts/ThemeContext';
 
 interface AddFactureModalProps {
@@ -62,13 +62,23 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
     }
   }, [isOpen, entreprises]);
 
-  // Chargement des propriétaires à l'ouverture
+  // Chargement des propriétaires liés à un bien à l'ouverture
   useEffect(() => {
     if (isOpen) {
-      getProprietaires()
-        .then((proprios) => {
-          setProprietaires(proprios);
-          if (proprios.length > 0) setSelectedProprioId(proprios[0].id);
+      getBiens()
+        .then((biensList) => {
+          // Extraire les propriétaires uniques des biens
+          const propriosMap: { [id: string]: any } = {};
+          biensList.forEach((bien: any) => {
+            if (bien.proprietaire && bien.proprietaire.id) {
+              propriosMap[bien.proprietaire.id] = bien.proprietaire;
+            } else if (bien.proprio && bien.proprio.id) {
+              propriosMap[bien.proprio.id] = bien.proprio;
+            }
+          });
+          const propriosArr = Object.values(propriosMap);
+          setProprietaires(propriosArr);
+          if (propriosArr.length > 0) setSelectedProprioId(propriosArr[0].id);
         })
         .catch(() => setProprietaires([]));
     }
@@ -184,18 +194,30 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
                         <View style={{
                           position: 'absolute',
                           top: '30%',
-                          left: '10%',
-                          width: '80%',
+                          left: '5%',
+                          width: '90%',
                           backgroundColor: colors.surface,
                           borderRadius: 12,
-                          padding: 16,
+                          padding: 12,
                           elevation: 8,
+                          shadowColor: '#000',
                         }}>
-                          {proprietaires.map((p) => (
-                            <TouchableOpacity key={p.id} onPress={() => { setSelectedProprioId(p.id); setShowProprioModal(false); }} style={{ paddingVertical: 10 }}>
-                              <Text style={{ color: colors.text }}>{p.nom} {p.prenom}</Text>
-                            </TouchableOpacity>
-                          ))}
+                          <FlatList
+                            data={proprietaires}
+                            keyExtractor={item => String(item.id)}
+                            renderItem={({ item }) => (
+                              <TouchableOpacity
+                                style={{ paddingVertical: 12, borderBottomWidth: 1, borderColor: colors.border }}
+                                onPress={() => {
+                                  setSelectedProprioId(item.id);
+                                  setShowProprioModal(false);
+                                }}
+                              >
+                                <Text style={{ color: colors.text, fontSize: 16 }}>{item.nom}{item.prenom ? ' ' + item.prenom : ''}</Text>
+                              </TouchableOpacity>
+                            )}
+                            ListFooterComponent={<TouchableOpacity onPress={() => setShowProprioModal(false)} style={{ padding: 12, alignItems: 'center' }}><Text style={{ color: colors.error }}>Annuler</Text></TouchableOpacity>}
+                          />
                         </View>
                       </TouchableOpacity>
                     </Modal>
