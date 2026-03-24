@@ -184,7 +184,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                     colors={colors}
                     styles={styles}
                     onAddBien={() => setAddBienModalVisible(true)}
-                    onAddTache={() => setAddTacheModalVisible(true)}
+                        onAddTache={() => navigation && navigation.navigate('TachesScreen')}
                     onAddReservation={() => setAddReservationModalVisible(true)}
                     onAddPrestation={() => setAddPrestationModalVisible(true)}
                     onAddDevis={handleGoToListeDevis}
@@ -199,12 +199,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
             onClose={() => setAddBienModalVisible(false)}
             onSuccess={() => setAddBienModalVisible(false)}
         />
-        {/* Modal d'ajout de tâche */}
-        <AddTachesModal
-            visible={addTacheModalVisible}
-            onClose={() => setAddTacheModalVisible(false)}
-            onSuccess={() => setAddTacheModalVisible(false)}
-        />
+        {/* Modal d'ajout de tâche supprimée, redirection vers TachesScreen */}
         {/* Modale d'ajout de réservation */}
         <AddReservationsModal
             visible={addReservationModalVisible}

@@ -27,7 +27,7 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
       <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]} onPress={onAddTache}>
         <View style={styles.centerContent}>
           <MaterialCommunityIcons name="playlist-plus" size={24} color={colors.surface} style={styles.icon} />
-          <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une tâche</Text>
+          <Text style={[styles.actionText, { color: colors.surface }]}>Mes tâches</Text>
         </View>
       </TouchableOpacity>
     </View>
@@ -63,18 +63,7 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
         </View>
       </TouchableOpacity>
     </View>
-    {/* Nouveau bouton Répertoire Propriétaire */}
-    <View style={styles.quickActionsRow}>
-      <TouchableOpacity
-        style={[styles.actionBtn, { backgroundColor: colors.primary, flex: 1 }]}
-        onPress={onGoToRepertoireProprietaire}
-      >
-        <View style={styles.centerContent}>
-          <FontAwesome5 name="address-book" size={24} color={colors.surface} style={styles.icon} />
-          <Text style={[styles.actionText, { color: colors.surface }]}>Répertoire Propriétaire</Text>
-        </View>
-      </TouchableOpacity>
-    </View>
+    {/* Bouton Répertoire Propriétaire supprimé */}
   </View>
 );
 

@@ -46,6 +46,7 @@ function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
       <HomeStack.Screen name="ListeFactureScreen" component={ListeFactureScreen} />
       <HomeStack.Screen name="NotificationsScreen" component={NotificationScreen} />
       <HomeStack.Screen name="RepertoireProprietaireScreen" component={require('./screens/Layout/RepertoireProprietaireScreen').default} />
+      <HomeStack.Screen name="TachesScreen" component={TachesScreen} />
     </HomeStack.Navigator>
   );
 }
@@ -181,8 +182,17 @@ export default function App() {
                                           />
                                         )}
                                       </Tab.Screen>
+                                      <Tab.Screen 
+                                        name="Propriétaires" 
+                                        component={require('./screens/Layout/RepertoireProprietaireScreen').default}
+                                        options={{
+                                          tabBarIcon: ({ color, size }) => (
+                                            <MaterialCommunityIcons name="account-group" size={size} color={color} />
+                                          ),
+                                          tabBarLabel: 'Propriétaires'
+                                        }}
+                                      />
                                       <Tab.Screen name="Biens" component={BiensScreen} />
-                                      <Tab.Screen name="Tâches" component={TachesScreen} />
                                       <Tab.Screen name="Réserv." component={ReservationScreen}
                                         options={{
                                           tabBarIcon: ({ color, size }) => (
