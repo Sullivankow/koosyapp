@@ -30,7 +30,7 @@ import { useUpcomingEvents } from '../../hooks/useUpcomingEvents';
 import { Bien, Entreprise } from '../../models/models';
 import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
 import { useChiffreAffaire } from '../../hooks/useChiffreAffaire';
-import ChiffreAffaireCard from '../../components/ChiffreAffaireCard';
+import ChiffreAffaireCard from '../../components/cards/ChiffreAffaireCard';
 import { useAddDevisModal } from '../../hooks/useAddDevisModal';
 import { apiFetchMyEntreprise } from '../../utils/api';
 

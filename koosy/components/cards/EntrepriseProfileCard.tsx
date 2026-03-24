@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, TextInput, Alert, Image } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
-import { useTheme } from '../contexts/ThemeContext';
-import { deleteEntreprise } from '../utils/api';
+import { useTheme } from '../../contexts/ThemeContext';
+import { deleteEntreprise } from '../../utils/api';
 
 // Type Entreprise strictement aligné sur le backend
 export interface Entreprise {
@@ -26,7 +26,7 @@ interface EntrepriseProfileCardProps {
 }
 
 
-import { updateEntreprise } from '../utils/api';
+import { updateEntreprise } from '../../utils/api';
 
 const EntrepriseProfileCard: React.FC<EntrepriseProfileCardProps> = ({ entreprise, onEdit, onDelete }) => {
 	const { colors } = useTheme();

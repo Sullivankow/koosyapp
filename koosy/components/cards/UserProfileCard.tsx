@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet } from 'react-native';
-import { Utilisateur } from '../models/models';
+import { Utilisateur } from '../../models/models';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 
 interface UserProfileCardProps {

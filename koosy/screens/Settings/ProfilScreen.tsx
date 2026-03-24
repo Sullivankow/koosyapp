@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Utilisateur } from '../../models/models';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
-import EntrepriseProfileCard, { Entreprise } from '../../components/EntrepriseProfileCard';
+import EntrepriseProfileCard, { Entreprise } from '../../components/cards/EntrepriseProfileCard';
 import { getEntrepriseById } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getMe, updateMe, apiFetch, deleteMe } from '../../utils/api';

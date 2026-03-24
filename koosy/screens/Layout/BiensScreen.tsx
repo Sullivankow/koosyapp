@@ -1,8 +1,8 @@
 import { updateTacheStatut } from '../../utils/api';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, Modal } from 'react-native';
-import BienCard from '../../components/BienCard';
-import StatusModal from '../../components/StatusModal';
+import BienCard from '../../components/cards/BienCard';
+import StatusModal from '../../components/modals/StatusModal';
 import { useTheme } from '../../contexts/ThemeContext';
 
 import { Bien } from '../../models/models';

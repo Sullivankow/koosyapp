@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, TextInput, Alert } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { styles } from '../screens/Layout/BienScreen.styles';
+import { styles } from '../../screens/Layout/BienScreen.styles';
 
 /**
  * Composant Carte de Bien
@@ -21,7 +21,7 @@ interface BienCardProps {
 }
 
 
-import { updateProprietaire } from '../utils/api';
+import { updateProprietaire } from '../../utils/api';
 
 const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR, onChangeTacheStatus }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -127,7 +127,7 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
         let source = photo;
         let key = (photo && photo.uri) ? photo.uri : `photo-${idx}`;
         if (photo && photo.uri !== undefined && (!photo.uri || photo.uri.trim() === '')) {
-          source = require('../assets/house.jpg');
+          source = require('../../assets/house.jpg');
           key = `default-photo-${idx}`;
         }
         return (
