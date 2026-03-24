@@ -17,7 +17,7 @@ import { useTache } from '../../contexts/TacheContext';
 import { useTacheCount } from '../../contexts/TacheCountContext';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { styles } from './BienScreen.styles';
+import { styles } from './styles/BienScreen.styles';
 
 const BiensScreen: React.FC = () => {
   const route: any = useRoute();

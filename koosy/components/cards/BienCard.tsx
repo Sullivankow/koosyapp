@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, TextInput, Alert } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import { styles } from '../../screens/Layout/BienScreen.styles';
+import { styles } from '../../screens/Layout/styles/BienScreen.styles';
 
 /**
  * Composant Carte de Bien

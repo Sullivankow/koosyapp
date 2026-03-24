@@ -5,7 +5,7 @@ import AddTachesModal from '../../components/modals/AddTachesModal';
 import PlusButton from '../../components/ui/PlusButton';
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
-import styles from './TachesScreen.styles';
+import styles from './styles/TachesScreen.styles';
 import { useTaches } from '../../hooks/useTaches';
 import { useTacheCount } from '../../contexts/TacheCountContext';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';

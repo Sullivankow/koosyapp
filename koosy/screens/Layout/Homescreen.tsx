@@ -221,6 +221,6 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
     );
 };
 
-import { styles } from './Homescreen.styles';
+import { styles } from './styles/Homescreen.styles';
 
 export default HomeScreen;
