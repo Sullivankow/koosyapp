@@ -1,8 +1,8 @@
-import BadgeStatus from '../../components/BadgeStatus';
+import BadgeStatus from '../../components/ui/BadgeStatus';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import AddTachesModal from '../../components/modals/AddTachesModal';
-import PlusButton from '../../components/PlusButton';
+import PlusButton from '../../components/ui/PlusButton';
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import styles from './TachesScreen.styles';

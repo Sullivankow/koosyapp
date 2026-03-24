@@ -7,14 +7,14 @@ import { useAddDevisModal } from '../../hooks/useAddDevisModal';
 import { useEntreprises } from '../../hooks/useEntreprises';
 import { useTheme } from '../../contexts/ThemeContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import PlusButton from '../../components/PlusButton';
+import PlusButton from '../../components/ui/PlusButton';
 import { Dimensions } from 'react-native';
 import { exportPdfToPhone } from '../../utils/pdfExport';
 import { useDevisManager } from '../../hooks/useDevisManager';
 import { DevisList } from '../../components/DevisList';
 import { getDevisPdfUrl } from '../../utils/api';
 import useDevisSearchSort from '../../hooks/useDevisSearchSort';
-import SearchBar from '../../components/SearchBar';
+import SearchBar from '../../components/ui/SearchBar';
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 

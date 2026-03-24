@@ -7,7 +7,7 @@ import TachesScreen from './screens/Layout/TachesScreen';
 import ReservationScreen from './screens/Layout/ReservationScreen';
 import CarteScreen from './screens/Layout/CarteScreen';
 import PrestationsScreen from './screens/Layout/PrestationsScreen';
-import SplashScreen from './components/SplashScreen';
+import SplashScreen from './components/ui/SplashScreen';
 import LoginScreen from './screens/Auth/LoginScreen';
 import SignupScreen from './screens/Auth/SignupScreen';
 import WelcomeScreen from './screens/Layout/WelcomeScreen';

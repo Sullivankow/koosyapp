@@ -9,7 +9,7 @@ import { Bien } from '../../models/models';
 import useBiens from '../../hooks/useBiens';
 import useBiensSearchSort from '../../hooks/useBiensSearchSort';
 import AddBienModal from '../../components/modals/AddBienModal';
-import SearchBar from '../../components/SearchBar';
+import SearchBar from '../../components/ui/SearchBar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SuccesMessage from '../../components/SuccesMessage';
 import { useBienCount } from '../../contexts/BienCountContext';

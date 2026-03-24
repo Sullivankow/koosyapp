@@ -4,7 +4,7 @@
 // et des actions rapides pour créer un bien, une tâche, une réservation ou une prestation.
 // Les commentaires ci-dessous expliquent le rôle des hooks, handlers et sections principales
 // pour faciliter la maintenance et la relecture du code.
-import QuickActionsGrid from '../../components/QuickActionsGrid';
+import QuickActionsGrid from '../../components/ui/QuickActionsGrid';
 import UpcomingEvents from '../../components/UpcomingEvents';
 import React, { useState, useEffect } from 'react';
 import { useSuccessMessage } from '../../hooks/useSuccessMessage';
@@ -13,9 +13,9 @@ import { clearSession } from '../../utils/session';
 import { useUserInfo } from '../../hooks/useUserInfo';
 import { useTheme } from '../../contexts/ThemeContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import SummaryCounters from '../../components/SummaryCounters';
+import SummaryCounters from '../../components/ui/SummaryCounters';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
-import NotificationBell from '../../components/NotificationBell';
+import NotificationBell from '../../components/ui/NotificationBell';
 import { getReservationsCount } from '../../utils/api';
 import { useBienCount } from '../../contexts/BienCountContext';
 import { useTacheCount } from '../../contexts/TacheCountContext';

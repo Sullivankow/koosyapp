@@ -12,8 +12,8 @@ import { useEntreprises } from '../../hooks/useEntreprises';
 import { useAddFactureModal } from '../../hooks/useAddFactureModal';
 import useFactureSearchSort from '../../hooks/useFactureSearchSort';
 import { FactureList } from '../../components/FactureList';
-import SearchBar from '../../components/SearchBar';
-import PlusButton from '../../components/PlusButton';
+import SearchBar from '../../components/ui/SearchBar';
+import PlusButton from '../../components/ui/PlusButton';
 
 
 
