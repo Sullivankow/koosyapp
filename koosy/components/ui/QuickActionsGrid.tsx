@@ -12,9 +12,10 @@ interface QuickActionsGridProps {
   onAddPrestation: () => void;
   onAddDevis: () => void;
   onAddFacture?: () => void;
+  onGoToRepertoireProprietaire?: () => void;
 }
 
-const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onAddBien, onAddTache, onAddReservation, onAddPrestation, onAddDevis, onAddFacture }) => (
+const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onAddBien, onAddTache, onAddReservation, onAddPrestation, onAddDevis, onAddFacture, onGoToRepertoireProprietaire }) => (
   <View style={styles.quickActionsGrid}>
     <View style={styles.quickActionsRow}>
       <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]} onPress={onAddBien}>
@@ -59,6 +60,18 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
         <View style={styles.centerContent}>
           <MaterialCommunityIcons name="file-document-outline" size={24} color={colors.surface} style={styles.icon} />
           <Text style={[styles.actionText, { color: colors.surface }]}>Mes factures</Text>
+        </View>
+      </TouchableOpacity>
+    </View>
+    {/* Nouveau bouton Répertoire Propriétaire */}
+    <View style={styles.quickActionsRow}>
+      <TouchableOpacity
+        style={[styles.actionBtn, { backgroundColor: colors.primary, flex: 1 }]}
+        onPress={onGoToRepertoireProprietaire}
+      >
+        <View style={styles.centerContent}>
+          <FontAwesome5 name="address-book" size={24} color={colors.surface} style={styles.icon} />
+          <Text style={[styles.actionText, { color: colors.surface }]}>Répertoire Propriétaire</Text>
         </View>
       </TouchableOpacity>
     </View>

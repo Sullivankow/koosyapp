@@ -45,6 +45,7 @@ function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
       <HomeStack.Screen name="ListeDevisScreen" component={ListeDevisScreen} />
       <HomeStack.Screen name="ListeFactureScreen" component={ListeFactureScreen} />
       <HomeStack.Screen name="NotificationsScreen" component={NotificationScreen} />
+      <HomeStack.Screen name="RepertoireProprietaireScreen" component={require('./screens/Layout/RepertoireProprietaireScreen').default} />
     </HomeStack.Navigator>
   );
 }
@@ -209,6 +210,7 @@ export default function App() {
                             <Stack.Screen name="Carte" component={CarteScreen} />
                             <Stack.Screen name="ListeDevis" component={ListeDevisScreen} />
                             <Stack.Screen name="ListeFactureScreen" component={ListeFactureScreen} />
+                            <Stack.Screen name="RepertoireProprietaireScreen" component={require('./screens/Layout/RepertoireProprietaireScreen').default} />
                           </Stack.Navigator>
                         </NavigationContainer>
                       )}

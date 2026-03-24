@@ -124,6 +124,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
         if (navigation) navigation.navigate('ListeFactureScreen');
     };
 
+    // Handler pour ouvrir la page Répertoire Propriétaire
+    const handleGoToRepertoireProprietaire = () => {
+        if (navigation) navigation.navigate('RepertoireProprietaireScreen');
+    };
+
     return (
         <>
             {successMsg ? (
@@ -184,6 +189,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                     onAddPrestation={() => setAddPrestationModalVisible(true)}
                     onAddDevis={handleGoToListeDevis}
                     onAddFacture={handleGoToListeFacture}
+                    onGoToRepertoireProprietaire={handleGoToRepertoireProprietaire}
                 />
             </ScrollView>
             {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}
