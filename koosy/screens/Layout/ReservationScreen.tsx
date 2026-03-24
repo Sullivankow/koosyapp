@@ -6,7 +6,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Scr
 import { useTheme } from '../../contexts/ThemeContext';
 import { Reservation, Bien, Locataire } from '../../models/models';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import PlusButton from '../../components/ui/PlusButton';
+import HeaderWithAddButton from '../../components/ui/HeaderWithAddButton';
 import { getBiens, createReservation, getReservations } from '../../utils/api';
 import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
@@ -109,10 +109,11 @@ function ReservationScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
-      {/* Titre principal */}
-      <Text style={{ fontSize: 32, fontWeight: 'bold', color: '#fff', marginTop: 32, marginBottom: 8, textAlign: 'center', letterSpacing: 0.5 }}>
-        Mes réservations
-      </Text>
+      <HeaderWithAddButton
+        title="Mes réservations"
+        onAdd={openModal}
+        colors={colors}
+      />
       {loading ? (
         <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
       ) : (
@@ -233,7 +234,6 @@ function ReservationScreen() {
                 )}
               </>
             )}
-          {/* Le bouton est déplacé en dehors du ScrollView pour être en bas de page */}
           </ScrollView>
           <AddReservationsModal
             visible={modalVisible}
@@ -244,7 +244,6 @@ function ReservationScreen() {
             biens={biens}
             colors={colors}
           />
-          <PlusButton onPress={openModal} backgroundColor={colors.primary} iconColor={colors.surface} />
         </>
       )}
     </View>

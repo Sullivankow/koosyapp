@@ -1,6 +1,28 @@
-import { StyleSheet } from 'react-native';
+	import { StyleSheet } from 'react-native';
 
-const styles = StyleSheet.create({
+	const styles = StyleSheet.create({
+		headerSticky: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			justifyContent: 'space-between',
+			paddingHorizontal: 16,
+			paddingVertical: 14,
+			borderBottomWidth: 1,
+			borderColor: '#eee',
+			zIndex: 10,
+		},
+		title: {
+			fontSize: 26,
+			fontWeight: 'bold',
+		},
+		addBtn: {
+			flexDirection: 'row',
+			alignItems: 'center',
+			borderRadius: 24,
+			paddingVertical: 8,
+			paddingHorizontal: 18,
+			elevation: 2,
+		},
 	container: { flex: 1 },
 	pageTitle: {
 		fontSize: 26,

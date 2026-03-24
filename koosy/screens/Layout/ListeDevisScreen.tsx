@@ -1,4 +1,6 @@
 import React, { useState, useMemo } from 'react';
+import { StatusBar } from 'react-native';
+// import supprimé car déjà présent plus bas
 import { View, Text, TouchableOpacity } from 'react-native';
 import { Modal } from 'react-native';
 import { WebView } from 'react-native-webview';
@@ -6,8 +8,8 @@ import { MaterialIcons } from '@expo/vector-icons';
 import { useAddDevisModal } from '../../hooks/useAddDevisModal';
 import { useEntreprises } from '../../hooks/useEntreprises';
 import { useTheme } from '../../contexts/ThemeContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import PlusButton from '../../components/ui/PlusButton';
+// SafeAreaView supprimé pour un rendu identique à BiensScreen
+import HeaderWithAddButton from '../../components/ui/HeaderWithAddButton';
 import { Dimensions } from 'react-native';
 import { exportPdfToPhone } from '../../utils/pdfExport';
 import { useDevisManager } from '../../hooks/useDevisManager';
@@ -54,24 +56,14 @@ export default function ListeDevisScreen() {
 	};
 
 	return (
-		<SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-			{/* En-tête */}
-			<View style={{
-				height: 60,
-				backgroundColor: colors.primary,
-				justifyContent: 'center',
-				alignItems: 'center',
-				borderBottomWidth: 1,
-				borderBottomColor: colors.border,
-				width: screenWidth,
-				elevation: 2,
-				shadowColor: colors.shadow,
-				shadowOffset: { width: 0, height: 2 },
-				shadowOpacity: 0.12,
-				shadowRadius: 2,
-			}}>
-				<Text style={{ fontSize: 26, fontWeight: 'bold', color: '#fff', textAlign: 'center' }}>Mes devis</Text>
-			</View>
+		<View style={{ flex: 1, backgroundColor: colors.surface }}>
+			<StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
+			{/* En-tête réutilisable déplacé à l'intérieur du SafeAreaView */}
+			<HeaderWithAddButton
+				title="Mes devis"
+				onAdd={open}
+				colors={colors}
+			/>
 
 
 			{/* Barre de recherche et bouton de tri */}
@@ -99,8 +91,7 @@ export default function ListeDevisScreen() {
 			{/* Liste des devis (extrait dans un composant) */}
 			<DevisList devis={sortedDevis} colors={colors} handlePreviewDevis={handlePreviewDevis} handleDeleteDevis={handleDeleteDevis} />
 
-			{/* Bouton flottant pour ajouter un devis */}
-			<PlusButton onPress={open} backgroundColor={colors.primary} iconColor={colors.surface} />
+			{/* PlusButton supprimé, remplacé par HeaderWithAddButton */}
 
 			{/* Modale d'ajout de devis */}
 			{modal}
@@ -139,8 +130,8 @@ export default function ListeDevisScreen() {
 				<TouchableOpacity onPress={() => setPreviewId(null)} style={{ position: 'absolute', top: 40, right: 20, zIndex: 10 }}>
 					<MaterialIcons name="close" size={32} color="#000" />
 				</TouchableOpacity>
-			</Modal>
-		</SafeAreaView>
+				</Modal>
+		</View>
 	);
 }
 

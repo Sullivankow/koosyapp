@@ -1,31 +1,28 @@
-import React, { useEffect, useState } from 'react';
+
+import React from 'react';
 import { View, Text, FlatList, StyleSheet, ActivityIndicator } from 'react-native';
-import { getProprietaires } from '../utils/api';
 import type { Proprietaire } from '../models/proprietaire';
 import { useTheme } from '../contexts/ThemeContext';
 
-const ProprietaireList: React.FC = () => {
-  const [proprietaires, setProprietaires] = useState<Proprietaire[]>([]);
-  const [loading, setLoading] = useState(true);
-  const { colors } = useTheme();
+interface ProprietaireListProps {
+  data: Proprietaire[];
+  loading?: boolean;
+}
 
-  useEffect(() => {
-    getProprietaires()
-      .then(setProprietaires)
-      .finally(() => setLoading(false));
-  }, []);
+const ProprietaireList: React.FC<ProprietaireListProps> = ({ data, loading }) => {
+  const { colors } = useTheme();
 
   if (loading) {
     return <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />;
   }
 
-  if (!proprietaires.length) {
+  if (!data.length) {
     return <Text style={[styles.emptyText, { color: colors.text }]}>Aucun propriétaire trouvé.</Text>;
   }
 
   return (
     <FlatList
-      data={proprietaires}
+      data={data}
       keyExtractor={item => item.id.toString()}
       contentContainerStyle={styles.listContainer}
       renderItem={({ item }) => (

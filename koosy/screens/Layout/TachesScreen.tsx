@@ -2,7 +2,7 @@ import BadgeStatus from '../../components/ui/BadgeStatus';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import AddTachesModal from '../../components/modals/AddTachesModal';
-import PlusButton from '../../components/ui/PlusButton';
+
 import React, { useState, useEffect } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Alert } from 'react-native';
 import styles from './styles/TachesScreen.styles';
@@ -82,8 +82,13 @@ function TachesScreen() {
           <Text style={[styles.successMsgText, { color: colors.error }]}>{error}</Text>
         </View>
       )}
-      {/* Titre principal */}
-      <Text style={styles.pageTitle}>Mes tâches</Text>
+      {/* Header sticky avec bouton + */}
+      <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}> 
+        <Text style={[styles.title, { color: colors.text }]}>Mes tâches</Text>
+        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={() => setModalVisible(true)}>
+          <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
+        </TouchableOpacity>
+      </View>
       {/* Onglets */}
       <View style={styles.tabsContainer}>
         <TouchableOpacity
@@ -192,7 +197,7 @@ function TachesScreen() {
         </TouchableOpacity>
       )}
       {/* Bouton pour ouvrir le modal d'ajout de tâche */}
-      <PlusButton onPress={() => setModalVisible(true)} backgroundColor={colors.primary} iconColor={colors.surface} />
+
       {/* Modal d'ajout de tâche */}
       <AddTachesModal
         visible={modalVisible}

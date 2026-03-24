@@ -1,9 +1,11 @@
 import React, { useState, useMemo } from 'react';
+import { StatusBar } from 'react-native';
+// import supprimé car déjà présent plus bas
 import { View, Text, TouchableOpacity, Modal } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { SafeAreaView } from 'react-native-safe-area-context';
+// SafeAreaView supprimé pour un rendu identique à BiensScreen
 import { Dimensions } from 'react-native';
 import { useFactureManager } from '../../hooks/useFactureManager';
 import { getFacturePdfUrl } from '../../utils/api';
@@ -13,7 +15,7 @@ import { useAddFactureModal } from '../../hooks/useAddFactureModal';
 import useFactureSearchSort from '../../hooks/useFactureSearchSort';
 import { FactureList } from '../../components/FactureList';
 import SearchBar from '../../components/ui/SearchBar';
-import PlusButton from '../../components/ui/PlusButton';
+import HeaderWithAddButton from '../../components/ui/HeaderWithAddButton';
 
 
 
@@ -54,24 +56,14 @@ export default function ListeFactureScreen() {
 	};
 
 	 return (
-		 <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }}>
-			 {/* En-tête */}
-			 <View style={{
-				 height: 60,
-				 backgroundColor: colors.primary,
-				 justifyContent: 'center',
-				 alignItems: 'center',
-				 borderBottomWidth: 1,
-				 borderBottomColor: colors.border,
-				 width: screenWidth,
-				 elevation: 2,
-				 shadowColor: colors.shadow,
-				 shadowOffset: { width: 0, height: 2 },
-				 shadowOpacity: 0.12,
-				 shadowRadius: 2,
-			 }}>
-				 <Text style={{ fontSize: 26, fontWeight: 'bold', color: '#fff', textAlign: 'center' }}>Mes factures</Text>
-			 </View>
+		 <View style={{ flex: 1, backgroundColor: colors.surface }}>
+			<StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
+			 {/* En-tête réutilisable déplacé à l'intérieur du SafeAreaView */}
+			 <HeaderWithAddButton
+				title="Mes factures"
+				onAdd={openAddFacture}
+				colors={colors}
+			/>
 
 			 {/* Barre de recherche et bouton de tri */}
 			 <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, marginTop: 18 }}>
@@ -98,8 +90,7 @@ export default function ListeFactureScreen() {
 			 {/* Liste des factures (extrait dans un composant) */}
 			 <FactureList factures={sortedFactures} colors={colors} handlePreviewFacture={handlePreviewFacture} handleDeleteFacture={handleDeleteFacture} />
 
-			 {/* Bouton flottant pour ajouter une facture (ouvre la modale) */}
-			 <PlusButton onPress={openAddFacture} backgroundColor={colors.primary} iconColor={colors.surface} />
+			 {/* PlusButton supprimé, remplacé par HeaderWithAddButton */}
 			 {/* Modale de création de facture */}
 			 {addFactureModal}
 
@@ -132,6 +123,6 @@ export default function ListeFactureScreen() {
 					 <MaterialIcons name="close" size={32} color="#000" />
 				 </TouchableOpacity>
 			 </Modal>
-		 </SafeAreaView>
+                 </View>
 	);
 }
