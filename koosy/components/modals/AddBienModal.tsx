@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, ScrollView, KeyboardAvoidingView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { useTheme } from '../contexts/ThemeContext';
-import { createBien, updateBien, uploadBienImages, geocodeAdresse } from '../utils/api';
-import { createProprietaire } from '../utils/api';
-import { useBienCount } from '../contexts/BienCountContext';
+import { useTheme } from '../../contexts/ThemeContext';
+import { createBien, updateBien, uploadBienImages, geocodeAdresse } from '../../utils/api';
+import { createProprietaire } from '../../utils/api';
+import { useBienCount } from '../../contexts/BienCountContext';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;

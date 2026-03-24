@@ -10,11 +10,11 @@
 // Les styles sont adaptés pour une modale centrée et responsive
 
 import React, { useState, useEffect } from 'react';
-import { Facture, LigneFacture, Entreprise } from '../models/models';
-import { Proprietaire } from '../models/proprietaire';
-import { getBiens } from '../utils/api';
+import { Facture, LigneFacture, Entreprise } from '../../models/models';
+import { Proprietaire } from '../../models/proprietaire';
+import { getBiens } from '../../utils/api';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions, FlatList } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface AddFactureModalProps {
   isOpen: boolean;

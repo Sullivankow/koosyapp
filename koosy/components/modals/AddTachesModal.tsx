@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, KeyboardAvoidingView, ScrollView } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../../contexts/ThemeContext';
 const SCREEN_WIDTH = Dimensions.get('window').width;
-import { getBiens, createTache } from '../utils/api';
-	import { useTache } from '../contexts/TacheContext';
+import { getBiens, createTache } from '../../utils/api';
+	import { useTache } from '../../contexts/TacheContext';
 
 // Enum des statuts
 const TACHE_STATUTS = [

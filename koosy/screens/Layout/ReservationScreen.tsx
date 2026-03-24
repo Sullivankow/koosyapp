@@ -11,7 +11,7 @@ import { getBiens, createReservation, getReservations } from '../../utils/api';
 import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 import dayjs from 'dayjs';
-import AddReservationsModal from '../../components/AddReservationsModal';
+import AddReservationsModal from '../../components/modals/AddReservationsModal';
 
 const statutColor = {
   'confirmée': '#43A047',

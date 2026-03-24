@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createDevis } from '../utils/api';
-import AddDevisModal from '../components/AddDevisModal';
+import AddDevisModal from '../components/modals/AddDevisModal';
 import { Entreprise } from '../models/models';
 
 export const useAddDevisModal = (entreprises: Entreprise[]) => {

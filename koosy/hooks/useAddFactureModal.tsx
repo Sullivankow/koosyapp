@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { createFacture } from '../utils/api';
-import AddFactureModal from '../components/AddFactureModal';
+import AddFactureModal from '../components/modals/AddFactureModal';
 import { Entreprise } from '../models/models';
 
 // Hook personnalisé pour gérer l'ouverture/fermeture de la modale de création de facture

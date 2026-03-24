@@ -4,9 +4,9 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions, FlatList } from 'react-native';
 import dayjs from 'dayjs';
 import 'dayjs/locale/fr';
-import { CreateDevisPayload, LigneDevis, Entreprise, Bien } from '../models/models';
-import { getBiens, apiFetchMyEntreprise } from '../utils/api';
-import { useTheme } from '../contexts/ThemeContext';
+import { CreateDevisPayload, LigneDevis, Entreprise, Bien } from '../../models/models';
+import { getBiens, apiFetchMyEntreprise } from '../../utils/api';
+import { useTheme } from '../../contexts/ThemeContext';
 
 
 interface AddDevisModalProps {

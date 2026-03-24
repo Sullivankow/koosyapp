@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator
 import { useTheme } from '../../contexts/ThemeContext';
 import { getPrestations, updatePrestationStatut, deletePrestation } from '../../utils/api';
 import { Prestation } from '../../models/models';
-import AddPrestationModal from '../../components/AddPrestationModal';
+import AddPrestationModal from '../../components/modals/AddPrestationModal';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useChiffreAffaireRefresh } from '../../contexts/ChiffreAffaireRefreshContext';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';

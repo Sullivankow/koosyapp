@@ -8,7 +8,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { Bien } from '../../models/models';
 import useBiens from '../../hooks/useBiens';
 import useBiensSearchSort from '../../hooks/useBiensSearchSort';
-import AddBienModal from '../../components/AddBienModal';
+import AddBienModal from '../../components/modals/AddBienModal';
 import SearchBar from '../../components/SearchBar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SuccesMessage from '../../components/SuccesMessage';

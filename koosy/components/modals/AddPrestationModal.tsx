@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { usePrestationsCount } from '../contexts/PrestationsCountContext';
+import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, KeyboardAvoidingView, ScrollView } from 'react-native';
-import { useTheme } from '../contexts/ThemeContext';
-import { getBiens, createPrestation } from '../utils/api';
+import { useTheme } from '../../contexts/ThemeContext';
+import { getBiens, createPrestation } from '../../utils/api';
 import dayjs from 'dayjs';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
