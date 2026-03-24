@@ -2,9 +2,6 @@
 /*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
 /*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
 /* -------------------------------------------------------------------------- */
-
-
-
 import { Devis } from '../models/models';
 import { getSession } from './session';
 const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
@@ -28,6 +25,8 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   return JSON.parse(text);
 }
 
+
+ 
 
 // Fonction d'inscription
 export function signup(data: { nom: string; prenom: string; email: string; password: string }) {
@@ -54,6 +53,8 @@ export async function login({ email, password }: { email: string; password: stri
   }
   return await response.json(); // { access_token: ... }
 }
+
+
 
 //PAGE D'ACCUEIL
 //Fonction pour récupérer le nombre total de biens
@@ -180,6 +181,8 @@ export async function deleteBien(id: string): Promise<void> {
 
 
 
+
+
 //Fonction pour créer une nouvelle tâche
 
 export async function createTache(data: {
@@ -202,7 +205,7 @@ export async function getTaches(): Promise<any[]> {
   return apiFetch('/taches');
 }
 
-//Fontion pour mettre à jour le status d'une tâche
+
 
 //Fonction pour supprimer une tâche par son ID
 export async function deleteTache(id: number | string): Promise<void> {
@@ -246,6 +249,9 @@ export async function deleteAllTachesTerminees() {
   }
   return response.json();
 }
+
+
+
 
 // Fonction pour créer une réservation
 export async function createReservation(data: {
@@ -292,7 +298,7 @@ export async function deleteReservation(id: string | number) {
   });
 }
 
-//Fonction pour modifier une réservation 
+
 // Fonction pour modifier une réservation (tous champs)
 export async function updateReservation(
   id: string | number,
@@ -313,6 +319,8 @@ export async function updateReservation(
   });
 }
 
+
+
 // Sauvegarde le token de push (ou le supprime si token === null)
 export async function savePushToken(token: string | null, platform?: string) {
   return apiFetch('/notifications/me/push-token', {
@@ -320,6 +328,21 @@ export async function savePushToken(token: string | null, platform?: string) {
     body: JSON.stringify({ token, platform }),
   });
 }
+
+/**
+ * Récupère le nombre de notifications non lues pour l'utilisateur connecté.
+ * Retourne un objet { unread: number }.
+ */
+export async function getNotificationsUnreadCount(): Promise<{ unread: number }> {
+  return apiFetch('/notifications/unread-count');
+}
+
+// Récupère les événements à venir (arrivées/départs/nouvelles réservations)
+export async function getEventsUpcoming(days = 7, limit = 50, page = 1) {
+  return apiFetch(`/reservations/events/upcoming?days=${days}&limit=${limit}&page=${page}`);
+}
+
+
 
 /**
  * Met à jour partiellement les settings de l'utilisateur (merge-safe).
@@ -333,23 +356,12 @@ export async function updateUserSettings(settings: Record<string, any>) {
 }
 
 
-/**
- * Récupère le nombre de notifications non lues pour l'utilisateur connecté.
- * Retourne un objet { unread: number }.
- */
-export async function getNotificationsUnreadCount(): Promise<{ unread: number }> {
-  return apiFetch('/notifications/unread-count');
-}
-
 // Récupère les informations de l'utilisateur connecté (incluant settings)
 export async function getMe(): Promise<any> {
   return apiFetch('/users/me');
 }
 
-// Récupère les événements à venir (arrivées/départs/nouvelles réservations)
-export async function getEventsUpcoming(days = 7, limit = 50, page = 1) {
-  return apiFetch(`/reservations/events/upcoming?days=${days}&limit=${limit}&page=${page}`);
-}
+
 
 /**
  * Récupère la liste paginée des notifications pour l'utilisateur connecté.
@@ -385,6 +397,29 @@ export async function deleteNotification(id: number) {
   return apiFetch(`/notifications/${id}`, { method: 'DELETE' });
 }
 
+// Fonction pour modifier le profil utilisateur principal (champ telephone, etc.) via PATCH /users/:id.
+export async function updateMe(data: any) {
+  const user = await getMe();
+  const userId = user?.id;
+  if (!userId) throw new Error('Utilisateur non authentifié');
+  return apiFetch(`/users/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+// Fonction pour supprimer le compte utilisateur
+export async function deleteMe() {
+  const user = await getMe();
+  const userId = user?.id;
+  if (!userId) throw new Error('Utilisateur non authentifié');
+  return apiFetch(`/users/${userId}`, {
+    method: 'DELETE',
+  });
+}
+
+
+
 /**
  * Endpoint admin/test pour créer et envoyer une notification à un utilisateur.
  * payload: { userId, title, body, data? }
@@ -394,8 +429,11 @@ export async function adminSendNotification(payload: { userId: number; title: st
   return apiFetch('/notifications/admin/send', { method: 'POST', body: JSON.stringify(payload) });
 }
 
+
+
+
 // Fonction pour créer une prestation
-import type { PrestationStatus } from '../components/AddPrestationModal';
+import type { PrestationStatus } from '../components/modals/AddPrestationModal';
 
 export async function createPrestation(data: {
   bienId: number;
@@ -459,26 +497,7 @@ export async function getChiffreAffaire(from: string, to: string, status = 'Term
   return apiFetch(`/prestations/summary?from=${from}&to=${to}&status=${status}`);
 }
 
-// Fonction pour modifier le profil utilisateur principal (champ telephone, etc.) via PATCH /users/:id.
-export async function updateMe(data: any) {
-  const user = await getMe();
-  const userId = user?.id;
-  if (!userId) throw new Error('Utilisateur non authentifié');
-  return apiFetch(`/users/${userId}`, {
-    method: 'PATCH',
-    body: JSON.stringify(data),
-  });
-}
 
-// Fonction pour supprimer le compte utilisateur
-export async function deleteMe() {
-  const user = await getMe();
-  const userId = user?.id;
-  if (!userId) throw new Error('Utilisateur non authentifié');
-  return apiFetch(`/users/${userId}`, {
-    method: 'DELETE',
-  });
-}
 
 // Fonction pour récupérer une entreprise par son ID
 
@@ -525,6 +544,9 @@ export async function deleteEntreprise(id: number): Promise<void> {
   });
 }
 
+
+
+
 // Fonction pour créer un devis lié à l'utilisateur connecté (l'entreprise est gérée côté backend)
 
 export async function createDevis(data: Omit<Devis, 'id' | 'entreprise'>): Promise<{ id: number }> {
@@ -567,7 +589,7 @@ export function getDevisPdfUrl(id: number) {
 import { Facture } from '../models/models';
 // Fonction pour récupérer la liste des factures
 export async function getFactures(): Promise<Facture[]> {
-  // Correction : endpoint au singulier pour correspondre au backend
+ 
   const data = await apiFetch('/facture');
   if (Array.isArray(data)) return data;
   if (data && Array.isArray(data.items)) return data.items;
@@ -582,7 +604,7 @@ export async function deleteFacture(id: number): Promise<void> {
 }
 
 // Fonction pour créer une facture liée à l'utilisateur connecté (l'entreprise est gérée côté backend)
-// Correction : endpoint au singulier pour correspondre au backend
+
 export async function createFacture(data: Omit<Facture, 'id' | 'entreprise'>): Promise<{ id: number }> {
   const res = await apiFetch('/facture', {
     method: 'POST',
