@@ -1,4 +1,4 @@
-import BadgeStatus from '../../components/ui/BadgeStatus';
+import BadgeStatus from '../../ui/BadgeStatus';
 import { STATUS_CONFIG } from '../../constants/Status';
 import React, { useState, useEffect } from 'react';
 import { useBienCount } from '../../contexts/BienCountContext';
@@ -6,7 +6,7 @@ import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, Scr
 import { useTheme } from '../../contexts/ThemeContext';
 import { Reservation, Bien, Locataire } from '../../models/models';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import HeaderWithAddButton from '../../components/ui/HeaderWithAddButton';
+import HeaderWithAddButton from '../../ui/HeaderWithAddButton';
 import { getBiens, createReservation, getReservations } from '../../utils/api';
 import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';

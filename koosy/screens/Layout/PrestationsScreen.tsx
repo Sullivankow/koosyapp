@@ -1,4 +1,4 @@
-import BadgeStatus from '../../components/ui/BadgeStatus';
+import BadgeStatus from '../../ui/BadgeStatus';
 import { STATUS_CONFIG } from '../../constants/Status';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
@@ -10,7 +10,7 @@ import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useChiffreAffaireRefresh } from '../../contexts/ChiffreAffaireRefreshContext';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import HeaderWithAddButton from '../../components/ui/HeaderWithAddButton';
+import HeaderWithAddButton from '../../ui/HeaderWithAddButton';
 import { Alert } from 'react-native';
 
 

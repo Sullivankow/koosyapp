@@ -5,12 +5,12 @@ import { View, Text, TouchableOpacity, TextInput, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ProprioBox from './ProprioBox';
 import { styles } from '../../../screens/Layout/styles/BienScreen.styles';
-import type { Bien, Reservation, Tache, Prestation } from '../../../models/models';
+import type { Bien } from '../../../models/models';
 import PrestationTimeline from './PrestationTimeline';
 import TacheTimeline from './TacheTimeline';
 import ReservationList from './ReservationList';
 import { Carrousel } from '../../../ui/Carrousel';
-import ButtonAction from './../../ui/ButtonAction';
+import ButtonAction from '../../../ui/ButtonAction';
 
 /**
  * Composant Carte de Bien

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import SearchBar from '../../components/ui/SearchBar';
+import SearchBar from '../../ui/SearchBar';
 import GpsTracker from '../../components/GpsTracker';
 import { useBienCount } from '../../contexts/BienCountContext';
 import * as Location from 'expo-location';

@@ -5,7 +5,7 @@ import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'rea
 import { useTheme } from '../../contexts/ThemeContext';
 import ProprietaireList from '../../components/ProprietaireList';
 import AddProprietaireModal from '../../components/modals/AddProprietaireModal';
-import SearchBar from '../../components/ui/SearchBar';
+import SearchBar from '../../ui/SearchBar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getProprietaires, deleteProprietaire, updateProprietaire } from '../../utils/api';
 import type { Proprietaire } from '../../models/proprietaire';

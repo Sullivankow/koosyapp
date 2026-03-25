@@ -1,4 +1,4 @@
-import BadgeStatus from '../../components/ui/BadgeStatus';
+import BadgeStatus from '../../ui/BadgeStatus';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import AddTachesModal from '../../components/modals/AddTachesModal';

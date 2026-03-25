@@ -5,7 +5,7 @@ import 'dayjs/locale/fr';
 import { CreateDevisPayload, LigneDevis, Entreprise, Bien } from '../../models/models';
 import { getBiens, apiFetchMyEntreprise } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
-import PlusButton from '../ui/PlusButton';
+import PlusButton from '../../ui/PlusButton';
 
 interface AddDevisModalProps {
 	isOpen: boolean;

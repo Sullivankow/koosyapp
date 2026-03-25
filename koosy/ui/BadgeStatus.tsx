@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text, StyleSheet, View, ViewStyle } from 'react-native';
-import { STATUS_CONFIG } from '../../constants/Status';
+import { STATUS_CONFIG } from '../constants/Status';
 
 type BadgeStatusProps = {
 	statut: string;

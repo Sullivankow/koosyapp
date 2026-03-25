@@ -13,7 +13,7 @@ import { Facture, LigneFacture, Entreprise } from '../../models/models';
 import { Proprietaire } from '../../models/proprietaire';
 import { getBiens } from '../../utils/api';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions, FlatList } from 'react-native';
-import PlusButton from '../ui/PlusButton';
+import PlusButton from '../../ui/PlusButton';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface AddFactureModalProps {

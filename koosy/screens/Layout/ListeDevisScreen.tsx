@@ -9,14 +9,14 @@ import { useAddDevisModal } from '../../hooks/useAddDevisModal';
 import { useEntreprises } from '../../hooks/useEntreprises';
 import { useTheme } from '../../contexts/ThemeContext';
 // SafeAreaView supprimé pour un rendu identique à BiensScreen
-import HeaderWithAddButton from '../../components/ui/HeaderWithAddButton';
+import HeaderWithAddButton from '../../ui/HeaderWithAddButton';
 import { Dimensions } from 'react-native';
 import { exportPdfToPhone } from '../../utils/pdfExport';
 import { useDevisManager } from '../../hooks/useDevisManager';
 import { DevisList } from '../../components/DevisList';
 import { getDevisPdfUrl } from '../../utils/api';
 import useDevisSearchSort from '../../hooks/useDevisSearchSort';
-import SearchBar from '../../components/ui/SearchBar';
+import SearchBar from '../../ui/SearchBar';
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 

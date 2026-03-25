@@ -7,14 +7,14 @@ import TachesScreen from './screens/Layout/TachesScreen';
 import ReservationScreen from './screens/Layout/ReservationScreen';
 import CarteScreen from './screens/Layout/CarteScreen';
 import PrestationsScreen from './screens/Layout/PrestationsScreen';
-import SplashScreen from './components/ui/SplashScreen';
+import SplashScreen from './ui/SplashScreen';
 import LoginScreen from './screens/Auth/LoginScreen';
 import SignupScreen from './screens/Auth/SignupScreen';
 import WelcomeScreen from './screens/Layout/WelcomeScreen';
 import React, { useState, useEffect } from 'react';
 import { useTheme } from './contexts/ThemeContext';
 import { getSession, saveSession, clearSession, generateToken } from './utils/session';
-import { initDefaultUsers } from './utils/users';
+
 import { View, Text, Button } from 'react-native';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BienCountProvider } from './contexts/BienCountContext';

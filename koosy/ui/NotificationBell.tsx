@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { useNotificationCount } from '../../contexts/NotificationCountContext';
+import { useNotificationCount } from '../contexts/NotificationCountContext';
 
 type Props = {
 	size?: number;
