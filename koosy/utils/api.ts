@@ -4,7 +4,7 @@
 /* -------------------------------------------------------------------------- */
 import { Devis } from '../models/models';
 import { getSession } from './session';
-const BASE_URL = 'http://192.168.1.67:3000'; // à adapter selon ton environnement
+import { BASE_URL } from '../constants/config';
 
 
 // Simule la récupération d'un token JWT stocké localement
@@ -619,7 +619,7 @@ export function getFacturePdfUrl(id: number) {
 }
 
 // Récupérer la liste des propriétaires existants
-import type { Proprietaire } from '../models/proprietaire';
+import type { Proprietaire } from '../models/models';
 export async function getProprietaires(): Promise<Proprietaire[]> {
   return apiFetch('/proprietaire');
 }

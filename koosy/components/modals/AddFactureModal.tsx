@@ -8,7 +8,6 @@
 // Les dates sont saisies au format JJ/MM/AAAA (pas de datepicker ici)
 // Le bouton "Créer" envoie la facture, "Annuler" ferme la modale sans rien faire
 // Les styles sont adaptés pour une modale centrée et responsive
-
 import React, { useState, useEffect } from 'react';
 import { Facture, LigneFacture, Entreprise } from '../../models/models';
 import { Proprietaire } from '../../models/proprietaire';

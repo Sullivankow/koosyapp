@@ -1,7 +1,15 @@
 // Type pour la création d'un devis (payload front → back)
 export type CreateDevisPayload = Omit<Devis, 'id' | 'dateCreation' | 'statut' | 'proprietaire'> & { proprietaire: number };
-import type { Proprietaire } from './proprietaire';
-import type { User } from '../utils/users';
+
+export interface Proprietaire {
+  id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  adresse: string;
+  telephone: string;
+}
+
 
 export interface Commentaire {
   id: string;
@@ -36,6 +44,7 @@ export interface Bien {
   commentaires?: Commentaire[];
   dateCreation: string;
   reservations?: Reservation[];
+  prestations?: Prestation[];
 }
 
 export interface Locataire {
@@ -117,7 +126,7 @@ export interface Entreprise {
 export interface Prestation {
   id: number;
   bien: Bien;
-  user?: User; // utilisateur ou conciergerie
+  user?: Utilisateur; // utilisateur ou conciergerie
   description?: string;
   amount_cents: number;
   currency: string;
@@ -129,7 +138,6 @@ export interface Prestation {
 
 
 // === Devis & Facture ===
-export type { Proprietaire } from './proprietaire';
 
 export interface Devis {
   id: number;

@@ -1,27 +1,38 @@
+import { BASE_URL } from '../../constants/config';
+
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, Image, ScrollView, TextInput, Alert } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { styles } from '../../screens/Layout/styles/BienScreen.styles';
+import type { Bien, Reservation, Tache, Prestation } from '../../models/models';
 
 /**
  * Composant Carte de Bien
  * Affiche toutes les informations d'un bien immobilier, ses photos, propriétaire, réservations et tâches.
  */
 
-// Interface des props du composant BienCard
+
 interface BienCardProps {
-  bien: any; // Remplace 'any' par le type Bien si tu l'as importé
-  colors: any;
-  onEdit: (bien: any) => void;
+  bien: Bien & { photos?: (string | { uri: string })[] };
+  colors: {
+    surface: string;
+    primary: string;
+    secondary: string;
+    accent: string;
+    error: string;
+    text: string;
+    textSecondary: string;
+  };
+  onEdit: (bien: Bien) => void;
   onDelete: (bienId: string) => void;
-  onStatus: (bien: any) => void;
-  onPhotoPress: (photo: any) => void;
+  onStatus: (bien: Bien) => void;
+  onPhotoPress: (photo: string) => void;
   formatDateFR: (dateStr?: string) => string;
   onChangeTacheStatus?: (tacheId: string | number, statut: string) => void;
 }
 
 
-import { updateProprietaire } from '../../utils/api';
+
 
 const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR, onChangeTacheStatus }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -35,7 +46,7 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
   });
 
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: keyof typeof editValues, value: string) => {
     setEditValues(prev => ({ ...prev, [field]: value }));
   };
 
@@ -76,25 +87,50 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
     setIsEditing(false);
   };
   // Carrousel responsive avec largeur dynamique
-  const { Dimensions } = require('react-native');
-  const SCREEN_WIDTH = Dimensions.get('window').width;
-  const renderCarousel = (photos: any[]) => (
-    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.carousel}>
-      {photos.map((photo, idx) => {
-        let source = photo;
-        let key = (photo && photo.uri) ? photo.uri : `photo-${idx}`;
-        if (photo && photo.uri !== undefined && (!photo.uri || photo.uri.trim() === '')) {
-          source = require('../../assets/house.jpg');
-          key = `default-photo-${idx}`;
-        }
-        return (
-          <TouchableOpacity key={key} onPress={() => onPhotoPress(source)}>
-            <Image source={source} style={[styles.carouselPhoto, { width: SCREEN_WIDTH - 32 }]} resizeMode="cover" />
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
-  );
+  const SCREEN_WIDTH = require('react-native').Dimensions.get('window').width;
+  const renderCarousel = (photos: (string | { uri: string })[] = []) => {
+    // Supporte tableau de string ou de { uri: string }
+    const normalizedPhotos = Array.isArray(photos)
+      ? photos.map((photo) => {
+          if (typeof photo === 'string') return photo;
+          if (photo && typeof photo === 'object' && typeof photo.uri === 'string') return photo.uri;
+          return '';
+        })
+      : [];
+    const validPhotos = normalizedPhotos.filter((photo): photo is string => typeof photo === 'string' && !!photo && photo.trim() !== '');
+    const displayPhotos = validPhotos.length > 0 ? validPhotos : [null];
+    return (
+      <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.carousel}>
+        {displayPhotos.map((photo, idx) => {
+          let source;
+          let key = photo ? photo.trim() : `default-photo-${idx}`;
+          if (photo) {
+            let trimmed = photo.trim();
+            trimmed = trimmed.replace(/\\/g, '/');
+            if (trimmed.startsWith('/uploads') || trimmed.startsWith('./uploads')) {
+              const cleanPath = trimmed.replace('./', '/');
+              source = { uri: `${BASE_URL}${cleanPath}` };
+            } else if (trimmed.startsWith('http') || trimmed.startsWith('file://') || trimmed.startsWith('content://')) {
+              source = { uri: trimmed };
+            } else if (!trimmed.includes('/') && trimmed.length > 0) {
+              source = { uri: `${BASE_URL}/uploads/${trimmed}` };
+            } else if (trimmed.startsWith('uploads/')) {
+              source = { uri: `${BASE_URL}/${trimmed}` };
+            } else {
+              source = require('../../assets/house.jpg');
+            }
+          } else {
+            source = require('../../assets/house.jpg');
+          }
+          return (
+            <TouchableOpacity key={key} onPress={() => onPhotoPress(photo ? photo.trim() : '')}>
+              <Image source={source} style={[styles.carouselPhoto, { width: SCREEN_WIDTH - 32 }]} resizeMode="cover" />
+            </TouchableOpacity>
+          );
+        })}
+      </ScrollView>
+    );
+  };
 
   return (
     <View style={[styles.card, { backgroundColor: colors.surface }]}> 
@@ -206,7 +242,7 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
         <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 6 }}>Réservations :</Text>
       </View>
       <View style={{ width: '100%', flexDirection: 'column', gap: 8, marginBottom: 8 }}>
-        {Array.isArray(bien.reservations) && bien.reservations.length > 0 ? bien.reservations.map((resa: any) => (
+        {Array.isArray(bien.reservations) && bien.reservations.length > 0 ? bien.reservations.map((resa: Reservation) => (
           <View key={resa.id} style={{ flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.accent + '22', borderColor: colors.accent, borderWidth: 1, borderRadius: 12, padding: 8, marginBottom: 2, maxWidth: '100%' }}>
             <MaterialCommunityIcons name="account" size={16} color={colors.accent} style={{ marginRight: 8, marginTop: 2 }} />
             <View style={{ flex: 1 }}>
@@ -228,7 +264,7 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
         <MaterialCommunityIcons name="clipboard-list" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
         <Text style={{ color: colors.text, fontWeight: 'bold' }}>Tâches :</Text>
         <View style={styles.timeline}>
-          {Array.isArray(bien.taches) && bien.taches.length > 0 ? bien.taches.map((tache: any) => (
+          {Array.isArray(bien.taches) && bien.taches.length > 0 ? bien.taches.map((tache: Tache) => (
             <View key={tache.id} style={styles.timelineItem}>
               <MaterialCommunityIcons name="circle" size={10} color={tache.statut === 'à faire' ? colors.error : colors.accent} style={{ marginRight: 6 }} />
               <View style={{ flex: 1 }}>
@@ -244,7 +280,7 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
         <MaterialCommunityIcons name="handshake" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
         <Text style={{ color: colors.text, fontWeight: 'bold' }}>Prestations :</Text>
         <View style={styles.timeline}>
-          {Array.isArray(bien.prestations) && bien.prestations.length > 0 ? bien.prestations.map((prestation: any) => (
+          {Array.isArray(bien.prestations) && bien.prestations.length > 0 ? bien.prestations.map((prestation: Prestation) => (
             <View key={prestation.id} style={styles.timelineItem}>
               <MaterialCommunityIcons name="circle" size={10} color={prestation.status === 'terminée' ? colors.accent : colors.error} style={{ marginRight: 6 }} />
               <View style={{ flex: 1 }}>
