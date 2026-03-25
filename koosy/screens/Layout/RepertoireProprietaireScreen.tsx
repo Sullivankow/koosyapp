@@ -6,7 +6,7 @@ import { useTheme } from '../../contexts/ThemeContext';
 import ProprietaireList from '../../components/ProprietaireList';
 import SearchBar from '../../components/ui/SearchBar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getProprietaires, deleteProprietaire } from '../../utils/api';
+import { getProprietaires, deleteProprietaire, updateProprietaire } from '../../utils/api';
 import type { Proprietaire } from '../../models/proprietaire';
 
 function RepertoireProprietaireScreen() {
@@ -64,6 +64,18 @@ function RepertoireProprietaireScreen() {
     return list;
   }, [proprietaires, search, sortOrder]);
 
+  // Gestion édition propriétaire
+  const handleEditProprietaire = async (id: number, data: Partial<Proprietaire>) => {
+    try {
+      await updateProprietaire(id, data);
+      fetchProprietaires();
+      Alert.alert('Succès', 'Propriétaire modifié avec succès');
+    } catch (e) {
+      // Optionnel: afficher une erreur/toast
+      console.error('Erreur édition propriétaire', e);
+    }
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
       {/* Header sticky comme BiensScreen */}
@@ -97,7 +109,12 @@ function RepertoireProprietaireScreen() {
       </View>
 
       {/* Liste filtrée et triée */}
-      <ProprietaireList data={filteredProprietaires} loading={loading} onDelete={handleDeleteProprietaire} />
+      <ProprietaireList
+        data={filteredProprietaires}
+        loading={loading}
+        onDelete={handleDeleteProprietaire}
+        onEdit={handleEditProprietaire}
+      />
     </View>
   );
 }
