@@ -14,6 +14,7 @@ import { Facture, LigneFacture, Entreprise } from '../../models/models';
 import { Proprietaire } from '../../models/proprietaire';
 import { getBiens } from '../../utils/api';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions, FlatList } from 'react-native';
+import PlusButton from '../ui/PlusButton';
 import { useTheme } from '../../contexts/ThemeContext';
 
 interface AddFactureModalProps {
@@ -235,7 +236,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
               <Text style={[styles.label, { color: colors.text }]}>Date d'échéance</Text>
               <TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={dateEcheance} onChangeText={setDateEcheance} placeholder="JJ/MM/AAAA" placeholderTextColor={colors.textSecondary} />
               {/* Lignes de facture dynamiques */}
-              <Text style={[styles.sectionTitle, { color: colors.text }]}>Lignes de la facture</Text>
+              <Text style={[styles.sectionTitle, { color: colors.text }]}>Articles</Text>
               {lignes.map((ligne, idx) => (
                 <View key={idx} style={[styles.ligneBox, { borderColor: colors.border, backgroundColor: colors.surface, width: '100%', maxWidth: 500 }]}> 
                   <Text style={[styles.label, { color: colors.text }]}>Description</Text>
@@ -283,9 +284,9 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
                 </View>
               ))}
               {/* Bouton pour ajouter une ligne */}
-              <TouchableOpacity onPress={addLigne} style={[styles.addBtn, { backgroundColor: colors.primary }]}> 
-                <Text style={{ color: '#fff' }}>Ajouter une ligne</Text>
-              </TouchableOpacity>
+              <View style={{ alignItems: 'center', marginVertical: 8 }}>
+                <PlusButton onPress={addLigne} backgroundColor={colors.primary} iconColor={colors.surface} style={{ position: 'relative', right: 0, bottom: 0 }} />
+              </View>
               {/* Récapitulatif des totaux */}
               <Text style={[styles.summary, { color: colors.text }]}>Total HT: {montantHT.toFixed(2)} € | TVA: {montantTVA.toFixed(2)} € | TTC: {montantTTC.toFixed(2)} €</Text>
               {/* Conditions de paiement et notes */}
@@ -297,11 +298,11 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
               {error ? <Text style={{ color: colors.error, marginTop: 10, textAlign: 'center' }}>{error}</Text> : null}
               {/* Boutons d'action */}
               <View style={styles.btnRow}>
-                <TouchableOpacity onPress={handleSubmit} style={[styles.submitBtn, { backgroundColor: colors.success }]}> 
+                <TouchableOpacity onPress={handleSubmit} style={[styles.submitBtn, { backgroundColor: colors.primary }]}> 
                   <Text style={{ color: colors.surface, fontWeight: 'bold', fontSize: 16 }}>Créer</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={onClose} style={[styles.cancelBtn, { backgroundColor: colors.error }]}> 
-                  <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Annuler</Text>
+                <TouchableOpacity onPress={onClose} style={[styles.cancelBtn, { backgroundColor: colors.border }]}> 
+                  <Text style={{ color: colors.text, fontWeight: 'bold', fontSize: 16 }}>Annuler</Text>
                 </TouchableOpacity>
               </View>
             </ScrollView>

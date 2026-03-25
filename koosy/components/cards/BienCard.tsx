@@ -25,7 +25,6 @@ import { updateProprietaire } from '../../utils/api';
 
 const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR, onChangeTacheStatus }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [isEditingProprio, setIsEditingProprio] = useState(false);
   const [editValues, setEditValues] = useState({
     nom: bien.nom || '',
     adresse: bien.adresse || '',
@@ -34,19 +33,10 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
     pieces: bien.pieces ? String(bien.pieces) : '',
     equipements: Array.isArray(bien.equipements) ? bien.equipements.join(', ') : (bien.equipements || ''),
   });
-  const [editProprio, setEditProprio] = useState({
-    nom: bien.proprio?.nom || '',
-    email: bien.proprio?.email || '',
-    telephone: bien.proprio?.telephone || '',
-  });
-  const [loadingProprio, setLoadingProprio] = useState(false);
 
 
   const handleChange = (field: string, value: string) => {
     setEditValues(prev => ({ ...prev, [field]: value }));
-  };
-  const handleChangeProprio = (field: string, value: string) => {
-    setEditProprio(prev => ({ ...prev, [field]: value }));
   };
 
 
@@ -71,41 +61,8 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
     }
   };
 
-  const handleEditProprioPress = () => {
-    setEditProprio({
-      nom: bien.proprio?.nom || '',
-      email: bien.proprio?.email || '',
-      telephone: bien.proprio?.telephone || '',
-    });
-    setIsEditingProprio(true);
-  };
 
-  const handleCancelEditProprio = () => {
-    setEditProprio({
-      nom: bien.proprio?.nom || '',
-      email: bien.proprio?.email || '',
-      telephone: bien.proprio?.telephone || '',
-    });
-    setIsEditingProprio(false);
-  };
 
-  const handleSaveProprio = async () => {
-    if (!bien.proprietaire?.id && !bien.proprio?.id) return;
-    setLoadingProprio(true);
-    try {
-      const id = bien.proprietaire?.id || bien.proprio?.id;
-      await updateProprietaire(id, editProprio);
-      setIsEditingProprio(false);
-      if (typeof onEdit === 'function') {
-        onEdit({ ...bien });
-      }
-    } catch (e: any) {
-      alert('Erreur lors de la mise à jour du propriétaire : ' + (e?.message || e));
-      console.error('Erreur updateProprietaire', e);
-    } finally {
-      setLoadingProprio(false);
-    }
-  };
 
   const handleCancelEdit = () => {
     setEditValues({
@@ -232,55 +189,15 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
         )}
       </View>
 
-      {/* Propriétaire - édition séparée */}
+      {/* Propriétaire */}
       <View style={styles.proprioBox}>
         <View style={styles.avatarCircle}>
           <FontAwesome5 name="user-tie" size={18} color={colors.secondary} />
         </View>
-        <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-          {isEditingProprio ? (
-            <View style={{ flex: 1 }}>
-              <TextInput
-                style={{ color: colors.text, fontWeight: 'bold', borderBottomWidth: 1, borderColor: colors.primary, marginBottom: 2, backgroundColor: colors.surface }}
-                value={editProprio.nom}
-                onChangeText={v => handleChangeProprio('nom', v)}
-                placeholder="Nom du propriétaire"
-              />
-              <TextInput
-                style={{ color: colors.textSecondary, borderBottomWidth: 1, borderColor: colors.primary, marginBottom: 2, backgroundColor: colors.surface }}
-                value={editProprio.email}
-                onChangeText={v => handleChangeProprio('email', v)}
-                placeholder="Email du propriétaire"
-                keyboardType="email-address"
-              />
-              <TextInput
-                style={{ color: colors.textSecondary, borderBottomWidth: 1, borderColor: colors.primary, backgroundColor: colors.surface }}
-                value={editProprio.telephone}
-                onChangeText={v => handleChangeProprio('telephone', v)}
-                placeholder="Téléphone du propriétaire"
-                keyboardType="phone-pad"
-              />
-              <View style={{ flexDirection: 'row', marginTop: 6, alignItems: 'center' }}>
-                <TouchableOpacity onPress={handleSaveProprio} style={{ marginRight: 12, backgroundColor: colors.primary, padding: 6, borderRadius: 8 }} disabled={loadingProprio}>
-                  <MaterialCommunityIcons name="content-save" size={18} color={colors.surface} />
-                </TouchableOpacity>
-                <TouchableOpacity onPress={handleCancelEditProprio} style={{ backgroundColor: colors.error, padding: 6, borderRadius: 8, marginRight: 12 }} disabled={loadingProprio}>
-                  <MaterialCommunityIcons name="close" size={18} color={colors.surface} />
-                </TouchableOpacity>
-              </View>
-            </View>
-          ) : (
-            <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-              <View style={{ flex: 1 }}>
-                <Text style={{ color: colors.text, fontWeight: 'bold' }}>{bien.proprio?.nom || 'N/A'}</Text>
-                <Text style={{ color: colors.textSecondary }}>{bien.proprio?.email || ''}</Text>
-                <Text style={{ color: colors.textSecondary }}>{bien.proprio?.telephone || ''}</Text>
-              </View>
-              <TouchableOpacity onPress={handleEditProprioPress} style={{ marginLeft: 8 }}>
-                <MaterialCommunityIcons name="pencil" size={22} color={colors.primary} />
-              </TouchableOpacity>
-            </View>
-          )}
+        <View style={{ flex: 1 }}>
+          <Text style={{ color: colors.text, fontWeight: 'bold' }}>{bien.proprio?.nom || 'N/A'}</Text>
+          <Text style={{ color: colors.textSecondary }}>{bien.proprio?.email || ''}</Text>
+          <Text style={{ color: colors.textSecondary }}>{bien.proprio?.telephone || ''}</Text>
         </View>
       </View>
       {/* Réservations */}

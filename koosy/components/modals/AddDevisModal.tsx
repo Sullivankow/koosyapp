@@ -1,5 +1,3 @@
-
-
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions, FlatList } from 'react-native';
 import dayjs from 'dayjs';
@@ -7,7 +5,7 @@ import 'dayjs/locale/fr';
 import { CreateDevisPayload, LigneDevis, Entreprise, Bien } from '../../models/models';
 import { getBiens, apiFetchMyEntreprise } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
-
+import PlusButton from '../ui/PlusButton';
 
 interface AddDevisModalProps {
 	isOpen: boolean;
@@ -235,7 +233,7 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 								placeholderTextColor={colors.textSecondary}
 								keyboardType="default"
 							/>
-							<Text style={[styles.sectionTitle, { color: colors.text }]}>Lignes du devis</Text>
+							<Text style={[styles.sectionTitle, { color: colors.text }]}>Articles</Text>
 							{lignes.map((ligne, idx) => (
 								<View key={idx} style={[styles.ligneBox, { borderColor: colors.border, backgroundColor: colors.surface, width: '100%', maxWidth: 500 }]}> 
 									<Text style={[styles.label, { color: colors.text }]}>Description</Text>
@@ -280,9 +278,9 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 									</TouchableOpacity>
 								</View>
 							))}
-							<TouchableOpacity onPress={addLigne} style={[styles.addBtn, { backgroundColor: colors.primary }]}> 
-								<Text style={{ color: '#fff' }}>Ajouter une ligne</Text>
-							</TouchableOpacity>
+							<View style={{ alignItems: 'center', marginVertical: 8 }}>
+								<PlusButton onPress={addLigne} backgroundColor={colors.primary} iconColor={colors.surface} style={{ position: 'relative', right: 0, bottom: 0 }} />
+							</View>
 							<Text style={[styles.summary, { color: colors.text }]}>Total HT: {montantHT.toFixed(2)} € | TVA: {montantTVA.toFixed(2)} € | TTC: {montantTTC.toFixed(2)} €</Text>
 							<Text style={[styles.label, { color: colors.text }]}>Conditions</Text>
 							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={conditions} onChangeText={setConditions} placeholder="Conditions" placeholderTextColor={colors.textSecondary} multiline />
@@ -290,11 +288,11 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={notes} onChangeText={setNotes} placeholder="Notes" placeholderTextColor={colors.textSecondary} multiline />
 							{error ? <Text style={{ color: colors.error, marginTop: 10, textAlign: 'center' }}>{error}</Text> : null}
 							<View style={styles.btnRow}>
-								<TouchableOpacity onPress={handleSubmit} style={[styles.submitBtn, { backgroundColor: colors.success }]}> 
+								<TouchableOpacity onPress={handleSubmit} style={[styles.submitBtn, { backgroundColor: colors.primary }]}> 
 									<Text style={{ color: colors.surface, fontWeight: 'bold', fontSize: 16 }}>Créer</Text>
 								</TouchableOpacity>
-								<TouchableOpacity onPress={onClose} style={[styles.cancelBtn, { backgroundColor: colors.error }]}> 
-									<Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Annuler</Text>
+								<TouchableOpacity onPress={onClose} style={[styles.cancelBtn, { backgroundColor: colors.border }]}> 
+									<Text style={{ color: colors.text, fontWeight: 'bold', fontSize: 16 }}>Annuler</Text>
 								</TouchableOpacity>
 							</View>
 						</ScrollView>
@@ -340,7 +338,6 @@ const styles = StyleSheet.create({
 	},
 	sectionTitle: { fontSize: 18, fontWeight: 'bold', marginTop: 16, marginBottom: 8 },
 	ligneBox: { borderWidth: 1, borderRadius: 10, padding: 8, marginBottom: 8 },
-	addBtn: { padding: 10, borderRadius: 8, alignItems: 'center', marginBottom: 8 },
 	removeBtn: { padding: 8, borderRadius: 8, alignItems: 'center', marginTop: 6 },
 	summary: { fontWeight: 'bold', marginVertical: 10, textAlign: 'center' },
 	btnRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 16 },
