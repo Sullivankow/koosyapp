@@ -640,3 +640,10 @@ export async function updateProprietaire(id: number | string, data: Partial<Prop
   });
 }
 
+// Fonction pour supprimer un propriétaire
+export async function deleteProprietaire(id: number | string): Promise<void> {
+  return apiFetch(`/proprietaire/${id}`, {
+    method: 'DELETE',
+  });
+}
+

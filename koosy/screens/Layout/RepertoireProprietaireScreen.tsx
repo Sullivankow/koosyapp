@@ -1,12 +1,12 @@
 
 
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import ProprietaireList from '../../components/ProprietaireList';
 import SearchBar from '../../components/ui/SearchBar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getProprietaires } from '../../utils/api';
+import { getProprietaires, deleteProprietaire } from '../../utils/api';
 import type { Proprietaire } from '../../models/proprietaire';
 
 function RepertoireProprietaireScreen() {
@@ -17,9 +17,37 @@ function RepertoireProprietaireScreen() {
   const [proprietaires, setProprietaires] = useState<Proprietaire[]>([]);
   const [loading, setLoading] = useState(true);
 
-  React.useEffect(() => {
+  const fetchProprietaires = () => {
+    setLoading(true);
     getProprietaires().then(setProprietaires).finally(() => setLoading(false));
+  };
+
+  React.useEffect(() => {
+    fetchProprietaires();
   }, []);
+
+  const handleDeleteProprietaire = (id: number) => {
+    Alert.alert(
+      'Confirmation',
+      'Êtes-vous sûr de vouloir supprimer ce propriétaire ?',
+      [
+        { text: 'Annuler', style: 'cancel' },
+        {
+          text: 'Supprimer',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              await deleteProprietaire(id);
+              fetchProprietaires();
+            } catch (e) {
+              // Optionnel: afficher une erreur/toast
+              console.error('Erreur suppression propriétaire', e);
+            }
+          },
+        },
+      ]
+    );
+  };
 
   // Filtrage et tri local sur nom/prenom
   const filteredProprietaires = useMemo(() => {
@@ -69,7 +97,7 @@ function RepertoireProprietaireScreen() {
       </View>
 
       {/* Liste filtrée et triée */}
-      <ProprietaireList data={filteredProprietaires} loading={loading} />
+      <ProprietaireList data={filteredProprietaires} loading={loading} onDelete={handleDeleteProprietaire} />
     </View>
   );
 }
