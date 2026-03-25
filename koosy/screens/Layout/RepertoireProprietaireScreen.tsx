@@ -4,6 +4,7 @@ import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import ProprietaireList from '../../components/ProprietaireList';
+import AddProprietaireModal from '../../components/modals/AddProprietaireModal';
 import SearchBar from '../../components/ui/SearchBar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getProprietaires, deleteProprietaire, updateProprietaire } from '../../utils/api';
@@ -16,6 +17,7 @@ function RepertoireProprietaireScreen() {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [proprietaires, setProprietaires] = useState<Proprietaire[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const fetchProprietaires = () => {
     setLoading(true);
@@ -81,7 +83,7 @@ function RepertoireProprietaireScreen() {
       {/* Header sticky comme BiensScreen */}
       <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}> 
         <Text style={[styles.title, { color: colors.text }]}>Propriétaires</Text>
-        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={() => {}}>
+        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={() => setShowAddModal(true)}>
           <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
         </TouchableOpacity>
       </View>
@@ -114,6 +116,16 @@ function RepertoireProprietaireScreen() {
         loading={loading}
         onDelete={handleDeleteProprietaire}
         onEdit={handleEditProprietaire}
+      />
+
+      {/* Modale d'ajout de propriétaire */}
+      <AddProprietaireModal
+        visible={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onSuccess={() => {
+          setShowAddModal(false);
+          fetchProprietaires();
+        }}
       />
     </View>
   );
