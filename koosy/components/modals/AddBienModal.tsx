@@ -1,27 +1,47 @@
+// Composant de modale pour créer ou éditer un bien immobilier
 import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, ScrollView, KeyboardAvoidingView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../contexts/ThemeContext';
 import { createBien, updateBien, uploadBienImages, geocodeAdresse, getProprietaires } from '../../utils/api';
 import { useBienCount } from '../../contexts/BienCountContext';
-import type { Proprietaire } from '../../models/proprietaire';
+import type { Bien, Proprietaire } from '../../models/models';
 
+// Récupération des dimensions de l'écran pour dimensionner la modale
 const SCREEN_WIDTH = Dimensions.get('window').width;
 const SCREEN_HEIGHT = Dimensions.get('window').height;
 
+// Propriétés attendues par le composant AddBienModal
 interface AddBienModalProps {
 	visible: boolean;
 	onClose: () => void;
 	onSuccess?: () => void;
 	mode?: 'add' | 'edit';
 	bienId?: string;
-	initialData?: Partial<any>;
+	initialData?: AddBienInitialData;
 }
 
+// Données initiales possibles lorsqu'on édite un bien existant
+interface AddBienInitialData extends Partial<Bien> {
+	proprietaireId?: number | string;
+}
+
+// Structure interne du formulaire (toutes les valeurs en string pour les inputs)
+interface BienForm {
+	nom: string;
+	adresse: string;
+	type: string;
+	superficie: string;
+	pieces: string;
+	equipements: string;
+}
+
+// Composant principal de la modale d'ajout/édition de bien
 const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess, mode = 'add', bienId, initialData }) => {
 	const { colors } = useTheme();
 	const { refreshBiensCount, signalBienAdded } = useBienCount();
-	const [form, setForm] = useState({
+	// État local du formulaire
+	const [form, setForm] = useState<BienForm>({
 		nom: '',
 		adresse: '',
 		type: '',
@@ -29,33 +49,59 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 		pieces: '',
 		equipements: '',
 	});
+	// Liste des propriétaires récupérés depuis l'API
 	const [proprietaires, setProprietaires] = useState<Proprietaire[]>([]);
+	// Identifiant du propriétaire actuellement sélectionné
 	const [selectedProprioId, setSelectedProprioId] = useState<number | undefined>(undefined);
+	// Contrôle de l'ouverture de la modale de sélection de propriétaire
 	const [showProprioModal, setShowProprioModal] = useState(false);
+	// Photos sélectionnées pour le bien (URIs locales)
 	const [selectedImages, setSelectedImages] = useState<string[]>([]);
+	// Indique si un enregistrement est en cours
 	const [loading, setLoading] = useState(false);
+	// Message de succès ou d'erreur affiché dans la modale
 	const [successMsg, setSuccessMsg] = useState('');
 
+	// Au moment où la modale devient visible, charger la liste des propriétaires
 	useEffect(() => {
-		if (visible) {
-			getProprietaires().then(list => {
+		if (!visible) return;
+		getProprietaires()
+			.then(list => {
 				setProprietaires(list);
-				if (list.length > 0 && !selectedProprioId) setSelectedProprioId(list[0].id);
-			}).catch(() => setProprietaires([]));
-		}
-		if (mode === 'edit' && initialData && visible) {
-			setForm({
-				nom: initialData.nom || '',
-				adresse: initialData.adresse || '',
-				type: initialData.type || '',
-				superficie: initialData.superficie ? String(initialData.superficie) : '',
-				pieces: initialData.pieces ? String(initialData.pieces) : '',
-				equipements: Array.isArray(initialData.equipements) ? initialData.equipements.join(', ') : (initialData.equipements || ''),
-			});
-			if (initialData.proprietaireId) setSelectedProprioId(Number(initialData.proprietaireId));
+				if (list.length > 0 && !selectedProprioId) {
+					setSelectedProprioId(list[0].id);
+				}
+			})
+			.catch(() => setProprietaires([]));
+	}, [visible, selectedProprioId]);
+
+	// Lorsque l'on est en mode édition, pré-remplir le formulaire avec les données du bien
+	useEffect(() => {
+		if (!(mode === 'edit' && initialData && visible)) return;
+		setForm({
+			nom: initialData.nom || '',
+			adresse: initialData.adresse || '',
+			type: initialData.type || '',
+			superficie: initialData.superficie ? String(initialData.superficie) : '',
+			pieces: initialData.pieces ? String(initialData.pieces) : '',
+			equipements:
+				typeof initialData.equipements === 'string'
+					? initialData.equipements
+					: Array.isArray(initialData.equipements)
+						? initialData.equipements.join(', ')
+						: '',
+		});
+		if (initialData.proprietaireId) {
+			setSelectedProprioId(Number(initialData.proprietaireId));
 		}
 	}, [mode, initialData, visible]);
 
+	// Helper générique pour mettre à jour un champ du formulaire
+	const updateField = (field: keyof BienForm) => (value: string) => {
+		setForm(prev => ({ ...prev, [field]: value }));
+	};
+
+	// Ouvre la galerie pour permettre la sélection de plusieurs images
 	const pickImage = async () => {
 		const result = await ImagePicker.launchImageLibraryAsync({
 			mediaTypes: ImagePicker.MediaTypeOptions.Images,
@@ -70,10 +116,12 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 		}
 	};
 
+	// Retire une image de la liste des images sélectionnées
 	const removeImage = (uri: string) => {
 		setSelectedImages(prev => prev.filter(img => img !== uri));
 	};
 
+	// Soumission du formulaire : validation, appel API, upload d'images et mise à jour des compteurs
 	const handleSubmit = async () => {
 		setLoading(true);
 		setSuccessMsg('');
@@ -97,18 +145,14 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 				equipements: form.equipements ? form.equipements.split(',').map(e => e.trim()) : [],
 				proprietaire: selectedProprioId,
 			};
-			let newBienId = bienId;
 			if (mode === 'add') {
 				const bienRes = await createBien(data);
 				const id = bienRes.id;
-				newBienId = String(id);
 				if (id) {
-					try {
-						const coords = await geocodeAdresse(data.adresse);
-						if (coords && (coords.lat !== undefined && coords.lng !== undefined)) {
-							await updateBien(String(id), { lat: coords.lat, lng: coords.lng });
-						}
-					} catch (e) {}
+					const coords = await geocodeAdresse(data.adresse);
+					if (coords && (coords.lat !== undefined && coords.lng !== undefined)) {
+						await updateBien(String(id), { lat: coords.lat, lng: coords.lng });
+					}
 				}
 				if (id && selectedImages.length > 0) {
 					await uploadBienImages(id, selectedImages);
@@ -133,11 +177,17 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 				onClose();
 				if (onSuccess) onSuccess();
 			}, 1200);
-		} catch (err) {
+		} catch (_error) {
 			setSuccessMsg(mode === 'add' ? "Erreur lors de l'ajout du bien" : "Erreur lors de la modification du bien");
 			setLoading(false);
 		}
 	};
+
+	// Propriétaire actuellement sélectionné et libellé affiché dans l'input
+	const selectedProprio = proprietaires.find(p => p.id === selectedProprioId);
+	const selectedProprioLabel = selectedProprio
+		? `${selectedProprio.nom}${selectedProprio.prenom ? ' ' + selectedProprio.prenom : ''}`
+		: 'Sélectionner un propriétaire';
 
 	return (
 		<Modal visible={visible} animationType="slide" transparent>
@@ -168,14 +218,7 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 											}}
 											onPress={() => setShowProprioModal(true)}
 										>
-											<Text style={{ color: colors.text }}>
-												{selectedProprioId !== undefined
-													? (() => {
-														const proprio = proprietaires.find((p) => p.id === selectedProprioId);
-														return proprio ? `${proprio.nom}${proprio.prenom ? ' ' + proprio.prenom : ''}` : 'Sélectionner un propriétaire';
-													})()
-													: 'Sélectionner un propriétaire'}
-											</Text>
+											<Text style={{ color: colors.text }}>{selectedProprioLabel}</Text>
 										</TouchableOpacity>
 										<Modal visible={showProprioModal} transparent animationType="fade">
 											<TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' }} activeOpacity={1} onPress={() => setShowProprioModal(false)}>
@@ -213,14 +256,14 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 									<Text style={{ color: colors.error, fontWeight: 'bold' }}>Aucun propriétaire trouvé.</Text>
 								)}
 							</View>
-							{/* Champs du bien */}
-							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nom" placeholderTextColor="#888" value={form.nom} onChangeText={v => setForm(f => ({ ...f, nom: v }))} />
-							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Adresse" placeholderTextColor="#888" value={form.adresse} onChangeText={v => setForm(f => ({ ...f, adresse: v }))} />
-							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Type (Appartement, Maison...)" placeholderTextColor="#888" value={form.type} onChangeText={v => setForm(f => ({ ...f, type: v }))} />
-							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Superficie (m²)" placeholderTextColor="#888" value={form.superficie} onChangeText={v => setForm(f => ({ ...f, superficie: v }))} keyboardType="numeric" />
-							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nombre de pièces" placeholderTextColor="#888" value={form.pieces} onChangeText={v => setForm(f => ({ ...f, pieces: v }))} keyboardType="numeric" />
-							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Équipements (séparés par des virgules)" placeholderTextColor="#888" value={form.equipements} onChangeText={v => setForm(f => ({ ...f, equipements: v }))} />
-							{/* Sélecteur d'images */}
+							{/* Champs de saisie des informations du bien */}
+							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nom" placeholderTextColor="#888" value={form.nom} onChangeText={updateField('nom')} />
+							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Adresse" placeholderTextColor="#888" value={form.adresse} onChangeText={updateField('adresse')} />
+							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Type (Appartement, Maison...)" placeholderTextColor="#888" value={form.type} onChangeText={updateField('type')} />
+							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Superficie (m²)" placeholderTextColor="#888" value={form.superficie} onChangeText={updateField('superficie')} keyboardType="numeric" />
+							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Nombre de pièces" placeholderTextColor="#888" value={form.pieces} onChangeText={updateField('pieces')} keyboardType="numeric" />
+							<TextInput style={[styles.input, { color: '#111', width: '100%' }]} placeholder="Équipements (séparés par des virgules)" placeholderTextColor="#888" value={form.equipements} onChangeText={updateField('equipements')} />
+							{/* Bouton pour ajouter des photos depuis la galerie */}
 							<TouchableOpacity style={[styles.input, { backgroundColor: '#f5f5f5', alignItems: 'center', justifyContent: 'center' }]} onPress={pickImage}>
 								<Text style={{ color: '#111', fontWeight: 'bold' }}>Ajouter une photo</Text>
 							</TouchableOpacity>
@@ -284,6 +327,7 @@ const styles = StyleSheet.create({
 		width: '100%',
 		maxWidth: 420,
 		alignSelf: 'center',
+		color: '#111',
 	},
 });
 
