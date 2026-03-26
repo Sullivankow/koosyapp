@@ -36,6 +36,28 @@ interface BienForm {
 	equipements: string;
 }
 
+// Valide le formulaire du bien et retourne un message d'erreur éventuel
+export const validateBienForm = (form: BienForm, selectedProprioId?: number): string | null => {
+	if (!form.nom.trim() || !form.adresse.trim() || !form.superficie.trim() || !form.pieces.trim()) {
+		return 'Veuillez remplir tous les champs obligatoires.';
+	}
+	if (selectedProprioId === undefined) {
+		return 'Veuillez sélectionner un propriétaire.';
+	}
+	return null;
+};
+
+// Construit l'objet envoyé à l'API à partir du formulaire
+export const buildBienPayload = (form: BienForm, selectedProprioId: number) => ({
+	nom: form.nom,
+	adresse: form.adresse,
+	type: form.type,
+	superficie: Number(form.superficie),
+	pieces: Number(form.pieces),
+	equipements: form.equipements ? form.equipements.split(',').map(e => e.trim()) : [],
+	proprietaire: selectedProprioId,
+});
+
 // Composant principal de la modale d'ajout/édition de bien
 const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess, mode = 'add', bienId, initialData }) => {
 	const { colors } = useTheme();
@@ -126,25 +148,14 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 		setLoading(true);
 		setSuccessMsg('');
 		try {
-			if (!form.nom.trim() || !form.adresse.trim() || !form.superficie.trim() || !form.pieces.trim()) {
-				alert('Veuillez remplir tous les champs obligatoires.');
+			const validationError = validateBienForm(form, selectedProprioId);
+			if (validationError) {
+				alert(validationError);
 				setLoading(false);
 				return;
 			}
-			if (selectedProprioId === undefined) {
-				alert('Veuillez sélectionner un propriétaire.');
-				setLoading(false);
-				return;
-			}
-			const data = {
-				nom: form.nom,
-				adresse: form.adresse,
-				type: form.type,
-				superficie: Number(form.superficie),
-				pieces: Number(form.pieces),
-				equipements: form.equipements ? form.equipements.split(',').map(e => e.trim()) : [],
-				proprietaire: selectedProprioId,
-			};
+			// À ce stade, selectedProprioId est forcément défini grâce à la validation
+			const data = buildBienPayload(form, selectedProprioId as number);
 			if (mode === 'add') {
 				const bienRes = await createBien(data);
 				const id = bienRes.id;
