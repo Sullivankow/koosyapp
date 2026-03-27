@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+// Composant de modale pour créer un devis
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions, FlatList } from 'react-native';
 import dayjs from 'dayjs';
 import 'dayjs/locale/fr';
@@ -7,6 +8,7 @@ import { getBiens, apiFetchMyEntreprise } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
 import PlusButton from '../../ui/PlusButton';
 
+// Propriétés attendues par le composant AddDevisModal
 interface AddDevisModalProps {
 	isOpen: boolean;
 	onClose: () => void;
@@ -15,6 +17,13 @@ interface AddDevisModalProps {
 }
 
 dayjs.locale('fr');
+// Représentation minimale d'un propriétaire utilisée dans cette modale
+type Proprietaire = {
+	id: number;
+	nom: string;
+	prenom?: string | null;
+};
+// Modèle par défaut pour une ligne de devis
 const defaultLigne: Omit<LigneDevis, 'id'> = {
 	description: '',
 	quantite: 1,
@@ -24,68 +33,123 @@ const defaultLigne: Omit<LigneDevis, 'id'> = {
 	totalLigneTTC: 0,
 };
 
+// Composant principal de création de devis
 const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit }) => {
+	// Champs principaux du devis
 	const [numero, setNumero] = useState('');
 	const [dateValidite, setDateValidite] = useState('');
 	const [entreprise, setEntreprise] = useState<Entreprise | null>(null);
-	const [biens, setBiens] = useState<Bien[]>([]);
-	const [proprietaires, setProprietaires] = useState<any[]>([]);
+	// Propriétaires potentiels (déduits des biens)
+	const [proprietaires, setProprietaires] = useState<Proprietaire[]>([]);
 	const [selectedProprioId, setSelectedProprioId] = useState<string | undefined>(undefined);
 	const [showProprioModal, setShowProprioModal] = useState(false);
+	// Lignes du devis (articles / prestations)
 	const [lignes, setLignes] = useState<Omit<LigneDevis, 'id' | 'devis'>[]>([{ ...defaultLigne }]);
+	// Champs texte complémentaires
 	const [conditions, setConditions] = useState('');
 	const [notes, setNotes] = useState('');
 	const [error, setError] = useState('');
 	const { colors } = useTheme();
-	const SCREEN_WIDTH = Dimensions.get('window').width;
 
+	// Au moment où la modale s'ouvre, charger l'entreprise et les propriétaires
 	useEffect(() => {
-		if (isOpen) {
-			apiFetchMyEntreprise()
-				.then(setEntreprise)
-				.catch(() => setEntreprise(null));
-			getBiens()
-				.then(biensList => {
-					setBiens(biensList);
-					// Extraire les propriétaires uniques
-					const propriosMap: { [id: string]: any } = {};
-					biensList.forEach((bien: any) => {
-						if (bien.proprietaire && bien.proprietaire.id) {
-							propriosMap[bien.proprietaire.id] = bien.proprietaire;
-						} else if (bien.proprio && bien.proprio.id) {
-							propriosMap[bien.proprio.id] = bien.proprio;
-						}
-					});
-					const propriosArr = Object.values(propriosMap);
-					setProprietaires(propriosArr);
-					if (propriosArr.length > 0) setSelectedProprioId(String(propriosArr[0].id));
-				})
-				.catch(() => setBiens([]));
-		}
+		if (!isOpen) return;
+
+		apiFetchMyEntreprise()
+			.then(setEntreprise)
+			.catch(() => setEntreprise(null));
+
+		getBiens()
+			.then((biensList: Bien[]) => {
+				const propriosMap: { [id: number]: Proprietaire } = {};
+				biensList.forEach((bien: any) => {
+					const proprio = bien.proprietaire || bien.proprio;
+					if (proprio && proprio.id) {
+						propriosMap[proprio.id] = {
+							id: proprio.id,
+							nom: proprio.nom,
+							prenom: proprio.prenom ?? null,
+						};
+					}
+				});
+				const propriosArr = Object.values(propriosMap);
+				setProprietaires(propriosArr);
+				if (propriosArr.length > 0) {
+					setSelectedProprioId(String(propriosArr[0].id));
+				}
+			})
+			.catch(() => {
+				setProprietaires([]);
+				setSelectedProprioId(undefined);
+			});
 	}, [isOpen]);
 
-	// Calculs automatiques
-	const calcLigne = (ligne: Omit<LigneDevis, 'id' | 'devis'>): Omit<LigneDevis, 'id' | 'devis'> => {
-		const totalHT = Number(ligne.quantite) * Number(ligne.prixUnitaireHT);
-		const totalTTC = totalHT * (1 + Number(ligne.tva) / 100);
-		return { ...ligne, totalLigneHT: totalHT, totalLigneTTC: totalTTC };
-	};
+	// Calculs automatiques sur une ligne de devis (HT / TTC)
+	const calcLigne = useCallback(
+		(ligne: Omit<LigneDevis, 'id' | 'devis'>): Omit<LigneDevis, 'id' | 'devis'> => {
+			const totalHT = Number(ligne.quantite) * Number(ligne.prixUnitaireHT);
+			const totalTTC = totalHT * (1 + Number(ligne.tva) / 100);
+			return { ...ligne, totalLigneHT: totalHT, totalLigneTTC: totalTTC };
+		},
+		[],
+	);
 
-	const handleLigneChange = (idx: number, field: keyof Omit<LigneDevis, 'id' | 'devis'>, value: any) => {
-		const newLignes = lignes.map((l, i) =>
-			i === idx ? calcLigne({ ...l, [field]: value }) : l
+	const handleLigneChange = useCallback(
+		(idx: number, field: keyof Omit<LigneDevis, 'id' | 'devis'>, value: any) => {
+			setLignes(prev =>
+				prev.map((l, i) => (i === idx ? calcLigne({ ...l, [field]: value }) : l)),
+			);
+		},
+		[calcLigne],
+	);
+
+	const addLigne = () => setLignes(prev => [...prev, { ...defaultLigne }]);
+	const removeLigne = (idx: number) =>
+		setLignes(prev => (prev.length > 1 ? prev.filter((_, i) => i !== idx) : prev));
+
+	// Calculs totaux mémoïsés pour l'ensemble du devis
+	const { montantHT, montantTVA, montantTTC } = useMemo(() => {
+		const totalHT = lignes.reduce((sum, l) => sum + (l.totalLigneHT ?? 0), 0);
+		const totalTVA = lignes.reduce(
+			(sum, l) => sum + ((l.totalLigneHT ?? 0) * (l.tva ?? 0)) / 100,
+			0,
 		);
-		setLignes(newLignes);
+		return {
+			montantHT: totalHT,
+			montantTVA: totalTVA,
+			montantTTC: totalHT + totalTVA,
+		};
+	}, [lignes]);
+
+	// Propriétaire actuellement sélectionné (objet complet)
+	const selectedProprio = useMemo(
+		() =>
+			selectedProprioId
+				? proprietaires.find(p => String(p.id) === selectedProprioId) ?? null
+				: null,
+		[proprietaires, selectedProprioId],
+	);
+
+	// Formate une date potentiellement au format ISO en JJ/MM/AAAA pour l'input
+	const formatDateForInput = useCallback((value: string) => {
+		if (/^\d{4}-\d{2}-\d{2}$/.test(value) && dayjs(value).isValid()) {
+			return dayjs(value).format('DD/MM/YYYY');
+		}
+		return value;
+	}, []);
+
+	// Gère les différentes saisies acceptées pour la date de validité
+	const handleDateChange = (val: string) => {
+		if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
+			setDateValidite(val);
+		} else if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
+			setDateValidite(dayjs(val).format('DD/MM/YYYY'));
+		} else {
+			setDateValidite(val);
+		}
 	};
 
-	const addLigne = () => setLignes([...lignes, { ...defaultLigne }]);
-	const removeLigne = (idx: number) => setLignes(lignes.length > 1 ? lignes.filter((_, i) => i !== idx) : lignes);
-
-	// Calculs totaux
-	const montantHT = lignes.reduce((sum, l) => sum + (l.totalLigneHT ?? 0), 0);
-	const montantTVA = lignes.reduce((sum, l) => sum + ((l.totalLigneHT ?? 0) * (l.tva ?? 0)) / 100, 0);
-	const montantTTC = montantHT + montantTVA;
-
+	// Soumission du formulaire : validation des champs, construction du payload et appel du callback parent
 	const handleSubmit = () => {
 		if (!entreprise) {
 			setError("Aucune entreprise disponible");
@@ -139,6 +203,7 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 							horizontal={false}
 						>
 							<Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12, color: colors.primary }}>Créer un devis</Text>
+							{/* Bloc affichant l'entreprise courante */}
 							<Text style={[styles.label, { color: colors.text }]}>Entreprise</Text>
 							<View style={{ width: '100%', marginBottom: 10, paddingVertical: 8, paddingHorizontal: 12, borderWidth: 1, borderColor: colors.border, borderRadius: 10, backgroundColor: colors.surface }}>
 								{entreprise ? (
@@ -147,6 +212,7 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 									<Text style={{ color: colors.error, fontWeight: 'bold' }}>Aucune entreprise trouvée. Veuillez vérifier vos paramètres ou créer une entreprise dans l'application.</Text>
 								)}
 							</View>
+							{/* Sélecteur de propriétaire lié au devis */}
 							<Text style={[styles.label, { color: colors.text }]}>Propriétaire</Text>
 							<View style={{ width: '100%', marginBottom: 10 }}>
 								{proprietaires.length > 0 ? (
@@ -164,11 +230,8 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 											onPress={() => setShowProprioModal(true)}
 										>
 											<Text style={{ color: colors.text }}>
-												{selectedProprioId
-													? (proprietaires.find((p: any) => String(p.id) === selectedProprioId)?.nom || '') +
-														(proprietaires.find((p: any) => String(p.id) === selectedProprioId)?.prenom ?
-															' ' + proprietaires.find((p: any) => String(p.id) === selectedProprioId)?.prenom :
-															'')
+												{selectedProprio
+													? `${selectedProprio.nom}${selectedProprio.prenom ? ' ' + selectedProprio.prenom : ''}`
 													: 'Sélectionner un propriétaire'}
 											</Text>
 										</TouchableOpacity>
@@ -196,10 +259,20 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 																	setShowProprioModal(false);
 																}}
 															>
-																<Text style={{ color: colors.text, fontSize: 16 }}>{item.nom}{item.prenom ? ' ' + item.prenom : ''}</Text>
+																<Text style={{ color: colors.text, fontSize: 16 }}>
+																	{item.nom}
+																	{item.prenom ? ' ' + item.prenom : ''}
+																</Text>
 															</TouchableOpacity>
 														)}
-														ListFooterComponent={<TouchableOpacity onPress={() => setShowProprioModal(false)} style={{ padding: 12, alignItems: 'center' }}><Text style={{ color: colors.error }}>Annuler</Text></TouchableOpacity>}
+															ListFooterComponent={
+																<TouchableOpacity
+																	onPress={() => setShowProprioModal(false)}
+																	style={{ padding: 12, alignItems: 'center' }}
+																>
+																	<Text style={{ color: colors.error }}>Annuler</Text>
+																</TouchableOpacity>
+															}
 													/>
 												</View>
 											</TouchableOpacity>
@@ -209,30 +282,19 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 									<Text style={{ color: colors.error }}>Aucun propriétaire trouvé dans les biens.</Text>
 								)}
 							</View>
+							{/* Champs principaux du devis */}
 							<Text style={[styles.label, { color: colors.text }]}>Numéro</Text>
 							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={numero} onChangeText={setNumero} placeholder="Numéro du devis (optionnel)" placeholderTextColor={colors.textSecondary} />
 							<Text style={[styles.label, { color: colors.text }]}>Date de validité</Text>
 							<TextInput
 								style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}
-								value={(() => {
-									if (/^\d{4}-\d{2}-\d{2}$/.test(dateValidite) && dayjs(dateValidite).isValid()) {
-										return dayjs(dateValidite).format('DD/MM/YYYY');
-									}
-									return dateValidite;
-								})()}
-								onChangeText={val => {
-									if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
-										setDateValidite(val);
-									} else if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
-										setDateValidite(dayjs(val).format('DD/MM/YYYY'));
-									} else {
-										setDateValidite(val);
-									}
-								}}
+								value={formatDateForInput(dateValidite)}
+								onChangeText={handleDateChange}
 								placeholder="JJ/MM/AAAA"
 								placeholderTextColor={colors.textSecondary}
 								keyboardType="default"
 							/>
+							{/* Lignes d'articles composant le devis */}
 							<Text style={[styles.sectionTitle, { color: colors.text }]}>Articles</Text>
 							{lignes.map((ligne, idx) => (
 								<View key={idx} style={[styles.ligneBox, { borderColor: colors.border, backgroundColor: colors.surface, width: '100%', maxWidth: 500 }]}> 
@@ -281,12 +343,15 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 							<View style={{ alignItems: 'center', marginVertical: 8 }}>
 								<PlusButton onPress={addLigne} backgroundColor={colors.primary} iconColor={colors.surface} style={{ position: 'relative', right: 0, bottom: 0 }} />
 							</View>
+							{/* Récapitulatif des montants du devis */}
 							<Text style={[styles.summary, { color: colors.text }]}>Total HT: {montantHT.toFixed(2)} € | TVA: {montantTVA.toFixed(2)} € | TTC: {montantTTC.toFixed(2)} €</Text>
+							{/* Zones de texte complémentaires */}
 							<Text style={[styles.label, { color: colors.text }]}>Conditions</Text>
 							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={conditions} onChangeText={setConditions} placeholder="Conditions" placeholderTextColor={colors.textSecondary} multiline />
 							<Text style={[styles.label, { color: colors.text }]}>Notes</Text>
 							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={notes} onChangeText={setNotes} placeholder="Notes" placeholderTextColor={colors.textSecondary} multiline />
 							{error ? <Text style={{ color: colors.error, marginTop: 10, textAlign: 'center' }}>{error}</Text> : null}
+							{/* Boutons d'action de la modale */}
 							<View style={styles.btnRow}>
 								<TouchableOpacity onPress={handleSubmit} style={[styles.submitBtn, { backgroundColor: colors.primary }]}> 
 									<Text style={{ color: colors.surface, fontWeight: 'bold', fontSize: 16 }}>Créer</Text>
