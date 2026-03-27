@@ -3,7 +3,7 @@
 // - Charge la liste via l'API
 // - Permet la recherche, le tri et l'édition/suppression des propriétaires.
 import React, { useState, useMemo } from 'react';
-import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import ProprietaireList from '../../components/ProprietaireList';
 import AddProprietaireModal from '../../components/modals/AddProprietaireModal';
@@ -14,7 +14,6 @@ import type { Proprietaire } from '../../models/proprietaire';
 
 function RepertoireProprietaireScreen() {
   const { colors } = useTheme();
-  const screenWidth = Dimensions.get('window').width;
   const [search, setSearch] = useState('');
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const [proprietaires, setProprietaires] = useState<Proprietaire[]>([]);

@@ -1,8 +1,7 @@
 // Écran listant tous les biens de l'utilisateur.
 // - Récupère les biens via le hook `useBiens`
 // - Gère la recherche, le tri, l'édition inline et la suppression
-// - Permet aussi de modifier le statut lié aux tâches associées au bien
-import { updateTacheStatut } from '../../utils/api';
+// - Permet aussi de modifier le statut d'un bien (disponible / occupé)
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, Modal } from 'react-native';
 import BienCard from '../../components/cards/biens/BienCard';
@@ -47,19 +46,6 @@ const BiensScreen: React.FC = () => {
   // Récupération des biens (ajout de tacheCount comme dépendance)
   const { biens, fetchBiens, updateBienById, deleteBienById } = useBiens([lastBienAdded, lastTacheAdded, tacheCount, prestationsTerminees]);
 
-  // Handler pour changer le statut d'une tâche et rafraîchir les biens
-  const handleChangeTacheStatus = async (tacheId: string | number, statut: string) => {
-    try {
-      await updateTacheStatut(tacheId, statut);
-      await fetchBiens();
-      setSuccessMsg('Statut de la tâche mis à jour');
-      setTimeout(() => setSuccessMsg(''), 1800);
-    } catch (err) {
-      setSuccessMsg("Erreur lors de la mise à jour du statut de la tâche");
-      setTimeout(() => setSuccessMsg(''), 1800);
-    }
-  };
-
   // Recherche locale
   const filteredBiens = biens.filter(b =>
     b.nom.toLowerCase().includes(search.toLowerCase()) ||
@@ -69,7 +55,8 @@ const BiensScreen: React.FC = () => {
   // Tri via hook personnalisé
   const { sortOrder, setSortOrder, sortedBiens } = useBiensSearchSort(filteredBiens);
 
-  // Scroll vers un bien si focusBienId
+  // Effet : si un identifiant de bien est passé en paramètre de navigation,
+  // on scrolle automatiquement jusqu'à ce bien dans la liste.
   useEffect(() => {
     if (focusBienId && sortedBiens.length > 0 && listRef.current) {
       const index = sortedBiens.findIndex((b: any) => b.id === focusBienId);
@@ -90,7 +77,7 @@ const BiensScreen: React.FC = () => {
     }
   }, [focusBienId, sortedBiens]);
 
-  // Formatage date française
+  // Formatage simple d'une date au format français (JJ/MM/AAAA)
   const formatDateFR = (dateStr?: string) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -99,7 +86,7 @@ const BiensScreen: React.FC = () => {
   };
 
   // Gestion modales et callbacks
-  // Nouvelle fonction pour édition inline
+  // Enregistre en base les modifications d'un bien édité inline depuis la carte.
   const handleEditBienInline = async (bienModifie: Bien) => {
     try {
       await updateBienById(bienModifie.id, bienModifie);
@@ -111,12 +98,15 @@ const BiensScreen: React.FC = () => {
       setTimeout(() => setSuccessMsg(''), 1800);
     }
   };
+  // Ouvre la modale de choix de statut pour un bien donné.
   const openStatusModal = (bien: Bien) => {
     setCurrentStatusBienId(bien.id);
     // On ne conserve dans l'état que les statuts gérés par StatusModal
     setCurrentBienStatus(bien.statut === 'disponible' || bien.statut === 'occupé' ? bien.statut : undefined);
     setStatutModalVisible(true);
   };
+  // Callback appelé depuis StatusModal lorsqu'un nouveau statut est sélectionné.
+  // Récupère le bien complet via l'API, prépare un payload cohérent et met à jour le statut.
   const handleSelectStatus = async (status: StatusValue) => {
     if (!currentStatusBienId) return;
     try {
@@ -149,6 +139,7 @@ const BiensScreen: React.FC = () => {
     }
   };
   const { signalRefresh } = useGlobalRefresh();
+  // Supprime définitivement un bien puis déclenche un rafraîchissement global.
   const handleSupprimerBien = async (bienId: string) => {
     try {
       await deleteBienById(bienId);

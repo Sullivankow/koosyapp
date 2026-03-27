@@ -21,20 +21,20 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 // - Permet la recherche, le tri et l'aperçu PDF d'un devis
 // - Propose une modale pour créer un nouveau devis.
 export default function ListeDevisScreen() {
-    // Récupération des entreprises de l'utilisateur
-    const entreprises = useEntreprises();
-    // Gestion modale d'ajout de devis avec la vraie liste d'entreprises (doit être avant useDevisManager)
-    const { open, modal, lastDevis } = useAddDevisModal(entreprises);
-    // Gestion centralisée des devis, token et aperçu via hook personnalisé
-    // On passe lastDevis pour forcer le rafraîchissement après création
-    const { devis, setDevis, pdfToken, setPdfToken, previewId, setPreviewId, handleDeleteDevis, handlePreviewDevis } = useDevisManager(lastDevis);
+	// Récupération des entreprises de l'utilisateur
+	const entreprises = useEntreprises();
+	// Gestion modale d'ajout de devis avec la vraie liste d'entreprises (doit être avant useDevisManager)
+	const { open, modal, lastDevis } = useAddDevisModal(entreprises);
+	// Hook centralisant la récupération des devis, le token PDF et les callbacks de prévisualisation / suppression.
+	// On passe lastDevis pour forcer le rafraîchissement après création.
+	const { devis, pdfToken, previewId, setPreviewId, handleDeleteDevis, handlePreviewDevis } = useDevisManager(lastDevis);
     // Couleurs du thème
 	const { colors } = useTheme();
 
 	// Recherche locale
 	const [search, setSearch] = useState('');
 
-	// Filtrage local par numéro ou montant
+	// Filtre localement les devis par numéro ou par montant à partir de la recherche saisie.
 	const filteredDevis = useMemo(() =>
 		devis.filter(d =>
 			(d.numero && d.numero.toLowerCase().includes(search.toLowerCase())) ||
@@ -43,10 +43,10 @@ export default function ListeDevisScreen() {
 		[devis, search]
 	);
 
-	// Tri via hook personnalisé
+	// Applique un tri (ascendant/descendant) sur les devis filtrés via un hook dédié.
 	const { sortOrder, setSortOrder, sortedDevis } = useDevisSearchSort(filteredDevis);
 
-	// Fonction pour exporter le PDF sur le téléphone (utilitaire extrait)
+	// Exporte le PDF du devis affiché dans la WebView vers le téléphone de l'utilisateur.
 	const handleExportPdf = async () => {
 		if (!previewId) return;
 		const pdfUrl = getDevisPdfUrl(previewId);

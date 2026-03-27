@@ -12,7 +12,7 @@ import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
 import { clearSession } from '../../utils/session';
 import { useUserInfo } from '../../hooks/useUserInfo';
 import { useTheme } from '../../contexts/ThemeContext';
-import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SummaryCounters from '../../ui/SummaryCounters';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import NotificationBell from '../../ui/NotificationBell';
@@ -21,7 +21,6 @@ import { useBienCount } from '../../contexts/BienCountContext';
 import { useTacheCount } from '../../contexts/TacheCountContext';
 import { useTache } from '../../contexts/TacheContext';
 import AddBienModal from '../../components/modals/AddBienModal';
-import AddTachesModal from '../../components/modals/AddTachesModal';
 import AddReservationsModal from '../../components/modals/AddReservationsModal';
 import AddPrestationModal from '../../components/modals/AddPrestationModal';
 import { getBiens } from '../../utils/api';
@@ -41,22 +40,24 @@ type HomeScreenProps = {
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
+    // Compteur global de tâches et fonction de rafraîchissement associée.
     const { tacheCount, refreshTacheCount } = useTacheCount();
     const { lastTacheAdded } = useTache();
     // Theme et couleurs fournis par le contexte `ThemeContext`
     const { colors, isDarkMode, toggleTheme } = useTheme();
     // Infos utilisateur via hook personnalisé
     const { userName, avatarUrl } = useUserInfo();
+    // Compteur global de biens et signaux de rafraîchissement lorsque des biens sont ajoutés.
     const { biensCount, refreshBiensCount, lastBienAdded, signalBienAdded } = useBienCount();
     // Nombre total de réservations (affiché dans le résumé)
     const [reservationsCount, setReservationsCount] = useState(0);
     const [addBienModalVisible, setAddBienModalVisible] = useState(false);
-    const [addTacheModalVisible, setAddTacheModalVisible] = useState(false);
     const [addReservationModalVisible, setAddReservationModalVisible] = useState(false);
     const [addPrestationModalVisible, setAddPrestationModalVisible] = useState(false);
     // Formulaire de réservation via hook personnalisé
     const { successMsg, showSuccess } = useSuccessMessage();
-    const { form: reservationForm, setForm: setReservationForm, handleAddReservation, loading: reservationLoading, resetForm } = useReservationForm(
+    // Hook formulaire de réservation rapide utilisé dans le dashboard (modale de réservation).
+    const { form: reservationForm, setForm: setReservationForm, handleAddReservation } = useReservationForm(
         () => {
             setAddReservationModalVisible(false);
             refreshBiensCount();
@@ -71,14 +72,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
     // Liste des entreprises (pour alimenter la modale d'ajout de réservation)
     const [entreprises, setEntreprises] = useState<Entreprise[]>([]);
     // Événements à venir via hook personnalisé
-    const { events, loading: eventsLoading, error: eventsError, refresh: refreshEvents } = useUpcomingEvents();
+    // Récupère les prochains événements (réservations, échéances) affichés dans la section agenda.
+    const { events, loading: eventsLoading } = useUpcomingEvents();
     // Message de succès temporaire via hook personnalisé
     const { signalReservationAdded } = useReservationRefresh();
     // Ajout du hook pour le compteur de prestations terminées
     const { prestationsTerminees } = usePrestationsCount();
-   const { caMois, caGlobal, caAnnee, caMoisN1 } = useChiffreAffaire();
-    const [addDevisModalVisible, setAddDevisModalVisible] = useState(false);
-    const { open: openAddDevisModal, modal: addDevisModal } = useAddDevisModal(entreprises);
+    const { caMois, caGlobal, caAnnee, caMoisN1 } = useChiffreAffaire();
+     const { modal: addDevisModal } = useAddDevisModal(entreprises);
 
     // Effet d'initialisation :
     // - rafraîchit les compteurs gérés par les contextes
@@ -106,6 +107,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
     // Les autres valeurs restent statiques pour l'instant
 
     // Handler de déconnexion : efface la session côté client et notifie le parent
+    // Déconnecte l'utilisateur : nettoyage de la session puis éventuelle notification au parent.
     const handleLogout = async () => {
         await clearSession();
         if (onLogout) {
@@ -115,16 +117,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
 
 
     // Handler pour ouvrir la page ListeDevisScreen
+    // Raccourci vers l'écran de gestion des devis.
     const handleGoToListeDevis = () => {
         if (navigation) navigation.navigate('ListeDevisScreen');
     };
 
     // Handler pour ouvrir la page ListeFactureScreen
+    // Raccourci vers l'écran de gestion des factures.
     const handleGoToListeFacture = () => {
         if (navigation) navigation.navigate('ListeFactureScreen');
     };
 
     // Handler pour ouvrir la page Répertoire Propriétaire
+    // Raccourci vers le répertoire des propriétaires.
     const handleGoToRepertoireProprietaire = () => {
         if (navigation) navigation.navigate('RepertoireProprietaireScreen');
     };

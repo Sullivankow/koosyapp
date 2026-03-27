@@ -45,10 +45,10 @@ function ReservationScreen() {
   const [form, setForm] = useState<{ bienId: string; locataireNom: string; locatairePrenom: string; locataireEmail: string; locataireTelephone: string; dateArrivee: string; dateDepart: string; heureArrivee: string; heureDepart: string; statut: 'confirmée' | 'en attente' }>(
     { bienId: '', locataireNom: '', locatairePrenom: '', locataireEmail: '', locataireTelephone: '', dateArrivee: '', dateDepart: '', heureArrivee: '', heureDepart: '', statut: 'en attente' }
   );
-  const [editId, setEditId] = useState<string | null>(null);
   const [tab, setTab] = useState<'en attente' | 'confirmée'>('en attente');
 
-  // Fonction pour charger les biens et réservations
+  // Charge les biens disponibles et les réservations existantes depuis l'API,
+  // puis met à jour l'état local pour alimenter la liste et la modale.
   const fetchData = async () => {
     setLoading(true);
     try {
@@ -67,7 +67,8 @@ function ReservationScreen() {
     fetchData();
   }, [lastReservationAdded, lastRefresh]);
 
-  // Ajout réel via API
+  // Valide le formulaire puis crée une nouvelle réservation via l'API.
+  // En cas de succès, les listes sont rafraîchies et les compteurs mis à jour.
   const handleSave = async () => {
     if (!form.bienId || !form.locataireNom || !form.locatairePrenom || !form.locataireEmail || !form.dateArrivee || !form.dateDepart) {
       Alert.alert('Champs manquants', 'Merci de remplir tous les champs obligatoires.');
@@ -102,9 +103,8 @@ function ReservationScreen() {
     }
   };
 
-  // Ouvre modale ajout
+  // Ouvre la modale d'ajout en réinitialisant le formulaire.
   const openModal = () => {
-    setEditId(null);
     setForm({ bienId: '', locataireNom: '', locatairePrenom: '', locataireEmail: '', locataireTelephone: '', dateArrivee: '', dateDepart: '', heureArrivee: '', heureDepart: '', statut: 'en attente' });
     setModalVisible(true);
   };

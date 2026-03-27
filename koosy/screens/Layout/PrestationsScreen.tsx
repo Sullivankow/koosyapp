@@ -41,6 +41,8 @@ const PrestationsScreen: React.FC = () => {
 	const [modalVisible, setModalVisible] = useState(false);
 	const [tab, setTab] = useState<'en attente' | 'confirmée' | 'terminée' | 'annulée'>('en attente');
 
+	// Récupère les prestations depuis l'API et met à jour l'état local.
+	// En cas d'erreur, on vide simplement la liste pour éviter un blocage d'affichage.
 	const fetchPrestations = async () => {
 		setLoading(true);
 		try {

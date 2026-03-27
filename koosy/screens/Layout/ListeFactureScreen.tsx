@@ -25,6 +25,7 @@ export default function ListeFactureScreen() {
 	const { open: openAddFacture, modal: addFactureModal, lastFacture } = useAddFactureModal(entreprises);
 	// Gestion centralisée des factures, token et aperçu via hook personnalisé
 	// On passe lastFacture pour forcer le rafraîchissement après création
+	// Hook centralisant la logique de filtrage, tri, sélection et export PDF des factures.
 	const { factures, pdfToken, previewId, setPreviewId, handleDeleteFacture, handlePreviewFacture } = useFactureManager(lastFacture);
 	// Couleurs du thème
 	const { colors } = useTheme();
