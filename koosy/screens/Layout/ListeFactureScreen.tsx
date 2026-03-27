@@ -1,12 +1,9 @@
 import React, { useState, useMemo } from 'react';
-import { StatusBar } from 'react-native';
-// import supprimé car déjà présent plus bas
-import { View, Text, TouchableOpacity, Modal } from 'react-native';
+import { StatusBar, View, TouchableOpacity, Modal } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { MaterialIcons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 // SafeAreaView supprimé pour un rendu identique à BiensScreen
-import { Dimensions } from 'react-native';
 import { useFactureManager } from '../../hooks/useFactureManager';
 import { getFacturePdfUrl } from '../../utils/api';
 import { exportPdfToPhone } from '../../utils/pdfExport';
@@ -17,10 +14,10 @@ import { FactureList } from '../../components/FactureList';
 import SearchBar from '../../ui/SearchBar';
 import HeaderWithAddButton from '../../ui/HeaderWithAddButton';
 
-
-
-
-// Écran principal de la liste des factures
+// Écran principal de la liste des factures.
+// - Récupère les factures via `useFactureManager`
+// - Permet la recherche, le tri et l'aperçu PDF d'une facture
+// - Gère une modale de création de facture.
 export default function ListeFactureScreen() {
 	// Récupération des entreprises de l'utilisateur
 	const entreprises = useEntreprises();
@@ -31,7 +28,6 @@ export default function ListeFactureScreen() {
 	const { factures, pdfToken, previewId, setPreviewId, handleDeleteFacture, handlePreviewFacture } = useFactureManager(lastFacture);
 	// Couleurs du thème
 	const { colors } = useTheme();
-	const screenWidth = Dimensions.get('window').width;
 
 	// Recherche locale
 	const [search, setSearch] = useState('');

@@ -1,8 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { StatusBar } from 'react-native';
-// import supprimé car déjà présent plus bas
-import { View, Text, TouchableOpacity } from 'react-native';
-import { Modal } from 'react-native';
+import { StatusBar, View, TouchableOpacity, Modal } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useAddDevisModal } from '../../hooks/useAddDevisModal';
@@ -10,7 +7,6 @@ import { useEntreprises } from '../../hooks/useEntreprises';
 import { useTheme } from '../../contexts/ThemeContext';
 // SafeAreaView supprimé pour un rendu identique à BiensScreen
 import HeaderWithAddButton from '../../ui/HeaderWithAddButton';
-import { Dimensions } from 'react-native';
 import { exportPdfToPhone } from '../../utils/pdfExport';
 import { useDevisManager } from '../../hooks/useDevisManager';
 import { DevisList } from '../../components/DevisList';
@@ -20,7 +16,10 @@ import SearchBar from '../../ui/SearchBar';
 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 
-
+// Écran principal de la liste des devis.
+// - Récupère les devis via `useDevisManager`
+// - Permet la recherche, le tri et l'aperçu PDF d'un devis
+// - Propose une modale pour créer un nouveau devis.
 export default function ListeDevisScreen() {
     // Récupération des entreprises de l'utilisateur
     const entreprises = useEntreprises();
@@ -30,8 +29,7 @@ export default function ListeDevisScreen() {
     // On passe lastDevis pour forcer le rafraîchissement après création
     const { devis, setDevis, pdfToken, setPdfToken, previewId, setPreviewId, handleDeleteDevis, handlePreviewDevis } = useDevisManager(lastDevis);
     // Couleurs du thème
-    const { colors } = useTheme();
-    const screenWidth = Dimensions.get('window').width;
+	const { colors } = useTheme();
 
 	// Recherche locale
 	const [search, setSearch] = useState('');

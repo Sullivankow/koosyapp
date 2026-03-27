@@ -1,3 +1,7 @@
+// Écran listant les tâches de l'utilisateur.
+// - S'appuie sur le hook `useTaches` pour charger et mettre à jour les tâches
+// - Permet de filtrer entre tâches "à faire" et "terminées"
+// - Offre des actions rapides (marquer terminée, revenir à "à faire", supprimer, tout supprimer).
 import BadgeStatus from '../../ui/BadgeStatus';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';

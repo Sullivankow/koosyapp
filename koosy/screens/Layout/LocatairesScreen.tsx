@@ -1,3 +1,5 @@
+// Placeholder pour un futur écran de gestion des locataires.
+// Pour l'instant, il affiche seulement un texte centré.
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';

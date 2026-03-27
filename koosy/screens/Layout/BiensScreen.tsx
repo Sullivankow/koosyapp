@@ -1,8 +1,12 @@
+// Écran listant tous les biens de l'utilisateur.
+// - Récupère les biens via le hook `useBiens`
+// - Gère la recherche, le tri, l'édition inline et la suppression
+// - Permet aussi de modifier le statut lié aux tâches associées au bien
 import { updateTacheStatut } from '../../utils/api';
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, Modal } from 'react-native';
 import BienCard from '../../components/cards/biens/BienCard';
-import StatusModal from '../../components/modals/StatusModal';
+import StatusModal, { StatusValue } from '../../components/modals/StatusModal';
 import { useTheme } from '../../contexts/ThemeContext';
 
 import { Bien } from '../../models/models';
@@ -17,6 +21,7 @@ import { useTache } from '../../contexts/TacheContext';
 import { useTacheCount } from '../../contexts/TacheCountContext';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 import { styles } from './styles/BienScreen.styles';
 
 const BiensScreen: React.FC = () => {
@@ -30,7 +35,7 @@ const BiensScreen: React.FC = () => {
   const { prestationsTerminees } = usePrestationsCount();
   const [statutModalVisible, setStatutModalVisible] = useState(false);
   const [currentStatusBienId, setCurrentStatusBienId] = useState<string | null>(null);
-  const [currentBienStatus, setCurrentBienStatus] = useState<string | undefined>(undefined);
+  const [currentBienStatus, setCurrentBienStatus] = useState<StatusValue | undefined>(undefined);
   const [search, setSearch] = useState('');
   const [addBienModalVisible, setAddBienModalVisible] = useState(false);
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
@@ -108,10 +113,11 @@ const BiensScreen: React.FC = () => {
   };
   const openStatusModal = (bien: Bien) => {
     setCurrentStatusBienId(bien.id);
-    setCurrentBienStatus(bien.statut);
+    // On ne conserve dans l'état que les statuts gérés par StatusModal
+    setCurrentBienStatus(bien.statut === 'disponible' || bien.statut === 'occupé' ? bien.statut : undefined);
     setStatutModalVisible(true);
   };
-  const handleSelectStatus = async (status: string) => {
+  const handleSelectStatus = async (status: StatusValue) => {
     if (!currentStatusBienId) return;
     try {
       const fullBien = await (await import('../../utils/api')).getBienById(currentStatusBienId);
@@ -142,7 +148,7 @@ const BiensScreen: React.FC = () => {
       setCurrentBienStatus(undefined);
     }
   };
-  const { signalRefresh } = require('../../contexts/GlobalRefreshContext').useGlobalRefresh();
+  const { signalRefresh } = useGlobalRefresh();
   const handleSupprimerBien = async (bienId: string) => {
     try {
       await deleteBienById(bienId);
@@ -206,7 +212,7 @@ const BiensScreen: React.FC = () => {
             onStatus={openStatusModal}
             onPhotoPress={handlePhotoPress}
             formatDateFR={formatDateFR}
-            onChangeTacheStatus={handleChangeTacheStatus}
+            // La carte n'a plus besoin de remonter les changements de statut de tâche ici
           />
         )}
       />

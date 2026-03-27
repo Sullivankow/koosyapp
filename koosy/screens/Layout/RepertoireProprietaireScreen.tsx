@@ -1,5 +1,7 @@
 
-
+// Répertoire des propriétaires.
+// - Charge la liste via l'API
+// - Permet la recherche, le tri et l'édition/suppression des propriétaires.
 import React, { useState, useMemo } from 'react';
 import { View, Text, StyleSheet, Dimensions, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';

@@ -1,9 +1,9 @@
-// Page qui affiche la liste des notifications reçues par l'utilisateur (messages, alertes, etc.)
-// Permet de marquer comme lue, supprimer, ou tout marquer comme lu
+// Page qui affiche la liste des notifications reçues par l'utilisateur (messages, alertes, etc.).
+// - Récupère les notifications côté backend
+// - Permet de marquer comme lue, tout marquer comme lu, et supprimer une notification.
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
-import { listNotifications, markNotificationRead, markAllNotificationsRead } from '../../utils/api';
-import { deleteNotification } from '../../utils/api';
+import { listNotifications, markNotificationRead, markAllNotificationsRead, deleteNotification } from '../../utils/api';
 import { useNotificationCount } from '../../contexts/NotificationCountContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';

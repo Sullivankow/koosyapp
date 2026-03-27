@@ -1,3 +1,7 @@
+// Écran listant les prestations (en attente, confirmées, terminées).
+// - Charge les prestations via l'API
+// - Permet de changer le statut ou de supprimer une prestation
+// - Met à jour le compteur de prestations terminées et le chiffre d'affaires.
 import BadgeStatus from '../../ui/BadgeStatus';
 import { STATUS_CONFIG } from '../../constants/Status';
 import React, { useEffect, useState } from 'react';

@@ -1,4 +1,6 @@
-// screens/WelcomeScreen.tsx
+// Écran de bienvenue animé affiché au lancement de l'application.
+// - Affiche une icône qui tourne brièvement
+// - Invoque le callback onFinish pour passer à l'écran suivant.
 import React, { useEffect, useRef } from 'react';
 import { View, Text, StyleSheet, Animated } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';

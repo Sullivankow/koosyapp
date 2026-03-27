@@ -1,3 +1,7 @@
+// Écran carte affichant tous les biens géolocalisés.
+// - Affiche les biens sous forme de marqueurs sur une MapView
+// - Utilise la recherche pour filtrer les biens visibles
+// - Permet de recentrer sur la position GPS de l'utilisateur.
 import React, { useEffect, useState, useRef } from 'react';
 import SearchBar from '../../ui/SearchBar';
 import GpsTracker from '../../components/GpsTracker';

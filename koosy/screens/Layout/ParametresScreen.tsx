@@ -1,3 +1,5 @@
+// Écran de paramètres regroupant les sous-sections (profil, notifications, sécurité, etc.).
+// Chaque ligne navigue vers un écran dédié selon le label.
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';

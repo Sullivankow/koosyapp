@@ -1,10 +1,14 @@
+// Écran listant les réservations (en attente / confirmées).
+// - Charge les biens et réservations via l'API
+// - Permet d'ajouter une réservation via une modale dédiée
+// - Offre des actions sur le statut et la suppression.
 import BadgeStatus from '../../ui/BadgeStatus';
 import { STATUS_CONFIG } from '../../constants/Status';
 import React, { useState, useEffect } from 'react';
 import { useBienCount } from '../../contexts/BienCountContext';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { Reservation, Bien, Locataire } from '../../models/models';
+import { Reservation, Bien } from '../../models/models';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import HeaderWithAddButton from '../../ui/HeaderWithAddButton';
 import { getBiens, createReservation, getReservations } from '../../utils/api';
@@ -52,8 +56,6 @@ function ReservationScreen() {
       setBiens(biensData);
       const reservationsData = await getReservations();
       setReservations(reservationsData);
-      // TODO: Remplacer par getLocataires() quand dispo
-      // setLocataires(await getLocataires());
     } catch (e) {
       Alert.alert('Erreur', 'Impossible de charger les données.');
     } finally {

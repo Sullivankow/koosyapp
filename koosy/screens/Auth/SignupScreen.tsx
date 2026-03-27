@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { signup } from '../../utils/api';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+
+import { signup } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
 
 type SignupScreenProps = {
@@ -10,6 +11,9 @@ type SignupScreenProps = {
     onBack?: () => void;
 };
 
+// Écran d'inscription d'un nouvel utilisateur.
+// Valide le formulaire (email, nom, prénom, mot de passe fort, confirmation)
+// puis appelle l'API `signup` et mémorise le prénom en local.
 const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -21,10 +25,13 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
     const { colors } = useTheme();
 
     // Validation email (format classique)
+    // On reste volontairement simple ici :
+    // - présence d'un '@'
+    // - domaine et extension avec au moins 2 lettres
     const isEmailValid = (val: string) =>
         /^([a-zA-Z0-9_\-.]+)@([a-zA-Z0-9_\-.]+)\.([a-zA-Z]{2,})$/.test(val.trim());
 
-    // Validation mot de passe robuste (min 8, majuscule, chiffre, spécial)
+    // Validation mot de passe robuste (min 8, majuscule, chiffre, caractère spécial)
     // Correction SonarQube : suppression de l'antislash inutile dans le groupe spécial
     const isPasswordStrong = (val: string) =>
         /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(val);
