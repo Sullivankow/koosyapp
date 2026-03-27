@@ -1,9 +1,17 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
+// Type décrivant les données du contexte de rafraîchissement du chiffre d'affaires
+interface ChiffreAffaireRefreshContextType {
+  // Fonction pour déclencher un rafraîchissement du chiffre d'affaires
+  signalRefresh: () => void;
+  // Clé de rafraîchissement (change à chaque signal pour forcer les effets dépendants)
+  refreshKey: number;
+}
+
 // Contexte pour signaler le rafraîchissement du chiffre d'affaires
-const ChiffreAffaireRefreshContext = createContext({
-  signalRefresh: () => {}, // Fonction pour déclencher le rafraîchissement
-  refreshKey: 0, // Clé de rafraîchissement (change à chaque signal)
+const ChiffreAffaireRefreshContext = createContext<ChiffreAffaireRefreshContextType>({
+  signalRefresh: () => {},
+  refreshKey: 0,
 });
 
 // Provider du contexte
@@ -26,7 +34,8 @@ export const ChiffreAffaireRefreshProvider = ({ children }: { children: ReactNod
 };
 
 // Hook pour utiliser le contexte dans les composants
-export const useChiffreAffaireRefresh = () => useContext(ChiffreAffaireRefreshContext);
+export const useChiffreAffaireRefresh = (): ChiffreAffaireRefreshContextType =>
+  useContext(ChiffreAffaireRefreshContext);
 
 // Utilisation :
 // - Place le provider autour de ton app ou dashboard
