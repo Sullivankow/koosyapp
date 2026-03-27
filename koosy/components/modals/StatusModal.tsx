@@ -1,14 +1,29 @@
+// Modale de sélection de statut pour un bien ou une entité
+// - Affiche la liste des statuts possibles
+// - Permet de choisir un statut et le remonter au parent via onSelect
+// - Met en surbrillance le statut actuellement sélectionné
+
 import React from 'react';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+
+// Type des valeurs possibles de statut
+export type StatusValue = 'disponible' | 'occupé';
+
+// Représentation d'une option de statut affichée dans la modale
+interface StatusOption {
+  label: string;
+  value: StatusValue;
+}
 
 interface StatusModalProps {
   visible: boolean;
   onClose: () => void;
-  onSelect: (status: string) => void;
-  currentStatus?: string;
+  onSelect: (status: StatusValue) => void;
+  currentStatus?: StatusValue;
 }
 
-const STATUS_OPTIONS = [
+// Liste des statuts proposés à l'utilisateur
+const STATUS_OPTIONS: StatusOption[] = [
   { label: 'Disponible', value: 'disponible' },
   { label: 'Occupé', value: 'occupé' },
 ];
@@ -19,15 +34,21 @@ const StatusModal: React.FC<StatusModalProps> = ({ visible, onClose, onSelect, c
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
           <Text style={styles.title}>Choisir le statut</Text>
-          {STATUS_OPTIONS.map(option => (
-            <TouchableOpacity
-              key={option.value}
-              style={[styles.optionBtn, currentStatus === option.value && styles.selected]}
-              onPress={() => { onSelect(option.value); onClose(); }}
-            >
-              <Text style={[styles.optionText, currentStatus === option.value && styles.selectedText]}>{option.label}</Text>
-            </TouchableOpacity>
-          ))}
+          {STATUS_OPTIONS.map(option => {
+            const isSelected = currentStatus === option.value;
+            return (
+              <TouchableOpacity
+                key={option.value}
+                style={[styles.optionBtn, isSelected && styles.selected]}
+                onPress={() => {
+                  onSelect(option.value);
+                  onClose();
+                }}
+              >
+                <Text style={[styles.optionText, isSelected && styles.selectedText]}>{option.label}</Text>
+              </TouchableOpacity>
+            );
+          })}
           <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
             <Text style={styles.cancelText}>Annuler</Text>
           </TouchableOpacity>

@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, KeyboardAvoidingView, ScrollView } from 'react-native';
+import dayjs from 'dayjs';
+import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getBiens, createPrestation } from '../../utils/api';
-import dayjs from 'dayjs';
+import { Bien } from '../../models/models';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -23,25 +24,29 @@ const PRESTATION_STATUTS = [
 
 export type PrestationStatus = 'En attente' | 'Confirmée' | 'Terminée';
 
+type PrestationFormState = {
+	bienId: number | '';
+	amount: string;
+	description: string;
+	date_prestation: string; // format JJ/MM/AAAA pour l'UI
+	status: PrestationStatus;
+};
+
+const buildInitialForm = (bienId?: number): PrestationFormState => ({
+	bienId: bienId ?? '',
+	amount: '',
+	description: '',
+	date_prestation: dayjs().format('DD/MM/YYYY'),
+	status: 'Confirmée',
+});
+
 const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClose, onSuccess, bienId }) => {
   const { colors } = useTheme();
   const { refreshPrestationsTerminees } = usePrestationsCount();
-  const [form, setForm] = useState<{
-    bienId: number | '';
-    amount: string;
-    description: string;
-    date_prestation: string; // format français
-    status: PrestationStatus;
-  }>({
-    bienId: bienId || '',
-    amount: '',
-    description: '',
-    date_prestation: dayjs().format('DD/MM/YYYY'),
-    status: 'Confirmée',
-  });
+  const [form, setForm] = useState<PrestationFormState>(() => buildInitialForm(bienId));
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
-  const [biens, setBiens] = useState<any[]>([]);
+  const [biens, setBiens] = useState<Bien[]>([]);
 
   useEffect(() => {
     if (visible) {
@@ -49,23 +54,37 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
     }
   }, [visible]);
 
+  // Réinitialise le formulaire quand la modale s'ouvre ou que le bien par défaut change
+  useEffect(() => {
+	if (visible) {
+		setForm(buildInitialForm(bienId));
+	}
+  }, [visible, bienId]);
+
+  const updateField = useCallback(
+  (key: keyof PrestationFormState, value: PrestationFormState[keyof PrestationFormState]) => {
+    setForm(prev => ({ ...prev, [key]: value }));
+  },
+  [],
+  );
+
+  const toBackendDate = (value: string): string => {
+	if (value && /^\d{2}\/\d{2}\/\d{4}$/.test(value)) {
+		const [jour, mois, annee] = value.split('/');
+		return `${annee}-${mois}-${jour}`; // JJ/MM/AAAA -> YYYY-MM-DD
+	}
+	if (value && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+		return value; // déjà au format backend
+	}
+	// Format inconnu : on laisse la logique existante basée sur dayjs
+	return dayjs(value).format('YYYY-MM-DD');
+  };
+
   const handleSubmit = async () => {
     setLoading(true);
     setSuccessMsg('');
     try {
-      // Conversion explicite de la date au format backend
-      let dateBackend = '';
-      if (form.date_prestation && form.date_prestation.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
-        // Format JJ/MM/AAAA
-        const [jour, mois, annee] = form.date_prestation.split('/');
-        dateBackend = `${annee}-${mois}-${jour}`;
-      } else if (form.date_prestation && form.date_prestation.match(/^\d{4}-\d{2}-\d{2}$/)) {
-        // Format déjà backend
-        dateBackend = form.date_prestation;
-      } else {
-        // Format inconnu, on tente dayjs
-        dateBackend = dayjs(form.date_prestation).format('YYYY-MM-DD');
-      }
+      const dateBackend = toBackendDate(form.date_prestation);
       await createPrestation({
         bienId: Number(form.bienId),
         amount: Number(form.amount),
@@ -76,7 +95,7 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
       setSuccessMsg('Prestation ajoutée !');
       setTimeout(() => {
         setSuccessMsg('');
-        setForm({ bienId: bienId || '', amount: '', description: '', date_prestation: dayjs().format('DD/MM/YYYY'), status: 'Confirmée' });
+        setForm(buildInitialForm(bienId));
         setLoading(false);
         onClose();
         if (refreshPrestationsTerminees && form.status === 'Terminée') refreshPrestationsTerminees();
@@ -105,7 +124,7 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
                       <TouchableOpacity
                         key={bien.id}
                         style={{ padding: 10, borderRadius: 8, backgroundColor: form.bienId === bien.id ? colors.primary : '#e6e6fa', marginBottom: 6, borderWidth: form.bienId === bien.id ? 2 : 0, borderColor: colors.primary }}
-                        onPress={() => setForm(f => ({ ...f, bienId: bien.id }))}
+                        onPress={() => updateField('bienId', bien.id)}
                       >
                         <Text style={{ color: form.bienId === bien.id ? colors.surface : '#222', fontWeight: 'bold', fontSize: 15 }}>{bien.nom} ({bien.adresse})</Text>
                       </TouchableOpacity>
@@ -114,16 +133,16 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
                 </ScrollView>
                 {!form.bienId && <Text style={{ color: colors.error, marginTop: 6, textAlign: 'center' }}>Veuillez sélectionner un bien</Text>}
               </View>
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Montant (€)" placeholderTextColor="#888" value={form.amount} onChangeText={v => setForm(f => ({ ...f, amount: v }))} keyboardType="decimal-pad" />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Description (optionnelle)" placeholderTextColor="#888" value={form.description} onChangeText={v => setForm(f => ({ ...f, description: v }))} multiline />
-              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Date de la prestation (JJ/MM/AAAA)" placeholderTextColor="#888" value={form.date_prestation} onChangeText={v => setForm(f => ({ ...f, date_prestation: v }))} />
+              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Montant (€)" placeholderTextColor="#888" value={form.amount} onChangeText={v => updateField('amount', v)} keyboardType="decimal-pad" />
+              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Description (optionnelle)" placeholderTextColor="#888" value={form.description} onChangeText={v => updateField('description', v)} multiline />
+              <TextInput style={[styles.input, { color: '#111' }]} placeholder="Date de la prestation (JJ/MM/AAAA)" placeholderTextColor="#888" value={form.date_prestation} onChangeText={v => updateField('date_prestation', v)} />
               <View style={{ width: SCREEN_WIDTH * 0.8, marginBottom: 10 }}>
                 <Text style={{ color: colors.textSecondary, marginBottom: 4 }}>Statut</Text>
                 {PRESTATION_STATUTS.map(opt => (
                   <TouchableOpacity
                     key={opt.value}
                     style={{ padding: 8, borderRadius: 8, backgroundColor: form.status === opt.value ? colors.primary : '#f5f5f5', marginBottom: 4 }}
-                    onPress={() => setForm(f => ({ ...f, status: opt.value as PrestationStatus }))}
+                    onPress={() => updateField('status', opt.value as PrestationStatus)}
                   >
                     <Text style={{ color: form.status === opt.value ? colors.surface : '#222', fontWeight: 'bold' }}>{opt.label}</Text>
                   </TouchableOpacity>

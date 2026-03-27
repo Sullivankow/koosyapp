@@ -1,8 +1,13 @@
-import React, { useState } from 'react';
+// Modale de création d'un propriétaire
+// - Affiche un petit formulaire (nom, prénom, email, adresse, téléphone)
+// - Valide les champs obligatoires
+// - Appelle l'API createProprietaire puis remonte le propriétaire créé au parent
+
+import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions, Alert } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { createProprietaire } from '../../utils/api';
-import type { Proprietaire } from '../../models/proprietaire';
+import type { Proprietaire } from '../../models/models';
 
 interface AddProprietaireModalProps {
 	visible: boolean;
@@ -10,33 +15,65 @@ interface AddProprietaireModalProps {
 	onSuccess?: (proprio: Proprietaire) => void;
 }
 
+// Structure d'état pour le formulaire de propriétaire
+type ProprietaireFormState = {
+	nom: string;
+	prenom: string;
+	email: string;
+	adresse: string;
+	telephone: string;
+};
+
+// Valeurs initiales du formulaire (champs vides)
+const buildInitialForm = (): ProprietaireFormState => ({
+	nom: '',
+	prenom: '',
+	email: '',
+	adresse: '',
+	telephone: '',
+});
+
+// Vérifie que les champs obligatoires sont renseignés
+// Retourne un message d'erreur (string) ou null si tout est OK
+const validateForm = (form: ProprietaireFormState): string | null => {
+	if (!form.nom || !form.prenom || !form.email) {
+		return 'Nom, prénom et email sont obligatoires';
+	}
+	return null;
+};
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
+
+// Composant principal de la modale "Nouveau propriétaire"
 const AddProprietaireModal: React.FC<AddProprietaireModalProps> = ({ visible, onClose, onSuccess }) => {
 	const { colors } = useTheme();
-	const SCREEN_WIDTH = Dimensions.get('window').width;
-	const [form, setForm] = useState({
-		nom: '',
-		prenom: '',
-		email: '',
-		adresse: '',
-		telephone: '',
-	});
+	const [form, setForm] = useState<ProprietaireFormState>(buildInitialForm);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
 
-	const handleChange = (field: keyof typeof form, value: string) => {
-		setForm(f => ({ ...f, [field]: value }));
-	};
+	// Met à jour un champ du formulaire de manière générique
+	const updateField = useCallback(
+		(field: keyof ProprietaireFormState, value: string) => {
+			setForm(prev => ({ ...prev, [field]: value }));
+		},
+		[],
+	);
 
+	// Soumission du formulaire :
+	// - valide les champs
+	// - appelle l'API
+	// - réinitialise le formulaire et notifie le parent en cas de succès
 	const handleSubmit = async () => {
 		setError('');
-		if (!form.nom || !form.prenom || !form.email) {
-			setError('Nom, prénom et email sont obligatoires');
+		const validationError = validateForm(form);
+		if (validationError) {
+			setError(validationError);
 			return;
 		}
 		setLoading(true);
 		try {
 			const proprio = await createProprietaire(form);
-			setForm({ nom: '', prenom: '', email: '', adresse: '', telephone: '' });
+			setForm(buildInitialForm());
 			setLoading(false);
 			onClose();
 			if (onSuccess) onSuccess(proprio);
@@ -57,7 +94,7 @@ const AddProprietaireModal: React.FC<AddProprietaireModalProps> = ({ visible, on
 						placeholder="Nom*"
 						placeholderTextColor={colors.text + 'CC'}
 						value={form.nom}
-						onChangeText={v => handleChange('nom', v)}
+						onChangeText={v => updateField('nom', v)}
 						autoFocus
 					/>
 					<TextInput
@@ -65,14 +102,14 @@ const AddProprietaireModal: React.FC<AddProprietaireModalProps> = ({ visible, on
 						placeholder="Prénom*"
 						placeholderTextColor={colors.text + 'CC'}
 						value={form.prenom}
-						onChangeText={v => handleChange('prenom', v)}
+						onChangeText={v => updateField('prenom', v)}
 					/>
 					<TextInput
 						style={[styles.input, { color: colors.text, borderColor: colors.border }]}
 						placeholder="Email*"
 						placeholderTextColor={colors.text + 'CC'}
 						value={form.email}
-						onChangeText={v => handleChange('email', v)}
+						onChangeText={v => updateField('email', v)}
 						keyboardType="email-address"
 						autoCapitalize="none"
 					/>
@@ -81,14 +118,14 @@ const AddProprietaireModal: React.FC<AddProprietaireModalProps> = ({ visible, on
 						placeholder="Adresse"
 						placeholderTextColor={colors.text + 'CC'}
 						value={form.adresse}
-						onChangeText={v => handleChange('adresse', v)}
+						onChangeText={v => updateField('adresse', v)}
 					/>
 					<TextInput
 						style={[styles.input, { color: colors.text, borderColor: colors.border }]}
 						placeholder="Téléphone"
 						placeholderTextColor={colors.text + 'CC'}
 						value={form.telephone}
-						onChangeText={v => handleChange('telephone', v)}
+						onChangeText={v => updateField('telephone', v)}
 						keyboardType="phone-pad"
 					/>
 					{error ? <Text style={[styles.error, { color: colors.error || '#d32f2f' }]}>{error}</Text> : null}

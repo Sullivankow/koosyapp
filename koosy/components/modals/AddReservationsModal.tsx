@@ -1,9 +1,13 @@
-import React, { useState } from 'react';
+// Modale de création / édition d'une réservation
+// - Affiche un formulaire complet (bien, locataire, dates / heures, statut)
+// - Utilise un état de formulaire géré par le parent (form, setForm)
+// - Fournit un sélecteur de date natif pour les dates d'arrivée et de départ
+
+import React, { useState, useCallback } from 'react';
 import dayjs from 'dayjs';
 import 'dayjs/locale/fr';
 import { Modal, View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-
 
 dayjs.locale('fr');
 const statutColor = {
@@ -11,6 +15,7 @@ const statutColor = {
 	'en attente': '#FF7043',
 };
 
+// Structure d'état représentant une réservation complète
 type ReservationForm = {
 	bienId: string;
 	locataireNom: string;
@@ -24,6 +29,7 @@ type ReservationForm = {
 	statut: 'confirmée' | 'en attente';
 };
 
+// Propriétés attendues par la modale de réservation
 interface AddReservationsModalProps {
 	visible: boolean;
 	onClose: () => void;
@@ -43,7 +49,18 @@ export default function AddReservationsModal({
    biens,
    colors
 }: AddReservationsModalProps) {
+	// État local pour savoir quel champ de date on est en train d'éditer
    const [showDatePicker, setShowDatePicker] = useState<{ field: 'dateArrivee' | 'dateDepart' | null, visible: boolean }>({ field: null, visible: false });
+
+	// Helper générique pour mettre à jour un champ du formulaire de réservation
+	const updateField = useCallback(
+		(key: keyof ReservationForm, value: ReservationForm[keyof ReservationForm]) => {
+			setForm(prev => ({ ...prev, [key]: value }));
+		},
+		[setForm],
+	);
+
+	// Gestion du changement de date (via le DateTimePicker natif)
    const handleDateChange = (event: any, selectedDate?: Date) => {
 	   if (event.type === 'dismissed') {
 		   setShowDatePicker({ field: null, visible: false });
@@ -55,6 +72,8 @@ export default function AddReservationsModal({
 	   }
 	   setShowDatePicker({ field: null, visible: false });
    };
+
+	// Renvoie une date au format JJ/MM/AAAA pour l'affichage, à partir d'un ISO YYYY-MM-DD
    const getDateValue = (field: 'dateArrivee' | 'dateDepart') => {
 	   const val = form[field];
 	   if (/^(\d{4})-(\d{2})-(\d{2})$/.test(val) && dayjs(val).isValid()) {
@@ -71,40 +90,45 @@ export default function AddReservationsModal({
 			>
 						<View style={[styles.modalBox, { backgroundColor: colors.surface }]}> 
 							<ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false}>
-								{/* ...tout le contenu du formulaire ici... */}
+								{/* Titre de la modale */}
 								<Text style={[styles.modalTitle, { color: colors.primary }]}>Ajouter une réservation</Text>
+								{/* Sélection du bien concerné */}
 								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Bien :</Text>
 								<FlatList
 									data={biens}
 									horizontal
 									keyExtractor={b => b.id.toString()}
 									renderItem={({ item }) => (
-										<TouchableOpacity style={[styles.chip, form.bienId === item.id.toString() && { backgroundColor: colors.secondary }]} onPress={() => setForm((f: ReservationForm) => ({ ...f, bienId: item.id.toString() }))}>
+										<TouchableOpacity
+											style={[styles.chip, form.bienId === item.id.toString() && { backgroundColor: colors.secondary }]}
+											onPress={() => updateField('bienId', item.id.toString())}
+										>
 											<Text style={{ color: form.bienId === item.id.toString() ? '#fff' : colors.text }}>{item.nom}</Text>
 										</TouchableOpacity>
 									)}
 								/>
+								{/* Informations sur le locataire */}
 								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Nom du locataire :</Text>
 								<TextInput
 									style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
 									placeholder="Nom"
 									placeholderTextColor={colors.textSecondary}
 									value={form.locataireNom}
-									onChangeText={v => setForm((f: ReservationForm) => ({ ...f, locataireNom: v }))}
+									onChangeText={v => updateField('locataireNom', v)}
 								/>
 								<TextInput
 									style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
 									placeholder="Prénom"
 									placeholderTextColor={colors.textSecondary}
 									value={form.locatairePrenom}
-									onChangeText={v => setForm((f: ReservationForm) => ({ ...f, locatairePrenom: v }))}
+									onChangeText={v => updateField('locatairePrenom', v)}
 								/>
 								<TextInput
 									style={[styles.input, { color: colors.text, borderColor: colors.border, backgroundColor: colors.background }]}
 									placeholder="Email"
 									placeholderTextColor={colors.textSecondary}
 									value={form.locataireEmail}
-									onChangeText={v => setForm((f: ReservationForm) => ({ ...f, locataireEmail: v }))}
+									onChangeText={v => updateField('locataireEmail', v)}
 									keyboardType="email-address"
 									autoCapitalize="none"
 								/>
@@ -113,9 +137,10 @@ export default function AddReservationsModal({
 									placeholder="Téléphone"
 									placeholderTextColor={colors.textSecondary}
 									value={form.locataireTelephone}
-									onChangeText={v => setForm((f: ReservationForm) => ({ ...f, locataireTelephone: v }))}
+									onChangeText={v => updateField('locataireTelephone', v)}
 									keyboardType="phone-pad"
 								/>
+								{/* Bloc date / heure d'arrivée */}
 								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Arrivée :</Text>
 								<View style={styles.row}>
 								   <TouchableOpacity
@@ -131,9 +156,10 @@ export default function AddReservationsModal({
 									   placeholder="Heure (HH:mm)"
 									   placeholderTextColor={colors.textSecondary}
 									   value={form.heureArrivee}
-									   onChangeText={v => setForm((f: ReservationForm) => ({ ...f, heureArrivee: v }))}
+								   	   onChangeText={v => updateField('heureArrivee', v)}
 								   />
 								</View>
+							{/* Bloc date / heure de départ */}
 								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Départ :</Text>
 								<View style={styles.row}>
 								   <TouchableOpacity
@@ -149,7 +175,7 @@ export default function AddReservationsModal({
 									   placeholder="Heure (HH:mm)"
 									   placeholderTextColor={colors.textSecondary}
 									   value={form.heureDepart}
-									   onChangeText={v => setForm((f: ReservationForm) => ({ ...f, heureDepart: v }))}
+								   	   onChangeText={v => updateField('heureDepart', v)}
 								   />
 								</View>
    {showDatePicker.visible && (
@@ -167,14 +193,20 @@ export default function AddReservationsModal({
 		   locale="fr-FR"
 	   />
    )}
-								<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Statut :</Text>
+							{/* Choix du statut de la réservation */}
+							<Text style={{ color: colors.textSecondary, marginTop: 8 }}>Statut :</Text>
 								<View style={styles.row}>
 									{(['confirmée', 'en attente'] as const).map(s => (
-										<TouchableOpacity key={s} style={[styles.chip, form.statut === s && { backgroundColor: statutColor[s] }]} onPress={() => setForm((f: ReservationForm) => ({ ...f, statut: s }))}>
+										<TouchableOpacity
+											key={s}
+											style={[styles.chip, form.statut === s && { backgroundColor: statutColor[s] }]}
+											onPress={() => updateField('statut', s)}
+										>
 											<Text style={{ color: form.statut === s ? '#fff' : colors.text }}>{s}</Text>
 										</TouchableOpacity>
 									))}
 								</View>
+							{/* Boutons d'action : sauvegarde / annulation */}
 								<View style={styles.modalActions}>
 									<TouchableOpacity style={[styles.modalBtn, { backgroundColor: colors.primary }]} onPress={onSave}>
 										<Text style={{ color: colors.surface, fontWeight: 'bold' }}>Ajouter</Text>
