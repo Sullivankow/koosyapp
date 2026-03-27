@@ -1,3 +1,5 @@
+// Bouton flottant rond avec une icône "+",
+// utilisé pour ajouter rapidement un élément sur certains écrans.
 import React from 'react';
 import { TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';

@@ -1,3 +1,5 @@
+// Écran de splash animé affiché au démarrage de l'application.
+// Fait tourner l'icône de clé Koosy en boucle avec les couleurs du thème.
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, StyleSheet } from 'react-native';
 import { FontAwesome5 } from '@expo/vector-icons';

@@ -1,3 +1,6 @@
+// Carrousel horizontal d’images pour les biens.
+// Accepte différents formats de chemin (URL absolues, chemins d’uploads, URI locales)
+// et normalise tout vers une source d’image exploitable.
 import React from 'react';
 import { ScrollView, TouchableOpacity, Image } from 'react-native';
 import { BASE_URL } from '../constants/config';

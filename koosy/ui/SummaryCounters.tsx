@@ -1,3 +1,5 @@
+// Grille de compteurs réutilisable affichée sur le dashboard (biens, réservations,
+// tâches à faire, prestations terminées).
 import React from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';

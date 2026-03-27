@@ -1,3 +1,5 @@
+// En-tête réutilisable avec un titre et un bouton "ajouter" à droite.
+// Utilisé sur plusieurs écrans de listes (biens, devis, factures, etc.).
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';

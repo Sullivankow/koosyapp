@@ -1,5 +1,6 @@
+// Écran affichant la politique de confidentialité de l'application.
 import React from 'react';
-import { View, Text, ScrollView, StyleSheet } from 'react-native';
+import { Text, ScrollView, StyleSheet } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 
 const ConfidentialiteScreen: React.FC = () => {

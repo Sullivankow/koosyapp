@@ -1,8 +1,11 @@
+// Icône de cloche affichant le nombre de notifications non lues.
+// Quand on appuie dessus, on navigue vers l'écran des notifications.
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { useNotificationCount } from '../contexts/NotificationCountContext';
+
 
 type Props = {
 	size?: number;
@@ -11,7 +14,8 @@ type Props = {
 };
 
 export default function NotificationBell({ size = 28, color = '#000', style }: Props) {
-	const navigation = useNavigation();
+	// Typage minimal de la navigation : on sait juste qu'il existe une route NotificationsScreen.
+	const navigation = useNavigation<NavigationProp<Record<string, object | undefined>>>();
 	const { unread } = useNotificationCount();
 
 	const onPress = () => {

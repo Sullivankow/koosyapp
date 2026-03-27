@@ -1,3 +1,5 @@
+// Écran "À propos" présentant Koosy, les informations de version
+// et des liens de contact / mentions légales.
 import React from 'react';
 import { View, Text, StyleSheet, Linking, TouchableOpacity } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';

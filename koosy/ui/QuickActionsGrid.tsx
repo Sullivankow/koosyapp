@@ -1,3 +1,5 @@
+// Grille d’actions rapides sur l’écran d’accueil (ajout de bien, tâches,
+// réservations, prestations, accès aux devis et factures).
 import React from 'react';
 import { View, TouchableOpacity, Text } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';

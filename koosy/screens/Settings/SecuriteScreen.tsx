@@ -1,3 +1,6 @@
+// Écran de paramètres de sécurité.
+// Propose (pour l'instant) un simple switch de double authentification
+// et une liste de bonnes pratiques pour sécuriser son compte.
 import React, { useState } from 'react';
 import { View, Text, Switch, StyleSheet } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';

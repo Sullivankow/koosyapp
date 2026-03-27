@@ -1,3 +1,5 @@
+// Écran de support et aide.
+// Regroupe une mini FAQ et les moyens de contacter l'équipe Koosy.
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Linking, ScrollView } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';

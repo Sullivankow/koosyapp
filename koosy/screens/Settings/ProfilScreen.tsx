@@ -1,3 +1,8 @@
+// Écran de gestion du profil utilisateur et de l'entreprise.
+// - Charge les informations de l'utilisateur connecté et de son entreprise
+// - Permet la modification des infos de profil et du mot de passe
+// - Gère un formulaire local pour les informations bancaires et l'abonnement
+// - Offre la création/suppression de l'entreprise liée au compte.
 import React, { useState } from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { Utilisateur } from '../../models/models';
@@ -5,7 +10,7 @@ import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import EntrepriseProfileCard, { Entreprise } from '../../components/cards/EntrepriseProfileCard';
 import { getEntrepriseById } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
-import { getMe, updateMe, apiFetch, deleteMe } from '../../utils/api';
+import { getMe, updateMe, deleteMe } from '../../utils/api';
 import { clearSession } from '../../utils/session';
 import { useContext } from 'react';
 import { AppContext } from '../../contexts/AppContext';
@@ -60,7 +65,8 @@ const ProfilScreen: React.FC = () => {
     // État pour l'entreprise réelle
     const [entreprise, setEntreprise] = useState<Entreprise | null>(null);
 
-    // Fonction pour rafraîchir l'entreprise depuis l'API
+    // Récupère les informations utilisateur et, si présente, son entreprise associée.
+    // Met à jour à la fois l'état "user" (affichage) et "editUser" (mode édition).
     const refreshEntreprise = async () => {
         try {
             const data = await getMe();
@@ -77,11 +83,13 @@ const ProfilScreen: React.FC = () => {
         }
     };
 
-    // Récupération initiale
+    // Récupération initiale des données de profil et d'entreprise au montage du composant.
     React.useEffect(() => {
         refreshEntreprise();
     }, []);
 
+    // Sauvegarde des informations de profil (et éventuellement du mot de passe) côté API.
+    // Valide d'abord la cohérence et la robustesse du mot de passe si l'utilisateur souhaite le modifier.
     const handleSave = async () => {
         try {
             if (showPasswordInput && newPassword.length > 0) {
@@ -120,6 +128,8 @@ const ProfilScreen: React.FC = () => {
         }
     };
 
+    // Active un abonnement "payant" en utilisant les informations bancaires saisies
+    // (logique purement locale pour l'instant, sans appel API).
     const handleSubscribe = () => {
         if (!bankInfo.titulaire || !bankInfo.iban || !bankInfo.bic) {
             Alert.alert('Erreur', 'Veuillez remplir toutes les informations bancaires.');
@@ -129,11 +139,14 @@ const ProfilScreen: React.FC = () => {
         Alert.alert('Abonnement', 'Votre abonnement payant est activé.');
     };
 
+    // Revient à la formule gratuite (sans persistance côté backend pour le moment).
     const handleUnsubscribe = () => {
         setUser({ ...user, formule: 'gratuit' });
         Alert.alert('Abonnement', 'Vous êtes repassé à la formule gratuite.');
     };
 
+    // Confirme avec l'utilisateur puis supprime le compte côté API,
+    // efface la session locale et déconnecte l'utilisateur.
     const handleDeleteAccount = async () => {
         Alert.alert(
             'Suppression du compte',
@@ -162,11 +175,13 @@ const ProfilScreen: React.FC = () => {
         );
     };
 
-    {/* Bouton ajouter une entreprise */}
+    // Affiche le formulaire de création d'entreprise lorsque l'utilisateur n'en a pas encore.
     const handleAddEntreprise = () => {
         setShowEntrepriseForm(true);
     };
 
+    // Valide le formulaire puis crée une nouvelle entreprise côté API.
+    // En cas de succès, on met à jour l'état local et on masque le formulaire.
     const handleCreateEntreprise = async () => {
         try {
             if (!newEntreprise.nom || !newEntreprise.siret || newEntreprise.siret.length !== 14) {
@@ -395,7 +410,10 @@ const ProfilScreen: React.FC = () => {
                 )}
                 {/* Bouton ajouter une entreprise */}
                 {!entreprise && !showEntrepriseForm && (
-                    <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary, marginTop: 24, marginBottom: 18 }]} onPress={() => setShowEntrepriseForm(true)}>
+                    <TouchableOpacity
+                        style={[styles.btnPrimary, { backgroundColor: colors.primary, marginTop: 24, marginBottom: 18 }]}
+                        onPress={handleAddEntreprise}
+                    >
                         <MaterialCommunityIcons name="plus-circle" size={20} color={colors.surface} />
                         <Text style={[styles.btnText, { color: colors.surface }]}>Ajouter une entreprise</Text>
                     </TouchableOpacity>
