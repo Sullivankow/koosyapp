@@ -3,65 +3,81 @@ import * as Notifications from 'expo-notifications';
 import Constants from 'expo-constants';
 import { getNotificationsUnreadCount } from '../utils/api';
 
+// Type décrivant les données et fonctions exposées par le contexte de notifications
 type NotificationContextType = {
+	// Nombre de notifications non lues
 	unread: number;
+	// Fonction pour rafraîchir le compteur en appelant l'API
 	refresh: () => Promise<void>;
+	// Setter explicite pour modifier le compteur et synchroniser le badge iOS
 	setUnread: (n: number) => void;
 };
 
+// Contexte initialisé avec des valeurs par défaut neutres
+// (les vraies valeurs sont fournies par le provider)
 const NotificationCountContext = createContext<NotificationContextType>({
 	unread: 0,
 	refresh: async () => {},
 	setUnread: () => {},
 });
 
+// Hook utilitaire pour consommer facilement le contexte dans les composants
 export const useNotificationCount = () => useContext(NotificationCountContext);
 
-// API calls are forwarded through apiFetch (uses BASE_URL and stored token)
+// Les appels API sont délégués à apiFetch (BASE_URL + token stocké)
 
+// Provider qui gère le compteur de notifications non lues et les listeners système
 export const NotificationCountProvider = ({ children }: { children: ReactNode }) => {
+	// État local du nombre de notifications non lues
 	const [unread, setUnreadState] = useState<number>(0);
 
+	// Met à jour le compteur local et le badge système iOS
 	const setUnread = (n: number) => {
 		setUnreadState(n);
-		// iOS system badge
+		// Mise à jour du badge d'icône sous iOS
 		try {
 			if (Constants.platform?.ios) {
 				Notifications.setBadgeCountAsync(n).catch(() => {});
 			}
 		} catch (e) {
-			// ignore
+			// On ignore toute erreur liée au badge pour ne pas bloquer l'app
 		}
 	};
 
+	// Récupère le nombre de notifications non lues via l'API
 	const refresh = async () => {
-				try {
-					const json = await getNotificationsUnreadCount();
-					if (json && typeof json.unread === 'number') setUnread(json.unread);
-				} catch (err) {
-								// ignore refresh errors in prod
-							}
+		try {
+			const json = await getNotificationsUnreadCount();
+			if (json && typeof json.unread === 'number') setUnread(json.unread);
+		} catch (err) {
+			// En production, on ignore les erreurs de rafraîchissement
+		}
 	};
 
 	useEffect(() => {
-		// load initial count
+		// Chargement initial du compteur au montage
 		refresh();
 
-		// listener when notification received in foreground
+		// Listener déclenché quand une notification est reçue en premier plan
 		const sub1 = Notifications.addNotificationReceivedListener(() => {
 			refresh();
 		});
 
-		// listener when user taps a notification (background/closed)
+		// Listener déclenché quand l'utilisateur clique sur une notification (app en arrière-plan/fermée)
 		const sub2 = Notifications.addNotificationResponseReceivedListener(response => {
-			// response.notification.request.content.data may contain notificationId
-			// We simply refresh the counter; navigation should be handled by a root component
+			// response.notification.request.content.data peut contenir un notificationId
+			// Ici on se contente de rafraîchir le compteur ; la navigation se fait plus haut dans l'arborescence
 			refresh();
 		});
 
+		// Nettoyage des listeners au démontage du provider
 		return () => {
-			try { sub1.remove(); } catch {}
-			try { sub2.remove(); } catch {}
+			try {
+				sub1.remove();
+			} catch {}
+			try {
+				sub2.remove();
+			} catch {}
 		};
 	}, []);
 
