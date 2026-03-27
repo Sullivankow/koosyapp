@@ -1,3 +1,5 @@
+// Utilitaires de gestion de la session locale (email + token JWT)
+// stockée dans AsyncStorage côté mobile.
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Type de session utilisateur
@@ -6,7 +8,9 @@ export type Session = {
   token: string;
 };
 
-// Génère un token aléatoire (UUID simple)
+// Génère un token aléatoire (UUID simple).
+// Utilisé dans les premières versions pour simuler un token, mais
+// aujourd'hui le backend renvoie un vrai JWT (access_token).
 export function generateToken(): string {
   return 'koosy_' + Math.random().toString(36).slice(2, 18);
 }

@@ -1,14 +1,22 @@
 /* -------------------------------------------------------------------------- */
-/*  Fonctions API centralisées pour les notifications (utiliser depuis le client) */
-/*  Toutes les fonctions ci‑dessous utilisent `apiFetch` qui gère le token et la BASE_URL */
+/*  Fonctions API centralisées côté client (biens, tâches, réservations,       */
+/*  notifications, devis, factures, etc.).                                    */
+/*  La plupart des helpers ci‑dessous passent par `apiFetch`, qui ajoute      */
+/*  automatiquement la BASE_URL et le token JWT quand il existe.              */
 /* -------------------------------------------------------------------------- */
-import { Devis } from '../models/models';
+import { Bien, Devis } from '../models/models';
 import { getSession } from './session';
 import { BASE_URL } from '../constants/config';
 
 
 // Simule la récupération d'un token JWT stocké localement
 
+/**
+ * Helper HTTP générique pour appeler l'API Koosy côté client.
+ * - Préfixe automatiquement l'URL avec BASE_URL
+ * - Ajoute le header Authorization Bearer <token> si une session existe
+ * - Gère les réponses vides (204, body vide) et parse le JSON sinon.
+ */
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const session = await getSession();
   const token = session?.token;
@@ -28,7 +36,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 
  
 
-// Fonction d'inscription
+// Fonction d'inscription d'un utilisateur (écran SignUp)
 export function signup(data: { nom: string; prenom: string; email: string; password: string }) {
   return apiFetch('/users', {
     method: 'POST',
@@ -41,7 +49,7 @@ export function signup(data: { nom: string; prenom: string; email: string; passw
   });
 }
 
-// Fonction de connexion
+// Fonction de connexion : renvoie typiquement { access_token } utilisé par saveSession
 export async function login({ email, password }: { email: string; password: string }) {
   const response = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
@@ -75,7 +83,6 @@ export async function getTachesAFaireTotal(): Promise<{ total: number }> {
 }
 
 // Récupérer la liste des biens de l'utilisateur connecté
-import { Bien } from '../models/models';
 export async function getBiens(): Promise<Bien[]> {
   return apiFetch('/biens');
 }
@@ -141,13 +148,10 @@ export async function uploadBienImages(bienId: number, imageUris: string[]): Pro
 
 // Fonction pour modifier un bien
 export async function updateBien(id: string, data: any): Promise<any> {
-  const session = await getSession();
-  const token = session?.token;
+  // Mise à jour partielle d'un bien (titre, adresse, statut, etc.).
+  // L'authentification est gérée automatiquement par apiFetch.
   return apiFetch(`/biens/${id}`, {
     method: 'PATCH',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
     body: JSON.stringify(data),
   });
 }
@@ -169,13 +173,9 @@ export async function geocodeAdresse(adresse: string): Promise<{ lat: number; ln
 
 //Fonction pour supprimer un bien par son iD
 export async function deleteBien(id: string): Promise<void> {
-  const session = await getSession();
-  const token = session?.token;
+  // Supprime définitivement un bien.
   return apiFetch(`/biens/${id}`, {
     method: 'DELETE',
-    headers: {
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
   });
 }
 
