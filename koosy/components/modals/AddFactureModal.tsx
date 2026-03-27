@@ -463,8 +463,8 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 									</TouchableOpacity>
 								</View>
 							))}
-							{/* Bouton pour ajouter une ligne */}
-							<View style={{ alignItems: 'center', marginVertical: 8 }}>
+							{/* Bouton pour ajouter une ligne (centré horizontalement) */}
+							<View style={{ alignItems: 'center', marginVertical: 8, width: '100%' }}>
 								<PlusButton
 									onPress={addLigne}
 									backgroundColor={colors.primary}

@@ -3,26 +3,35 @@ import { createFacture } from '../utils/api';
 import AddFactureModal from '../components/modals/AddFactureModal';
 import { Entreprise } from '../models/models';
 
+// Type minimal pour ce que le hook expose au reste de l'application
+type UseAddFactureModalResult = {
+  open: () => void;
+  close: () => void;
+  modal: React.ReactNode;
+  // Dernière facture créée (ou null tant qu'aucune facture n'a été créée via ce hook)
+  lastFacture: any | null;
+};
+
+// Convertit une date JJ/MM/AAAA en ISO (ou retourne undefined si vide ou invalide)
+function toISO(dateStr: string | undefined): string | undefined {
+  if (!dateStr) return undefined;
+  const [jour, mois, annee] = dateStr.split('/');
+  if (!jour || !mois || !annee) return undefined;
+  const d = new Date(Number(annee), Number(mois) - 1, Number(jour));
+  return d.toISOString();
+}
+
 // Hook personnalisé pour gérer l'ouverture/fermeture de la modale de création de facture
 // et l'envoi de la facture au backend
-export const useAddFactureModal = (entreprises: Entreprise[]) => {
+export const useAddFactureModal = (entreprises: Entreprise[]): UseAddFactureModalResult => {
   const [visible, setVisible] = useState(false);
-  // Initialisation à [] pour éviter l'erreur de typage
-  const [lastFacture, setLastFacture] = useState<any[]>([]);
+  // Stocke la dernière facture créée via ce hook
+  const [lastFacture, setLastFacture] = useState<any | null>(null);
 
   const open = () => setVisible(true);
   const close = () => setVisible(false);
 
   // Soumission de la facture (appel API)
-  // Convertit une date JJ/MM/AAAA en ISO (ou retourne undefined si vide)
-  function toISO(dateStr: string) {
-    if (!dateStr) return undefined;
-    const [jour, mois, annee] = dateStr.split('/');
-    if (!jour || !mois || !annee) return undefined;
-    const d = new Date(Number(annee), Number(mois) - 1, Number(jour));
-    return d.toISOString();
-  }
-
   const handleSubmit = async (facture: any) => {
     try {
       // On envoie seulement l'id de l'entreprise au backend et on convertit les dates
@@ -30,15 +39,21 @@ export const useAddFactureModal = (entreprises: Entreprise[]) => {
         ...facture,
         dateEmission: toISO(facture.dateEmission),
         dateEcheance: toISO(facture.dateEcheance),
-        entreprise: facture.entreprise?.id ?? facture.entreprise
+        entreprise: facture.entreprise?.id ?? facture.entreprise,
       };
+
       const res = await createFacture(payload);
+
+      // On mémorise la facture créée avec l'id retourné par l'API
       setLastFacture({ ...facture, id: res.id });
       setVisible(false);
       alert('La facture a bien été créée !');
     } catch (e: any) {
-      const msg = typeof e === 'object' && e !== null && 'message' in e ? (e as any).message : String(e);
-      alert("Erreur lors de la création de la facture : " + msg);
+      const msg =
+        typeof e === 'object' && e !== null && 'message' in e
+          ? (e as any).message
+          : String(e);
+      alert('Erreur lors de la création de la facture : ' + msg);
     }
   };
 

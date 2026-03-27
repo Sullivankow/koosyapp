@@ -3,6 +3,14 @@ import { getChiffreAffaire } from '../utils/api';
 import dayjs from 'dayjs';
 import { useChiffreAffaireRefresh } from '../contexts/ChiffreAffaireRefreshContext';
 
+/**
+ * Hook pour charger et exposer différents indicateurs de chiffre d'affaires :
+ * - caMois : CA du mois courant
+ * - caGlobal : CA global depuis 2000
+ * - caAnnee : CA de l'année en cours
+ * - caMoisN1 : CA du mois précédent
+ * Les valeurs sont recalculées à chaque changement de refreshKey (contexte ChiffreAffaireRefreshContext).
+ */
 export function useChiffreAffaire() {
   const [caMois, setCaMois] = useState(0);
   const [caGlobal, setCaGlobal] = useState(0);

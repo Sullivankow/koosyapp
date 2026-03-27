@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getBiens, updateBien, deleteBien } from '../utils/api';
+import { getBiens, updateBien, deleteBien, getImageUrl } from '../utils/api';
+import type { Bien } from '../models/models';
 
 /**
  * Hook personnalisé pour gérer la liste des biens et les opérations associées
@@ -11,8 +12,8 @@ import { getBiens, updateBien, deleteBien } from '../utils/api';
  * - loading : booléen de chargement
  * - error : message d'erreur éventuel
  */
-export default function useBiens(deps: any[] = []) {
-  const [biens, setBiens] = useState<any[]>([]);
+export default function useBiens(deps: unknown[] = []) {
+  const [biens, setBiens] = useState<Bien[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,18 +25,22 @@ export default function useBiens(deps: any[] = []) {
       const biensData = await getBiens();
       // Mapping et sécurisation des données (reprend la logique de BiensScreen)
       const mappedBiens = biensData.map((bien: any) => {
-        let photos = [];
+        let photos: { uri: string }[] = [];
+
         if (bien.images && bien.images.length > 0) {
           photos = bien.images
             .map((img: any) => {
-              const uri = img.url ? require('../utils/api').getImageUrl(img.url.replace(/\\|\//g, '/')) : '';
+              const cleanedPath = img.url?.replace(/\\|\//g, '/');
+              const uri = cleanedPath ? getImageUrl(cleanedPath) : '';
               return uri && uri.trim() !== '' ? { uri } : null;
             })
             .filter((img: any) => img && img.uri && img.uri.trim() !== '');
         }
+
         if (photos.length === 0) {
           photos = [require('../assets/house.jpg')];
         }
+
         return {
           ...bien,
           photos,
@@ -82,8 +87,9 @@ export default function useBiens(deps: any[] = []) {
                 currency: prestation.currency || 'EUR',
               }))
             : [],
-        };
+        } as Bien;
       });
+
       setBiens(mappedBiens);
     } catch (err: any) {
       setError('Erreur lors de la récupération des biens');

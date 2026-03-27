@@ -5,9 +5,11 @@ import type { Devis } from '../models/models';
 
 /**
  * Hook personnalisé pour gérer la liste des devis, le token PDF et l'aperçu PDF.
+ * lastDevis sert uniquement de "clé de rafraîchissement" : à chaque changement,
+ * la liste des devis est rechargée depuis l'API.
  * Fournit les états et fonctions pour manipuler les devis dans l'application.
  */
-export function useDevisManager(lastDevis: any[] = []) {
+export function useDevisManager(lastDevis?: unknown) {
   // Liste des devis
   const [devis, setDevis] = useState<Devis[]>([]);
   // Token JWT pour l'authentification PDF

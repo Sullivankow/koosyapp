@@ -5,9 +5,11 @@ import type { Facture } from '../models/models';
 
 /**
  * Hook personnalisé pour gérer la liste des factures, le token PDF et l'aperçu PDF.
+ * lastFacture sert uniquement de "clé de rafraîchissement" : à chaque changement,
+ * la liste des factures est rechargée depuis l'API.
  * Fournit les états et fonctions pour manipuler les factures dans l'application.
  */
-export function useFactureManager(lastFacture: any[] = []) {
+export function useFactureManager(lastFacture?: unknown) {
   // Liste des factures
   const [factures, setFactures] = useState<Facture[]>([]);
   // Token JWT pour l'authentification PDF

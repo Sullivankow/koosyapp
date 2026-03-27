@@ -2,6 +2,7 @@ import { useState } from 'react';
 import dayjs from 'dayjs';
 import { createReservation } from '../utils/api';
 
+// Structure de l'état du formulaire de réservation
 export type ReservationFormState = {
   bienId: string;
   locataireNom: string;
@@ -27,7 +28,13 @@ const initialForm: ReservationFormState = {
   heureDepart: '',
   statut: 'en attente',
 };
-
+/**
+ * Hook pour gérer le formulaire d'ajout de réservation :
+ * - expose l'état du formulaire et son setter
+ * - valide les champs obligatoires
+ * - envoie la réservation au backend en formatant les dates
+ * - permet de réagir au succès ou à l'erreur via des callbacks.
+ */
 export function useReservationForm(onSuccess?: () => void, onError?: (e: any) => void) {
   const [form, setForm] = useState<ReservationFormState>(initialForm);
   const [loading, setLoading] = useState(false);
