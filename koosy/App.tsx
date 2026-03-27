@@ -1,3 +1,8 @@
+// Point d'entrée principal de l'application mobile Koosy.
+// Gère :
+//  - le flow d'authentification (Splash -> Login/Signup -> écran de bienvenue)
+//  - l'arbre de providers (thème, compteurs, refresh globaux)
+//  - la navigation principale (tabs + stacks).
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -13,8 +18,7 @@ import SignupScreen from './screens/Auth/SignupScreen';
 import WelcomeScreen from './screens/Layout/WelcomeScreen';
 import React, { useState, useEffect } from 'react';
 import { useTheme } from './contexts/ThemeContext';
-import { getSession, saveSession, clearSession, generateToken } from './utils/session';
-
+import { getSession, clearSession } from './utils/session';
 import { View, Text, Button } from 'react-native';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BienCountProvider } from './contexts/BienCountContext';
@@ -36,6 +40,8 @@ const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
 const HomeStack = createStackNavigator();
 
+// Stack imbriquée pour l'onglet "Accueil" :
+// permet de naviguer vers les écrans de devis, factures, notifications, etc.
 function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
@@ -53,6 +59,11 @@ function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
 
 
 export default function App() {
+  // États principaux du shell :
+  // - isLoading : affichage du Splash pendant qu'on vérifie la session
+  // - isLoggedIn : indique si l'utilisateur est authentifié
+  // - showSignup / showForgotPassword : écrans d'auth secondaires
+  // - showWelcomeLogin : écran de bienvenue après une connexion réussie.
   const [isLoading, setIsLoading] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [showSignup, setShowSignup] = useState(false);
@@ -61,7 +72,8 @@ export default function App() {
   const [showWelcomeLogin, setShowWelcomeLogin] = useState(false);
 
   useEffect(() => {
-    // Récupération des infos utilisateur depuis la base de données (API)
+    // Au démarrage : on regarde s'il existe une session locale,
+    // puis on valide le token en appelant getMe().
     const timer = setTimeout(async () => {
       const sess = await getSession();
       if (sess?.token) {
@@ -97,7 +109,7 @@ export default function App() {
                   <ReservationRefreshProvider>
                     <NotificationCountProvider>
                       <ChiffreAffaireRefreshProvider>
-                        {/* Auth flow */}
+                        {/* Flow d'authentification (login / signup / mot de passe oublié / welcome) */}
                         {!isLoggedIn ? (
                         showWelcome ? (
                           <WelcomeScreen onFinish={() => { setShowWelcome(false); setIsLoggedIn(true); }} />
@@ -121,14 +133,10 @@ export default function App() {
                         ) : (
                           <LoginScreen
                             onLogin={async (email?: string) => {
-                              const sess = await getSession();
-                              if (sess?.token && sess?.email === email) {
-                                setShowWelcomeLogin(true);
-                              } else {
-                                const token = generateToken();
-                                await saveSession(email || '', token);
-                                setShowWelcomeLogin(true);
-                              }
+                              // Après un login réussi, LoginScreen enregistre déjà
+                              // le token réel via saveSession(email, access_token).
+                              // Ici on se contente d'afficher l'écran de bienvenue.
+                              setShowWelcomeLogin(true);
                             }}
                             onSignup={() => setShowSignup(true)}
                             onForgotPassword={() => setShowForgotPassword(true)}
