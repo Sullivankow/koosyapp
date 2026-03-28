@@ -20,6 +20,8 @@ import { DevisModule } from './devis/devis.module';
 import { FactureModule } from './facture/facture.module';
 import { LigneDevisModule } from './ligne-devis/ligne-devis.module';
 import { ProprietaireModule } from './proprietaire/proprietaire.module';
+import { APP_GUARD } from '@nestjs/core';
+import { RolesGuard } from './auth/roles.guard';
 
 @Module({
   imports: [
@@ -60,7 +62,13 @@ import { ProprietaireModule } from './proprietaire/proprietaire.module';
 
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: RolesGuard,
+    },
+  ],
 })
 
 

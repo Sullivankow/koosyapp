@@ -19,13 +19,14 @@ export class AuthService {
     if (!isPasswordValid) {
       throw new UnauthorizedException('Email ou mot de passe incorrect');
     }
-    const payload = { sub: user.id, email: user.email };
+    const payload = { sub: user.id, email: user.email, role: user.role };
     const token = this.jwtService.sign(payload);
     // Retourne aussi le prénom et le nom
     return {
       access_token: token,
       prenom: user.prenom,
-      nom: user.nom
+      nom: user.nom,
+      role: user.role,
     };
   }
 }

@@ -5,6 +5,8 @@ import { Notification } from './push-tokens/notifications.entity';
 import { Entreprise } from '../entreprise/entreprise.entity';
 
 
+export type UserRole = 'user' | 'admin';
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -51,6 +53,9 @@ expoPushToken: string | null;
    */
   @Column({ type: 'json', nullable: true })
   settings: any;
+
+  @Column({ default: 'user' })
+  role: UserRole;
 
 //Relation avec les biens
 @OneToMany(() => Bien, bien => bien.conciergerie)
