@@ -5,6 +5,8 @@ import Login from './pages/login';
 import Dashboard from './pages/dashboard';
 import Messages from './pages/messages';
 import Users from './pages/users';
+import Notifications from './pages/notifications';
+import Biens from './pages/biens';
 
 // Composant racine de l'application React
 // Il configure le router et associe chaque URL à une page
@@ -25,6 +27,12 @@ function App() {
 
         {/* Page de messages / retours utilisateurs */}
         <Route path="/admin/messages" element={<Messages />} />
+
+        {/* Centre de notifications du backoffice */}
+        <Route path="/admin/notifications" element={<Notifications />} />
+
+        {/* Gestion des biens liés aux utilisateurs */}
+        <Route path="/admin/biens" element={<Biens />} />
 
         {/* Redirection par défaut vers la page de login */}
         <Route path="/" element={<Navigate to="/login" replace />} />

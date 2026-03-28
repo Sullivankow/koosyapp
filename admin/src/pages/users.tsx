@@ -123,10 +123,10 @@ const Users: React.FC = () => {
               </p>
             </div>
             <button
-              type="button"
-              onClick={() => handleOpenDrawer()}
-              className="inline-flex items-center justify-center rounded-lg bg-[#2563EB] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#1D4ED8] transition-colors"
-            >
+          type="button"
+          onClick={() => handleOpenDrawer()}
+          className="inline-flex items-center justify-center rounded-lg bg-[#00A896] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#00897B] transition-colors"
+        >
               <span className="mr-2 text-lg">+</span>
               Nouvel utilisateur
             </button>
@@ -143,7 +143,7 @@ const Users: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Rechercher par nom, email…"
-                className="w-full rounded-lg border border-[#E0E6ED] bg-[#F9FBFF] py-2.5 pl-9 pr-3 text-sm text-[#222B45] placeholder:text-[#9EABB8] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/40 focus:border-[#2563EB]"
+                className="w-full rounded-lg border border-[#E0E6ED] bg-[#F9FBFF] py-2.5 pl-9 pr-3 text-sm text-[#222B45] placeholder:text-[#9EABB8] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
               />
             </div>
 
@@ -153,7 +153,7 @@ const Users: React.FC = () => {
                 <select
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value as any)}
-                  className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/40 focus:border-[#2563EB]"
+                  className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
                 >
                   <option value="Tous">Tous</option>
                   <option value="Admin">Admin</option>
@@ -167,7 +167,7 @@ const Users: React.FC = () => {
                 <select
                   value={statusFilter}
                   onChange={(e) => setStatusFilter(e.target.value as any)}
-                  className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/40 focus:border-[#2563EB]"
+                  className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
                 >
                   <option value="Tous">Tous</option>
                   <option value="Actif">Actif</option>
@@ -187,7 +187,7 @@ const Users: React.FC = () => {
                     setRoleFilter('Tous');
                     setStatusFilter('Tous');
                   }}
-                  className="text-[11px] font-medium text-[#2563EB] hover:text-[#1D4ED8]"
+                  className="text-[11px] font-medium text-[#00A896] hover:text-[#00897B]"
                 >
                   Réinitialiser les filtres
                 </button>
@@ -212,7 +212,7 @@ const Users: React.FC = () => {
                     setRoleFilter('Tous');
                     setStatusFilter('Tous');
                   }}
-                  className="rounded-lg border border-[#E0E6ED] bg-[#F9FBFF] px-3 py-1.5 text-xs font-medium text-[#2563EB] hover:bg-[#E5EDFF]"
+                  className="rounded-lg border border-[#E0E6ED] bg-[#F9FBFF] px-3 py-1.5 text-xs font-medium text-[#00A896] hover:bg-[#D1FAF5]"
                 >
                   Réinitialiser les filtres
                 </button>
@@ -270,10 +270,10 @@ const Users: React.FC = () => {
                         <td className="px-5 py-3 text-right">
                           <div className="inline-flex items-center gap-2 text-xs">
                             <button
-                              type="button"
-                              onClick={() => handleOpenDrawer(user)}
-                              className="rounded-full border border-transparent px-2 py-1 text-[#2563EB] hover:bg-[#E5EDFF]"
-                            >
+                  type="button"
+                  onClick={() => handleOpenDrawer(user)}
+                  className="rounded-full border border-transparent px-2 py-1 text-[#00A896] hover:bg-[#D1FAF5]"
+                >
                               Détails
                             </button>
                             <button
@@ -327,20 +327,20 @@ const Users: React.FC = () => {
                       <div className="space-y-1.5">
                         <label className="block text-xs font-medium text-[#6E7B8B]">Nom complet</label>
                         <input
-                          type="text"
-                          defaultValue={selectedUser?.name ?? ''}
-                          className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/40 focus:border-[#2563EB]"
-                          placeholder="Ex : Julie Martin"
-                        />
+                  type="text"
+                  defaultValue={selectedUser?.name ?? ''}
+                  className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                  placeholder="Ex : Julie Martin"
+                />
                       </div>
                       <div className="space-y-1.5">
                         <label className="block text-xs font-medium text-[#6E7B8B]">Email</label>
                         <input
-                          type="email"
-                          defaultValue={selectedUser?.email ?? ''}
-                          className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/40 focus:border-[#2563EB]"
-                          placeholder="Ex : nom@entreprise.com"
-                        />
+                  type="email"
+                  defaultValue={selectedUser?.email ?? ''}
+                  className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                  placeholder="Ex : nom@entreprise.com"
+                />
                       </div>
                     </div>
                   </section>
@@ -353,9 +353,9 @@ const Users: React.FC = () => {
                       <div className="space-y-1.5">
                         <label className="block text-xs font-medium text-[#6E7B8B]">Rôle</label>
                         <select
-                          defaultValue={selectedUser?.role ?? 'Utilisateur'}
-                          className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#2563EB]/40 focus:border-[#2563EB]"
-                        >
+                  defaultValue={selectedUser?.role ?? 'Utilisateur'}
+                  className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                >
                           <option value="Admin">Admin</option>
                           <option value="Manager">Manager</option>
                           <option value="Utilisateur">Utilisateur</option>
@@ -420,9 +420,9 @@ const Users: React.FC = () => {
                     Annuler
                   </button>
                   <button
-                    type="button"
-                    className="rounded-lg bg-[#2563EB] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#1D4ED8]"
-                  >
+            type="button"
+            className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B]"
+          >
                     Enregistrer (mock)
                   </button>
                 </footer>
