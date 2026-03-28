@@ -3,79 +3,9 @@
 // Liste les biens liés aux utilisateurs (propriétaires) avec filtres + panneau de détail (mock)
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
-
-// Type représentant un propriétaire (utilisateur Koosy)
-type Owner = {
-  id: number;
-  name: string;
-  email: string;
-};
-
-// Type représentant un bien
-type Bien = {
-  id: number;
-  name: string;
-  city: string;
-  country: string;
-  type: 'Appartement' | 'Maison' | 'Studio' | 'Chambre';
-  // Statut métier côté back office : modération / validation
-  status: 'Brouillon' | 'En attente de validation' | 'Actif' | 'Suspendu';
-  occupancyRate: number; // taux d'occupation en % (mock)
-  pricePerNight: number; // prix par nuit
-  capacity: {
-    guests: number;
-    bedrooms: number;
-    bathrooms: number;
-  };
-  owner: Owner;
-};
-
-// Données mockées pour quelques propriétaires
-const mockOwners: Owner[] = [
-  { id: 1, name: 'Julie Martin', email: 'julie.martin@example.com' },
-  { id: 2, name: 'Samuel Dupont', email: 'samuel.dupont@example.com' },
-  { id: 3, name: 'Lina Costa', email: 'lina.costa@example.com' },
-];
-
-// Données mockées pour les biens
-const mockBiens: Bien[] = [
-  {
-    id: 101,
-    name: 'Appartement lumineux centre-ville',
-    city: 'Paris',
-    country: 'France',
-    type: 'Appartement',
-    status: 'En attente de validation',
-    occupancyRate: 82,
-    pricePerNight: 120,
-    capacity: { guests: 4, bedrooms: 2, bathrooms: 1 },
-    owner: mockOwners[0],
-  },
-  {
-    id: 102,
-    name: 'Maison avec jardin',
-    city: 'Bordeaux',
-    country: 'France',
-    type: 'Maison',
-    status: 'Actif',
-    occupancyRate: 65,
-    pricePerNight: 180,
-    capacity: { guests: 6, bedrooms: 3, bathrooms: 2 },
-    owner: mockOwners[1],
-  },
-  {
-    id: 103,
-    name: 'Studio cosy proche plage',
-    city: 'Nice',
-    country: 'France',
-    type: 'Studio',
-    status: 'Suspendu',
-    occupancyRate: 0,
-    pricePerNight: 75,
-    capacity: { guests: 2, bedrooms: 1, bathrooms: 1 },
-    owner: mockOwners[2],
-  },
-];
+// Import centralisé des types et données mock pour les biens
+import type { Bien } from '../models/mocks';
+import { mockBiens, mockOwners } from '../models/mocks';
 
 const BiensPage: React.FC = () => {
   // État pour la sidebar mobile (ouvert / fermé)

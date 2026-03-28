@@ -7,6 +7,9 @@ import Messages from './pages/messages';
 import Users from './pages/users';
 import Notifications from './pages/notifications';
 import Biens from './pages/biens';
+import Reservations from './pages/reservations';
+import Prestations from './pages/prestations';
+import Taches from './pages/taches';
 
 // Composant racine de l'application React
 // Il configure le router et associe chaque URL à une page
@@ -33,6 +36,15 @@ function App() {
 
         {/* Gestion des biens liés aux utilisateurs */}
         <Route path="/admin/biens" element={<Biens />} />
+
+        {/* Gestion des réservations */}
+        <Route path="/admin/reservations" element={<Reservations />} />
+
+        {/* Gestion des prestations */}
+        <Route path="/admin/prestations" element={<Prestations />} />
+
+        {/* Gestion des tâches internes */}
+        <Route path="/admin/taches" element={<Taches />} />
 
         {/* Redirection par défaut vers la page de login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
