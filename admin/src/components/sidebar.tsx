@@ -1,6 +1,9 @@
+// Barre latérale de navigation pour le backoffice Koosy
+// Gère l'affichage du menu principal et la redirection vers les pages d'admin
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 
+// Définition des entrées du menu : chaque élément pointe vers une route
 const menuItems = [
 	{ to: '/dashboard', label: 'Dashboard' },
 	{ to: '/admin/users', label: 'Utilisateurs' },
@@ -9,13 +12,27 @@ const menuItems = [
 	{ to: '/admin/biens', label: 'Biens' },
 	{ to: '/admin/reservations', label: 'Réservations' },
 	{ to: '/admin/taches', label: 'Tâches' },
-	{ to: '/admin/prestations', label: 'Prestations' },
+ 	{ to: '/admin/prestations', label: 'Prestations' },
 ];
 
-const Sidebar: React.FC = () => {
+// Props de la sidebar
+// isOpen permet de contrôler l'ouverture/fermeture du menu en mobile
+type SidebarProps = {
+	isOpen?: boolean;
+};
+
+// Composant Sidebar : menu latéral fixe sur desktop et coulissant sur mobile
+const Sidebar: React.FC<SidebarProps> = ({ isOpen = true }) => {
 	const navigate = useNavigate();
 	return (
-		<aside className="h-screen w-60 bg-[#0F172A] text-white flex flex-col shadow-lg">
+		<aside
+			className={[
+				'fixed inset-y-0 left-0 z-40 h-screen w-60 bg-[#0F172A] text-white flex flex-col shadow-lg transform transition-transform duration-200',
+				isOpen ? 'translate-x-0' : '-translate-x-full',
+				'md:translate-x-0',
+			].join(' ')}
+		>
+			{/* Bloc logo + titre */}
 			<div className="px-4 py-5 flex items-center gap-3 border-b border-white/10">
 				<div className="h-9 w-9 rounded-xl bg-gradient-to-br from-[#00A896] to-[#00897B] flex items-center justify-center shadow-md">
 					<span className="text-lg">🔑</span>
@@ -26,6 +43,7 @@ const Sidebar: React.FC = () => {
 				</div>
 			</div>
 
+			{/* Liste des liens de navigation */}
 			<nav className="flex-1 px-2 py-4 space-y-1 text-sm">
 				{menuItems.map((item) => (
 					<NavLink
@@ -44,6 +62,7 @@ const Sidebar: React.FC = () => {
 				))}
 			</nav>
 
+			{/* Zone du bas : bouton de déconnexion + copyright */}
 			<div className="px-4 py-3 border-t border-white/10 flex flex-col gap-2">
 				<button
 					type="button"

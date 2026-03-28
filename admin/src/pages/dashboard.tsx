@@ -1,12 +1,45 @@
-import React from 'react';
+// Page "Tableau de bord" du backoffice
+// Affiche un aperçu global de l'activité (stats, abonnements, messages récents...)
+import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
 
 const Dashboard: React.FC = () => {
+  // État local pour gérer l'ouverture de la sidebar en mobile
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
-    <div className="min-h-screen flex bg-[#F4F7FA]">
-      <Sidebar />
+    <div className="min-h-screen bg-[#F4F7FA]">
+      {/* Sidebar responsive : visible en permanence sur desktop, coulissante sur mobile */}
+      <Sidebar isOpen={sidebarOpen} />
 
-      <main className="flex-1 px-6 py-6 flex">
+      {/* Overlay mobile : petit voile noir lorsqu'on ouvre le menu, qui permet aussi de le fermer au clic */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Topbar mobile avec bouton burger et titre de la page */}
+      <header className="flex items-center justify-between px-4 py-3 border-b border-[#E0E6ED] bg-[#F4F7FA] md:hidden">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white p-2 text-[#0F172A] shadow-sm"
+        >
+          <span className="sr-only">Ouvrir le menu</span>
+          <div className="flex flex-col space-y-1">
+            <span className="block h-0.5 w-4 bg-[#0F172A]" />
+            <span className="block h-0.5 w-4 bg-[#0F172A]" />
+            <span className="block h-0.5 w-4 bg-[#0F172A]" />
+          </div>
+        </button>
+        <h1 className="text-sm font-semibold text-[#222B45]">Tableau de bord</h1>
+        {/* Espace réservé pour garder le titre centré visuellement */}
+        <div className="w-8" />
+      </header>
+
+      {/* Contenu principal de la page */}
+      <main className="px-4 py-4 md:ml-60 md:px-6 md:py-6 flex min-h-screen">
         <div className="w-full max-w-6xl mx-auto space-y-6">
           {/* En-tête */}
           <div className="flex flex-col gap-2">

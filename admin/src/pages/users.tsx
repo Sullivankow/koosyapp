@@ -1,7 +1,9 @@
-
+// Page de gestion des utilisateurs
+// Liste les comptes, permet de filtrer et d'ouvrir un panneau de détails (mock pour l'instant)
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
 
+// Type représentant un utilisateur dans cette page (mock local)
 type User = {
   id: number;
   name: string;
@@ -11,6 +13,7 @@ type User = {
   lastLogin: string;
 };
 
+// Données mockées pour l'affichage en attendant la connexion à l'API backend
 const mockUsers: User[] = [
   {
     id: 1,
@@ -39,12 +42,20 @@ const mockUsers: User[] = [
 ];
 
 const Users: React.FC = () => {
+  // État pour la sidebar mobile (ouvert / fermé)
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  // Texte de recherche (nom / email)
   const [search, setSearch] = useState('');
+  // Filtre sur le rôle (Tous, Admin, Manager...)
   const [roleFilter, setRoleFilter] = useState<'Tous' | User['role']>('Tous');
+  // Filtre sur le statut (Tous, Actif, Inactif)
   const [statusFilter, setStatusFilter] = useState<'Tous' | User['status']>('Tous');
+  // Utilisateur actuellement sélectionné dans le drawer (ou null si création)
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  // Booléen indiquant si le drawer (panneau latéral) est ouvert
   const [drawerOpen, setDrawerOpen] = useState(false);
 
+  // Applique les filtres (recherche, rôle, statut) sur la liste mockée
   const filteredUsers = mockUsers.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -56,21 +67,52 @@ const Users: React.FC = () => {
     return matchesSearch && matchesRole && matchesStatus;
   });
 
+  // Ouvre le drawer pour créer ou éditer un utilisateur
   const handleOpenDrawer = (user?: User) => {
     setSelectedUser(user ?? null);
     setDrawerOpen(true);
   };
 
+  // Ferme le drawer et réinitialise l'utilisateur sélectionné
   const handleCloseDrawer = () => {
     setDrawerOpen(false);
     setSelectedUser(null);
   };
 
   return (
-    <div className="min-h-screen flex bg-[#F4F7FA]">
-      <Sidebar />
+    <div className="min-h-screen bg-[#F4F7FA]">
+      {/* Sidebar responsive : visible sur desktop et coulissante sur mobile */}
+      <Sidebar isOpen={sidebarOpen} />
 
-      <main className="flex-1 px-6 py-6 flex">
+      {/* Overlay mobile : clique dessus pour fermer la sidebar */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          onClick={() => setSidebarOpen(false)}
+        />
+      )}
+
+      {/* Topbar mobile avec bouton burger et titre de la page */}
+      <header className="flex items-center justify-between px-4 py-3 border-b border-[#E0E6ED] bg-[#F4F7FA] md:hidden">
+        <button
+          type="button"
+          onClick={() => setSidebarOpen(true)}
+          className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white p-2 text-[#0F172A] shadow-sm"
+        >
+          <span className="sr-only">Ouvrir le menu</span>
+          <div className="flex flex-col space-y-1">
+            <span className="block h-0.5 w-4 bg-[#0F172A]" />
+            <span className="block h-0.5 w-4 bg-[#0F172A]" />
+            <span className="block h-0.5 w-4 bg-[#0F172A]" />
+          </div>
+        </button>
+        <h1 className="text-sm font-semibold text-[#222B45]">Utilisateurs</h1>
+        {/* Espace vide pour équilibrer le header */}
+        <div className="w-8" />
+      </header>
+
+      {/* Contenu principal de la page utilisateurs */}
+      <main className="px-4 py-4 md:ml-60 md:px-6 md:py-6 flex min-h-screen">
         <div className="w-full max-w-6xl mx-auto space-y-6">
           {/* En-tête */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
