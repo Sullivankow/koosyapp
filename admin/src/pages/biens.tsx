@@ -7,8 +7,9 @@ import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
 import BienCard from '../components/cards';
 import BienImagesCarousel from '../components/bienImagesCarousel';
-import type { BackendBien, BackendProprietaire } from '../models/models';
-import { fetchBiensAdminList } from '../utils/biensApi';
+import type { BackendBien, BackendProprietaire, BackendUser } from '../models/models';
+import { fetchBiensAdminList, createBienForUser } from '../utils/biensApi';
+import { fetchUsersList } from '../utils/usersApi';
 
 const BiensPage: React.FC = () => {
   // État pour la sidebar mobile (ouvert / fermé)
@@ -25,6 +26,18 @@ const BiensPage: React.FC = () => {
   // Bien sélectionné dans le panneau de détail
   const [selectedBien, setSelectedBien] = useState<BackendBien | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Données pour la création d'un nouveau bien (admin)
+  const [users, setUsers] = useState<BackendUser[]>([]);
+  const [formUserId, setFormUserId] = useState<number | ''>('');
+  const [formNom, setFormNom] = useState('');
+  const [formAdresse, setFormAdresse] = useState('');
+  const [formType, setFormType] = useState<'Appartement' | 'Maison' | 'Studio' | 'Chambre' | ''>('');
+  const [formSuperficie, setFormSuperficie] = useState('');
+  const [formPieces, setFormPieces] = useState('');
+  const [formStatut, setFormStatut] = useState<'disponible' | 'occupé' | 'travaux'>('disponible');
+  const [formSaving, setFormSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Chargement des biens depuis l'API admin
   useEffect(() => {
@@ -49,6 +62,20 @@ const BiensPage: React.FC = () => {
     };
 
     void loadBiens();
+  }, []);
+
+  // Chargement des utilisateurs (conciergeries) pour la création admin
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const data = await fetchUsersList();
+        setUsers(data ?? []);
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    void loadUsers();
   }, []);
 
   const filteredBiens = biens.filter((bien) => {
@@ -83,6 +110,18 @@ const BiensPage: React.FC = () => {
   // Ouvre le drawer avec le bien sélectionné (ou null pour création)
   const openDrawer = (bien?: BackendBien) => {
     setSelectedBien(bien ?? null);
+    setFormError(null);
+    setFormSaving(false);
+    if (!bien) {
+      // Nouveau bien : réinitialise le formulaire
+      setFormUserId('');
+      setFormNom('');
+      setFormAdresse('');
+      setFormType('');
+      setFormSuperficie('');
+      setFormPieces('');
+      setFormStatut('disponible');
+    }
     setDrawerOpen(true);
   };
 
@@ -90,6 +129,47 @@ const BiensPage: React.FC = () => {
   const closeDrawer = () => {
     setDrawerOpen(false);
     setSelectedBien(null);
+    setFormError(null);
+  };
+
+  const handleCreateBien = async () => {
+    try {
+      setFormSaving(true);
+      setFormError(null);
+
+      if (!formUserId || !formNom || !formAdresse || !formType || !formSuperficie || !formPieces) {
+        setFormError('Veuillez renseigner tous les champs obligatoires.');
+        return;
+      }
+
+      const superficieNum = Number(formSuperficie);
+      const piecesNum = Number(formPieces);
+
+      if (Number.isNaN(superficieNum) || Number.isNaN(piecesNum)) {
+        setFormError('Superficie et nombre de pièces doivent être des nombres.');
+        return;
+      }
+
+      await createBienForUser(formUserId, {
+        nom: formNom,
+        adresse: formAdresse,
+        type: formType,
+        superficie: superficieNum,
+        pieces: piecesNum,
+        statut: formStatut,
+      });
+
+      // Recharge la liste des biens après création
+      const data = await fetchBiensAdminList();
+      setBiens(data ?? []);
+
+      closeDrawer();
+    } catch (e) {
+      console.error(e);
+      setFormError('Impossible de créer le bien.');
+    } finally {
+      setFormSaving(false);
+    }
   };
 
   return (
@@ -244,7 +324,7 @@ const BiensPage: React.FC = () => {
         </section>
       </main>
 
-      {/* Drawer latéral pour créer / éditer un bien (mock) */}
+      {/* Drawer latéral pour créer un bien (admin) ou consulter un bien existant */}
       {drawerOpen && (
         <div className="fixed inset-0 z-40 flex">
           <div className="fixed inset-0 bg-black/20" onClick={closeDrawer} />
@@ -252,10 +332,12 @@ const BiensPage: React.FC = () => {
             <header className="px-5 py-4 border-b border-[#E0E6ED] flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-semibold text-[#222B45]">
-                  {selectedBien ? 'Modifier le bien' : 'Nouveau bien'}
+                  {selectedBien ? 'Détail du bien' : 'Nouveau bien (admin)'}
                 </h2>
                 <p className="text-[11px] text-[#9EABB8]">
-                  Formulaire mocké à connecter à ton backend Nest (biens + propriétaires).
+                  {selectedBien
+                    ? 'Visualisation des informations du bien existant.'
+                    : 'Créer un bien pour un utilisateur (conciergerie) choisi.'}
                 </p>
               </div>
               <button
@@ -278,71 +360,192 @@ const BiensPage: React.FC = () => {
                 </section>
               )}
 
-              {/* En-tête de la fiche avec nom + statut (backend) */}
-              <section className="rounded-xl border border-[#E0E6ED] bg-[#F9FBFF] p-4 space-y-3">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="space-y-1">
-                    <p className="text-[11px] text-[#9EABB8]">Nom du bien</p>
-                    <p className="text-sm font-semibold text-[#222B45]">
-                      {selectedBien?.nom ?? '—'}
-                    </p>
-                    <p className="text-[11px] text-[#6E7B8B]">
-                      {selectedBien?.adresse ?? '—'}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-2">
-                    {selectedBien && (
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                          selectedBien.statut === 'disponible'
-                            ? 'bg-[#ECFDF3] text-[#166534]'
-                            : selectedBien.statut === 'occupé'
-                              ? 'bg-[#EFF6FF] text-[#1D4ED8]'
-                              : 'bg-[#FFFBEB] text-[#92400E]'
-                        }`}
-                      >
-                        {selectedBien.statut === 'disponible' && 'Disponible'}
-                        {selectedBien.statut === 'occupé' && 'Occupé'}
-                        {selectedBien.statut === 'travaux' && 'En travaux'}
-                      </span>
-                    )}
-                    <p className="text-[11px] text-[#9EABB8]">
-                      Type&nbsp;: <span className="text-[#222B45]">{selectedBien?.type ?? '—'}</span>
-                    </p>
-                  </div>
-                </div>
-              </section>
+              {selectedBien ? (
+                <>
+                  {/* En-tête de la fiche avec nom + statut (backend) */}
+                  <section className="rounded-xl border border-[#E0E6ED] bg-[#F9FBFF] p-4 space-y-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="space-y-1">
+                        <p className="text-[11px] text-[#9EABB8]">Nom du bien</p>
+                        <p className="text-sm font-semibold text-[#222B45]">
+                          {selectedBien.nom}
+                        </p>
+                        <p className="text-[11px] text-[#6E7B8B]">
+                          {selectedBien.adresse}
+                        </p>
+                      </div>
+                      <div className="flex flex-col items-end gap-2">
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                            selectedBien.statut === 'disponible'
+                              ? 'bg-[#ECFDF3] text-[#166534]'
+                              : selectedBien.statut === 'occupé'
+                                ? 'bg-[#EFF6FF] text-[#1D4ED8]'
+                                : 'bg-[#FFFBEB] text-[#92400E]'
+                          }`}
+                        >
+                          {selectedBien.statut === 'disponible' && 'Disponible'}
+                          {selectedBien.statut === 'occupé' && 'Occupé'}
+                          {selectedBien.statut === 'travaux' && 'En travaux'}
+                        </span>
+                        <p className="text-[11px] text-[#9EABB8]">
+                          Type&nbsp;: <span className="text-[#222B45]">{selectedBien.type}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </section>
 
-              {/* Bloc propriétaire / conciergerie (backend proprietaire) */}
-              <section className="rounded-xl border border-[#E0E6ED] bg-white p-4 space-y-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9EABB8]">
-                  Propriétaire du bien
-                </h3>
-                <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-[#0F172A]/5 flex items-center justify-center text-xs font-semibold text-[#0F172A]">
-                    {selectedBien?.proprietaire
-                      ? `${selectedBien.proprietaire.prenom} ${selectedBien.proprietaire.nom}`
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')
-                      : ''}
+                  {/* Bloc propriétaire */}
+                  <section className="rounded-xl border border-[#E0E6ED] bg-white p-4 space-y-3">
+                    <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9EABB8]">
+                      Propriétaire du bien
+                    </h3>
+                    <div className="flex items-center gap-3">
+                      <div className="h-9 w-9 rounded-full bg-[#0F172A]/5 flex items-center justify-center text-xs font-semibold text-[#0F172A]">
+                        {selectedBien.proprietaire
+                          ? `${selectedBien.proprietaire.prenom} ${selectedBien.proprietaire.nom}`
+                              .split(' ')
+                              .map((n) => n[0])
+                              .join('')
+                          : ''}
+                      </div>
+                      <div className="space-y-0.5">
+                        <p className="text-sm font-medium text-[#222B45]">
+                          {selectedBien.proprietaire
+                            ? `${selectedBien.proprietaire.prenom} ${selectedBien.proprietaire.nom}`
+                            : '—'}
+                        </p>
+                        <p className="text-[11px] text-[#6E7B8B]">
+                          {selectedBien.proprietaire?.email ?? ''}
+                        </p>
+                        <p className="text-[11px] text-[#9EABB8]">Propriétaire enregistré pour ce bien.</p>
+                      </div>
+                    </div>
+                  </section>
+                </>
+              ) : (
+                <section className="space-y-4">
+                  {formError && (
+                    <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] text-red-700">
+                      {formError}
+                    </div>
+                  )}
+
+                  <div className="space-y-1">
+                    <label className="block text-xs font-medium text-[#6E7B8B]">
+                      Utilisateur (conciergerie) concerné
+                    </label>
+                    <select
+                      value={formUserId}
+                      onChange={(e) =>
+                        setFormUserId(e.target.value ? Number(e.target.value) : '')
+                      }
+                      className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                    >
+                      <option value="">Sélectionner un utilisateur</option>
+                      {users.map((u) => (
+                        <option key={u.id} value={u.id}>
+                          {u.prenom} {u.nom} — {u.email}
+                        </option>
+                      ))}
+                    </select>
+                    {formUserId && (
+                      <p className="text-[11px] text-[#9EABB8]">
+                        Le bien sera rattaché à cet utilisateur dans la conciergerie.
+                      </p>
+                    )}
                   </div>
-                  <div className="space-y-0.5">
-                    <p className="text-sm font-medium text-[#222B45]">
-                      {selectedBien?.proprietaire
-                        ? `${selectedBien.proprietaire.prenom} ${selectedBien.proprietaire.nom}`
-                        : '—'}
-                    </p>
-                    <p className="text-[11px] text-[#6E7B8B]">
-                      {selectedBien?.proprietaire?.email ?? ''}
-                    </p>
-                    <p className="text-[11px] text-[#9EABB8]">Propriétaire enregistré pour ce bien.</p>
+
+                  <div className="grid grid-cols-1 gap-3">
+                    <div className="space-y-1">
+                      <label className="block text-xs font-medium text-[#6E7B8B]">Nom du bien</label>
+                      <input
+                        type="text"
+                        value={formNom}
+                        onChange={(e) => setFormNom(e.target.value)}
+                        className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                        placeholder="Ex : Appartement T2 centre-ville"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-xs font-medium text-[#6E7B8B]">Adresse</label>
+                      <input
+                        type="text"
+                        value={formAdresse}
+                        onChange={(e) => setFormAdresse(e.target.value)}
+                        className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                        placeholder="Adresse complète du bien"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-[#6E7B8B]">Type</label>
+                        <select
+                          value={formType}
+                          onChange={(e) =>
+                            setFormType(
+                              e.target.value as
+                                | 'Appartement'
+                                | 'Maison'
+                                | 'Studio'
+                                | 'Chambre'
+                                | '',
+                            )
+                          }
+                          className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                        >
+                          <option value="">Sélectionner</option>
+                          <option value="Appartement">Appartement</option>
+                          <option value="Maison">Maison</option>
+                          <option value="Studio">Studio</option>
+                          <option value="Chambre">Chambre</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-[#6E7B8B]">Superficie (m²)</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={formSuperficie}
+                          onChange={(e) => setFormSuperficie(e.target.value)}
+                          className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-[#6E7B8B]">Pièces</label>
+                        <input
+                          type="number"
+                          min={0}
+                          value={formPieces}
+                          onChange={(e) => setFormPieces(e.target.value)}
+                          className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="block text-xs font-medium text-[#6E7B8B]">Statut</label>
+                      <select
+                        value={formStatut}
+                        onChange={(e) =>
+                          setFormStatut(
+                            e.target.value as 'disponible' | 'occupé' | 'travaux',
+                          )
+                        }
+                        className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                      >
+                        <option value="disponible">Disponible</option>
+                        <option value="occupé">Occupé</option>
+                        <option value="travaux">En travaux</option>
+                      </select>
+                    </div>
                   </div>
-                </div>
-                <p className="text-[11px] text-[#9EABB8]">
-                  Plus tard, cette fiche pourra aussi afficher la conciergerie responsable (champ backend : conciergerie) et les remarques éventuelles.
-                </p>
-              </section>
+                </section>
+              )}
             </div>
 
             <footer className="px-5 py-4 border-t border-[#E0E6ED] flex justify-end gap-2 bg-white">
@@ -353,12 +556,16 @@ const BiensPage: React.FC = () => {
               >
                 Annuler
               </button>
-              <button
-                type="button"
-                className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B]"
-              >
-                Enregistrer (mock)
-              </button>
+              {!selectedBien && (
+                <button
+                  type="button"
+                  onClick={handleCreateBien}
+                  disabled={formSaving}
+                  className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B] disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {formSaving ? 'Création…' : 'Créer le bien'}
+                </button>
+              )}
             </footer>
           </div>
         </div>

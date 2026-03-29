@@ -30,6 +30,27 @@ export class BiensController {
     return this.biensService.createBien(createBienDto, req.user.userId);
   }
 
+  // Création d'un bien pour un utilisateur donné (réservé aux administrateurs)
+  @Post('admin/:userId')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiBody({ type: CreateBienDto })
+  @ApiResponse({ status: 201, description: "Bien créé pour l'utilisateur ciblé (admin)." })
+  @ApiResponse({ status: 400, description: "Données invalides ou identifiant utilisateur invalide." })
+  @ApiResponse({ status: 401, description: 'Non authentifié.' })
+  @ApiResponse({ status: 403, description: 'Accès réservé aux administrateurs.' })
+  @ApiOperation({ summary: "Créer un bien pour un utilisateur donné (admin)" })
+  async createBienForUser(
+    @Param('userId') userId: string,
+    @Body() createBienDto: CreateBienDto,
+  ) {
+    const idNum = Number(userId);
+    if (!userId || isNaN(idNum) || !Number.isInteger(idNum)) {
+      throw new BadRequestException("L'id de l'utilisateur doit être un entier valide");
+    }
+    return this.biensService.createBien(createBienDto, idNum);
+  }
+
   //Méthode pour géocoder une adresse en latitude et longitude
   @Get('geocode')
   @ApiOperation({ summary: 'Géocoder une adresse en latitude/longitude' })

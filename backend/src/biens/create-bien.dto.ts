@@ -3,11 +3,12 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNumber, IsOptional } from 'class-validator';
 import { PartialType } from '@nestjs/mapped-types';
 
-// DTO pour la création d'un bien avec l'id du propriétaire
+// DTO pour la création d'un bien (le propriétaire est optionnel)
 export class CreateBienDto {
-	@ApiProperty({ description: "ID du propriétaire du bien" })
+	@ApiPropertyOptional({ description: "ID du propriétaire du bien (optionnel)" })
+	@IsOptional()
 	@IsNumber()
-	proprietaire: number;
+	proprietaire?: number;
 
 	@ApiProperty({ example: 'Appartement T2 centre-ville' })
 	@IsString()

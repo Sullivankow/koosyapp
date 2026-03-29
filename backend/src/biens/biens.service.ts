@@ -38,10 +38,12 @@ export class BiensService {
       }
     }
 
+    const { proprietaire, ...rest } = createBienDto;
+
     const bien = this.biensRepository.create({
-      ...createBienDto,
+      ...rest,
       conciergerie: user,
-      proprietaire: { id: createBienDto.proprietaire },
+      ...(proprietaire ? { proprietaire: { id: proprietaire } } : {}),
     });
     return this.biensRepository.save(bien);
   }

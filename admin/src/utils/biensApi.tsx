@@ -1,6 +1,6 @@
 
 // Fonctions d'appel API liées aux biens
-import { getJson } from './api';
+import { API_BASE_URL, buildHeaders, getJson } from './api';
 import type { BackendBien } from '../models/models';
 
 // Liste des biens de l'utilisateur connecté (vue conciergerie)
@@ -34,8 +34,38 @@ export async function fetchBiensTotal(): Promise<number | null> {
   }
 }
 
+// Payload pour la création d'un bien (admin)
+export type CreateBienPayload = {
+  nom: string;
+  adresse: string;
+  type: string;
+  superficie: number;
+  pieces: number;
+  statut?: 'disponible' | 'occupé' | 'travaux';
+  proprietaire?: number;
+};
+
+// Création d'un bien pour un utilisateur donné (vue admin)
+export async function createBienForUser(
+  userId: number,
+  payload: CreateBienPayload,
+): Promise<BackendBien> {
+  const res = await fetch(`${API_BASE_URL}/biens/admin/${userId}` , {
+    method: 'POST',
+    headers: buildHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new Error("Erreur lors de la création du bien");
+  }
+
+  return res.json();
+}
+
 export default {
   fetchBiensList,
   fetchBiensAdminList,
   fetchBiensTotal,
+  createBienForUser,
 };
