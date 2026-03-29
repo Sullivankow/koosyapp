@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
 import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
-import { fetchUsersList, createUser } from '../utils/usersApi';
+import { fetchUsersList, createUser, updateUser, deleteUser } from '../utils/usersApi';
 import type { BackendUser } from '../models/models';
 
 // Type représentant un utilisateur pour l'affichage dans cette page
@@ -124,20 +124,32 @@ const Users: React.FC = () => {
     try {
       setSaving(true);
       setFormError(null);
+      const isEdit = !!selectedUser;
 
-      if (!formEmail || !formPassword || !formNom || !formPrenom) {
+      if (!formEmail || !formNom || !formPrenom || (!isEdit && !formPassword)) {
         setFormError('Veuillez remplir tous les champs obligatoires.');
         return;
       }
 
-      // Création uniquement pour l'instant
-      await createUser({
+      const basePayload = {
         email: formEmail,
-        password: formPassword,
         nom: formNom,
         prenom: formPrenom,
         role: formRole === 'Admin' ? 'admin' : 'user',
-      });
+      } as const;
+
+      if (isEdit && selectedUser) {
+        const payload: any = { ...basePayload };
+        if (formPassword.trim()) {
+          payload.password = formPassword;
+        }
+        await updateUser(selectedUser.id, payload);
+      } else {
+        await createUser({
+          ...basePayload,
+          password: formPassword,
+        });
+      }
 
       // Recharge la liste
       const apiUsers = await fetchUsersList();
@@ -158,6 +170,33 @@ const Users: React.FC = () => {
       setFormError("Impossible de créer l'utilisateur.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async (user: User) => {
+    const confirmed = window.confirm(`Supprimer définitivement l'utilisateur ${user.name} ?`);
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      await deleteUser(user.id);
+      const apiUsers = await fetchUsersList();
+      const mapped: User[] = (apiUsers ?? []).map((u: BackendUser) => ({
+        id: u.id,
+        name: `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email,
+        email: u.email,
+        role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
+        status: 'Actif',
+        lastLogin: '—',
+        entrepriseName: u.entreprise?.nom ?? null,
+      }));
+      setUsers(mapped);
+    } catch (e) {
+      console.error('Erreur lors de la suppression de l\'utilisateur', e);
+      setError('Impossible de supprimer cet utilisateur.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -361,17 +400,18 @@ const Users: React.FC = () => {
                         <td className="px-5 py-3 text-right">
                           <div className="inline-flex items-center gap-2 text-xs">
                             <button
-                  type="button"
-                  onClick={() => handleOpenDrawer(user)}
-                  className="rounded-full border border-transparent px-2 py-1 text-[#00A896] hover:bg-[#D1FAF5]"
-                >
+                              type="button"
+                              onClick={() => handleOpenDrawer(user)}
+                              className="rounded-full border border-transparent px-2 py-1 text-[#00A896] hover:bg-[#D1FAF5]"
+                            >
                               Détails
                             </button>
                             <button
                               type="button"
-                              className="rounded-full border border-transparent px-2 py-1 text-[#9EABB8] hover:bg-[#F4F7FA]"
+                              onClick={() => handleDelete(user)}
+                              className="rounded-full border border-transparent px-2 py-1 text-[#B91C1C] hover:bg-[#FEE2E2]"
                             >
-                              …
+                              Supprimer
                             </button>
                           </div>
                         </td>
@@ -465,16 +505,18 @@ const Users: React.FC = () => {
                         </select>
                       </div>
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-medium text-[#6E7B8B]">Mot de passe initial</label>
+                        <label className="block text-xs font-medium text-[#6E7B8B]">Mot de passe</label>
                         <input
                   type="password"
                   value={formPassword}
                   onChange={(e) => setFormPassword(e.target.value)}
                   className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                  placeholder="Mot de passe temporaire"
+                  placeholder={selectedUser ? 'Laisser vide pour ne pas changer' : 'Mot de passe temporaire'}
                 />
                         <p className="text-[11px] text-[#9EABB8]">
-                          L&apos;utilisateur pourra le changer plus tard depuis son espace.
+                          {selectedUser
+                            ? 'Laisser vide pour conserver le mot de passe actuel.'
+                            : 'L\'utilisateur pourra le changer plus tard depuis son espace.'}
                         </p>
                       </div>
                     </div>

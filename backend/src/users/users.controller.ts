@@ -1,4 +1,4 @@
-import { ApiBearerAuth, ApiTags, ApiBody, ApiOperation } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Controller, Post, Body, Get, Patch, Delete, Param, ForbiddenException, Request, BadRequestException, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { TachesService } from '../taches/taches.service';
@@ -6,6 +6,8 @@ import { PushTokensService } from './push-tokens/push-tokens.service';
 import { CreateUserDto, UpdateUserDto } from './create-user.dto';
 import { UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import { SettingsDto } from './settings.dto';
 
 
@@ -88,15 +90,33 @@ export class UsersController {
 
 
 
-    //Supprimer un utilisateur par son id 
+    // Supprimer son propre compte utilisateur (auto-suppression)
     @Delete(':id')
     @ApiBearerAuth()
     @UseGuards(JwtAuthGuard)
-    @ApiOperation({ summary: 'Supprimer un utilisateur par son id (seulement soi-même)' })
+    @ApiOperation({ summary: 'Supprimer son propre compte utilisateur' })
+    @ApiResponse({ status: 200, description: 'Compte utilisateur supprimé avec succès.' })
+    @ApiResponse({ status: 401, description: 'Non authentifié.' })
+    @ApiResponse({ status: 403, description: 'Vous ne pouvez supprimer que votre propre compte.' })
+    @ApiResponse({ status: 404, description: 'Utilisateur non trouvé.' })
     async remove(@Param('id') id: number, @Request() req) {
       if (req.user.userId !== Number(id)) {
         throw new ForbiddenException('Vous ne pouvez supprimer que votre propre compte.');
       }
+      return this.userService.remove(Number(id));
+    }
+
+    // Supprimer n'importe quel utilisateur (admin uniquement)
+    @Delete('admin/:id')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @ApiOperation({ summary: 'Supprimer n’importe quel utilisateur (admin uniquement)' })
+    @ApiResponse({ status: 200, description: 'Utilisateur supprimé avec succès.' })
+    @ApiResponse({ status: 401, description: 'Non authentifié.' })
+    @ApiResponse({ status: 403, description: 'Accès réservé aux administrateurs.' })
+    @ApiResponse({ status: 404, description: 'Utilisateur non trouvé.' })
+    async adminRemove(@Param('id') id: number) {
       return this.userService.remove(Number(id));
     }
 

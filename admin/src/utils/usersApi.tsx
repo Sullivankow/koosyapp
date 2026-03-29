@@ -34,6 +34,16 @@ export type CreateUserPayload = {
   telephone?: string;
 };
 
+export type UpdateUserPayload = {
+  email?: string;
+  password?: string;
+  nom?: string;
+  prenom?: string;
+  role?: 'user' | 'admin';
+  abonnement?: 'gratuit' | 'premium';
+  telephone?: string;
+};
+
 // Création d'un nouvel utilisateur
 export async function createUser(payload: CreateUserPayload): Promise<any> {
   const res = await fetch(`${API_BASE_URL}/users`, {
@@ -49,8 +59,37 @@ export async function createUser(payload: CreateUserPayload): Promise<any> {
   return res.json();
 }
 
+// Mise à jour partielle d'un utilisateur existant
+export async function updateUser(id: number, payload: UpdateUserPayload): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/users/${id}` , {
+    method: 'PATCH',
+    headers: buildHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new Error('Erreur lors de la mise à jour de l\'utilisateur');
+  }
+
+  return res.json();
+}
+
+// Suppression d'un utilisateur (admin uniquement)
+export async function deleteUser(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/users/admin/${id}` , {
+    method: 'DELETE',
+    headers: buildHeaders(),
+  });
+
+  if (!res.ok) {
+    throw new Error('Erreur lors de la suppression de l\'utilisateur');
+  }
+}
+
 export default {
   fetchUsersList,
   fetchUsersTotal,
   createUser,
+  updateUser,
+  deleteUser,
 };
