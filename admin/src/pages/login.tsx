@@ -1,8 +1,34 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { loginBackoffice } from '../utils/api';
 
 const Login: React.FC = () => {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await loginBackoffice(email, password);
+      if (res.role !== 'admin') {
+        setError("Vous n'avez pas accès au backoffice.");
+        setLoading(false);
+        return;
+      }
+      localStorage.setItem('token', res.access_token);
+      localStorage.setItem('backofficeUserName', `${res.prenom} ${res.nom}`);
+      localStorage.setItem('backofficeUserRole', res.role);
+      navigate('/dashboard');
+    } catch (e) {
+      setError('Email ou mot de passe incorrect.');
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-[#F4F7FA] flex items-center justify-center px-4">
@@ -15,7 +41,7 @@ const Login: React.FC = () => {
           <p className="text-sm text-[#6E7B8B] mt-1">Espace d'administration réservé</p>
         </div>
 
-        <form className="space-y-4">
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-1">
             <label className="block text-sm font-medium text-[#222B45]" htmlFor="email">
               Email
@@ -23,6 +49,8 @@ const Login: React.FC = () => {
             <input
               id="email"
               type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#009688] focus:border-transparent bg-[#F9FBFF]"
               placeholder="vous@koosy.app"
             />
@@ -35,17 +63,23 @@ const Login: React.FC = () => {
             <input
               id="password"
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#009688] focus:border-transparent bg-[#F9FBFF]"
               placeholder="••••••••"
             />
           </div>
 
+          {error && (
+            <p className="text-xs text-red-600 mt-2">{error}</p>
+          )}
+
           <button
-            type="button"
-            className="w-full mt-4 bg-[#009688] hover:bg-[#00897B] text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition-colors"
-            onClick={() => navigate('/dashboard')}
+            type="submit"
+            disabled={loading}
+            className="w-full mt-4 bg-[#009688] hover:bg-[#00897B] disabled:bg-[#80CBC4] text-white font-semibold py-2.5 rounded-lg text-sm shadow-sm transition-colors"
           >
-            Se connecter
+            {loading ? 'Connexion…' : 'Se connecter'}
           </button>
         </form>
 

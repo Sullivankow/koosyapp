@@ -9,8 +9,9 @@ import { join } from 'path';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe());
-  app.enableCors( {
-    origin: 'http://localhost:8081', // adapte à l'adresse de ton front
+  app.enableCors({
+    // Autoriser le front mobile (8081) et le backoffice Vite (5173)
+    origin: ['http://localhost:8081', 'http://localhost:5173'],
     credentials: true,
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     allowedHeaders: ['Content-Type', 'Authorization'],

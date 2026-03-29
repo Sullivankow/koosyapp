@@ -48,7 +48,7 @@ export class BiensService {
 
 
 
-//Méthode pour récupérer la liste de tous les biens d'un utilisateur
+// Méthode pour récupérer la liste de tous les biens d'un utilisateur
 async getAllBiens(userId: number): Promise<Bien[]> {
   const biens = await this.biensRepository.find({
     where: { conciergerie: { id: userId } },
@@ -60,6 +60,22 @@ async getAllBiens(userId: number): Promise<Bien[]> {
       'reservations.locataire',
       'prestations',
       'proprietaire', // On charge la relation propriétaire
+    ],
+  });
+  return biens;
+}
+
+// Méthode admin pour récupérer la liste de tous les biens en base (sans filtre utilisateur)
+async getAllBiensAdmin(): Promise<Bien[]> {
+  const biens = await this.biensRepository.find({
+    relations: [
+      'conciergerie',
+      'taches',
+      'images',
+      'reservations',
+      'reservations.locataire',
+      'prestations',
+      'proprietaire',
     ],
   });
   return biens;

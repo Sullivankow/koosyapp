@@ -1,11 +1,35 @@
 // Page "Tableau de bord" du backoffice
 // Affiche un aperçu global de l'activité (stats, abonnements, messages récents...)
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
+import { fetchDashboardStats, type DashboardStats } from '../utils/api';
 
 const Dashboard: React.FC = () => {
   // État local pour gérer l'ouverture de la sidebar en mobile
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await fetchDashboardStats();
+        if (mounted) {
+          setStats(data);
+        }
+      } catch (e) {
+        console.error('Erreur lors du chargement des statistiques du dashboard :', e);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const formatNumber = (value: number | null | undefined) => {
+    if (value == null) return '—';
+    return value.toLocaleString('fr-FR');
+  };
   return (
     <div className="min-h-screen bg-[#F4F7FA]">
       {/* Sidebar responsive : visible en permanence sur desktop, coulissante sur mobile */}
@@ -54,23 +78,45 @@ const Dashboard: React.FC = () => {
           <div className="grid gap-4 md:grid-cols-4 text-sm">
             <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
               <p className="text-xs uppercase text-[#6E7B8B] mb-1">Utilisateurs totaux</p>
-              <p className="text-2xl font-semibold text-[#222B45]">—</p>
-              <p className="text-[11px] text-[#B0BEC5] mt-1">Données à connecter à l’API users</p>
+              <p className="text-2xl font-semibold text-[#222B45]">
+                {formatNumber(stats?.usersTotal)}
+              </p>
+              <p className="text-[11px] text-[#B0BEC5] mt-1">Nombre total d’utilisateurs Koosy</p>
             </div>
             <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
               <p className="text-xs uppercase text-[#6E7B8B] mb-1">Biens</p>
-              <p className="text-2xl font-semibold text-[#222B45]">—</p>
+              <p className="text-2xl font-semibold text-[#222B45]">
+                {formatNumber(stats?.biensTotal)}
+              </p>
               <p className="text-[11px] text-[#B0BEC5] mt-1">Nombre de biens actifs</p>
             </div>
             <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
               <p className="text-xs uppercase text-[#6E7B8B] mb-1">Réservations à venir</p>
-              <p className="text-2xl font-semibold text-[#222B45]">—</p>
+              <p className="text-2xl font-semibold text-[#222B45]">
+                {formatNumber(stats?.reservationsUpcomingTotal)}
+              </p>
               <p className="text-[11px] text-[#B0BEC5] mt-1">Sur les 7 prochains jours</p>
             </div>
             <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
               <p className="text-xs uppercase text-[#6E7B8B] mb-1">Tâches à faire</p>
-              <p className="text-2xl font-semibold text-[#222B45]">—</p>
+              <p className="text-2xl font-semibold text-[#222B45]">
+                {formatNumber(stats?.tachesAFaireTotal)}
+              </p>
               <p className="text-[11px] text-[#B0BEC5] mt-1">Tâches en cours / à venir</p>
+            </div>
+            <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
+              <p className="text-xs uppercase text-[#6E7B8B] mb-1">Devis émis</p>
+              <p className="text-2xl font-semibold text-[#222B45]">
+                {formatNumber(stats?.devisTotal)}
+              </p>
+              <p className="text-[11px] text-[#B0BEC5] mt-1">Nombre total de devis créés par les utilisateurs</p>
+            </div>
+            <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
+              <p className="text-xs uppercase text-[#6E7B8B] mb-1">Factures émises</p>
+              <p className="text-2xl font-semibold text-[#222B45]">
+                {formatNumber(stats?.facturesTotal)}
+              </p>
+              <p className="text-[11px] text-[#B0BEC5] mt-1">Nombre total de factures générées par les utilisateurs</p>
             </div>
           </div>
 

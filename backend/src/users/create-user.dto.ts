@@ -22,6 +22,10 @@ export class CreateUserDto {
   @IsString()
   prenom: string;
 
+  @ApiProperty({ example: 'admin', required: false, enum: ['user', 'admin'] })
+  @IsString()
+  role?: 'user' | 'admin';
+
   @ApiProperty({ example: 'premium', required: false })
   abonnement?: 'gratuit' | 'premium';
    
@@ -48,6 +52,10 @@ export class UpdateUserDto {
   @ApiProperty({ example: 'Jean' })
   @IsString()
   prenom?: string;
+
+  @ApiProperty({ example: 'admin', required: false, enum: ['user', 'admin'] })
+  @IsString()
+  role?: 'user' | 'admin';
 
   @ApiProperty({ example: 'premium', required: false })
   abonnement?: 'gratuit' | 'premium';

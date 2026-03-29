@@ -1,6 +1,8 @@
 import { Controller, Post, Body, UseGuards, Request, Get, Delete, Patch, Query, BadRequestException, NotFoundException } from '@nestjs/common';
 import { Param } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import { BiensService } from './biens.service';
 import { CreateBienDto } from './create-bien.dto';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags, ApiQuery, ApiOperation } from '@nestjs/swagger';
@@ -38,14 +40,26 @@ export class BiensController {
     return await this.biensService.geocodeAdresse(adresse);
   }
 
-//Affiche la liste des biens de l'utilisateur connecté
- @UseGuards(JwtAuthGuard)
-  @Get()
-  @ApiResponse({ status: 200, description: 'Liste des biens.' })
-  @ApiOperation({ summary: 'Afficher la liste des biens de l’utilisateur connecté' })
-  async getAllBiens(@Request() req) {
-    return this.biensService.getAllBiens(req.user.userId);
-  }
+// Affiche la liste des biens de l'utilisateur connecté
+@UseGuards(JwtAuthGuard)
+@Get()
+@ApiResponse({ status: 200, description: 'Liste des biens de l’utilisateur connecté.' })
+@ApiOperation({ summary: 'Afficher la liste des biens de l’utilisateur connecté' })
+async getAllBiens(@Request() req) {
+  return this.biensService.getAllBiens(req.user.userId);
+}
+
+// Affiche la liste complète de tous les biens (réservé aux administrateurs)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
+@Get('admin')
+@ApiResponse({ status: 200, description: 'Liste de tous les biens en base (admin).' })
+@ApiResponse({ status: 401, description: 'Non authentifié.' })
+@ApiResponse({ status: 403, description: 'Accès réservé aux administrateurs.' })
+@ApiOperation({ summary: 'Afficher la liste complète de tous les biens (admin)' })
+async getAllBiensAdmin() {
+  return this.biensService.getAllBiensAdmin();
+}
 
   //Méthode pour compter le nombre total de réservations
 @Get('count')
