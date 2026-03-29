@@ -6,6 +6,7 @@ import Sidebar from '../components/sidebar';
 import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
 import BienCard from '../components/cards';
+import BienImagesCarousel from '../components/bienImagesCarousel';
 import type { BackendBien, BackendProprietaire } from '../models/models';
 import { fetchBiensAdminList } from '../utils/biensApi';
 
@@ -267,6 +268,16 @@ const BiensPage: React.FC = () => {
             </header>
 
             <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6 text-sm">
+              {selectedBien && (
+                <section className="rounded-xl border border-[#E0E6ED] bg-white p-3">
+                  <BienImagesCarousel
+                    images={selectedBien.images}
+                    alt={selectedBien.nom}
+                    heightClass="h-40 md:h-56"
+                  />
+                </section>
+              )}
+
               {/* En-tête de la fiche avec nom + statut (backend) */}
               <section className="rounded-xl border border-[#E0E6ED] bg-[#F9FBFF] p-4 space-y-3">
                 <div className="flex items-start justify-between gap-3">

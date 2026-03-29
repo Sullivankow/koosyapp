@@ -1,5 +1,5 @@
-
 import type { BackendBien } from '../models/models'
+import BienImagesCarousel from './bienImagesCarousel'
 
 interface BienCardProps {
   bien: BackendBien
@@ -20,8 +20,7 @@ export function BienCard({ bien, onOpen }: BienCardProps) {
 
   return (
     <article className="flex flex-col rounded-2xl border border-[#E0E6ED] bg-white shadow-sm overflow-hidden">
-      {/* Image placeholder */}
-      <div className="h-32 bg-gradient-to-br from-[#E0F7F4] via-[#F9FBFF] to-[#E0F2FE]" />
+      <BienImagesCarousel images={bien.images} alt={bien.nom} heightClass="h-40" fit="contain" />
       <div className="flex-1 p-4 space-y-2 text-sm">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-0.5">

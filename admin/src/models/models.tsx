@@ -10,6 +10,11 @@ export interface BackendProprietaire {
   email: string;
 }
 
+export interface BackendBienImage {
+  id: number;
+  url: string;
+}
+
 export interface BackendBien {
   id: number;
   nom: string;
@@ -17,6 +22,7 @@ export interface BackendBien {
   type: string;
   statut: 'disponible' | 'occupé' | 'travaux';
   proprietaire?: BackendProprietaire | null;
+  images?: BackendBienImage[] | null;
   remarque?: string | null;
   lat?: number | null;
   lng?: number | null;
