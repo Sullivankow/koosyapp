@@ -91,11 +91,11 @@ const Dashboard: React.FC = () => {
               <p className="text-[11px] text-[#B0BEC5] mt-1">Nombre de biens actifs</p>
             </div>
             <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
-              <p className="text-xs uppercase text-[#6E7B8B] mb-1">Réservations à venir</p>
+              <p className="text-xs uppercase text-[#6E7B8B] mb-1">Réservations totales</p>
               <p className="text-2xl font-semibold text-[#222B45]">
-                {formatNumber(stats?.reservationsUpcomingTotal)}
+                {formatNumber(stats?.reservationsTotal)}
               </p>
-              <p className="text-[11px] text-[#B0BEC5] mt-1">Sur les 7 prochains jours</p>
+              <p className="text-[11px] text-[#B0BEC5] mt-1">Toutes les réservations en base</p>
             </div>
             <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
               <p className="text-xs uppercase text-[#6E7B8B] mb-1">Tâches à faire</p>

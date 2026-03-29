@@ -30,6 +30,13 @@ export class TachesService {
     });
   }
 
+  // Récupérer toutes les tâches en base (vue admin, sans filtre utilisateur)
+  async getAllTachesAdmin(): Promise<Tache[]> {
+    return this.tacheRepo.find({
+      relations: ['bien', 'bien.conciergerie'],
+    });
+  }
+
   //Méthode spour créer une tâche liée à un bien spécifique
   async createTache(dto: CreateTacheDto, userId: number) {
     const bien = await this.bienRepo.findOne({ where: { id: dto.bienId, conciergerie: { id: userId } } });

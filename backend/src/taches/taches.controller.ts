@@ -2,6 +2,8 @@ import { Controller, BadRequestException } from '@nestjs/common';
 import { Body, Post, UseGuards, Request, Patch, Param, Delete,Get, Query } from '@nestjs/common';
 import { TachesService } from './taches.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import { CreateTacheDto, UpdateTacheDto } from './create-tache.dto';
 import { ApiBody, ApiResponse, ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
 import { TacheStatut } from './tache.entity';
@@ -21,14 +23,26 @@ export class TachesController {
 
 
 
-//Méthode pour récupérer la liste de toutes les tâches pour un utilisateur donné
+//Méthode pour récupérer la liste de toutes les tâches pour l’utilisateur connecté
 @Get()
 @UseGuards(JwtAuthGuard)
-@ApiResponse({ status: 200, description: 'Liste de toutes les tâches.' })
+@ApiResponse({ status: 200, description: 'Liste de toutes les tâches de l’utilisateur connecté.' })
 @ApiOperation({ summary: 'Récupérer la liste de toutes les tâches pour l’utilisateur connecté' })
 async getAllTaches(@Request() req) {
   const userId = req.user.userId;
   return this.tachesService.getAllTaches(userId);
+}
+
+//Méthode admin pour récupérer la liste de toutes les tâches en base
+@Get('admin')
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
+@ApiResponse({ status: 200, description: 'Liste de toutes les tâches en base (admin).' })
+@ApiResponse({ status: 401, description: 'Non authentifié.' })
+@ApiResponse({ status: 403, description: 'Accès réservé aux administrateurs.' })
+@ApiOperation({ summary: 'Récupérer la liste totale de toutes les tâches (admin)' })
+async getAllTachesAdmin() {
+  return this.tachesService.getAllTachesAdmin();
 }
 
 

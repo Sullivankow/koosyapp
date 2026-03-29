@@ -120,35 +120,57 @@ export async function fetchReservationsUpcomingTotal(days = 7): Promise<number |
   }
 }
 
-// Liste complète des réservations
-export async function fetchReservationsList(): Promise<any[] | null> {
+// Nombre total de réservations (toutes périodes confondues)
+export async function fetchReservationsTotal(): Promise<number | null> {
   try {
-    return await getJson<any[]>('/reservations');
+    const reservations = await getJson<any[]>('/reservations');
+    return reservations.length;
   } catch (e) {
-    console.error('Erreur lors de la récupération de la liste des réservations :', e);
+    console.error('Erreur lors de la récupération du nombre total de réservations :', e);
     return null;
   }
 }
 
-// Nombre total de tâches « à faire » pour l’utilisateur connecté
+// Liste complète des réservations (vue admin)
+export async function fetchReservationsAdminList(): Promise<any[] | null> {
+  try {
+    return await getJson<any[]>('/reservations');
+  } catch (e) {
+    console.error('Erreur lors de la récupération de la liste totale des réservations (admin) :', e);
+    return null;
+  }
+}
+
+// Alias pour compatibilité : liste des réservations (utilise la vue admin)
+export async function fetchReservationsList(): Promise<any[] | null> {
+  return fetchReservationsAdminList();
+}
+
+// Nombre total de tâches « à faire » (toutes conciergeries confondues, vue admin)
 export async function fetchTachesAFaireTotal(): Promise<number | null> {
   try {
-    const data = await getJson<{ total: number }>('/taches/count-a-faire-total');
-    return data.total;
+    const taches = await getJson<any[]>('/taches/admin');
+    // On compte uniquement les tâches dont le statut est "à faire"
+    return taches.filter((t: any) => t.statut === 'à faire').length;
   } catch (e) {
     console.error('Erreur lors de la récupération du nombre de tâches à faire :', e);
     return null;
   }
 }
 
-// Liste complète des tâches
-export async function fetchTachesList(): Promise<any[] | null> {
+// Liste complète des tâches (vue admin)
+export async function fetchTachesAdminList(): Promise<any[] | null> {
   try {
-    return await getJson<any[]>('/taches');
+    return await getJson<any[]>('/taches/admin');
   } catch (e) {
-    console.error('Erreur lors de la récupération de la liste des tâches :', e);
+    console.error('Erreur lors de la récupération de la liste totale des tâches (admin) :', e);
     return null;
   }
+}
+
+// Alias pour compatibilité : liste des tâches
+export async function fetchTachesList(): Promise<any[] | null> {
+  return fetchTachesAdminList();
 }
 
 // Nombre total de devis accessibles (compte côté front en attendant un endpoint dédié)
@@ -197,6 +219,7 @@ export type DashboardStats = {
   usersTotal: number | null;
   biensTotal: number | null;
   reservationsUpcomingTotal: number | null;
+  reservationsTotal: number | null;
   tachesAFaireTotal: number | null;
   devisTotal: number | null;
   facturesTotal: number | null;
@@ -207,6 +230,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
     usersTotal,
     biensTotal,
     reservationsUpcomingTotal,
+    reservationsTotal,
     tachesAFaireTotal,
     devisTotal,
     facturesTotal,
@@ -214,6 +238,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
     fetchUsersTotal(),
     fetchBiensTotal(),
     fetchReservationsUpcomingTotal(7),
+    fetchReservationsTotal(),
     fetchTachesAFaireTotal(),
     fetchDevisTotal(),
     fetchFacturesTotal(),
@@ -223,6 +248,7 @@ export async function fetchDashboardStats(): Promise<DashboardStats> {
     usersTotal,
     biensTotal,
     reservationsUpcomingTotal,
+    reservationsTotal,
     tachesAFaireTotal,
     devisTotal,
     facturesTotal,
