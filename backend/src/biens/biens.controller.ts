@@ -190,6 +190,24 @@ async deleteRemarque(@Param('id') id: string) {
     return { success: true };
   }
 
+// Suppression d'un bien par son id (réservé aux administrateurs)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
+@Delete('admin/:id')
+@ApiResponse({ status: 200, description: 'Bien supprimé (admin).' })
+@ApiResponse({ status: 401, description: 'Non authentifié.' })
+@ApiResponse({ status: 403, description: 'Accès réservé aux administrateurs.' })
+@ApiResponse({ status: 404, description: 'Bien non trouvé.' })
+@ApiOperation({ summary: 'Supprimer n\'importe quel bien (admin)' })
+async deleteBienAdmin(@Param('id') id: string) {
+  const idNum = Number(id);
+  if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
+    throw new BadRequestException("L'id du bien doit être un entier valide");
+  }
+  await this.biensService.deleteBienAdmin(idNum);
+  return { success: true };
+}
+
 
 
 

@@ -8,7 +8,7 @@ import ButtonCreate from '../ui/buttonCreate';
 import BienCard from '../components/cards';
 import BienImagesCarousel from '../components/bienImagesCarousel';
 import type { BackendBien, BackendProprietaire, BackendUser } from '../models/models';
-import { fetchBiensAdminList, createBienForUser } from '../utils/biensApi';
+import { fetchBiensAdminList, createBienForUser, deleteBienAdmin } from '../utils/biensApi';
 import { fetchUsersList } from '../utils/usersApi';
 
 const BiensPage: React.FC = () => {
@@ -130,6 +130,24 @@ const BiensPage: React.FC = () => {
     setDrawerOpen(false);
     setSelectedBien(null);
     setFormError(null);
+  };
+
+  const handleDeleteBien = async (bien: BackendBien) => {
+    const confirmed = window.confirm(`Supprimer définitivement le bien "${bien.nom}" ?`);
+    if (!confirmed) return;
+
+    try {
+      setLoading(true);
+      setError(null);
+      await deleteBienAdmin(bien.id);
+      const data = await fetchBiensAdminList();
+      setBiens(data ?? []);
+    } catch (e) {
+      console.error(e);
+      setError('Impossible de supprimer ce bien.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCreateBien = async () => {
@@ -318,7 +336,12 @@ const BiensPage: React.FC = () => {
             </div>
           ) : (
             filteredBiens.map((bien) => (
-              <BienCard key={bien.id} bien={bien} onOpen={openDrawer} />
+              <BienCard
+                key={bien.id}
+                bien={bien}
+                onOpen={openDrawer}
+                onDelete={handleDeleteBien}
+              />
             ))
           )}
         </section>

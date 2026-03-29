@@ -5,9 +5,10 @@ import BienImagesCarousel from './bienImagesCarousel'
 interface BienCardProps {
   bien: BackendBien
   onOpen: (bien: BackendBien) => void
+  onDelete?: (bien: BackendBien) => void
 }
 
-export function BienCard({ bien, onOpen }: BienCardProps) {
+export function BienCard({ bien, onOpen, onDelete }: BienCardProps) {
   const ownerFullName = bien.proprietaire
     ? `${bien.proprietaire.prenom} ${bien.proprietaire.nom}`
     : '—'
@@ -97,9 +98,10 @@ export function BienCard({ bien, onOpen }: BienCardProps) {
           </button>
           <button
             type="button"
+            onClick={() => onDelete && onDelete(bien)}
             className="rounded-full border border-transparent px-2 py-0.5 text-[11px] text-[#B91C1C] hover:bg-[#FEE2E2]"
           >
-            Suspendre (mock)
+            Supprimer
           </button>
         </div>
       </footer>

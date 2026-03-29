@@ -63,9 +63,22 @@ export async function createBienForUser(
   return res.json();
 }
 
+// Suppression d'un bien (vue admin)
+export async function deleteBienAdmin(id: number): Promise<void> {
+  const res = await fetch(`${API_BASE_URL}/biens/admin/${id}` , {
+    method: 'DELETE',
+    headers: buildHeaders(),
+  });
+
+  if (!res.ok) {
+    throw new Error('Erreur lors de la suppression du bien');
+  }
+}
+
 export default {
   fetchBiensList,
   fetchBiensAdminList,
   fetchBiensTotal,
   createBienForUser,
+  deleteBienAdmin,
 };

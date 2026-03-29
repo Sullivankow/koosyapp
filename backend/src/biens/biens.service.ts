@@ -121,10 +121,30 @@ async updateBien(id: number, userId: number, updateBienDto: UpdateBienDto): Prom
 // Méthode pour supprimer un bien en vérifiant qu'il appartient à l'utilisateur
 async deleteBien(id: number, userId: number): Promise<void> {
   // Récupère le bien avec ses relations
-  const bien = await this.biensRepository.findOne({ where: { id, conciergerie: { id: userId } }, relations: ['taches', 'reservations'] });
+  const bien = await this.biensRepository.findOne({
+    where: { id, conciergerie: { id: userId } },
+    relations: ['taches', 'reservations'],
+  });
   if (!bien) {
     throw new NotFoundException('Bien non trouvé ou non accessible');
   }
+  await this.removeBienWithRelations(bien);
+}
+
+// Méthode pour supprimer un bien sans vérifier la conciergerie (usage admin)
+async deleteBienAdmin(id: number): Promise<void> {
+  const bien = await this.biensRepository.findOne({
+    where: { id },
+    relations: ['taches', 'reservations'],
+  });
+  if (!bien) {
+    throw new NotFoundException('Bien non trouvé');
+  }
+  await this.removeBienWithRelations(bien);
+}
+
+// Suppression physique d'un bien et de ses relations dépendantes
+private async removeBienWithRelations(bien: Bien): Promise<void> {
   // Supprime les tâches liées
   if (bien.taches && bien.taches.length > 0) {
     const tacheRepo = this.biensRepository.manager.getRepository('Tache');
@@ -139,7 +159,7 @@ async deleteBien(id: number, userId: number): Promise<void> {
       await reservationRepo.delete(reservation.id);
     }
   }
-  // Supprime le bien
+  // Supprime le bien lui‑même
   await this.biensRepository.remove(bien);
 }
 
