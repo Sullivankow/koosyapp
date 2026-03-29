@@ -5,6 +5,7 @@ import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
 import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
+import BienCard from '../components/cards';
 // Import centralisé des types et données mock pour les biens
 import type { Bien } from '../models/mocks';
 import { mockBiens, mockOwners } from '../models/mocks';
@@ -117,17 +118,16 @@ const BiensPage: React.FC = () => {
             </div>
 
             <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Statut (workflow back office)</label>
+              <label className="block text-xs font-medium text-[#6E7B8B]">Statut du bien</label>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value as any)}
                 className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
               >
                 <option value="Tous">Tous</option>
-                <option value="Brouillon">Brouillon</option>
-                <option value="En attente de validation">En attente de validation</option>
-                <option value="Actif">Actif</option>
-                <option value="Suspendu">Suspendu</option>
+                <option value="disponible">Disponible</option>
+                <option value="occupé">Occupé</option>
+                <option value="travaux">En travaux</option>
               </select>
             </div>
 
@@ -188,113 +188,7 @@ const BiensPage: React.FC = () => {
             </div>
           ) : (
             filteredBiens.map((bien) => (
-              <article
-                key={bien.id}
-                className="flex flex-col rounded-2xl border border-[#E0E6ED] bg-white shadow-sm overflow-hidden"
-              >
-                {/* Image placeholder */}
-                <div className="h-32 bg-gradient-to-br from-[#E0F7F4] via-[#F9FBFF] to-[#E0F2FE]" />
-                <div className="flex-1 p-4 space-y-2 text-sm">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="space-y-0.5">
-                      <h3 className="font-semibold text-[#1F2933] line-clamp-2">
-                        {bien.name}
-                      </h3>
-                      <p className="text-xs text-[#6E7B8B]">
-                        {bien.city}, {bien.country}
-                      </p>
-                    </div>
-                    <div className="flex flex-col items-end gap-1">
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                          bien.status === 'Actif'
-                            ? 'bg-[#ECFDF3] text-[#166534]'
-                          : bien.status === 'En attente de validation'
-                            ? 'bg-[#FFFBEB] text-[#92400E]'
-                          : bien.status === 'Suspendu'
-                            ? 'bg-[#FEF2F2] text-[#B91C1C]'
-                          : 'bg-[#EFF6FF] text-[#1D4ED8]'
-                        }`}
-                      >
-                        {bien.status}
-                      </span>
-                      <span className="text-[10px] text-[#9EABB8]">
-                        {bien.status === 'Actif' && 'Bien validé et exploité par la conciergerie.'}
-                        {bien.status === 'En attente de validation' &&
-                          'Créé par la conciergerie, en attente de validation back office.'}
-                        {bien.status === 'Suspendu' &&
-                          'Bien suspendu par le back office (non visible côté conciergerie).'}
-                        {bien.status === 'Brouillon' &&
-                          'Brouillon côté conciergerie, pas encore prêt pour validation.'}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs text-[#6E7B8B]">
-                    <p>
-                      {bien.capacity.guests} voyageurs · {bien.capacity.bedrooms} chambres ·{' '}
-                      {bien.capacity.bathrooms} salle{bien.capacity.bathrooms > 1 ? 's' : ''} de bain
-                    </p>
-                    <p className="font-semibold text-[#1F2933]">
-                      {bien.pricePerNight} € <span className="font-normal text-xs text-[#6E7B8B]">/ nuit</span>
-                    </p>
-                  </div>
-
-                  <div className="flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <div className="h-7 w-7 rounded-full bg-[#0F172A]/5 flex items-center justify-center text-[10px] font-semibold text-[#0F172A]">
-                        {bien.owner.name
-                            .split(' ')
-                            .map((n) => n[0])
-                            .join('')}
-                      </div>
-                      <div className="space-y-0.5">
-                        <p className="text-xs font-medium text-[#1F2933]">{bien.owner.name}</p>
-                        <p className="text-[11px] text-[#6E7B8B]">{bien.owner.email}</p>
-                      </div>
-                    </div>
-                    <p className="text-[11px] text-[#6E7B8B]">
-                      Taux d’occupation :{' '}
-                      <span className="font-semibold text-[#00A896]">{bien.occupancyRate}%</span>
-                    </p>
-                  </div>
-                </div>
-
-                <footer className="flex flex-col gap-2 border-t border-[#E0E6ED] bg-[#F9FBFF] px-4 py-2.5 text-xs sm:flex-row sm:items-center sm:justify-between">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => openDrawer(bien)}
-                      className="rounded-full border border-transparent px-2 py-0.5 text-[#00A896] hover:bg-[#D1FAF5]"
-                    >
-                      Voir la fiche bien
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-full border border-transparent px-2 py-0.5 text-[#9EABB8] hover:bg-[#F4F7FA]"
-                    >
-                      Voir la conciergerie
-                    </button>
-                    <span className="hidden text-[10px] text-[#9EABB8] md:inline">
-                      Actions back office simulées, à connecter à ton API.
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 justify-end">
-                    <button
-                      type="button"
-                      className="rounded-full border border-[#E0E6ED] bg-white px-2 py-0.5 text-[11px] text-[#6E7B8B] hover:bg-[#F4F7FA]"
-                    >
-                      Valider le bien (mock)
-                    </button>
-                    <button
-                      type="button"
-                      className="rounded-full border border-transparent px-2 py-0.5 text-[11px] text-[#B91C1C] hover:bg-[#FEE2E2]"
-                    >
-                      Suspendre (mock)
-                    </button>
-                  </div>
-                </footer>
-              </article>
+              <BienCard key={bien.id} bien={bien} onOpen={openDrawer} />
             ))
           )}
         </section>
@@ -324,123 +218,66 @@ const BiensPage: React.FC = () => {
             </header>
 
             <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6 text-sm">
-              <section className="space-y-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9EABB8]">
-                  Informations générales
-                </h3>
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-[#6E7B8B]">Nom du bien</label>
-                    <input
-                      type="text"
-                      defaultValue={selectedBien?.name ?? ''}
-                      className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                      placeholder="Ex : Appartement lumineux centre-ville"
-                    />
+              {/* En-tête de la fiche avec nom + statut */}
+              <section className="rounded-xl border border-[#E0E6ED] bg-[#F9FBFF] p-4 space-y-3">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="space-y-1">
+                    <p className="text-[11px] text-[#9EABB8]">Nom du bien</p>
+                    <p className="text-sm font-semibold text-[#222B45]">
+                      {selectedBien?.name ?? '—'}
+                    </p>
+                    <p className="text-[11px] text-[#6E7B8B]">
+                      {selectedBien ? `${selectedBien.city}, ${selectedBien.country}` : '—'}
+                    </p>
                   </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-[#6E7B8B]">Ville</label>
-                      <input
-                        type="text"
-                        defaultValue={selectedBien?.city ?? ''}
-                        className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                        placeholder="Ex : Paris"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-[#6E7B8B]">Pays</label>
-                      <input
-                        type="text"
-                        defaultValue={selectedBien?.country ?? ''}
-                        className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                        placeholder="Ex : France"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-[#6E7B8B]">Type de bien</label>
-                    <select
-                      defaultValue={selectedBien?.type ?? 'Appartement'}
-                      className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                    >
-                      <option value="Appartement">Appartement</option>
-                      <option value="Maison">Maison</option>
-                      <option value="Studio">Studio</option>
-                      <option value="Chambre">Chambre</option>
-                    </select>
+                  <div className="flex flex-col items-end gap-2">
+                    {selectedBien && (
+                      <span
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                          selectedBien.status === 'disponible'
+                            ? 'bg-[#ECFDF3] text-[#166534]'
+                            : selectedBien.status === 'occupé'
+                              ? 'bg-[#EFF6FF] text-[#1D4ED8]'
+                              : 'bg-[#FFFBEB] text-[#92400E]'
+                        }`}
+                      >
+                        {selectedBien.status === 'disponible' && 'Disponible'}
+                        {selectedBien.status === 'occupé' && 'Occupé'}
+                        {selectedBien.status === 'travaux' && 'En travaux'}
+                      </span>
+                    )}
+                    <p className="text-[11px] text-[#9EABB8]">
+                      Type&nbsp;: <span className="text-[#222B45]">{selectedBien?.type ?? '—'}</span>
+                    </p>
                   </div>
                 </div>
               </section>
 
-              <section className="space-y-3">
+              {/* Bloc propriétaire / conciergerie */}
+              <section className="rounded-xl border border-[#E0E6ED] bg-white p-4 space-y-3">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9EABB8]">
                   Propriétaire du bien
                 </h3>
-                <div className="space-y-3">
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-[#6E7B8B]">Compte propriétaire</label>
-                    <select
-                      defaultValue={selectedBien?.owner.id ?? mockOwners[0].id}
-                      className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                    >
-                      {mockOwners.map((owner) => (
-                        <option key={owner.id} value={owner.id}>
-                          {owner.name} – {owner.email}
-                        </option>
-                      ))}
-                    </select>
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-[#0F172A]/5 flex items-center justify-center text-xs font-semibold text-[#0F172A]">
+                    {selectedBien?.owner.name
+                      ?.split(' ')
+                      .map((n) => n[0])
+                      .join('') ?? ''}
                   </div>
-                  <p className="text-[11px] text-[#9EABB8]">
-                    Ce bien sera visible depuis le compte de cet utilisateur dans l’app Koosy.
-                  </p>
-                </div>
-              </section>
-
-              <section className="space-y-3">
-                <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9EABB8]">
-                  Capacité & tarifs
-                </h3>
-                <div className="space-y-3">
-                  <div className="grid grid-cols-3 gap-3">
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-[#6E7B8B]">Voyageurs</label>
-                      <input
-                        type="number"
-                        min={1}
-                        defaultValue={selectedBien?.capacity.guests ?? 2}
-                        className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-[#6E7B8B]">Chambres</label>
-                      <input
-                        type="number"
-                        min={0}
-                        defaultValue={selectedBien?.capacity.bedrooms ?? 1}
-                        className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                      />
-                    </div>
-                    <div className="space-y-1.5">
-                      <label className="block text-xs font-medium text-[#6E7B8B]">Salles de bain</label>
-                      <input
-                        type="number"
-                        min={0}
-                        defaultValue={selectedBien?.capacity.bathrooms ?? 1}
-                        className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                      />
-                    </div>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="block text-xs font-medium text-[#6E7B8B]">Prix par nuit (€)</label>
-                    <input
-                      type="number"
-                      min={0}
-                      defaultValue={selectedBien?.pricePerNight ?? 100}
-                      className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                    />
+                  <div className="space-y-0.5">
+                    <p className="text-sm font-medium text-[#222B45]">
+                      {selectedBien?.owner.name ?? '—'}
+                    </p>
+                    <p className="text-[11px] text-[#6E7B8B]">
+                      {selectedBien?.owner.email ?? ''}
+                    </p>
+                    <p className="text-[11px] text-[#9EABB8]">Propriétaire enregistré pour ce bien.</p>
                   </div>
                 </div>
+                <p className="text-[11px] text-[#9EABB8]">
+                  Plus tard, cette fiche pourra aussi afficher la conciergerie responsable (champ backend : conciergerie) et les remarques éventuelles.
+                </p>
               </section>
             </div>
 

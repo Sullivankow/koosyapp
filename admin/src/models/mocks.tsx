@@ -43,8 +43,8 @@ export type Bien = {
   city: string;
   country: string;
   type: 'Appartement' | 'Maison' | 'Studio' | 'Chambre';
-  // Statut métier côté back office : modération / validation
-  status: 'Brouillon' | 'En attente de validation' | 'Actif' | 'Suspendu';
+  // Statut réel côté backend : disponible / occupé / travaux
+  status: 'disponible' | 'occupé' | 'travaux';
   occupancyRate: number; // taux d'occupation en % (mock)
   pricePerNight: number; // prix par nuit
   capacity: {
@@ -63,7 +63,7 @@ export const mockBiens: Bien[] = [
     city: 'Paris',
     country: 'France',
     type: 'Appartement',
-    status: 'En attente de validation',
+    status: 'disponible',
     occupancyRate: 82,
     pricePerNight: 120,
     capacity: { guests: 4, bedrooms: 2, bathrooms: 1 },
@@ -75,7 +75,7 @@ export const mockBiens: Bien[] = [
     city: 'Bordeaux',
     country: 'France',
     type: 'Maison',
-    status: 'Actif',
+    status: 'occupé',
     occupancyRate: 65,
     pricePerNight: 180,
     capacity: { guests: 6, bedrooms: 3, bathrooms: 2 },
@@ -87,7 +87,7 @@ export const mockBiens: Bien[] = [
     city: 'Nice',
     country: 'France',
     type: 'Studio',
-    status: 'Suspendu',
+    status: 'travaux',
     occupancyRate: 0,
     pricePerNight: 75,
     capacity: { guests: 2, bedrooms: 1, bathrooms: 1 },
