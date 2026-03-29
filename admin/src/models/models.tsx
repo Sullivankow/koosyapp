@@ -21,6 +21,8 @@ export interface BackendBien {
   adresse: string;
   type: string;
   statut: 'disponible' | 'occupé' | 'travaux';
+  superficie?: number;
+  pieces?: number;
   proprietaire?: BackendProprietaire | null;
   images?: BackendBienImage[] | null;
   remarque?: string | null;

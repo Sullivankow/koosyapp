@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Bien } from './bien.entity';
 import { User } from '../users/user.entity';
-import { CreateBienDto, UpdateBienDto } from './create-bien.dto';
+import { CreateBienDto, UpdateBienDto, UpdateBienAdminDto } from './create-bien.dto';
 import fetch from 'node-fetch';
 
 
@@ -114,6 +114,26 @@ async updateBien(id: number, userId: number, updateBienDto: UpdateBienDto): Prom
   if (!bien) {
     throw new NotFoundException('Bien non trouvé ou non accessible');
   }
+  Object.assign(bien, updateBienDto);
+  return this.biensRepository.save(bien);
+}
+
+// Méthode admin pour mettre à jour un bien sans vérifier la conciergerie
+async updateBienAdmin(id: number, updateBienDto: UpdateBienAdminDto): Promise<Bien> {
+  const bien = await this.biensRepository.findOne({ where: { id } });
+  if (!bien) {
+    throw new NotFoundException('Bien non trouvé');
+  }
+
+  // Si l'adresse change, on regénère les coordonnées
+  if (updateBienDto.adresse) {
+    const coords = await this.geocodeAdresse(updateBienDto.adresse);
+    if (coords) {
+      updateBienDto.lat = coords.lat;
+      updateBienDto.lng = coords.lng;
+    }
+  }
+
   Object.assign(bien, updateBienDto);
   return this.biensRepository.save(bien);
 }

@@ -4,8 +4,8 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { BiensService } from './biens.service';
-import { CreateBienDto } from './create-bien.dto';
-import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags, ApiQuery, ApiOperation } from '@nestjs/swagger';
+import { CreateBienDto, UpdateBienAdminDto } from './create-bien.dto';
+import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags, ApiQuery, ApiOperation, ApiParam } from '@nestjs/swagger';
 
 
 import { UpdateBienDto } from './create-bien.dto';
@@ -189,6 +189,38 @@ async deleteRemarque(@Param('id') id: string) {
     await this.biensService.deleteBien(Number(id), req.user.userId);
     return { success: true };
   }
+
+// Modification d'un bien pour un utilisateur donné (réservé aux administrateurs)
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Roles('admin')
+@Patch('admin/:userId/:id')
+@ApiBody({ type: UpdateBienAdminDto })
+@ApiParam({ name: 'userId', description: "ID de l'utilisateur (conciergerie) concerné", type: Number })
+@ApiParam({ name: 'id', description: 'ID du bien à modifier', type: Number })
+@ApiResponse({ status: 200, description: 'Bien mis à jour (admin).' })
+@ApiResponse({ status: 401, description: 'Non authentifié.' })
+@ApiResponse({ status: 403, description: 'Accès réservé aux administrateurs.' })
+@ApiResponse({ status: 404, description: 'Bien non trouvé.' })
+@ApiOperation({ summary: "Modifier un bien pour un utilisateur donné (admin)" })
+async updateBienAdmin(
+  @Param('userId') userId: string,
+  @Param('id') id: string,
+  @Body() updateBienDto: UpdateBienAdminDto,
+) {
+  const userIdNum = Number(userId);
+  if (!userId || isNaN(userIdNum) || !Number.isInteger(userIdNum)) {
+    throw new BadRequestException("L'id de l'utilisateur doit être un entier valide");
+  }
+
+  const idNum = Number(id);
+  if (!id || isNaN(idNum) || !Number.isInteger(idNum)) {
+    throw new BadRequestException("L'id du bien doit être un entier valide");
+  }
+
+  // Ici, userId sert principalement à expliciter dans l'API
+  // quel utilisateur (conciergerie) est concerné par la modification.
+  return this.biensService.updateBienAdmin(idNum, updateBienDto);
+}
 
 // Suppression d'un bien par son id (réservé aux administrateurs)
 @UseGuards(JwtAuthGuard, RolesGuard)

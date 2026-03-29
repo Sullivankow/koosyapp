@@ -1,7 +1,6 @@
 
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsNumber, IsOptional } from 'class-validator';
-import { PartialType } from '@nestjs/mapped-types';
 
 // DTO pour la création d'un bien (le propriétaire est optionnel)
 export class CreateBienDto {
@@ -106,4 +105,57 @@ export class UpdateBienDto {
 	@ApiProperty({ example: 2.3522, required: false })
 	@IsOptional()
 	lng?: number;
-}	
+}
+
+// DTO d'édition admin : mêmes champs que la création mais tous optionnels (pour PATCH)
+export class UpdateBienAdminDto {
+	@ApiPropertyOptional({ description: "ID du propriétaire du bien (optionnel)" })
+	@IsOptional()
+	@IsNumber()
+	proprietaire?: number;
+
+	@ApiPropertyOptional({ example: 'Appartement T2 centre-ville' })
+	@IsOptional()
+	@IsString()
+	nom?: string;
+
+	@ApiPropertyOptional({ example: '12 rue des Lilas, Paris' })
+	@IsOptional()
+	@IsString()
+	adresse?: string;
+
+	@ApiPropertyOptional({ example: 'appartement' })
+	@IsOptional()
+	@IsString()
+	type?: string;
+
+	@ApiPropertyOptional({ example: 45 })
+	@IsOptional()
+	@IsNumber()
+	superficie?: number;
+
+	@ApiPropertyOptional({ example: 2 })
+	@IsOptional()
+	@IsNumber()
+	pieces?: number;
+
+	@ApiPropertyOptional({ example: ['cuisine équipée', 'balcon'] })
+	@IsOptional()
+	equipements?: string[];
+
+	@ApiPropertyOptional({ example: ['photo1.jpg', 'photo2.jpg'] })
+	@IsOptional()
+	photos?: string[];
+
+	@ApiPropertyOptional({ example: 'disponible' })
+	@IsOptional()
+	statut?: 'disponible' | 'occupé' | 'travaux';
+
+	@ApiPropertyOptional({ example: 48.8566 })
+	@IsOptional()
+	lat?: number;
+
+	@ApiPropertyOptional({ example: 2.3522 })
+	@IsOptional()
+	lng?: number;
+}

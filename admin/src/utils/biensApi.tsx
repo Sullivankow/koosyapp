@@ -45,6 +45,9 @@ export type CreateBienPayload = {
   proprietaire?: number;
 };
 
+// Payload pour la mise à jour d'un bien (admin)
+export type UpdateBienPayload = Partial<CreateBienPayload>;
+
 // Création d'un bien pour un utilisateur donné (vue admin)
 export async function createBienForUser(
   userId: number,
@@ -75,10 +78,30 @@ export async function deleteBienAdmin(id: number): Promise<void> {
   }
 }
 
+// Mise à jour d'un bien pour un utilisateur donné (vue admin)
+export async function updateBienForUser(
+  userId: number,
+  id: number,
+  payload: UpdateBienPayload,
+): Promise<BackendBien> {
+  const res = await fetch(`${API_BASE_URL}/biens/admin/${userId}/${id}`, {
+    method: 'PATCH',
+    headers: buildHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new Error("Erreur lors de la mise à jour du bien");
+  }
+
+  return res.json();
+}
+
 export default {
   fetchBiensList,
   fetchBiensAdminList,
   fetchBiensTotal,
   createBienForUser,
   deleteBienAdmin,
+  updateBienForUser,
 };

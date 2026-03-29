@@ -92,12 +92,6 @@ export function BienCard({ bien, onOpen, onDelete }: BienCardProps) {
         <div className="flex flex-wrap items-center gap-2 justify-end">
           <button
             type="button"
-            className="rounded-full border border-[#E0E6ED] bg-white px-2 py-0.5 text-[11px] text-[#6E7B8B] hover:bg-[#F4F7FA]"
-          >
-            Valider le bien (mock)
-          </button>
-          <button
-            type="button"
             onClick={() => onDelete && onDelete(bien)}
             className="rounded-full border border-transparent px-2 py-0.5 text-[11px] text-[#B91C1C] hover:bg-[#FEE2E2]"
           >

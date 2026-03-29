@@ -8,7 +8,7 @@ import ButtonCreate from '../ui/buttonCreate';
 import BienCard from '../components/cards';
 import BienImagesCarousel from '../components/bienImagesCarousel';
 import type { BackendBien, BackendProprietaire, BackendUser } from '../models/models';
-import { fetchBiensAdminList, createBienForUser, deleteBienAdmin } from '../utils/biensApi';
+import { fetchBiensAdminList, createBienForUser, deleteBienAdmin, updateBienForUser } from '../utils/biensApi';
 import { fetchUsersList } from '../utils/usersApi';
 
 const BiensPage: React.FC = () => {
@@ -121,6 +121,16 @@ const BiensPage: React.FC = () => {
       setFormSuperficie('');
       setFormPieces('');
       setFormStatut('disponible');
+    } else {
+      // Édition d'un bien existant : préremplit le formulaire
+      setFormNom(bien.nom ?? '');
+      setFormAdresse(bien.adresse ?? '');
+      setFormType((bien.type as any) ?? '');
+      setFormSuperficie(
+        typeof bien.superficie === 'number' ? String(bien.superficie) : '',
+      );
+      setFormPieces(typeof bien.pieces === 'number' ? String(bien.pieces) : '');
+      setFormStatut(bien.statut);
     }
     setDrawerOpen(true);
   };
@@ -185,6 +195,53 @@ const BiensPage: React.FC = () => {
     } catch (e) {
       console.error(e);
       setFormError('Impossible de créer le bien.');
+    } finally {
+      setFormSaving(false);
+    }
+  };
+
+  const handleUpdateBien = async () => {
+    if (!selectedBien) return;
+
+    try {
+      setFormSaving(true);
+      setFormError(null);
+
+      if (!formNom || !formAdresse || !formType || !formSuperficie || !formPieces) {
+        setFormError('Veuillez renseigner tous les champs obligatoires.');
+        return;
+      }
+
+      const superficieNum = Number(formSuperficie);
+      const piecesNum = Number(formPieces);
+
+      if (Number.isNaN(superficieNum) || Number.isNaN(piecesNum)) {
+        setFormError('Superficie et nombre de pièces doivent être des nombres.');
+        return;
+      }
+
+      const userId = (selectedBien as any)?.conciergerie?.id as number | undefined;
+      if (!userId) {
+        setFormError("Impossible de déterminer l'utilisateur (conciergerie) lié à ce bien.");
+        return;
+      }
+
+      await updateBienForUser(userId, selectedBien.id, {
+        nom: formNom,
+        adresse: formAdresse,
+        type: formType,
+        superficie: superficieNum,
+        pieces: piecesNum,
+        statut: formStatut,
+      });
+
+      const data = await fetchBiensAdminList();
+      setBiens(data ?? []);
+
+      closeDrawer();
+    } catch (e) {
+      console.error(e);
+      setFormError('Impossible de mettre à jour le bien.');
     } finally {
       setFormSaving(false);
     }
@@ -445,6 +502,108 @@ const BiensPage: React.FC = () => {
                       </div>
                     </div>
                   </section>
+
+                  {/* Formulaire d'édition du bien (admin) */}
+                  <section className="space-y-4 mt-2">
+                    {formError && (
+                      <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] text-red-700">
+                        {formError}
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-1 gap-3">
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-[#6E7B8B]">
+                          Nom du bien
+                        </label>
+                        <input
+                          type="text"
+                          value={formNom}
+                          onChange={(e) => setFormNom(e.target.value)}
+                          className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                          placeholder="Ex : Appartement T2 centre-ville"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-[#6E7B8B]">Adresse</label>
+                        <input
+                          type="text"
+                          value={formAdresse}
+                          onChange={(e) => setFormAdresse(e.target.value)}
+                          className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                          placeholder="Adresse complète du bien"
+                        />
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-[#6E7B8B]">Type</label>
+                          <select
+                            value={formType}
+                            onChange={(e) =>
+                              setFormType(
+                                e.target.value as
+                                  | 'Appartement'
+                                  | 'Maison'
+                                  | 'Studio'
+                                  | 'Chambre'
+                                  | '',
+                              )
+                            }
+                            className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                          >
+                            <option value="">Sélectionner</option>
+                            <option value="Appartement">Appartement</option>
+                            <option value="Maison">Maison</option>
+                            <option value="Studio">Studio</option>
+                            <option value="Chambre">Chambre</option>
+                          </select>
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-[#6E7B8B]">
+                            Superficie (m²)
+                          </label>
+                          <input
+                            type="number"
+                            min={0}
+                            value={formSuperficie}
+                            onChange={(e) => setFormSuperficie(e.target.value)}
+                            className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                          />
+                        </div>
+
+                        <div className="space-y-1">
+                          <label className="block text-xs font-medium text-[#6E7B8B]">Pièces</label>
+                          <input
+                            type="number"
+                            min={0}
+                            value={formPieces}
+                            onChange={(e) => setFormPieces(e.target.value)}
+                            className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-1">
+                        <label className="block text-xs font-medium text-[#6E7B8B]">Statut</label>
+                        <select
+                          value={formStatut}
+                          onChange={(e) =>
+                            setFormStatut(
+                              e.target.value as 'disponible' | 'occupé' | 'travaux',
+                            )
+                          }
+                          className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                        >
+                          <option value="disponible">Disponible</option>
+                          <option value="occupé">Occupé</option>
+                          <option value="travaux">En travaux</option>
+                        </select>
+                      </div>
+                    </div>
+                  </section>
                 </>
               ) : (
                 <section className="space-y-4">
@@ -587,6 +746,16 @@ const BiensPage: React.FC = () => {
                   className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   {formSaving ? 'Création…' : 'Créer le bien'}
+                </button>
+              )}
+              {selectedBien && (
+                <button
+                  type="button"
+                  onClick={handleUpdateBien}
+                  disabled={formSaving}
+                  className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B] disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {formSaving ? 'Enregistrement…' : 'Enregistrer les modifications'}
                 </button>
               )}
             </footer>
