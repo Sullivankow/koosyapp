@@ -15,6 +15,7 @@ type User = {
   role: 'Admin' | 'Utilisateur';
   status: 'Actif' | 'Inactif';
   lastLogin: string;
+  entrepriseName: string | null;
 };
 
 const Users: React.FC = () => {
@@ -62,6 +63,7 @@ const Users: React.FC = () => {
           role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
           status: 'Actif',
           lastLogin: '—',
+          entrepriseName: u.entreprise?.nom ?? null,
         }));
 
         setUsers(mapped);
@@ -146,6 +148,7 @@ const Users: React.FC = () => {
         role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
         status: 'Actif',
         lastLogin: '—',
+        entrepriseName: u.entreprise?.nom ?? null,
       }));
       setUsers(mapped);
 
@@ -306,6 +309,7 @@ const Users: React.FC = () => {
                   <thead className="bg-[#F4F7FA] text-left text-[11px] uppercase tracking-wide text-[#9EABB8]">
                     <tr>
                       <th className="px-5 py-3 font-medium">Utilisateur</th>
+                      <th className="px-5 py-3 font-medium">Entreprise</th>
                       <th className="px-5 py-3 font-medium">Rôle</th>
                       <th className="px-5 py-3 font-medium">Statut</th>
                       <th className="px-5 py-3 font-medium">Dernière connexion</th>
@@ -328,6 +332,10 @@ const Users: React.FC = () => {
                               <p className="text-xs text-[#6E7B8B]">{user.email}</p>
                             </div>
                           </div>
+                        </td>
+
+                        <td className="px-5 py-3 text-xs text-[#6E7B8B]">
+                          {user.entrepriseName ?? '—'}
                         </td>
 
                         <td className="px-5 py-3">

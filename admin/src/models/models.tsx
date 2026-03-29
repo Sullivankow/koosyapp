@@ -26,6 +26,11 @@ export interface BackendBien {
 
 export type BackendUserRole = 'user' | 'admin';
 
+export interface BackendEntreprise {
+  id: number;
+  nom: string;
+}
+
 export interface BackendUser {
   id: number;
   email: string;
@@ -34,6 +39,7 @@ export interface BackendUser {
   telephone?: string | null;
   abonnement: 'gratuit' | 'premium';
   role: BackendUserRole;
+  entreprise?: BackendEntreprise | null;
   // Champs supplémentaires disponibles côté backend mais pas encore utilisés dans l'admin :
   // entreprise?: any;
   // settings?: any;
