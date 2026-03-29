@@ -1,9 +1,10 @@
 // Page de gestion des utilisateurs
-// Liste les comptes, permet de filtrer et d'ouvrir un panneau de détails (mock pour l'instant)
-import React, { useState } from 'react';
+// Liste les comptes, permet de filtrer et d'ouvrir un panneau de détails (branché sur l'API)
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
+import { fetchUsersList } from '../utils/usersApi';
 
-// Type représentant un utilisateur dans cette page (mock local)
+// Type représentant un utilisateur pour l'affichage dans cette page
 type User = {
   id: number;
   name: string;
@@ -12,34 +13,6 @@ type User = {
   status: 'Actif' | 'Inactif';
   lastLogin: string;
 };
-
-// Données mockées pour l'affichage en attendant la connexion à l'API backend
-const mockUsers: User[] = [
-  {
-    id: 1,
-    name: 'Julie Martin',
-    email: 'julie.martin@example.com',
-    role: 'Admin',
-    status: 'Actif',
-    lastLogin: 'Aujourd’hui, 09:24',
-  },
-  {
-    id: 2,
-    name: 'Samuel Dupont',
-    email: 'samuel.dupont@example.com',
-    role: 'Manager',
-    status: 'Actif',
-    lastLogin: 'Hier, 18:02',
-  },
-  {
-    id: 3,
-    name: 'Lina Costa',
-    email: 'lina.costa@example.com',
-    role: 'Utilisateur',
-    status: 'Inactif',
-    lastLogin: 'Il y a 15 jours',
-  },
-];
 
 const Users: React.FC = () => {
   // État pour la sidebar mobile (ouvert / fermé)
@@ -54,9 +27,46 @@ const Users: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   // Booléen indiquant si le drawer (panneau latéral) est ouvert
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // Liste récupérée depuis l'API backend
+  const [users, setUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Applique les filtres (recherche, rôle, statut) sur la liste mockée
-  const filteredUsers = mockUsers.filter((user) => {
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const apiUsers = await fetchUsersList();
+        if (!apiUsers) {
+          setUsers([]);
+          return;
+        }
+
+        const mapped: User[] = apiUsers.map((u: any) => ({
+          id: u.id,
+          name: `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email,
+          email: u.email,
+          // On mappe les rôles back vers les rôles visibles dans le backoffice
+          role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
+          status: 'Actif',
+          lastLogin: '—',
+        }));
+
+        setUsers(mapped);
+      } catch (e) {
+        console.error('Erreur lors du chargement des utilisateurs', e);
+        setError("Impossible de charger la liste des utilisateurs.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUsers();
+  }, []);
+
+  // Applique les filtres (recherche, rôle, statut) sur la liste provenant de l'API
+  const filteredUsers = users.filter((user) => {
     const matchesSearch =
       user.name.toLowerCase().includes(search.toLowerCase()) ||
       user.email.toLowerCase().includes(search.toLowerCase());
@@ -199,10 +209,28 @@ const Users: React.FC = () => {
           <section className="rounded-2xl bg-white border border-[#E0E6ED] overflow-hidden">
             <div className="px-5 py-4 flex items-center justify-between border-b border-[#E0E6ED] bg-[#F9FBFF]">
               <h2 className="text-sm font-semibold text-[#222B45]">Liste des utilisateurs</h2>
-              <span className="text-[11px] text-[#9EABB8]">Mock de données à connecter à l’API</span>
+              <span className="text-[11px] text-[#9EABB8]">Données chargées depuis l’API</span>
             </div>
-
-            {filteredUsers.length === 0 ? (
+            {loading ? (
+              <div className="p-8 text-center text-sm text-[#6E7B8B]">
+                Chargement des utilisateurs…
+              </div>
+            ) : error ? (
+              <div className="p-8 text-center text-sm text-[#B91C1C]">
+                <p className="mb-2 font-medium">{error}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearch('');
+                    setRoleFilter('Tous');
+                    setStatusFilter('Tous');
+                  }}
+                  className="rounded-lg border border-[#E0E6ED] bg-[#F9FBFF] px-3 py-1.5 text-xs font-medium text-[#00A896] hover:bg-[#D1FAF5]"
+                >
+                  Réinitialiser les filtres
+                </button>
+              </div>
+            ) : filteredUsers.length === 0 ? (
               <div className="p-8 text-center text-sm text-[#6E7B8B]">
                 <p className="mb-2 font-medium">Aucun utilisateur ne correspond à vos filtres.</p>
                 <button

@@ -2,7 +2,7 @@
 // Affiche un aperçu global de l'activité (stats, abonnements, messages récents...)
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
-import { fetchDashboardStats, type DashboardStats } from '../utils/api';
+import { fetchDashboardStats, type DashboardStats } from '../utils/dashboardApi';
 
 const Dashboard: React.FC = () => {
   // État local pour gérer l'ouverture de la sidebar en mobile
