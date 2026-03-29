@@ -1,3 +1,4 @@
+
 import type { BackendBien } from '../models/models'
 import BienImagesCarousel from './bienImagesCarousel'
 
@@ -20,7 +21,12 @@ export function BienCard({ bien, onOpen }: BienCardProps) {
 
   return (
     <article className="flex flex-col rounded-2xl border border-[#E0E6ED] bg-white shadow-sm overflow-hidden">
-      <BienImagesCarousel images={bien.images} alt={bien.nom} heightClass="h-40" fit="contain" />
+      <BienImagesCarousel
+        images={bien.images}
+        alt={bien.nom}
+        heightClass="h-40"
+        fit="contain"
+      />
       <div className="flex-1 p-4 space-y-2 text-sm">
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-0.5">
