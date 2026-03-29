@@ -4,6 +4,7 @@
 // liées aux biens et aux réservations, et de les assigner aux utilisateurs.
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
+import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
 // Import centralisé des types et données mock pour les prestations
 import type { Prestation, PrestationType, PrestationStatus } from '../models/mocks';
@@ -157,18 +158,11 @@ const PrestationsPage: React.FC = () => {
         {/* Bloc de filtres */}
         <section className="rounded-2xl bg-white border border-[#E0E6ED] p-4 sm:p-5 space-y-4">
           {/* Recherche globale */}
-          <div className="relative">
-            <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[#9EABB8] text-sm">
-              🔍
-            </span>
-            <input
-              type="text"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Rechercher par bien, ville, type ou réf de réservation…"
-              className="w-full rounded-lg border border-[#E0E6ED] bg-[#F9FBFF] py-2.5 pl-9 pr-3 text-sm text-[#222B45] placeholder:text-[#9EABB8] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-            />
-          </div>
+          <SearchBar
+            value={search}
+            onChange={setSearch}
+            placeholder="Rechercher par bien, ville, type ou réf de réservation…"
+          />
 
           {/* Filtres détaillés */}
           <div className="grid gap-3 sm:grid-cols-4 text-sm">
