@@ -2,14 +2,14 @@
 // Liste les comptes, permet de filtrer et d'ouvrir un panneau de détails (branché sur l'API)
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
-import { fetchUsersList } from '../utils/usersApi';
+import { fetchUsersList, createUser } from '../utils/usersApi';
 
 // Type représentant un utilisateur pour l'affichage dans cette page
 type User = {
   id: number;
   name: string;
   email: string;
-  role: 'Admin' | 'Manager' | 'Utilisateur';
+  role: 'Admin' | 'Utilisateur';
   status: 'Actif' | 'Inactif';
   lastLogin: string;
 };
@@ -27,6 +27,14 @@ const Users: React.FC = () => {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   // Booléen indiquant si le drawer (panneau latéral) est ouvert
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // États du formulaire de création/édition
+  const [formNom, setFormNom] = useState('');
+  const [formPrenom, setFormPrenom] = useState('');
+  const [formEmail, setFormEmail] = useState('');
+  const [formRole, setFormRole] = useState<'Admin' | 'Utilisateur'>('Utilisateur');
+  const [formPassword, setFormPassword] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   // Liste récupérée depuis l'API backend
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -80,6 +88,20 @@ const Users: React.FC = () => {
   // Ouvre le drawer pour créer ou éditer un utilisateur
   const handleOpenDrawer = (user?: User) => {
     setSelectedUser(user ?? null);
+    if (user) {
+      const [prenom = '', nom = ''] = user.name.split(' ');
+      setFormPrenom(prenom);
+      setFormNom(nom);
+      setFormEmail(user.email);
+      setFormRole(user.role);
+    } else {
+      setFormPrenom('');
+      setFormNom('');
+      setFormEmail('');
+      setFormRole('Utilisateur');
+    }
+    setFormPassword('');
+    setFormError(null);
     setDrawerOpen(true);
   };
 
@@ -87,6 +109,51 @@ const Users: React.FC = () => {
   const handleCloseDrawer = () => {
     setDrawerOpen(false);
     setSelectedUser(null);
+    setFormPrenom('');
+    setFormNom('');
+    setFormEmail('');
+    setFormPassword('');
+    setFormError(null);
+  };
+
+  const handleSubmit = async () => {
+    try {
+      setSaving(true);
+      setFormError(null);
+
+      if (!formEmail || !formPassword || !formNom || !formPrenom) {
+        setFormError('Veuillez remplir tous les champs obligatoires.');
+        return;
+      }
+
+      // Création uniquement pour l'instant
+      await createUser({
+        email: formEmail,
+        password: formPassword,
+        nom: formNom,
+        prenom: formPrenom,
+        role: formRole === 'Admin' ? 'admin' : 'user',
+      });
+
+      // Recharge la liste
+      const apiUsers = await fetchUsersList();
+      const mapped: User[] = (apiUsers ?? []).map((u: any) => ({
+        id: u.id,
+        name: `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email,
+        email: u.email,
+        role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
+        status: 'Actif',
+        lastLogin: '—',
+      }));
+      setUsers(mapped);
+
+      handleCloseDrawer();
+    } catch (e) {
+      console.error('Erreur lors de la création de l\'utilisateur', e);
+      setFormError("Impossible de créer l'utilisateur.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -353,19 +420,31 @@ const Users: React.FC = () => {
                     </h3>
                     <div className="space-y-3">
                       <div className="space-y-1.5">
-                        <label className="block text-xs font-medium text-[#6E7B8B]">Nom complet</label>
+                        <label className="block text-xs font-medium text-[#6E7B8B]">Nom</label>
                         <input
-                  type="text"
-                  defaultValue={selectedUser?.name ?? ''}
+                          type="text"
+                          value={formNom}
+                          onChange={(e) => setFormNom(e.target.value)}
                   className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                  placeholder="Ex : Julie Martin"
+                          placeholder="Ex : Martin"
                 />
+                      </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-medium text-[#6E7B8B]">Prénom</label>
+                        <input
+                          type="text"
+                          value={formPrenom}
+                          onChange={(e) => setFormPrenom(e.target.value)}
+                          className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                          placeholder="Ex : Julie"
+                        />
                       </div>
                       <div className="space-y-1.5">
                         <label className="block text-xs font-medium text-[#6E7B8B]">Email</label>
                         <input
                   type="email"
-                  defaultValue={selectedUser?.email ?? ''}
+                          value={formEmail}
+                          onChange={(e) => setFormEmail(e.target.value)}
                   className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
                   placeholder="Ex : nom@entreprise.com"
                 />
@@ -381,62 +460,31 @@ const Users: React.FC = () => {
                       <div className="space-y-1.5">
                         <label className="block text-xs font-medium text-[#6E7B8B]">Rôle</label>
                         <select
-                  defaultValue={selectedUser?.role ?? 'Utilisateur'}
+                  value={formRole}
+                  onChange={(e) => setFormRole(e.target.value as 'Admin' | 'Utilisateur')}
                   className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
                 >
                           <option value="Admin">Admin</option>
-                          <option value="Manager">Manager</option>
                           <option value="Utilisateur">Utilisateur</option>
                         </select>
                       </div>
-                      <div className="space-y-2">
-                        <p className="text-xs text-[#6E7B8B]">Permissions rapides (mock) :</p>
-                        <div className="space-y-1.5 text-xs text-[#4B5563]">
-                          <label className="flex items-center gap-2">
-                            <input type="checkbox" className="h-3.5 w-3.5 rounded border-[#CBD5E1]" />
-                            Accès aux réservations
-                          </label>
-                          <label className="flex items-center gap-2">
-                            <input type="checkbox" className="h-3.5 w-3.5 rounded border-[#CBD5E1]" />
-                            Gestion des biens
-                          </label>
-                          <label className="flex items-center gap-2">
-                            <input type="checkbox" className="h-3.5 w-3.5 rounded border-[#CBD5E1]" />
-                            Administration (facturation, paramètres…)
-                          </label>
-                        </div>
+                      <div className="space-y-1.5">
+                        <label className="block text-xs font-medium text-[#6E7B8B]">Mot de passe initial</label>
+                        <input
+                  type="password"
+                  value={formPassword}
+                  onChange={(e) => setFormPassword(e.target.value)}
+                  className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+                  placeholder="Mot de passe temporaire"
+                />
+                        <p className="text-[11px] text-[#9EABB8]">
+                          L&apos;utilisateur pourra le changer plus tard depuis son espace.
+                        </p>
                       </div>
                     </div>
                   </section>
 
-                  <section className="space-y-3">
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9EABB8]">
-                      Statut & sécurité
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between rounded-xl border border-[#E0E6ED] bg-[#F9FBFF] px-3 py-2.5">
-                        <div>
-                          <p className="text-xs font-medium text-[#222B45]">Compte actif</p>
-                          <p className="text-[11px] text-[#9EABB8]">
-                            Active ou désactive l’accès à la plateforme.
-                          </p>
-                        </div>
-                        <button
-                          type="button"
-                          className="relative inline-flex h-5 w-9 items-center rounded-full bg-[#22C55E]"
-                        >
-                          <span className="inline-block h-4 w-4 translate-x-4 transform rounded-full bg-white shadow" />
-                        </button>
-                      </div>
-
-                      <button
-                        type="button"
-                        className="w-full rounded-lg border border-[#F97373]/40 bg-[#FEF2F2] px-3 py-2 text-xs font-medium text-[#B91C1C] hover:bg-[#FEE2E2]"
-                      >
-                        Réinitialiser le mot de passe (mock)
-                      </button>
-                    </div>
-                  </section>
+                  {/* Bloc Statut & sécurité retiré pour simplifier la création */}
                 </div>
 
                 <footer className="px-5 py-4 border-t border-[#E0E6ED] flex justify-end gap-2 bg-white">
@@ -447,11 +495,16 @@ const Users: React.FC = () => {
                   >
                     Annuler
                   </button>
+                  {formError && (
+              <p className="flex-1 text-xs text-[#B91C1C] self-center text-left">{formError}</p>
+            )}
                   <button
             type="button"
-            className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B]"
+            onClick={handleSubmit}
+            disabled={saving}
+            className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B] disabled:opacity-60 disabled:cursor-not-allowed"
           >
-                    Enregistrer (mock)
+                    {saving ? 'Enregistrement…' : 'Enregistrer'}
                   </button>
                 </footer>
               </div>

@@ -1,6 +1,6 @@
 
 // Fonctions d'appel API liées aux utilisateurs
-import { getJson } from './api';
+import { API_BASE_URL, buildHeaders, getJson } from './api';
 
 // Liste complète des utilisateurs
 export async function fetchUsersList(): Promise<any[] | null> {
@@ -23,7 +23,33 @@ export async function fetchUsersTotal(): Promise<number | null> {
   }
 }
 
+export type CreateUserPayload = {
+  email: string;
+  password: string;
+  nom: string;
+  prenom: string;
+  role?: 'user' | 'admin';
+  abonnement?: 'gratuit' | 'premium';
+  telephone?: string;
+};
+
+// Création d'un nouvel utilisateur
+export async function createUser(payload: CreateUserPayload): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/users`, {
+    method: 'POST',
+    headers: buildHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!res.ok) {
+    throw new Error('Erreur lors de la création de l\'utilisateur');
+  }
+
+  return res.json();
+}
+
 export default {
   fetchUsersList,
   fetchUsersTotal,
+  createUser,
 };
