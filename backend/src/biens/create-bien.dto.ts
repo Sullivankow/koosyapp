@@ -107,7 +107,7 @@ export class UpdateBienDto {
 	lng?: number;
 }
 
-// DTO d'édition admin : mêmes champs que la création mais tous optionnels (pour PATCH)
+// DTO d'édition admin : mêmes champs que la création mais tous optionnels (pour PATCH)!!!
 export class UpdateBienAdminDto {
 	@ApiPropertyOptional({ description: "ID du propriétaire du bien (optionnel)" })
 	@IsOptional()
