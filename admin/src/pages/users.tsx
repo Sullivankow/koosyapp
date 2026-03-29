@@ -2,6 +2,7 @@
 // Liste les comptes, permet de filtrer et d'ouvrir un panneau de détails (branché sur l'API)
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
+import ButtonCreate from '../ui/buttonCreate';
 import { fetchUsersList, createUser } from '../utils/usersApi';
 
 // Type représentant un utilisateur pour l'affichage dans cette page
@@ -199,14 +200,7 @@ const Users: React.FC = () => {
                 Gérez les accès, les rôles et le statut des comptes Koosy.
               </p>
             </div>
-            <button
-          type="button"
-          onClick={() => handleOpenDrawer()}
-          className="inline-flex items-center justify-center rounded-lg bg-[#00A896] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#00897B] transition-colors"
-        >
-              <span className="mr-2 text-lg">+</span>
-              Nouvel utilisateur
-            </button>
+            <ButtonCreate label="Nouvel utilisateur" onClick={() => handleOpenDrawer()} />
           </div>
 
           {/* Filtres & recherche */}

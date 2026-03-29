@@ -3,6 +3,7 @@
 // Permet de suivre les tâches assignées aux utilisateurs Koosy (pour les séjours, prestations, etc.)
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
+import ButtonCreate from '../ui/buttonCreate';
 // Import centralisé des types et données mock pour les tâches
 import type { Tache, TacheStatus, TachePriority } from '../models/mocks';
 import { mockTaches, mockUsers } from '../models/mocks';
@@ -136,14 +137,7 @@ const TachesPage: React.FC = () => {
               Centralisez les tâches des utilisateurs (check-in, ménage, suivi propriétaire, litiges, etc.).
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => openDrawer()}
-            className="inline-flex items-center justify-center rounded-lg bg-[#00A896] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#00897B] transition-colors"
-          >
-            <span className="mr-2 text-lg">+</span>
-            Nouvelle tâche
-          </button>
+          <ButtonCreate label="Nouvelle tâche" onClick={() => openDrawer()} />
         </div>
 
         {/* Bloc de filtres */}

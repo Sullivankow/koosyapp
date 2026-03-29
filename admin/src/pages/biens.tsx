@@ -3,6 +3,7 @@
 // Liste les biens liés aux utilisateurs (propriétaires) avec filtres + panneau de détail (mock)
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
+import ButtonCreate from '../ui/buttonCreate';
 // Import centralisé des types et données mock pour les biens
 import type { Bien } from '../models/mocks';
 import { mockBiens, mockOwners } from '../models/mocks';
@@ -87,14 +88,7 @@ const BiensPage: React.FC = () => {
               Gérez les biens liés aux comptes utilisateurs Koosy (propriétaires).
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => openDrawer()}
-            className="inline-flex items-center justify-center rounded-lg bg-[#00A896] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#00897B] transition-colors"
-          >
-            <span className="mr-2 text-lg">+</span>
-            Nouveau bien
-          </button>
+          <ButtonCreate label="Nouveau bien" onClick={() => openDrawer()} />
         </div>
 
         {/* Filtres */}

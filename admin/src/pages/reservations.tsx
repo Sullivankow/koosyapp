@@ -3,6 +3,7 @@
 // Permet à l'équipe de suivre les séjours par bien, voyageur et utilisateur Koosy
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
+import ButtonCreate from '../ui/buttonCreate';
 // Import centralisé des types et données mock pour les réservations
 import type { Reservation, ReservationStatus } from '../models/mocks';
 import { mockReservations, mockUsers, mockBiensLight } from '../models/mocks';
@@ -144,14 +145,7 @@ const ReservationsPage: React.FC = () => {
               Suivez les séjours par bien, voyageur et utilisateur Koosy, et liez-les aux prestations.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => openDrawer()}
-            className="inline-flex items-center justify-center rounded-lg bg-[#00A896] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#00897B] transition-colors"
-          >
-            <span className="mr-2 text-lg">+</span>
-            Nouvelle réservation
-          </button>
+          <ButtonCreate label="Nouvelle réservation" onClick={() => openDrawer()} />
         </div>
 
         {/* Bloc de filtres (recherche + selects) */}

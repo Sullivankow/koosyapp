@@ -4,6 +4,7 @@
 // liées aux biens et aux réservations, et de les assigner aux utilisateurs.
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
+import ButtonCreate from '../ui/buttonCreate';
 // Import centralisé des types et données mock pour les prestations
 import type { Prestation, PrestationType, PrestationStatus } from '../models/mocks';
 import { mockPrestations, mockUsers, mockBiensLight } from '../models/mocks';
@@ -150,14 +151,7 @@ const PrestationsPage: React.FC = () => {
               Ordonnez et suivez les prestations (ménage, check-in, maintenance, etc.) liées aux biens et aux séjours.
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => openDrawer()}
-            className="inline-flex items-center justify-center rounded-lg bg-[#00A896] px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-[#00897B] transition-colors"
-          >
-            <span className="mr-2 text-lg">+</span>
-            Nouvelle prestation
-          </button>
+          <ButtonCreate label="Nouvelle prestation" onClick={() => openDrawer()} />
         </div>
 
         {/* Bloc de filtres */}
