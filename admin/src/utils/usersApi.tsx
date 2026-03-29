@@ -1,11 +1,12 @@
 
 // Fonctions d'appel API liées aux utilisateurs
 import { API_BASE_URL, buildHeaders, getJson } from './api';
+import type { BackendUser } from '../models/models';
 
 // Liste complète des utilisateurs
-export async function fetchUsersList(): Promise<any[] | null> {
+export async function fetchUsersList(): Promise<BackendUser[] | null> {
   try {
-    return await getJson<any[]>('/users');
+    return await getJson<BackendUser[]>('/users');
   } catch (e) {
     console.error('Erreur lors de la récupération de la liste des utilisateurs :', e);
     return null;
@@ -15,7 +16,7 @@ export async function fetchUsersList(): Promise<any[] | null> {
 // Nombre total d'utilisateurs
 export async function fetchUsersTotal(): Promise<number | null> {
   try {
-    const users = await getJson<any[]>('/users');
+    const users = await getJson<BackendUser[]>('/users');
     return users.length;
   } catch (e) {
     console.error('Erreur lors de la récupération des utilisateurs :', e);

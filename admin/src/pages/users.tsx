@@ -5,6 +5,7 @@ import Sidebar from '../components/sidebar';
 import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
 import { fetchUsersList, createUser } from '../utils/usersApi';
+import type { BackendUser } from '../models/models';
 
 // Type représentant un utilisateur pour l'affichage dans cette page
 type User = {
@@ -53,7 +54,7 @@ const Users: React.FC = () => {
           return;
         }
 
-        const mapped: User[] = apiUsers.map((u: any) => ({
+        const mapped: User[] = apiUsers.map((u: BackendUser) => ({
           id: u.id,
           name: `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email,
           email: u.email,
@@ -71,7 +72,6 @@ const Users: React.FC = () => {
         setLoading(false);
       }
     };
-
     loadUsers();
   }, []);
 
@@ -139,7 +139,7 @@ const Users: React.FC = () => {
 
       // Recharge la liste
       const apiUsers = await fetchUsersList();
-      const mapped: User[] = (apiUsers ?? []).map((u: any) => ({
+      const mapped: User[] = (apiUsers ?? []).map((u: BackendUser) => ({
         id: u.id,
         name: `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email,
         email: u.email,

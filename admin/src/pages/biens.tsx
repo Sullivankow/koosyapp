@@ -1,44 +1,86 @@
 
 // Page de gestion des biens
-// Liste les biens liés aux utilisateurs (propriétaires) avec filtres + panneau de détail (mock)
-import React, { useState } from 'react';
+// Liste les biens liés aux utilisateurs (propriétaires) avec filtres + panneau de détail
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
 import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
 import BienCard from '../components/cards';
-// Import centralisé des types et données mock pour les biens
-import type { Bien } from '../models/mocks';
-import { mockBiens, mockOwners } from '../models/mocks';
+import type { BackendBien, BackendProprietaire } from '../models/models';
+import { fetchBiensAdminList } from '../utils/biensApi';
 
 const BiensPage: React.FC = () => {
   // État pour la sidebar mobile (ouvert / fermé)
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // Filtres
   const [search, setSearch] = useState('');
-  const [typeFilter, setTypeFilter] = useState<'Tous' | Bien['type']>('Tous');
-  const [statusFilter, setStatusFilter] = useState<'Tous' | Bien['status']>('Tous');
+  const [typeFilter, setTypeFilter] = useState<'Tous' | 'Appartement' | 'Maison' | 'Studio' | 'Chambre'>('Tous');
+  const [statusFilter, setStatusFilter] = useState<'Tous' | BackendBien['statut']>('Tous');
   const [ownerFilter, setOwnerFilter] = useState<'Tous' | number>('Tous');
+  // Données réelles des biens (backend)
+  const [biens, setBiens] = useState<BackendBien[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   // Bien sélectionné dans le panneau de détail
-  const [selectedBien, setSelectedBien] = useState<Bien | null>(null);
+  const [selectedBien, setSelectedBien] = useState<BackendBien | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Filtrage de la liste des biens (mock)
-  const filteredBiens = mockBiens.filter((bien) => {
+  // Chargement des biens depuis l'API admin
+  useEffect(() => {
+    const loadBiens = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchBiensAdminList();
+        if (!data) {
+          setError('Impossible de récupérer la liste des biens.');
+          setBiens([]);
+        } else {
+          setBiens(data);
+        }
+      } catch (e) {
+        console.error(e);
+        setError('Une erreur est survenue lors du chargement des biens.');
+        setBiens([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadBiens();
+  }, []);
+
+  const filteredBiens = biens.filter((bien) => {
+    const searchTerm = search.trim().toLowerCase();
+    const ownerFullName = bien.proprietaire
+      ? `${bien.proprietaire.prenom} ${bien.proprietaire.nom}`
+      : '';
+
     const matchesSearch =
-      search.trim().length === 0 ||
-      bien.name.toLowerCase().includes(search.toLowerCase()) ||
-      bien.city.toLowerCase().includes(search.toLowerCase()) ||
-      bien.owner.name.toLowerCase().includes(search.toLowerCase());
+      searchTerm.length === 0 ||
+      bien.nom.toLowerCase().includes(searchTerm) ||
+      (bien.adresse ?? '').toLowerCase().includes(searchTerm) ||
+      ownerFullName.toLowerCase().includes(searchTerm) ||
+      (bien.proprietaire?.email ?? '').toLowerCase().includes(searchTerm);
 
     const matchesType = typeFilter === 'Tous' ? true : bien.type === typeFilter;
-    const matchesStatus = statusFilter === 'Tous' ? true : bien.status === statusFilter;
-    const matchesOwner = ownerFilter === 'Tous' ? true : bien.owner.id === ownerFilter;
+    const matchesStatus = statusFilter === 'Tous' ? true : bien.statut === statusFilter;
+    const matchesOwner =
+      ownerFilter === 'Tous' ? true : bien.proprietaire?.id === ownerFilter;
 
     return matchesSearch && matchesType && matchesStatus && matchesOwner;
   });
 
+  const ownersOptions: BackendProprietaire[] = Array.from(
+    new Map(
+      biens
+        .filter((b) => b.proprietaire)
+        .map((b) => [b.proprietaire!.id, b.proprietaire as BackendProprietaire]),
+    ).values(),
+  );
+
   // Ouvre le drawer avec le bien sélectionné (ou null pour création)
-  const openDrawer = (bien?: Bien) => {
+  const openDrawer = (bien?: BackendBien) => {
     setSelectedBien(bien ?? null);
     setDrawerOpen(true);
   };
@@ -141,9 +183,9 @@ const BiensPage: React.FC = () => {
                 className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
               >
                 <option value="Tous">Tous les propriétaires</option>
-                {mockOwners.map((owner) => (
+                {ownersOptions.map((owner) => (
                   <option key={owner.id} value={owner.id}>
-                    {owner.name}
+                    {owner.prenom} {owner.nom}
                   </option>
                 ))}
               </select>
@@ -152,8 +194,11 @@ const BiensPage: React.FC = () => {
 
           <div className="flex flex-col items-start justify-end gap-2 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[11px] text-[#9EABB8]">
-              {filteredBiens.length} bien{filteredBiens.length > 1 ? 's' : ''} affiché
-              {filteredBiens.length > 1 ? 's' : ''}
+              {loading
+                ? 'Chargement des biens…'
+                : `${filteredBiens.length} bien${filteredBiens.length > 1 ? 's' : ''} affiché${
+                    filteredBiens.length > 1 ? 's' : ''
+                  }`}
             </p>
             <button
               type="button"
@@ -172,7 +217,11 @@ const BiensPage: React.FC = () => {
 
         {/* Grille de biens */}
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filteredBiens.length === 0 ? (
+          {error && !loading ? (
+            <div className="col-span-full rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {error}
+            </div>
+          ) : !loading && filteredBiens.length === 0 ? (
             <div className="col-span-full rounded-2xl border border-dashed border-[#E0E6ED] bg-[#F9FBFF] p-6 text-center text-sm text-[#6E7B8B]">
               <p className="font-medium mb-1">Aucun bien ne correspond à vos filtres.</p>
               <p className="text-[12px] text-[#9EABB8] mb-3">
@@ -218,32 +267,32 @@ const BiensPage: React.FC = () => {
             </header>
 
             <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6 text-sm">
-              {/* En-tête de la fiche avec nom + statut */}
+              {/* En-tête de la fiche avec nom + statut (backend) */}
               <section className="rounded-xl border border-[#E0E6ED] bg-[#F9FBFF] p-4 space-y-3">
                 <div className="flex items-start justify-between gap-3">
                   <div className="space-y-1">
                     <p className="text-[11px] text-[#9EABB8]">Nom du bien</p>
                     <p className="text-sm font-semibold text-[#222B45]">
-                      {selectedBien?.name ?? '—'}
+                      {selectedBien?.nom ?? '—'}
                     </p>
                     <p className="text-[11px] text-[#6E7B8B]">
-                      {selectedBien ? `${selectedBien.city}, ${selectedBien.country}` : '—'}
+                      {selectedBien?.adresse ?? '—'}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     {selectedBien && (
                       <span
                         className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                          selectedBien.status === 'disponible'
+                          selectedBien.statut === 'disponible'
                             ? 'bg-[#ECFDF3] text-[#166534]'
-                            : selectedBien.status === 'occupé'
+                            : selectedBien.statut === 'occupé'
                               ? 'bg-[#EFF6FF] text-[#1D4ED8]'
                               : 'bg-[#FFFBEB] text-[#92400E]'
                         }`}
                       >
-                        {selectedBien.status === 'disponible' && 'Disponible'}
-                        {selectedBien.status === 'occupé' && 'Occupé'}
-                        {selectedBien.status === 'travaux' && 'En travaux'}
+                        {selectedBien.statut === 'disponible' && 'Disponible'}
+                        {selectedBien.statut === 'occupé' && 'Occupé'}
+                        {selectedBien.statut === 'travaux' && 'En travaux'}
                       </span>
                     )}
                     <p className="text-[11px] text-[#9EABB8]">
@@ -253,24 +302,28 @@ const BiensPage: React.FC = () => {
                 </div>
               </section>
 
-              {/* Bloc propriétaire / conciergerie */}
+              {/* Bloc propriétaire / conciergerie (backend proprietaire) */}
               <section className="rounded-xl border border-[#E0E6ED] bg-white p-4 space-y-3">
                 <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9EABB8]">
                   Propriétaire du bien
                 </h3>
                 <div className="flex items-center gap-3">
                   <div className="h-9 w-9 rounded-full bg-[#0F172A]/5 flex items-center justify-center text-xs font-semibold text-[#0F172A]">
-                    {selectedBien?.owner.name
-                      ?.split(' ')
-                      .map((n) => n[0])
-                      .join('') ?? ''}
+                    {selectedBien?.proprietaire
+                      ? `${selectedBien.proprietaire.prenom} ${selectedBien.proprietaire.nom}`
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')
+                      : ''}
                   </div>
                   <div className="space-y-0.5">
                     <p className="text-sm font-medium text-[#222B45]">
-                      {selectedBien?.owner.name ?? '—'}
+                      {selectedBien?.proprietaire
+                        ? `${selectedBien.proprietaire.prenom} ${selectedBien.proprietaire.nom}`
+                        : '—'}
                     </p>
                     <p className="text-[11px] text-[#6E7B8B]">
-                      {selectedBien?.owner.email ?? ''}
+                      {selectedBien?.proprietaire?.email ?? ''}
                     </p>
                     <p className="text-[11px] text-[#9EABB8]">Propriétaire enregistré pour ce bien.</p>
                   </div>

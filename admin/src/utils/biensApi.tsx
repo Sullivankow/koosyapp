@@ -1,11 +1,12 @@
 
 // Fonctions d'appel API liées aux biens
 import { getJson } from './api';
+import type { BackendBien } from '../models/models';
 
 // Liste des biens de l'utilisateur connecté (vue conciergerie)
-export async function fetchBiensList(): Promise<any[] | null> {
+export async function fetchBiensList(): Promise<BackendBien[] | null> {
   try {
-    return await getJson<any[]>('/biens');
+    return await getJson<BackendBien[]>('/biens');
   } catch (e) {
     console.error('Erreur lors de la récupération de la liste des biens :', e);
     return null;
@@ -13,9 +14,9 @@ export async function fetchBiensList(): Promise<any[] | null> {
 }
 
 // Liste complète de tous les biens (vue admin)
-export async function fetchBiensAdminList(): Promise<any[] | null> {
+export async function fetchBiensAdminList(): Promise<BackendBien[] | null> {
   try {
-    return await getJson<any[]>('/biens/admin');
+    return await getJson<BackendBien[]>('/biens/admin');
   } catch (e) {
     console.error('Erreur lors de la récupération de la liste complète des biens (admin) :', e);
     return null;
