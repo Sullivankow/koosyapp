@@ -93,4 +93,26 @@ export interface BackendTache {
   bien: BackendBien;
 }
 
-// D'autres modèles (réservations, tâches, etc.) pourront être ajoutés ici au fur et à mesure
+// ---------- Prestations ----------
+
+export type BackendPrestationStatus = 'En attente' | 'Confirmée' | 'Annulée' | 'Terminée' | string;
+
+export interface BackendPrestation {
+  id: number;
+  bien: BackendBien;
+  user?: BackendUser | null;
+  description?: string | null;
+  amount_cents: number;
+  currency: string;
+  date_prestation: string;
+  status: BackendPrestationStatus;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface BackendPrestationsList {
+  items: BackendPrestation[];
+  total: number;
+  page: number;
+  limit: number;
+}
