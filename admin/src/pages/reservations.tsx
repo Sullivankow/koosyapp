@@ -7,7 +7,7 @@ import ButtonCreate from '../ui/buttonCreate';
 import FiltersSection from '../components/filters/filtersSection';
 import useSidebar from '../hooks/useSidebar';
 import type { BackendReservation, BackendReservationStatus } from '../models/models';
-import { fetchReservationsAdminList } from '../utils/reservationsApi';
+import { fetchReservationsAdminList, updateReservation } from '../utils/reservationsApi';
 
 // Petite fonction utilitaire pour formater les dates en français
 const formatDateFR = (dateString: string) => {
@@ -26,12 +26,17 @@ const ReservationsPage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'Tous' | BackendReservationStatus>('Tous');
   const [propertyFilter, setPropertyFilter] = useState<'Tous' | number>('Tous');
 
   const [selectedReservation, setSelectedReservation] = useState<BackendReservation | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  const [editedStatus, setEditedStatus] = useState<BackendReservationStatus>('en attente');
 
   // Chargement des réservations réelles depuis le backend
   useEffect(() => {
@@ -78,12 +83,38 @@ const ReservationsPage: React.FC = () => {
 
   const openDrawer = (reservation?: BackendReservation) => {
     setSelectedReservation(reservation ?? null);
+    if (reservation) {
+      setEditedStatus(reservation.statut);
+      setSaveError(null);
+    }
     setDrawerOpen(true);
   };
 
   const closeDrawer = () => {
     setDrawerOpen(false);
     setSelectedReservation(null);
+    setSaveError(null);
+  };
+
+  const handleSaveReservation = async () => {
+    if (!selectedReservation) return;
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const updated = await updateReservation(selectedReservation.id, {
+        statut: editedStatus,
+      });
+      setReservations((prev) =>
+        prev.map((r) => (r.id === updated.id ? updated : r)),
+      );
+      setSelectedReservation(updated);
+      setDrawerOpen(false);
+    } catch (e) {
+      console.error(e);
+      setSaveError('Impossible de mettre à jour la réservation.');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const getStatusClasses = (status: BackendReservationStatus) => {
@@ -370,11 +401,31 @@ const ReservationsPage: React.FC = () => {
                   </div>
                   <div>
                     <p className="text-xs font-medium text-[#9EABB8] mb-1">Statut</p>
-                    <p className="text-sm font-semibold text-[#1F2933]">{selectedReservation.statut}</p>
+                    <select
+                      className="mt-1 block w-full rounded-lg border border-[#E0E6ED] bg-white px-2 py-1 text-sm text-[#1F2933] focus:outline-none focus:ring-2 focus:ring-[#00A896]"
+                      value={editedStatus}
+                      onChange={(e) => setEditedStatus(e.target.value as BackendReservationStatus)}
+                      disabled={saving}
+                    >
+                      <option value="en attente">En attente</option>
+                      <option value="confirmée">Confirmée</option>
+                      <option value="terminée">Terminée</option>
+                      <option value="annulée">Annulée</option>
+                    </select>
                   </div>
-                  <p className="text-[11px] text-[#9EABB8]">
-                    Ici tu pourras plus tard éditer la réservation, changer le statut ou ajouter des prestations liées.
-                  </p>
+                      {saveError && (
+                        <p className="text-[11px] text-red-600 mt-2">{saveError}</p>
+                      )}
+                      <div className="pt-2 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={handleSaveReservation}
+                          disabled={saving}
+                          className="inline-flex items-center justify-center rounded-lg bg-[#00A896] px-4 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-[#00897B] disabled:opacity-60"
+                        >
+                          {saving ? 'Enregistrement…' : 'Enregistrer les modifications'}
+                        </button>
+                      </div>
                 </>
               ) : (
                 <>

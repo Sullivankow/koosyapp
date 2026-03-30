@@ -1,6 +1,6 @@
 // Fonctions d'appel API liées aux réservations
-import { getJson } from './api';
-import type { BackendReservation } from '../models/models';
+import { API_BASE_URL, buildHeaders, getJson } from './api';
+import type { BackendReservation, BackendReservationStatus } from '../models/models';
 
 // Réservations à venir sur les N prochains jours (par défaut 7)
 export async function fetchReservationsUpcomingTotal(days = 7): Promise<number | null> {
@@ -40,10 +40,36 @@ export async function fetchReservationsList(): Promise<BackendReservation[] | nu
 	return fetchReservationsAdminList();
 }
 
+// Payload pour la mise à jour d'une réservation (admin)
+export type UpdateReservationPayload = {
+	dateDebut?: string;
+	dateFin?: string;
+	statut?: BackendReservationStatus;
+};
+
+// Mise à jour d'une réservation par son id (admin)
+export async function updateReservation(
+	id: number,
+	payload: UpdateReservationPayload,
+): Promise<BackendReservation> {
+	const res = await fetch(`${API_BASE_URL}/reservations/${id}`, {
+		method: 'PATCH',
+		headers: buildHeaders(),
+		body: JSON.stringify(payload),
+	});
+
+	if (!res.ok) {
+		throw new Error("Erreur lors de la mise à jour de la réservation");
+	}
+
+	return res.json();
+}
+
 export default {
 	fetchReservationsUpcomingTotal,
 	fetchReservationsTotal,
 	fetchReservationsAdminList,
 	fetchReservationsList,
+	updateReservation,
 };
 
