@@ -4,9 +4,9 @@
 // liées aux biens et aux réservations, et de les assigner aux utilisateurs.
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
-import SearchBar from '../components/searchBar';
 import SelectField from '../ui/selectField';
 import ButtonCreate from '../ui/buttonCreate';
+import FiltersSection from '../components/filters/filtersSection';
 // Import centralisé des types et données mock pour les prestations
 import type { Prestation, PrestationType, PrestationStatus } from '../models/mocks';
 import { mockPrestations, mockUsers, mockBiensLight } from '../models/mocks';
@@ -157,99 +157,79 @@ const PrestationsPage: React.FC = () => {
         </div>
 
         {/* Bloc de filtres */}
-        <section className="rounded-2xl bg-white border border-[#E0E6ED] p-4 sm:p-5 space-y-4">
-          {/* Recherche globale */}
-          <SearchBar
-            value={search}
-            onChange={setSearch}
-            placeholder="Rechercher par bien, ville, type ou réf de réservation…"
-          />
-
+        <FiltersSection
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Rechercher par bien, ville, type ou réf de réservation…"
+          filtersClassName="grid gap-3 sm:grid-cols-4 text-sm"
+          summary={`${filteredPrestations.length} prestation${
+            filteredPrestations.length > 1 ? 's' : ''
+          } affichée${filteredPrestations.length > 1 ? 's' : ''}`}
+          onReset={() => {
+            setSearch('');
+            setTypeFilter('Tous');
+            setStatusFilter('Tous');
+            setUserFilter('Tous');
+            setPropertyFilter('Tous');
+          }}
+        >
           {/* Filtres détaillés */}
-          <div className="grid gap-3 sm:grid-cols-4 text-sm">
-            {/* Filtre type */}
-            <SelectField
-              label="Type de prestation"
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value as any)}
-            >
-              <option value="Tous">Tous les types</option>
-              <option value="Ménage">Ménage</option>
-              <option value="Check-in">Check-in</option>
-              <option value="Check-out">Check-out</option>
-              <option value="Linge">Linge</option>
-              <option value="Maintenance">Maintenance</option>
-              <option value="Autre">Autre</option>
-            </SelectField>
+          <SelectField
+            label="Type de prestation"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as any)}
+          >
+            <option value="Tous">Tous les types</option>
+            <option value="Ménage">Ménage</option>
+            <option value="Check-in">Check-in</option>
+            <option value="Check-out">Check-out</option>
+            <option value="Linge">Linge</option>
+            <option value="Maintenance">Maintenance</option>
+            <option value="Autre">Autre</option>
+          </SelectField>
 
-            {/* Filtre statut */}
-            <SelectField
-              label="Statut"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-            >
-              <option value="Tous">Tous les statuts</option>
-              <option value="Planifiée">Planifiée</option>
-              <option value="En cours">En cours</option>
-              <option value="Réalisée">Réalisée</option>
-              <option value="Annulée">Annulée</option>
-            </SelectField>
+          <SelectField
+            label="Statut"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+          >
+            <option value="Tous">Tous les statuts</option>
+            <option value="Planifiée">Planifiée</option>
+            <option value="En cours">En cours</option>
+            <option value="Réalisée">Réalisée</option>
+            <option value="Annulée">Annulée</option>
+          </SelectField>
 
-            {/* Filtre bien */}
-            <SelectField
-              label="Bien concerné"
-              value={propertyFilter}
-              onChange={(e) =>
-                setPropertyFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-              }
-            >
-              <option value="Tous">Tous les biens</option>
-              {mockBiensLight.map((bien) => (
-                <option key={bien.id} value={bien.id}>
-                  {bien.name} – {bien.city}
-                </option>
-              ))}
-            </SelectField>
+          <SelectField
+            label="Bien concerné"
+            value={propertyFilter}
+            onChange={(e) =>
+              setPropertyFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+            }
+          >
+            <option value="Tous">Tous les biens</option>
+            {mockBiensLight.map((bien) => (
+              <option key={bien.id} value={bien.id}>
+                {bien.name} – {bien.city}
+              </option>
+            ))}
+          </SelectField>
 
-            {/* Filtre utilisateur Koosy */}
-            <SelectField
-              label="Utilisateur assigné"
-              value={userFilter}
-              onChange={(e) =>
-                setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-              }
-            >
-              <option value="Tous">Tous les utilisateurs</option>
-              {mockUsers.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name} ({user.role})
-                </option>
-              ))}
-            </SelectField>
-          </div>
-
-          {/* Résumé + reset */}
-          <div className="flex flex-col items-start justify-end gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[11px] text-[#9EABB8]">
-              {filteredPrestations.length} prestation
-              {filteredPrestations.length > 1 ? 's' : ''} affichée
-              {filteredPrestations.length > 1 ? 's' : ''}
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearch('');
-                setTypeFilter('Tous');
-                setStatusFilter('Tous');
-                setUserFilter('Tous');
-                setPropertyFilter('Tous');
-              }}
-              className="text-[11px] font-medium text-[#00A896] hover:text-[#00897B]"
-            >
-              Réinitialiser les filtres
-            </button>
-          </div>
-        </section>
+          <SelectField
+            label="Utilisateur assigné"
+            value={userFilter}
+            onChange={(e) =>
+              setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+            }
+          >
+            <option value="Tous">Tous les utilisateurs</option>
+            {mockUsers.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name} ({user.role})
+              </option>
+            ))}
+          </SelectField>
+        </FiltersSection>
 
         {/* Liste des prestations sous forme de cartes responsive */}
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

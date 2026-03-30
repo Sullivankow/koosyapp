@@ -3,9 +3,9 @@
 // Permet de suivre les tâches assignées aux utilisateurs Koosy (pour les séjours, prestations, etc.)
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
-import SearchBar from '../components/searchBar';
 import SelectField from '../ui/selectField';
 import ButtonCreate from '../ui/buttonCreate';
+import FiltersSection from '../components/filters/filtersSection';
 // Import centralisé des types et données mock pour les tâches
 import type { Tache, TacheStatus, TachePriority } from '../models/mocks';
 import { mockTaches, mockUsers } from '../models/mocks';
@@ -143,79 +143,59 @@ const TachesPage: React.FC = () => {
         </div>
 
         {/* Bloc de filtres */}
-        <section className="rounded-2xl bg-white border border-[#E0E6ED] p-4 sm:p-5 space-y-4">
-          {/* Recherche globale */}
-          <SearchBar
-            value={search}
-            onChange={setSearch}
-            placeholder="Rechercher par titre, description ou référence liée…"
-          />
-
+        <FiltersSection
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Rechercher par titre, description ou référence liée…"
+          summary={`${filteredTaches.length} tâche${
+            filteredTaches.length > 1 ? 's' : ''
+          } affichée${filteredTaches.length > 1 ? 's' : ''}`}
+          onReset={() => {
+            setSearch('');
+            setStatusFilter('Tous');
+            setPriorityFilter('Toutes');
+            setUserFilter('Tous');
+          }}
+        >
           {/* Filtres détaillés */}
-          <div className="grid gap-3 sm:grid-cols-3 text-sm">
-            {/* Filtre statut */}
-            <SelectField
-              label="Statut"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-            >
-              <option value="Tous">Tous les statuts</option>
-              <option value="À faire">À faire</option>
-              <option value="En cours">En cours</option>
-              <option value="Terminée">Terminée</option>
-              <option value="En retard">En retard</option>
-            </SelectField>
+          <SelectField
+            label="Statut"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+          >
+            <option value="Tous">Tous les statuts</option>
+            <option value="À faire">À faire</option>
+            <option value="En cours">En cours</option>
+            <option value="Terminée">Terminée</option>
+            <option value="En retard">En retard</option>
+          </SelectField>
 
-            {/* Filtre priorité */}
-            <SelectField
-              label="Priorité"
-              value={priorityFilter}
-              onChange={(e) => setPriorityFilter(e.target.value as any)}
-            >
-              <option value="Toutes">Toutes les priorités</option>
-              <option value="Haute">Haute</option>
-              <option value="Moyenne">Moyenne</option>
-              <option value="Basse">Basse</option>
-            </SelectField>
+          <SelectField
+            label="Priorité"
+            value={priorityFilter}
+            onChange={(e) => setPriorityFilter(e.target.value as any)}
+          >
+            <option value="Toutes">Toutes les priorités</option>
+            <option value="Haute">Haute</option>
+            <option value="Moyenne">Moyenne</option>
+            <option value="Basse">Basse</option>
+          </SelectField>
 
-            {/* Filtre utilisateur */}
-            <SelectField
-              label="Utilisateur Koosy"
-              value={userFilter}
-              onChange={(e) =>
-                setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-              }
-            >
-              <option value="Tous">Tous les utilisateurs</option>
-              {mockUsers.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name} ({user.role})
-                </option>
-              ))}
-            </SelectField>
-          </div>
-
-          {/* Résumé + reset */}
-          <div className="flex flex-col items-start justify-end gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[11px] text-[#9EABB8]">
-              {filteredTaches.length} tâche
-              {filteredTaches.length > 1 ? 's' : ''} affichée
-              {filteredTaches.length > 1 ? 's' : ''}
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearch('');
-                setStatusFilter('Tous');
-                setPriorityFilter('Toutes');
-                setUserFilter('Tous');
-              }}
-              className="text-[11px] font-medium text-[#00A896] hover:text-[#00897B]"
-            >
-              Réinitialiser les filtres
-            </button>
-          </div>
-        </section>
+          <SelectField
+            label="Utilisateur Koosy"
+            value={userFilter}
+            onChange={(e) =>
+              setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+            }
+          >
+            <option value="Tous">Tous les utilisateurs</option>
+            {mockUsers.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name} ({user.role})
+              </option>
+            ))}
+          </SelectField>
+        </FiltersSection>
 
         {/* Liste des tâches sous forme de cartes (responsive) */}
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

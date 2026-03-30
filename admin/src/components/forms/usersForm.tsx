@@ -1,7 +1,10 @@
 
+// Formulaire latéral (drawer) pour créer ou modifier un utilisateur Koosy côté admin.
+// Toute la logique (chargement, validation, appel API) reste dans la page `users.tsx`.
 import React from 'react';
 import type { User } from '../../pages/users';
 
+// Décrit les props nécessaires pour piloter le formulaire depuis la page
 interface UsersFormProps {
   selectedUser: User | null;
   formNom: string;
@@ -38,7 +41,9 @@ const UsersForm: React.FC<UsersFormProps> = ({
   onCancel,
 }) => {
   return (
+    // Conteneur du panneau latéral (drawer)
     <div className="relative ml-auto h-full w-full max-w-md bg-white shadow-xl border-l border-[#E0E6ED] flex flex-col">
+      {/* En-tête du formulaire : titre + bouton de fermeture */}
       <header className="px-5 py-4 border-b border-[#E0E6ED] flex items-center justify-between">
         <div>
           <h2 className="text-sm font-semibold text-[#222B45]">
@@ -56,7 +61,7 @@ const UsersForm: React.FC<UsersFormProps> = ({
           ✕
         </button>
       </header>
-
+      {/* Corps du formulaire : champs contrôlés (nom, prénom, email, rôle, mot de passe) */}
       <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6 text-sm">
         <section className="space-y-3">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9EABB8]">
@@ -133,10 +138,9 @@ const UsersForm: React.FC<UsersFormProps> = ({
             </div>
           </div>
         </section>
-
-        {/* Bloc Statut & sécurité retiré pour simplifier la création */}
+        {/* Bloc Statut & sécurité retiré pour simplifier la création dans cette première version */}
       </div>
-
+      {/* Pied du formulaire : actions Annuler / Enregistrer + affichage d'erreur éventuelle */}
       <footer className="px-5 py-4 border-t border-[#E0E6ED] flex justify-end gap-2 bg-white">
         <button
           type="button"

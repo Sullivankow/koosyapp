@@ -1,6 +1,8 @@
 
 import React from 'react';
 
+// Barre de recherche générique utilisée en haut des listes (biens, users, réservations, etc.).
+// Affiche une icône de loupe + un champ texte.
 type SearchBarProps = {
   value: string;
   onChange: (value: string) => void;
@@ -13,10 +15,13 @@ const baseClasses =
 
 const SearchBar: React.FC<SearchBarProps> = ({ value, onChange, placeholder, className = '' }) => {
   return (
+    // Conteneur positionné en relatif pour placer l'icône de recherche à l'intérieur du champ
     <div className={`relative ${className}`.trim()}>
+      {/* Icône de loupe à gauche du champ de saisie */}
       <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-[#9EABB8] text-sm">
         🔍
       </span>
+      {/* Champ de saisie contrôlé par le parent (valeur + onChange) */}
       <input
         type="text"
         value={value}

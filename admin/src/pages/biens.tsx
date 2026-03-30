@@ -3,12 +3,12 @@
 // Liste les biens liés aux utilisateurs (propriétaires) avec filtres + panneau de détail
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
-import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
 import BienCard from '../components/cards';
 import BienImagesCarousel from '../components/bienImagesCarousel';
 import SelectField from '../ui/selectField';
 import BiensForm from '../components/forms/biensForm';
+import FiltersSection from '../components/filters/filtersSection';
 import type { BackendBien, BackendProprietaire, BackendUser } from '../models/models';
 import { fetchBiensAdminList, createBienForUser, deleteBienAdmin, updateBienForUser } from '../utils/biensApi';
 import { fetchUsersList } from '../utils/usersApi';
@@ -299,91 +299,79 @@ const BiensPage: React.FC = () => {
         </div>
 
         {/* Filtres */}
-        <section className="rounded-2xl bg-white border border-[#E0E6ED] p-4 sm:p-5 space-y-4">
-          <SearchBar
-            value={search}
-            onChange={setSearch}
-            placeholder="Rechercher par nom de bien, ville ou propriétaire…"
-          />
+        <FiltersSection
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Rechercher par nom de bien, ville ou propriétaire…"
+          filtersClassName="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm"
+          summary={
+            loading
+              ? 'Chargement des biens…'
+              : `${filteredBiens.length} bien${filteredBiens.length > 1 ? 's' : ''} affiché${
+                  filteredBiens.length > 1 ? 's' : ''
+                }`
+          }
+          onReset={() => {
+            setSearch('');
+            setTypeFilter('Tous');
+            setStatusFilter('Tous');
+            setOwnerFilter('Tous');
+            setUserFilter('Tous');
+          }}
+        >
+          <SelectField
+            label="Type de bien"
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value as any)}
+          >
+            <option value="Tous">Tous</option>
+            <option value="Appartement">Appartement</option>
+            <option value="Maison">Maison</option>
+            <option value="Studio">Studio</option>
+            <option value="Chambre">Chambre</option>
+          </SelectField>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
-            <SelectField
-              label="Type de bien"
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value as any)}
-            >
-              <option value="Tous">Tous</option>
-              <option value="Appartement">Appartement</option>
-              <option value="Maison">Maison</option>
-              <option value="Studio">Studio</option>
-              <option value="Chambre">Chambre</option>
-            </SelectField>
+          <SelectField
+            label="Statut du bien"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+          >
+            <option value="Tous">Tous</option>
+            <option value="disponible">Disponible</option>
+            <option value="occupé">Occupé</option>
+            <option value="travaux">En travaux</option>
+          </SelectField>
 
-            <SelectField
-              label="Statut du bien"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-            >
-              <option value="Tous">Tous</option>
-              <option value="disponible">Disponible</option>
-              <option value="occupé">Occupé</option>
-              <option value="travaux">En travaux</option>
-            </SelectField>
+          <SelectField
+            label="Propriétaire"
+            value={ownerFilter}
+            onChange={(e) =>
+              setOwnerFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+            }
+          >
+            <option value="Tous">Tous les propriétaires</option>
+            {ownersOptions.map((owner) => (
+              <option key={owner.id} value={owner.id}>
+                {owner.prenom} {owner.nom}
+              </option>
+            ))}
+          </SelectField>
 
-            <SelectField
-              label="Propriétaire"
-              value={ownerFilter}
-              onChange={(e) =>
-                setOwnerFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-              }
-            >
-              <option value="Tous">Tous les propriétaires</option>
-              {ownersOptions.map((owner) => (
-                <option key={owner.id} value={owner.id}>
-                  {owner.prenom} {owner.nom}
-                </option>
-              ))}
-            </SelectField>
-
-            <SelectField
-              label="Utilisateur (conciergerie)"
-              value={userFilter}
-              onChange={(e) =>
-                setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-              }
-            >
-              <option value="Tous">Tous les utilisateurs</option>
-              {users.map((u) => (
-                <option key={u.id} value={u.id}>
-                  {u.prenom} {u.nom} — {u.email}
-                </option>
-              ))}
-            </SelectField>
-          </div>
-
-          <div className="flex flex-col items-start justify-end gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[11px] text-[#9EABB8]">
-              {loading
-                ? 'Chargement des biens…'
-                : `${filteredBiens.length} bien${filteredBiens.length > 1 ? 's' : ''} affiché${
-                    filteredBiens.length > 1 ? 's' : ''
-                  }`}
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearch('');
-                setTypeFilter('Tous');
-                setStatusFilter('Tous');
-                setOwnerFilter('Tous');
-                setUserFilter('Tous');
-              }}
-              className="text-[11px] font-medium text-[#00A896] hover:text-[#00897B]"
-            >
-              Réinitialiser les filtres
-            </button>
-          </div>
-        </section>
+          <SelectField
+            label="Utilisateur (conciergerie)"
+            value={userFilter}
+            onChange={(e) =>
+              setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+            }
+          >
+            <option value="Tous">Tous les utilisateurs</option>
+            {users.map((u) => (
+              <option key={u.id} value={u.id}>
+                {u.prenom} {u.nom} — {u.email}
+              </option>
+            ))}
+          </SelectField>
+        </FiltersSection>
 
         {/* Grille de biens */}
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

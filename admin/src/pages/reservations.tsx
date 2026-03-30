@@ -3,9 +3,9 @@
 // Permet à l'équipe de suivre les séjours par bien, voyageur et utilisateur Koosy
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
-import SearchBar from '../components/searchBar';
 import SelectField from '../ui/selectField';
 import ButtonCreate from '../ui/buttonCreate';
+import FiltersSection from '../components/filters/filtersSection';
 // Import centralisé des types et données mock pour les réservations
 import type { Reservation, ReservationStatus } from '../models/mocks';
 import { mockReservations, mockUsers, mockBiensLight } from '../models/mocks';
@@ -151,84 +151,64 @@ const ReservationsPage: React.FC = () => {
         </div>
 
         {/* Bloc de filtres (recherche + selects) */}
-        <section className="rounded-2xl bg-white border border-[#E0E6ED] p-4 sm:p-5 space-y-4">
-          {/* Barre de recherche globale */}
-          <SearchBar
-            value={search}
-            onChange={setSearch}
-            placeholder="Rechercher par réf, bien ou voyageur…"
-          />
-
+        <FiltersSection
+          searchValue={search}
+          onSearchChange={setSearch}
+          searchPlaceholder="Rechercher par réf, bien ou voyageur…"
+          summary={`${filteredReservations.length} réservation${
+            filteredReservations.length > 1 ? 's' : ''
+          } affichée${filteredReservations.length > 1 ? 's' : ''}`}
+          onReset={() => {
+            setSearch('');
+            setStatusFilter('Tous');
+            setUserFilter('Tous');
+            setPropertyFilter('Tous');
+          }}
+        >
           {/* Ligne de filtres détaillés */}
-          <div className="grid gap-3 sm:grid-cols-3 text-sm">
-            {/* Filtre statut */}
-            <SelectField
-              label="Statut de la réservation"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
-            >
-              <option value="Tous">Tous les statuts</option>
-              <option value="Brouillon">Brouillon</option>
-              <option value="Confirmée">Confirmée</option>
-              <option value="En cours">En cours</option>
-              <option value="Terminée">Terminée</option>
-              <option value="Annulée">Annulée</option>
-            </SelectField>
+          <SelectField
+            label="Statut de la réservation"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value as any)}
+          >
+            <option value="Tous">Tous les statuts</option>
+            <option value="Brouillon">Brouillon</option>
+            <option value="Confirmée">Confirmée</option>
+            <option value="En cours">En cours</option>
+            <option value="Terminée">Terminée</option>
+            <option value="Annulée">Annulée</option>
+          </SelectField>
 
-            {/* Filtre bien */}
-            <SelectField
-              label="Bien concerné"
-              value={propertyFilter}
-              onChange={(e) =>
-                setPropertyFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-              }
-            >
-              <option value="Tous">Tous les biens</option>
-              {mockBiensLight.map((bien) => (
-                <option key={bien.id} value={bien.id}>
-                  {bien.name} – {bien.city}
-                </option>
-              ))}
-            </SelectField>
+          <SelectField
+            label="Bien concerné"
+            value={propertyFilter}
+            onChange={(e) =>
+              setPropertyFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+            }
+          >
+            <option value="Tous">Tous les biens</option>
+            {mockBiensLight.map((bien) => (
+              <option key={bien.id} value={bien.id}>
+                {bien.name} – {bien.city}
+              </option>
+            ))}
+          </SelectField>
 
-            {/* Filtre utilisateur Koosy */}
-            <SelectField
-              label="Utilisateur Koosy concerné"
-              value={userFilter}
-              onChange={(e) =>
-                setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-              }
-            >
-              <option value="Tous">Tous les utilisateurs</option>
-              {mockUsers.map((user) => (
-                <option key={user.id} value={user.id}>
-                  {user.name} ({user.role})
-                </option>
-              ))}
-            </SelectField>
-          </div>
-
-          {/* Résumé + bouton de réinitialisation */}
-          <div className="flex flex-col items-start justify-end gap-2 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[11px] text-[#9EABB8]">
-              {filteredReservations.length} réservation
-              {filteredReservations.length > 1 ? 's' : ''} affichée
-              {filteredReservations.length > 1 ? 's' : ''}
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearch('');
-                setStatusFilter('Tous');
-                setUserFilter('Tous');
-                setPropertyFilter('Tous');
-              }}
-              className="text-[11px] font-medium text-[#00A896] hover:text-[#00897B]"
-            >
-              Réinitialiser les filtres
-            </button>
-          </div>
-        </section>
+          <SelectField
+            label="Utilisateur Koosy concerné"
+            value={userFilter}
+            onChange={(e) =>
+              setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+            }
+          >
+            <option value="Tous">Tous les utilisateurs</option>
+            {mockUsers.map((user) => (
+              <option key={user.id} value={user.id}>
+                {user.name} ({user.role})
+              </option>
+            ))}
+          </SelectField>
+        </FiltersSection>
 
         {/* Liste des réservations sous forme de cartes responsive */}
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

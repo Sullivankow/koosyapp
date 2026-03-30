@@ -2,9 +2,9 @@
 // Liste les comptes, permet de filtrer et d'ouvrir un panneau de détails (branché sur l'API)
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
-import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
 import SelectField from '../ui/selectField';
+import FiltersSection from '../components/filters/filtersSection';
 import { fetchUsersList, createUser, updateUser, deleteUser } from '../utils/usersApi';
 import UsersForm from '../components/forms/usersForm';
 import type { BackendUser } from '../models/models';
@@ -249,54 +249,40 @@ const Users: React.FC = () => {
           </div>
 
           {/* Filtres & recherche */}
-          <section className="rounded-2xl bg-white border border-[#E0E6ED] p-4 sm:p-5 space-y-4">
-            <SearchBar
-              value={search}
-              onChange={setSearch}
-              placeholder="Rechercher par nom, email…"
-            />
+          <FiltersSection
+            searchValue={search}
+            onSearchChange={setSearch}
+            searchPlaceholder="Rechercher par nom, email…"
+            summary={`${filteredUsers.length} utilisateur${
+              filteredUsers.length > 1 ? 's' : ''
+            } affiché${filteredUsers.length > 1 ? 's' : ''}`}
+            onReset={() => {
+              setSearch('');
+              setRoleFilter('Tous');
+              setStatusFilter('Tous');
+            }}
+          >
+            <SelectField
+              label="Rôle"
+              value={roleFilter}
+              onChange={(e) => setRoleFilter(e.target.value as any)}
+            >
+              <option value="Tous">Tous</option>
+              <option value="Admin">Admin</option>
+              <option value="Manager">Manager</option>
+              <option value="Utilisateur">Utilisateur</option>
+            </SelectField>
 
-            <div className="grid gap-3 sm:grid-cols-3 text-sm">
-              <SelectField
-                label="Rôle"
-                value={roleFilter}
-                onChange={(e) => setRoleFilter(e.target.value as any)}
-              >
-                <option value="Tous">Tous</option>
-                <option value="Admin">Admin</option>
-                <option value="Manager">Manager</option>
-                <option value="Utilisateur">Utilisateur</option>
-              </SelectField>
-
-              <SelectField
-                label="Statut"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-              >
-                <option value="Tous">Tous</option>
-                <option value="Actif">Actif</option>
-                <option value="Inactif">Inactif</option>
-              </SelectField>
-
-              <div className="flex flex-col justify-end items-start sm:items-end gap-2">
-                <p className="text-[11px] text-[#9EABB8]">
-                  {filteredUsers.length} utilisateur{filteredUsers.length > 1 ? 's' : ''} affiché
-                  {filteredUsers.length > 1 ? 's' : ''}
-                </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSearch('');
-                    setRoleFilter('Tous');
-                    setStatusFilter('Tous');
-                  }}
-                  className="text-[11px] font-medium text-[#00A896] hover:text-[#00897B]"
-                >
-                  Réinitialiser les filtres
-                </button>
-              </div>
-            </div>
-          </section>
+            <SelectField
+              label="Statut"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+            >
+              <option value="Tous">Tous</option>
+              <option value="Actif">Actif</option>
+              <option value="Inactif">Inactif</option>
+            </SelectField>
+          </FiltersSection>
 
           {/* Tableau des utilisateurs */}
           <section className="rounded-2xl bg-white border border-[#E0E6ED] overflow-hidden">

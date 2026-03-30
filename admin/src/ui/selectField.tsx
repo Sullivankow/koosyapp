@@ -1,5 +1,7 @@
 import React from 'react';
 
+// Petit composant utilitaire pour afficher un label + <select> avec le style Koosy.
+// Utilisé pour tous les filtres de type liste déroulante dans les pages admin.
 export interface SelectFieldProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   containerClassName?: string;
@@ -13,6 +15,7 @@ const SelectField: React.FC<SelectFieldProps> = ({
   ...selectProps
 }) => {
   return (
+    // Conteneur du label + champ select
     <div className={containerClassName ?? 'space-y-1'}>
       <label className="block text-xs font-medium text-[#6E7B8B]">{label}</label>
       <select

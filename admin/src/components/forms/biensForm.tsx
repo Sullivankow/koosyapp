@@ -1,6 +1,9 @@
 
+// Formulaire réutilisable pour éditer les informations d'un bien côté admin.
+// Utilisé dans le drawer de la page `biens.tsx` pour modifier nom, adresse, type, superficie, pièces et statut.
 import React from 'react';
 
+// Props contrôlées par la page parente (pas de logique métier ici)
 interface BiensEditFormProps {
   formError: string | null;
   formNom: string;
@@ -33,7 +36,9 @@ const BiensForm: React.FC<BiensEditFormProps> = ({
   onChangeStatut,
 }) => {
   return (
+    // Bloc principal du formulaire d'édition de bien
     <section className="space-y-4 mt-2">
+      {/* Message d'erreur global du formulaire (validation côté page parente) */}
       {formError && (
         <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] text-red-700">
           {formError}
@@ -65,6 +70,7 @@ const BiensForm: React.FC<BiensEditFormProps> = ({
           />
         </div>
 
+        {/* Ligne avec type de bien, superficie et nombre de pièces */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div className="space-y-1">
             <label className="block text-xs font-medium text-[#6E7B8B]">Type</label>
@@ -110,6 +116,7 @@ const BiensForm: React.FC<BiensEditFormProps> = ({
           </div>
         </div>
 
+        {/* Sélecteur de statut (disponible / occupé / travaux) */}
         <div className="space-y-1">
           <label className="block text-xs font-medium text-[#6E7B8B]">Statut</label>
           <select
