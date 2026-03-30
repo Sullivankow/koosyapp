@@ -5,10 +5,11 @@ import Sidebar from '../components/sidebar';
 import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
 import { fetchUsersList, createUser, updateUser, deleteUser } from '../utils/usersApi';
+import UsersForm from '../components/forms/usersForm';
 import type { BackendUser } from '../models/models';
 
 // Type représentant un utilisateur pour l'affichage dans cette page
-type User = {
+export type User = {
   id: number;
   name: string;
   email: string;
@@ -423,129 +424,30 @@ const Users: React.FC = () => {
             )}
           </section>
 
-          {/* Drawer latéral mocké */}
+          {/* Drawer latéral pour création/édition d'un utilisateur */}
           {drawerOpen && (
             <div className="fixed inset-0 z-30 flex">
               <div
                 className="fixed inset-0 bg-black/20"
                 onClick={handleCloseDrawer}
               />
-              <div className="relative ml-auto h-full w-full max-w-md bg-white shadow-xl border-l border-[#E0E6ED] flex flex-col">
-                <header className="px-5 py-4 border-b border-[#E0E6ED] flex items-center justify-between">
-                  <div>
-                    <h2 className="text-sm font-semibold text-[#222B45]">
-                      {selectedUser ? 'Modifier l’utilisateur' : 'Nouvel utilisateur'}
-                    </h2>
-                    <p className="text-[11px] text-[#9EABB8]">
-                      Formulaire mocké à connecter à ton backend Nest.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCloseDrawer}
-                    className="rounded-full p-1.5 text-[#9EABB8] hover:bg-[#F4F7FA]"
-                  >
-                    ✕
-                  </button>
-                </header>
-
-                <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6 text-sm">
-                  <section className="space-y-3">
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9EABB8]">
-                      Informations générales
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-medium text-[#6E7B8B]">Nom</label>
-                        <input
-                          type="text"
-                          value={formNom}
-                          onChange={(e) => setFormNom(e.target.value)}
-                  className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                          placeholder="Ex : Martin"
-                />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-medium text-[#6E7B8B]">Prénom</label>
-                        <input
-                          type="text"
-                          value={formPrenom}
-                          onChange={(e) => setFormPrenom(e.target.value)}
-                          className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                          placeholder="Ex : Julie"
-                        />
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-medium text-[#6E7B8B]">Email</label>
-                        <input
-                  type="email"
-                          value={formEmail}
-                          onChange={(e) => setFormEmail(e.target.value)}
-                  className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                  placeholder="Ex : nom@entreprise.com"
-                />
-                      </div>
-                    </div>
-                  </section>
-
-                  <section className="space-y-3">
-                    <h3 className="text-xs font-semibold uppercase tracking-wide text-[#9EABB8]">
-                      Rôle & permissions
-                    </h3>
-                    <div className="space-y-3">
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-medium text-[#6E7B8B]">Rôle</label>
-                        <select
-                  value={formRole}
-                  onChange={(e) => setFormRole(e.target.value as 'Admin' | 'Utilisateur')}
-                  className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                >
-                          <option value="Admin">Admin</option>
-                          <option value="Utilisateur">Utilisateur</option>
-                        </select>
-                      </div>
-                      <div className="space-y-1.5">
-                        <label className="block text-xs font-medium text-[#6E7B8B]">Mot de passe</label>
-                        <input
-                  type="password"
-                  value={formPassword}
-                  onChange={(e) => setFormPassword(e.target.value)}
-                  className="w-full rounded-lg border border-[#E0E6ED] px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                  placeholder={selectedUser ? 'Laisser vide pour ne pas changer' : 'Mot de passe temporaire'}
-                />
-                        <p className="text-[11px] text-[#9EABB8]">
-                          {selectedUser
-                            ? 'Laisser vide pour conserver le mot de passe actuel.'
-                            : 'L\'utilisateur pourra le changer plus tard depuis son espace.'}
-                        </p>
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* Bloc Statut & sécurité retiré pour simplifier la création */}
-                </div>
-
-                <footer className="px-5 py-4 border-t border-[#E0E6ED] flex justify-end gap-2 bg-white">
-                  <button
-                    type="button"
-                    onClick={handleCloseDrawer}
-                    className="rounded-lg border border-[#E0E6ED] bg-white px-4 py-2 text-xs font-medium text-[#6E7B8B] hover:bg-[#F4F7FA]"
-                  >
-                    Annuler
-                  </button>
-                  {formError && (
-              <p className="flex-1 text-xs text-[#B91C1C] self-center text-left">{formError}</p>
-            )}
-                  <button
-            type="button"
-            onClick={handleSubmit}
-            disabled={saving}
-            className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B] disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-                    {saving ? 'Enregistrement…' : 'Enregistrer'}
-                  </button>
-                </footer>
-              </div>
+              <UsersForm
+                selectedUser={selectedUser}
+                formNom={formNom}
+                formPrenom={formPrenom}
+                formEmail={formEmail}
+                formRole={formRole}
+                formPassword={formPassword}
+                formError={formError}
+                saving={saving}
+                onChangeNom={setFormNom}
+                onChangePrenom={setFormPrenom}
+                onChangeEmail={setFormEmail}
+                onChangeRole={(role) => setFormRole(role)}
+                onChangePassword={setFormPassword}
+                onSubmit={handleSubmit}
+                onCancel={handleCloseDrawer}
+              />
             </div>
           )}
         </div>

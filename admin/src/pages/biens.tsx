@@ -7,6 +7,7 @@ import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
 import BienCard from '../components/cards';
 import BienImagesCarousel from '../components/bienImagesCarousel';
+import BiensForm from '../components/forms/biensForm';
 import type { BackendBien, BackendProprietaire, BackendUser } from '../models/models';
 import { fetchBiensAdminList, createBienForUser, deleteBienAdmin, updateBienForUser } from '../utils/biensApi';
 import { fetchUsersList } from '../utils/usersApi';
@@ -19,6 +20,7 @@ const BiensPage: React.FC = () => {
   const [typeFilter, setTypeFilter] = useState<'Tous' | 'Appartement' | 'Maison' | 'Studio' | 'Chambre'>('Tous');
   const [statusFilter, setStatusFilter] = useState<'Tous' | BackendBien['statut']>('Tous');
   const [ownerFilter, setOwnerFilter] = useState<'Tous' | number>('Tous');
+  const [userFilter, setUserFilter] = useState<'Tous' | number>('Tous');
   // Données réelles des biens (backend)
   const [biens, setBiens] = useState<BackendBien[]>([]);
   const [loading, setLoading] = useState(false);
@@ -95,8 +97,12 @@ const BiensPage: React.FC = () => {
     const matchesStatus = statusFilter === 'Tous' ? true : bien.statut === statusFilter;
     const matchesOwner =
       ownerFilter === 'Tous' ? true : bien.proprietaire?.id === ownerFilter;
+    const matchesUser =
+      userFilter === 'Tous'
+        ? true
+        : (bien as any)?.conciergerie?.id === userFilter;
 
-    return matchesSearch && matchesType && matchesStatus && matchesOwner;
+    return matchesSearch && matchesType && matchesStatus && matchesOwner && matchesUser;
   });
 
   const ownersOptions: BackendProprietaire[] = Array.from(
@@ -299,7 +305,7 @@ const BiensPage: React.FC = () => {
             placeholder="Rechercher par nom de bien, ville ou propriétaire…"
           />
 
-          <div className="grid gap-3 sm:grid-cols-3 text-sm">
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
             <div className="space-y-1">
               <label className="block text-xs font-medium text-[#6E7B8B]">Type de bien</label>
               <select
@@ -346,6 +352,24 @@ const BiensPage: React.FC = () => {
                 ))}
               </select>
             </div>
+
+            <div className="space-y-1">
+              <label className="block text-xs font-medium text-[#6E7B8B]">Utilisateur (conciergerie)</label>
+              <select
+                value={userFilter}
+                onChange={(e) =>
+                  setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+                }
+                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
+              >
+                <option value="Tous">Tous les utilisateurs</option>
+                {users.map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.prenom} {u.nom} — {u.email}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
           <div className="flex flex-col items-start justify-end gap-2 sm:flex-row sm:items-center sm:justify-between">
@@ -363,6 +387,7 @@ const BiensPage: React.FC = () => {
                 setTypeFilter('Tous');
                 setStatusFilter('Tous');
                 setOwnerFilter('Tous');
+                setUserFilter('Tous');
               }}
               className="text-[11px] font-medium text-[#00A896] hover:text-[#00897B]"
             >
@@ -504,106 +529,21 @@ const BiensPage: React.FC = () => {
                   </section>
 
                   {/* Formulaire d'édition du bien (admin) */}
-                  <section className="space-y-4 mt-2">
-                    {formError && (
-                      <div className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-[11px] text-red-700">
-                        {formError}
-                      </div>
-                    )}
-
-                    <div className="grid grid-cols-1 gap-3">
-                      <div className="space-y-1">
-                        <label className="block text-xs font-medium text-[#6E7B8B]">
-                          Nom du bien
-                        </label>
-                        <input
-                          type="text"
-                          value={formNom}
-                          onChange={(e) => setFormNom(e.target.value)}
-                          className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                          placeholder="Ex : Appartement T2 centre-ville"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="block text-xs font-medium text-[#6E7B8B]">Adresse</label>
-                        <input
-                          type="text"
-                          value={formAdresse}
-                          onChange={(e) => setFormAdresse(e.target.value)}
-                          className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                          placeholder="Adresse complète du bien"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="space-y-1">
-                          <label className="block text-xs font-medium text-[#6E7B8B]">Type</label>
-                          <select
-                            value={formType}
-                            onChange={(e) =>
-                              setFormType(
-                                e.target.value as
-                                  | 'Appartement'
-                                  | 'Maison'
-                                  | 'Studio'
-                                  | 'Chambre'
-                                  | '',
-                              )
-                            }
-                            className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                          >
-                            <option value="">Sélectionner</option>
-                            <option value="Appartement">Appartement</option>
-                            <option value="Maison">Maison</option>
-                            <option value="Studio">Studio</option>
-                            <option value="Chambre">Chambre</option>
-                          </select>
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="block text-xs font-medium text-[#6E7B8B]">
-                            Superficie (m²)
-                          </label>
-                          <input
-                            type="number"
-                            min={0}
-                            value={formSuperficie}
-                            onChange={(e) => setFormSuperficie(e.target.value)}
-                            className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                          />
-                        </div>
-
-                        <div className="space-y-1">
-                          <label className="block text-xs font-medium text-[#6E7B8B]">Pièces</label>
-                          <input
-                            type="number"
-                            min={0}
-                            value={formPieces}
-                            onChange={(e) => setFormPieces(e.target.value)}
-                            className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                          />
-                        </div>
-                      </div>
-
-                      <div className="space-y-1">
-                        <label className="block text-xs font-medium text-[#6E7B8B]">Statut</label>
-                        <select
-                          value={formStatut}
-                          onChange={(e) =>
-                            setFormStatut(
-                              e.target.value as 'disponible' | 'occupé' | 'travaux',
-                            )
-                          }
-                          className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                        >
-                          <option value="disponible">Disponible</option>
-                          <option value="occupé">Occupé</option>
-                          <option value="travaux">En travaux</option>
-                        </select>
-                      </div>
-                    </div>
-                  </section>
+                  <BiensForm
+                    formError={formError}
+                    formNom={formNom}
+                    formAdresse={formAdresse}
+                    formType={formType}
+                    formSuperficie={formSuperficie}
+                    formPieces={formPieces}
+                    formStatut={formStatut}
+                    onChangeNom={setFormNom}
+                    onChangeAdresse={setFormAdresse}
+                    onChangeType={setFormType as any}
+                    onChangeSuperficie={setFormSuperficie}
+                    onChangePieces={setFormPieces}
+                    onChangeStatut={setFormStatut as any}
+                  />
                 </>
               ) : (
                 <section className="space-y-4">
