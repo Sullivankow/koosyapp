@@ -7,6 +7,7 @@ import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
 import BienCard from '../components/cards';
 import BienImagesCarousel from '../components/bienImagesCarousel';
+import SelectField from '../ui/selectField';
 import BiensForm from '../components/forms/biensForm';
 import type { BackendBien, BackendProprietaire, BackendUser } from '../models/models';
 import { fetchBiensAdminList, createBienForUser, deleteBienAdmin, updateBienForUser } from '../utils/biensApi';
@@ -306,70 +307,58 @@ const BiensPage: React.FC = () => {
           />
 
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 text-sm">
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Type de bien</label>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as any)}
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous</option>
-                <option value="Appartement">Appartement</option>
-                <option value="Maison">Maison</option>
-                <option value="Studio">Studio</option>
-                <option value="Chambre">Chambre</option>
-              </select>
-            </div>
+            <SelectField
+              label="Type de bien"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as any)}
+            >
+              <option value="Tous">Tous</option>
+              <option value="Appartement">Appartement</option>
+              <option value="Maison">Maison</option>
+              <option value="Studio">Studio</option>
+              <option value="Chambre">Chambre</option>
+            </SelectField>
 
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Statut du bien</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous</option>
-                <option value="disponible">Disponible</option>
-                <option value="occupé">Occupé</option>
-                <option value="travaux">En travaux</option>
-              </select>
-            </div>
+            <SelectField
+              label="Statut du bien"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+            >
+              <option value="Tous">Tous</option>
+              <option value="disponible">Disponible</option>
+              <option value="occupé">Occupé</option>
+              <option value="travaux">En travaux</option>
+            </SelectField>
 
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Propriétaire</label>
-              <select
-                value={ownerFilter}
-                onChange={(e) =>
-                  setOwnerFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-                }
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous les propriétaires</option>
-                {ownersOptions.map((owner) => (
-                  <option key={owner.id} value={owner.id}>
-                    {owner.prenom} {owner.nom}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SelectField
+              label="Propriétaire"
+              value={ownerFilter}
+              onChange={(e) =>
+                setOwnerFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+              }
+            >
+              <option value="Tous">Tous les propriétaires</option>
+              {ownersOptions.map((owner) => (
+                <option key={owner.id} value={owner.id}>
+                  {owner.prenom} {owner.nom}
+                </option>
+              ))}
+            </SelectField>
 
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Utilisateur (conciergerie)</label>
-              <select
-                value={userFilter}
-                onChange={(e) =>
-                  setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-                }
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous les utilisateurs</option>
-                {users.map((u) => (
-                  <option key={u.id} value={u.id}>
-                    {u.prenom} {u.nom} — {u.email}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SelectField
+              label="Utilisateur (conciergerie)"
+              value={userFilter}
+              onChange={(e) =>
+                setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+              }
+            >
+              <option value="Tous">Tous les utilisateurs</option>
+              {users.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.prenom} {u.nom} — {u.email}
+                </option>
+              ))}
+            </SelectField>
           </div>
 
           <div className="flex flex-col items-start justify-end gap-2 sm:flex-row sm:items-center sm:justify-between">

@@ -5,6 +5,7 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
 import SearchBar from '../components/searchBar';
+import SelectField from '../ui/selectField';
 import ButtonCreate from '../ui/buttonCreate';
 // Import centralisé des types et données mock pour les prestations
 import type { Prestation, PrestationType, PrestationStatus } from '../models/mocks';
@@ -167,76 +168,64 @@ const PrestationsPage: React.FC = () => {
           {/* Filtres détaillés */}
           <div className="grid gap-3 sm:grid-cols-4 text-sm">
             {/* Filtre type */}
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Type de prestation</label>
-              <select
-                value={typeFilter}
-                onChange={(e) => setTypeFilter(e.target.value as any)}
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous les types</option>
-                <option value="Ménage">Ménage</option>
-                <option value="Check-in">Check-in</option>
-                <option value="Check-out">Check-out</option>
-                <option value="Linge">Linge</option>
-                <option value="Maintenance">Maintenance</option>
-                <option value="Autre">Autre</option>
-              </select>
-            </div>
+            <SelectField
+              label="Type de prestation"
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value as any)}
+            >
+              <option value="Tous">Tous les types</option>
+              <option value="Ménage">Ménage</option>
+              <option value="Check-in">Check-in</option>
+              <option value="Check-out">Check-out</option>
+              <option value="Linge">Linge</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Autre">Autre</option>
+            </SelectField>
 
             {/* Filtre statut */}
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Statut</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous les statuts</option>
-                <option value="Planifiée">Planifiée</option>
-                <option value="En cours">En cours</option>
-                <option value="Réalisée">Réalisée</option>
-                <option value="Annulée">Annulée</option>
-              </select>
-            </div>
+            <SelectField
+              label="Statut"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+            >
+              <option value="Tous">Tous les statuts</option>
+              <option value="Planifiée">Planifiée</option>
+              <option value="En cours">En cours</option>
+              <option value="Réalisée">Réalisée</option>
+              <option value="Annulée">Annulée</option>
+            </SelectField>
 
             {/* Filtre bien */}
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Bien concerné</label>
-              <select
-                value={propertyFilter}
-                onChange={(e) =>
-                  setPropertyFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-                }
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous les biens</option>
-                {mockBiensLight.map((bien) => (
-                  <option key={bien.id} value={bien.id}>
-                    {bien.name} – {bien.city}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SelectField
+              label="Bien concerné"
+              value={propertyFilter}
+              onChange={(e) =>
+                setPropertyFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+              }
+            >
+              <option value="Tous">Tous les biens</option>
+              {mockBiensLight.map((bien) => (
+                <option key={bien.id} value={bien.id}>
+                  {bien.name} – {bien.city}
+                </option>
+              ))}
+            </SelectField>
 
             {/* Filtre utilisateur Koosy */}
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Utilisateur assigné</label>
-              <select
-                value={userFilter}
-                onChange={(e) =>
-                  setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-                }
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous les utilisateurs</option>
-                {mockUsers.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name} ({user.role})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SelectField
+              label="Utilisateur assigné"
+              value={userFilter}
+              onChange={(e) =>
+                setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+              }
+            >
+              <option value="Tous">Tous les utilisateurs</option>
+              {mockUsers.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name} ({user.role})
+                </option>
+              ))}
+            </SelectField>
           </div>
 
           {/* Résumé + reset */}

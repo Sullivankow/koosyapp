@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
 import SearchBar from '../components/searchBar';
 import ButtonCreate from '../ui/buttonCreate';
+import SelectField from '../ui/selectField';
 import { fetchUsersList, createUser, updateUser, deleteUser } from '../utils/usersApi';
 import UsersForm from '../components/forms/usersForm';
 import type { BackendUser } from '../models/models';
@@ -256,32 +257,26 @@ const Users: React.FC = () => {
             />
 
             <div className="grid gap-3 sm:grid-cols-3 text-sm">
-              <div className="space-y-1">
-                <label className="block text-xs font-medium text-[#6E7B8B]">Rôle</label>
-                <select
-                  value={roleFilter}
-                  onChange={(e) => setRoleFilter(e.target.value as any)}
-                  className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                >
-                  <option value="Tous">Tous</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Manager">Manager</option>
-                  <option value="Utilisateur">Utilisateur</option>
-                </select>
-              </div>
+              <SelectField
+                label="Rôle"
+                value={roleFilter}
+                onChange={(e) => setRoleFilter(e.target.value as any)}
+              >
+                <option value="Tous">Tous</option>
+                <option value="Admin">Admin</option>
+                <option value="Manager">Manager</option>
+                <option value="Utilisateur">Utilisateur</option>
+              </SelectField>
 
-              <div className="space-y-1">
-                <label className="block text-xs font-medium text-[#6E7B8B]">Statut</label>
-                <select
-                  value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as any)}
-                  className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-                >
-                  <option value="Tous">Tous</option>
-                  <option value="Actif">Actif</option>
-                  <option value="Inactif">Inactif</option>
-                </select>
-              </div>
+              <SelectField
+                label="Statut"
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value as any)}
+              >
+                <option value="Tous">Tous</option>
+                <option value="Actif">Actif</option>
+                <option value="Inactif">Inactif</option>
+              </SelectField>
 
               <div className="flex flex-col justify-end items-start sm:items-end gap-2">
                 <p className="text-[11px] text-[#9EABB8]">

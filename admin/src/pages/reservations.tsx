@@ -4,6 +4,7 @@
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';
 import SearchBar from '../components/searchBar';
+import SelectField from '../ui/selectField';
 import ButtonCreate from '../ui/buttonCreate';
 // Import centralisé des types et données mock pour les réservations
 import type { Reservation, ReservationStatus } from '../models/mocks';
@@ -161,59 +162,50 @@ const ReservationsPage: React.FC = () => {
           {/* Ligne de filtres détaillés */}
           <div className="grid gap-3 sm:grid-cols-3 text-sm">
             {/* Filtre statut */}
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Statut de la réservation</label>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous les statuts</option>
-                <option value="Brouillon">Brouillon</option>
-                <option value="Confirmée">Confirmée</option>
-                <option value="En cours">En cours</option>
-                <option value="Terminée">Terminée</option>
-                <option value="Annulée">Annulée</option>
-              </select>
-            </div>
+            <SelectField
+              label="Statut de la réservation"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+            >
+              <option value="Tous">Tous les statuts</option>
+              <option value="Brouillon">Brouillon</option>
+              <option value="Confirmée">Confirmée</option>
+              <option value="En cours">En cours</option>
+              <option value="Terminée">Terminée</option>
+              <option value="Annulée">Annulée</option>
+            </SelectField>
 
             {/* Filtre bien */}
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Bien concerné</label>
-              <select
-                value={propertyFilter}
-                onChange={(e) =>
-                  setPropertyFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-                }
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous les biens</option>
-                {mockBiensLight.map((bien) => (
-                  <option key={bien.id} value={bien.id}>
-                    {bien.name} – {bien.city}
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SelectField
+              label="Bien concerné"
+              value={propertyFilter}
+              onChange={(e) =>
+                setPropertyFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+              }
+            >
+              <option value="Tous">Tous les biens</option>
+              {mockBiensLight.map((bien) => (
+                <option key={bien.id} value={bien.id}>
+                  {bien.name} – {bien.city}
+                </option>
+              ))}
+            </SelectField>
 
             {/* Filtre utilisateur Koosy */}
-            <div className="space-y-1">
-              <label className="block text-xs font-medium text-[#6E7B8B]">Utilisateur Koosy concerné</label>
-              <select
-                value={userFilter}
-                onChange={(e) =>
-                  setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-                }
-                className="w-full rounded-lg border border-[#E0E6ED] bg-white px-3 py-2 text-sm text-[#222B45] focus:outline-none focus:ring-2 focus:ring-[#00A896]/40 focus:border-[#00A896]"
-              >
-                <option value="Tous">Tous les utilisateurs</option>
-                {mockUsers.map((user) => (
-                  <option key={user.id} value={user.id}>
-                    {user.name} ({user.role})
-                  </option>
-                ))}
-              </select>
-            </div>
+            <SelectField
+              label="Utilisateur Koosy concerné"
+              value={userFilter}
+              onChange={(e) =>
+                setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
+              }
+            >
+              <option value="Tous">Tous les utilisateurs</option>
+              {mockUsers.map((user) => (
+                <option key={user.id} value={user.id}>
+                  {user.name} ({user.role})
+                </option>
+              ))}
+            </SelectField>
           </div>
 
           {/* Résumé + bouton de réinitialisation */}
