@@ -3,10 +3,11 @@
 import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
 import { fetchDashboardStats, type DashboardStats } from '../utils/dashboardApi';
+import useSidebar from '../hooks/useSidebar';
 
 const Dashboard: React.FC = () => {
   // État local pour gérer l'ouverture de la sidebar en mobile
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { sidebarOpen, openSidebar, closeSidebar } = useSidebar(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
 
   useEffect(() => {
@@ -39,7 +40,7 @@ const Dashboard: React.FC = () => {
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={closeSidebar}
         />
       )}
 
@@ -47,7 +48,7 @@ const Dashboard: React.FC = () => {
       <header className="flex items-center justify-between px-4 py-3 border-b border-[#E0E6ED] bg-[#F4F7FA] md:hidden">
         <button
           type="button"
-          onClick={() => setSidebarOpen(true)}
+          onClick={openSidebar}
           className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white p-2 text-[#0F172A] shadow-sm"
         >
           <span className="sr-only">Ouvrir le menu</span>

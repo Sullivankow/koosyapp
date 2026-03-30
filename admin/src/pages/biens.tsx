@@ -9,13 +9,14 @@ import BienImagesCarousel from '../components/bienImagesCarousel';
 import SelectField from '../ui/selectField';
 import BiensForm from '../components/forms/biensForm';
 import FiltersSection from '../components/filters/filtersSection';
+import useSidebar from '../hooks/useSidebar';
 import type { BackendBien, BackendProprietaire, BackendUser } from '../models/models';
 import { fetchBiensAdminList, createBienForUser, deleteBienAdmin, updateBienForUser } from '../utils/biensApi';
 import { fetchUsersList } from '../utils/usersApi';
 
 const BiensPage: React.FC = () => {
   // État pour la sidebar mobile (ouvert / fermé)
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { sidebarOpen, openSidebar, closeSidebar } = useSidebar(false);
   // Filtres
   const [search, setSearch] = useState('');
   const [typeFilter, setTypeFilter] = useState<'Tous' | 'Appartement' | 'Maison' | 'Studio' | 'Chambre'>('Tous');
@@ -263,7 +264,7 @@ const BiensPage: React.FC = () => {
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={closeSidebar}
         />
       )}
 
@@ -271,7 +272,7 @@ const BiensPage: React.FC = () => {
       <header className="flex items-center justify-between px-4 py-3 border-b border-[#E0E6ED] bg-[#F4F7FA] md:hidden">
         <button
           type="button"
-          onClick={() => setSidebarOpen(true)}
+          onClick={openSidebar}
           className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white p-2 text-[#0F172A] shadow-sm"
         >
           <span className="sr-only">Ouvrir le menu</span>

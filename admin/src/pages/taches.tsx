@@ -6,6 +6,7 @@ import Sidebar from '../components/sidebar';
 import SelectField from '../ui/selectField';
 import ButtonCreate from '../ui/buttonCreate';
 import FiltersSection from '../components/filters/filtersSection';
+import useSidebar from '../hooks/useSidebar';
 // Import centralisé des types et données mock pour les tâches
 import type { Tache, TacheStatus, TachePriority } from '../models/mocks';
 import { mockTaches, mockUsers } from '../models/mocks';
@@ -53,7 +54,7 @@ const getPriorityClasses = (priority: TachePriority) => {
 // Composant principal de la page Tâches
 const TachesPage: React.FC = () => {
   // État pour la sidebar mobile (ouvert / fermé)
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { sidebarOpen, openSidebar, closeSidebar } = useSidebar(false);
 
   // États pour les filtres
   const [search, setSearch] = useState('');
@@ -107,7 +108,7 @@ const TachesPage: React.FC = () => {
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/40 md:hidden"
-          onClick={() => setSidebarOpen(false)}
+          onClick={closeSidebar}
         />
       )}
 
@@ -115,7 +116,7 @@ const TachesPage: React.FC = () => {
       <header className="flex items-center justify-between px-4 py-3 border-b border-[#E0E6ED] bg-[#F4F7FA] md:hidden">
         <button
           type="button"
-          onClick={() => setSidebarOpen(true)}
+          onClick={openSidebar}
           className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white p-2 text-[#0F172A] shadow-sm"
         >
           <span className="sr-only">Ouvrir le menu</span>
