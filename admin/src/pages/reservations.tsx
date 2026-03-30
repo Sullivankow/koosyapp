@@ -1,13 +1,13 @@
 // Page de gestion des réservations
-// Permet à l'équipe de suivre les séjours par bien, voyageur et utilisateur Koosy
-import React, { useState } from 'react';
+// Branchée sur le backend Nest pour afficher les vraies réservations
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
 import SelectField from '../ui/selectField';
 import ButtonCreate from '../ui/buttonCreate';
 import FiltersSection from '../components/filters/filtersSection';
 import useSidebar from '../hooks/useSidebar';
-import type { Reservation, ReservationStatus } from '../models/mocks';
-import { mockReservations, mockUsers, mockBiensLight } from '../models/mocks';
+import type { BackendReservation, BackendReservationStatus } from '../models/models';
+import { fetchReservationsAdminList } from '../utils/reservationsApi';
 
 // Petite fonction utilitaire pour formater les dates en français
 const formatDateFR = (dateString: string) => {
@@ -22,39 +22,61 @@ const formatDateFR = (dateString: string) => {
 const ReservationsPage: React.FC = () => {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar(false);
 
+  const [reservations, setReservations] = useState<BackendReservation[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'Tous' | ReservationStatus>('Tous');
-  const [userFilter, setUserFilter] = useState<'Tous' | number>('Tous');
+  const [statusFilter, setStatusFilter] = useState<'Tous' | BackendReservationStatus>('Tous');
   const [propertyFilter, setPropertyFilter] = useState<'Tous' | number>('Tous');
 
-  const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
+  const [selectedReservation, setSelectedReservation] = useState<BackendReservation | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const filteredReservations = mockReservations.filter((reservation) => {
+  // Chargement des réservations réelles depuis le backend
+  useEffect(() => {
+    const loadReservations = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchReservationsAdminList();
+        setReservations(data ?? []);
+      } catch (e) {
+        console.error(e);
+        setError('Impossible de récupérer les réservations.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadReservations();
+  }, []);
+
+  const biensOptions = Array.from(
+    new Map(reservations.map((r) => [r.bien.id, r.bien])).values(),
+  );
+
+  const filteredReservations = reservations.filter((reservation) => {
     const query = search.trim().toLowerCase();
 
     const matchesSearch =
       query.length === 0 ||
-      reservation.reference.toLowerCase().includes(query) ||
-      reservation.property.name.toLowerCase().includes(query) ||
-      reservation.property.city.toLowerCase().includes(query) ||
-      reservation.traveler.name.toLowerCase().includes(query);
+      reservation.bien.nom.toLowerCase().includes(query) ||
+      reservation.bien.adresse.toLowerCase().includes(query) ||
+      reservation.locataire.nom.toLowerCase().includes(query) ||
+      reservation.locataire.prenom.toLowerCase().includes(query) ||
+      reservation.locataire.email.toLowerCase().includes(query);
 
     const matchesStatus =
-      statusFilter === 'Tous' ? true : reservation.status === statusFilter;
-
-    const matchesUser =
-      userFilter === 'Tous'
-        ? true
-        : reservation.assignedTo?.id === userFilter || reservation.createdBy.id === userFilter;
+      statusFilter === 'Tous' ? true : reservation.statut === statusFilter;
 
     const matchesProperty =
-      propertyFilter === 'Tous' ? true : reservation.property.id === propertyFilter;
+      propertyFilter === 'Tous' ? true : reservation.bien.id === propertyFilter;
 
-    return matchesSearch && matchesStatus && matchesUser && matchesProperty;
+    return matchesSearch && matchesStatus && matchesProperty;
   });
 
-  const openDrawer = (reservation?: Reservation) => {
+  const openDrawer = (reservation?: BackendReservation) => {
     setSelectedReservation(reservation ?? null);
     setDrawerOpen(true);
   };
@@ -64,35 +86,29 @@ const ReservationsPage: React.FC = () => {
     setSelectedReservation(null);
   };
 
-  const getStatusClasses = (status: ReservationStatus) => {
+  const getStatusClasses = (status: BackendReservationStatus) => {
     switch (status) {
-      case 'Confirmée':
+      case 'confirmée':
         return 'bg-[#ECFDF3] text-[#166534]';
-      case 'En cours':
-        return 'bg-[#EFF6FF] text-[#1D4ED8]';
-      case 'Terminée':
+      case 'terminée':
         return 'bg-[#F1F5F9] text-[#0F172A]';
-      case 'Annulée':
+      case 'annulée':
         return 'bg-[#FEF2F2] text-[#B91C1C]';
-      case 'Brouillon':
       default:
         return 'bg-[#FFFBEB] text-[#92400E]';
     }
   };
 
-  const getStatusHelper = (status: ReservationStatus) => {
+  const getStatusHelper = (status: BackendReservationStatus) => {
     switch (status) {
-      case 'Confirmée':
+      case 'confirmée':
         return 'Séjour validé, prêt à être planifié (prestations, équipes).';
-      case 'En cours':
-        return 'Séjour en cours, pensez au suivi des prestations terrain.';
-      case 'Terminée':
+      case 'terminée':
         return 'Séjour terminé, utile pour le reporting et l’historique.';
-      case 'Annulée':
+      case 'annulée':
         return 'Réservation annulée, conservée pour traçabilité backoffice.';
-      case 'Brouillon':
       default:
-        return 'Brouillon créé par un utilisateur Koosy, pas encore confirmé.';
+        return "Réservation en attente de confirmation côté conciergerie.";
     }
   };
 
@@ -139,27 +155,29 @@ const ReservationsPage: React.FC = () => {
           searchValue={search}
           onSearchChange={setSearch}
           searchPlaceholder="Rechercher par réf, bien ou voyageur…"
-          summary={`${filteredReservations.length} réservation${
-            filteredReservations.length > 1 ? 's' : ''
-          } affichée${filteredReservations.length > 1 ? 's' : ''}`}
+          summary={
+            loading
+              ? 'Chargement des réservations…'
+              : `${filteredReservations.length} réservation${
+                  filteredReservations.length > 1 ? 's' : ''
+                } affichée${filteredReservations.length > 1 ? 's' : ''}`
+          }
           onReset={() => {
             setSearch('');
             setStatusFilter('Tous');
-            setUserFilter('Tous');
             setPropertyFilter('Tous');
           }}
         >
           <SelectField
             label="Statut de la réservation"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as ReservationStatus | 'Tous')}
+            onChange={(e) => setStatusFilter(e.target.value as BackendReservationStatus | 'Tous')}
           >
             <option value="Tous">Tous les statuts</option>
-            <option value="Brouillon">Brouillon</option>
-            <option value="Confirmée">Confirmée</option>
-            <option value="En cours">En cours</option>
-            <option value="Terminée">Terminée</option>
-            <option value="Annulée">Annulée</option>
+            <option value="en attente">En attente</option>
+            <option value="confirmée">Confirmée</option>
+            <option value="terminée">Terminée</option>
+            <option value="annulée">Annulée</option>
           </SelectField>
 
           <SelectField
@@ -170,31 +188,20 @@ const ReservationsPage: React.FC = () => {
             }
           >
             <option value="Tous">Tous les biens</option>
-            {mockBiensLight.map((bien) => (
+            {biensOptions.map((bien) => (
               <option key={bien.id} value={bien.id}>
-                {bien.name} – {bien.city}
-              </option>
-            ))}
-          </SelectField>
-
-          <SelectField
-            label="Utilisateur Koosy concerné"
-            value={userFilter}
-            onChange={(e) =>
-              setUserFilter(e.target.value === 'Tous' ? 'Tous' : Number(e.target.value))
-            }
-          >
-            <option value="Tous">Tous les utilisateurs</option>
-            {mockUsers.map((user) => (
-              <option key={user.id} value={user.id}>
-                {user.name} ({user.role})
+                {bien.nom} – {bien.adresse}
               </option>
             ))}
           </SelectField>
         </FiltersSection>
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filteredReservations.length === 0 ? (
+          {error && !loading ? (
+            <div className="col-span-full rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {error}
+            </div>
+          ) : !loading && filteredReservations.length === 0 ? (
             <div className="col-span-full rounded-2xl border border-dashed border-[#E0E6ED] bg-[#F9FBFF] p-6 text-center text-sm text-[#6E7B8B]">
               <p className="font-medium mb-1">Aucune réservation ne correspond à vos filtres.</p>
               <p className="text-[12px] text-[#9EABB8] mb-3">
@@ -218,76 +225,66 @@ const ReservationsPage: React.FC = () => {
                   <div className="flex items-start justify-between gap-2">
                     <div className="space-y-0.5">
                       <h3 className="text-sm font-semibold text-[#1F2933] line-clamp-2">
-                        {reservation.property.name}
+                        {reservation.bien.nom}
                       </h3>
                       <p className="text-xs text-[#6E7B8B]">
-                        {reservation.property.city}, {reservation.property.country}
+                        {reservation.bien.adresse}
                       </p>
-                      <p className="text-[11px] text-[#9EABB8]">Réf. {reservation.reference}</p>
+                      <p className="text-[11px] text-[#9EABB8]">Réservation #{reservation.id}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${getStatusClasses(reservation.status)}`}
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${getStatusClasses(reservation.statut)}`}
                       >
-                        {reservation.status}
-                      </span>
-                      <span className="inline-flex items-center rounded-full bg-white/70 px-2 py-0.5 text-[10px] font-medium text-[#0369A1] border border-[#E0E6ED]">
-                        {reservation.channel}
+                        {reservation.statut}
                       </span>
                     </div>
                   </div>
-                  <p className="text-[11px] text-[#6E7B8B]">{getStatusHelper(reservation.status)}</p>
+                  <p className="text-[11px] text-[#6E7B8B]">{getStatusHelper(reservation.statut)}</p>
                 </div>
 
                 <div className="flex-1 p-4 space-y-3 text-xs text-[#6E7B8B]">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-full bg-[#0F172A]/5 flex items-center justify-center text-[10px] font-semibold text-[#0F172A]">
-                        {reservation.traveler.name
+                        {`${reservation.locataire.prenom} ${reservation.locataire.nom}`
                           .split(' ')
                           .map((n) => n[0])
                           .join('')}
                       </div>
                       <div className="space-y-0.5">
                         <p className="text-xs font-medium text-[#1F2933]">
-                          {reservation.traveler.name}
+                          {reservation.locataire.prenom} {reservation.locataire.nom}
                         </p>
                         <p className="text-[11px] text-[#6E7B8B]">
-                          {reservation.traveler.email}
+                          {reservation.locataire.email}
                         </p>
                         <p className="text-[11px] text-[#6E7B8B]">
-                          {reservation.traveler.phone}
+                          {reservation.locataire.telephone ?? 'Téléphone non renseigné'}
                         </p>
                       </div>
                     </div>
                     <div className="text-right space-y-0.5">
                       <p className="text-[11px] text-[#9EABB8]">Séjour</p>
                       <p className="text-xs font-medium text-[#1F2933]">
-                        {formatDateFR(reservation.checkIn)} → {formatDateFR(reservation.checkOut)}
+                        {formatDateFR(reservation.dateDebut as string)} →{' '}
+                        {formatDateFR(reservation.dateFin as string)}
                       </p>
-                      <p className="text-[11px] text-[#6E7B8B]">{reservation.nights} nuit(s)</p>
+                      <p className="text-[11px] text-[#6E7B8B]">
+                        {Math.max(
+                          1,
+                          Math.round(
+                            (new Date(reservation.dateFin as string).getTime() -
+                              new Date(reservation.dateDebut as string).getTime()) /
+                              (1000 * 60 * 60 * 24),
+                          ),
+                        )}{' '}
+                        nuit(s)
+                      </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="space-y-0.5">
-                      <p className="text-[11px] text-[#9EABB8]">Montant total</p>
-                      <p className="text-sm font-semibold text-[#1F2933]">
-                        {reservation.totalAmount.toLocaleString('fr-FR')} €
-                      </p>
-                    </div>
-                    <div className="space-y-0.5">
-                      <p className="text-[11px] text-[#9EABB8]">Utilisateur Koosy concerné</p>
-                      <p className="text-xs font-medium text-[#1F2933]">
-                        {reservation.assignedTo?.name ?? reservation.createdBy.name}
-                      </p>
-                      <p className="text-[11px] text-[#6E7B8B]">
-                        {reservation.assignedTo
-                          ? `Assignée à ${reservation.assignedTo.name}, créée par ${reservation.createdBy.name}`
-                          : `Créée par ${reservation.createdBy.name}`}
-                      </p>
-                    </div>
-                  </div>
+                  {/* Bloc de droite pour de futures infos (montant, utilisateur Koosy, etc.) quand ces champs existeront côté backend */}
                 </div>
 
                 <footer className="flex flex-col gap-2 border-t border-[#E0E6ED] bg-[#F9FBFF] px-4 py-2.5 text-xs sm:flex-row sm:items-center sm:justify-between">
@@ -326,7 +323,7 @@ const ReservationsPage: React.FC = () => {
                   {selectedReservation ? 'Détail de la réservation' : 'Nouvelle réservation'}
                 </h2>
                 <p className="text-[11px] text-[#9EABB8]">
-                  Formulaire mocké à connecter à ton backend Nest (biens, voyageurs, utilisateurs).
+                  Vue connectée à ton backend Nest (biens, locataires). Le formulaire reste à brancher.
                 </p>
               </div>
               <button
@@ -344,46 +341,36 @@ const ReservationsPage: React.FC = () => {
                   <div>
                     <p className="text-xs font-medium text-[#9EABB8] mb-1">Référence</p>
                     <p className="text-sm font-semibold text-[#1F2933]">
-                      {selectedReservation.reference}
+                      Réservation #{selectedReservation.id}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs font-medium text-[#9EABB8] mb-1">Bien</p>
                     <p className="text-sm font-semibold text-[#1F2933]">
-                      {selectedReservation.property.name} – {selectedReservation.property.city}
+                      {selectedReservation.bien.nom}
                     </p>
+                    <p className="text-xs text-[#6E7B8B]">{selectedReservation.bien.adresse}</p>
                   </div>
                   <div>
                     <p className="text-xs font-medium text-[#9EABB8] mb-1">Voyageur</p>
                     <p className="text-sm font-semibold text-[#1F2933]">
-                      {selectedReservation.traveler.name}
+                      {selectedReservation.locataire.prenom} {selectedReservation.locataire.nom}
                     </p>
-                    <p className="text-xs text-[#6E7B8B]">{selectedReservation.traveler.email}</p>
-                    <p className="text-xs text-[#6E7B8B]">{selectedReservation.traveler.phone}</p>
+                    <p className="text-xs text-[#6E7B8B]">{selectedReservation.locataire.email}</p>
+                    <p className="text-xs text-[#6E7B8B]">
+                      {selectedReservation.locataire.telephone ?? 'Téléphone non renseigné'}
+                    </p>
                   </div>
                   <div>
                     <p className="text-xs font-medium text-[#9EABB8] mb-1">Séjour</p>
                     <p className="text-sm font-semibold text-[#1F2933]">
-                      {formatDateFR(selectedReservation.checkIn)} → {formatDateFR(selectedReservation.checkOut)}
-                      {' · '} {selectedReservation.nights} nuit(s)
+                      {formatDateFR(selectedReservation.dateDebut as string)} →{' '}
+                      {formatDateFR(selectedReservation.dateFin as string)}
                     </p>
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-[#9EABB8] mb-1">Montant</p>
-                    <p className="text-sm font-semibold text-[#1F2933]">
-                      {selectedReservation.totalAmount.toLocaleString('fr-FR')} € TTC
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs font-medium text-[#9EABB8] mb-1">Utilisateur Koosy</p>
-                    <p className="text-sm font-semibold text-[#1F2933]">
-                      {selectedReservation.assignedTo?.name ?? selectedReservation.createdBy.name}
-                    </p>
-                    <p className="text-xs text-[#6E7B8B]">
-                      {selectedReservation.assignedTo
-                        ? `Assignée à ${selectedReservation.assignedTo.name}, créée par ${selectedReservation.createdBy.name}`
-                        : `Créée par ${selectedReservation.createdBy.name}`}
-                    </p>
+                    <p className="text-xs font-medium text-[#9EABB8] mb-1">Statut</p>
+                    <p className="text-sm font-semibold text-[#1F2933]">{selectedReservation.statut}</p>
                   </div>
                   <p className="text-[11px] text-[#9EABB8]">
                     Ici tu pourras plus tard éditer la réservation, changer le statut ou ajouter des prestations liées.

@@ -1,5 +1,6 @@
 // Fonctions d'appel API liées aux réservations
 import { getJson } from './api';
+import type { BackendReservation } from '../models/models';
 
 // Réservations à venir sur les N prochains jours (par défaut 7)
 export async function fetchReservationsUpcomingTotal(days = 7): Promise<number | null> {
@@ -16,7 +17,7 @@ export async function fetchReservationsUpcomingTotal(days = 7): Promise<number |
 // Nombre total de réservations (toutes périodes confondues)
 export async function fetchReservationsTotal(): Promise<number | null> {
 	try {
-		const reservations = await getJson<any[]>('/reservations');
+		const reservations = await getJson<BackendReservation[]>('/reservations');
 		return reservations.length;
 	} catch (e) {
 		console.error('Erreur lors de la récupération du nombre total de réservations :', e);
@@ -25,9 +26,9 @@ export async function fetchReservationsTotal(): Promise<number | null> {
 }
 
 // Liste complète des réservations (vue admin)
-export async function fetchReservationsAdminList(): Promise<any[] | null> {
+export async function fetchReservationsAdminList(): Promise<BackendReservation[] | null> {
 	try {
-		return await getJson<any[]>('/reservations');
+		return await getJson<BackendReservation[]>('/reservations');
 	} catch (e) {
 		console.error('Erreur lors de la récupération de la liste totale des réservations (admin) :', e);
 		return null;
@@ -35,7 +36,7 @@ export async function fetchReservationsAdminList(): Promise<any[] | null> {
 }
 
 // Alias pour compatibilité : liste des réservations (utilise la vue admin)
-export async function fetchReservationsList(): Promise<any[] | null> {
+export async function fetchReservationsList(): Promise<BackendReservation[] | null> {
 	return fetchReservationsAdminList();
 }
 

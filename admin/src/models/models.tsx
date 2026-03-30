@@ -3,6 +3,29 @@
 
 // ---------- Biens ----------
 
+// ---------- Locataires ----------
+
+export interface BackendLocataire {
+  id: number;
+  nom: string;
+  prenom: string;
+  email: string;
+  telephone?: string | null;
+}
+
+// ---------- Réservations ----------
+
+export type BackendReservationStatus = 'en attente' | 'confirmée' | 'terminée' | 'annulée';
+
+export interface BackendReservation {
+  id: number;
+  bien: BackendBien;
+  locataire: BackendLocataire;
+  dateDebut: string | Date;
+  dateFin: string | Date;
+  statut: BackendReservationStatus;
+}
+
 export interface BackendProprietaire {
   id: number;
   nom: string;
