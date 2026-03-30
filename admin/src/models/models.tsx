@@ -39,18 +39,20 @@ export interface BackendBienImage {
 }
 
 export interface BackendBien {
-  id: number;
-  nom: string;
-  adresse: string;
-  type: string;
-  statut: 'disponible' | 'occupé' | 'travaux';
-  superficie?: number;
-  pieces?: number;
-  proprietaire?: BackendProprietaire | null;
-  images?: BackendBienImage[] | null;
-  remarque?: string | null;
-  lat?: number | null;
-  lng?: number | null;
+    id: number;
+    nom: string;
+    adresse: string;
+    type: string;
+    statut: 'disponible' | 'occupé' | 'travaux';
+    superficie?: number;
+    pieces?: number;
+    proprietaire?: BackendProprietaire | null;
+    images?: BackendBienImage[] | null;
+    remarque?: string | null;
+    lat?: number | null;
+    lng?: number | null;
+    // Conciergerie (utilisateur propriétaire du bien), quand chargé côté API
+    conciergerie?: BackendUser | null;
 }
 
 // ---------- Utilisateurs ----------
@@ -75,6 +77,20 @@ export interface BackendUser {
   // entreprise?: any;
   // settings?: any;
   // expoPushToken?: string | null;
+}
+
+// ---------- Tâches ----------
+
+export type BackendTacheStatus = 'à faire' | 'terminée';
+
+export interface BackendTache {
+  id: number;
+  titre: string;
+  description?: string | null;
+  statut: BackendTacheStatus;
+  dateEcheance?: string | null;
+  dateCreation: string | Date;
+  bien: BackendBien;
 }
 
 // D'autres modèles (réservations, tâches, etc.) pourront être ajoutés ici au fur et à mesure

@@ -1,17 +1,17 @@
 // Page de gestion des tâches
-// Permet de suivre les tâches assignées aux utilisateurs Koosy (mock pour l'instant)
-import React, { useState } from 'react';
+// Connectée au backend Nest pour afficher les vraies tâches (vue admin)
+import React, { useEffect, useState } from 'react';
 import Sidebar from '../components/sidebar';
 import SelectField from '../ui/selectField';
 import ButtonCreate from '../ui/buttonCreate';
 import FiltersSection from '../components/filters/filtersSection';
 import DrawerShell from '../ui/DrawerShell';
 import useSidebar from '../hooks/useSidebar';
-import type { Tache, TacheStatus, TachePriority } from '../models/mocks';
-import { mockTaches, mockUsers } from '../models/mocks';
+import type { BackendTache, BackendTacheStatus, BackendUser } from '../models/models';
+import { fetchTachesAdminList } from '../utils/tachesApi';
 
 // Formattage simple de la date en français
-const formatDateFR = (dateString: string) => {
+const formatDateFR = (dateString: string | Date) => {
   const date = new Date(dateString);
   return date.toLocaleDateString('fr-FR', {
     day: '2-digit',
@@ -21,30 +21,12 @@ const formatDateFR = (dateString: string) => {
 };
 
 // Retourne les classes Tailwind selon le statut
-const getStatusClasses = (status: TacheStatus) => {
+const getStatusClasses = (status: BackendTacheStatus) => {
   switch (status) {
-    case 'À faire':
+    case 'à faire':
       return 'bg-[#FFFBEB] text-[#92400E]';
-    case 'En cours':
-      return 'bg-[#EFF6FF] text-[#1D4ED8]';
-    case 'Terminée':
+    case 'terminée':
       return 'bg-[#ECFDF3] text-[#166534]';
-    case 'En retard':
-      return 'bg-[#FEF2F2] text-[#B91C1C]';
-    default:
-      return 'bg-[#E5E7EB] text-[#374151]';
-  }
-};
-
-// Retourne les classes Tailwind selon la priorité
-const getPriorityClasses = (priority: TachePriority) => {
-  switch (priority) {
-    case 'Haute':
-      return 'bg-[#FEE2E2] text-[#B91C1C]';
-    case 'Moyenne':
-      return 'bg-[#FEF3C7] text-[#92400E]';
-    case 'Basse':
-      return 'bg-[#E0F2FE] text-[#1D4ED8]';
     default:
       return 'bg-[#E5E7EB] text-[#374151]';
   }
@@ -53,37 +35,66 @@ const getPriorityClasses = (priority: TachePriority) => {
 const TachesPage: React.FC = () => {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar(false);
 
+  const [taches, setTaches] = useState<BackendTache[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'Tous' | TacheStatus>('Tous');
-  const [priorityFilter, setPriorityFilter] = useState<'Toutes' | TachePriority>('Toutes');
+  const [statusFilter, setStatusFilter] = useState<'Tous' | BackendTacheStatus>('Tous');
   const [userFilter, setUserFilter] = useState<'Tous' | number>('Tous');
 
-  const [selectedTache, setSelectedTache] = useState<Tache | null>(null);
+  const [selectedTache, setSelectedTache] = useState<BackendTache | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  const filteredTaches = mockTaches.filter((tache) => {
+  // Chargement des tâches réelles (vue admin)
+  useEffect(() => {
+    const loadTaches = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await fetchTachesAdminList();
+        setTaches(data ?? []);
+      } catch (e) {
+        console.error(e);
+        setError('Impossible de récupérer les tâches.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    void loadTaches();
+  }, []);
+
+  const utilisateursConciergerie: BackendUser[] = Array.from(
+    new Map(
+      taches
+        .map((t) => t.bien.conciergerie)
+        .filter((u): u is BackendUser => !!u)
+        .map((u) => [u.id, u]),
+    ).values(),
+  );
+
+  const filteredTaches = taches.filter((tache) => {
     const query = search.trim().toLowerCase();
 
     const matchesSearch =
       query.length === 0 ||
-      tache.title.toLowerCase().includes(query) ||
+      tache.titre.toLowerCase().includes(query) ||
       (tache.description ?? '').toLowerCase().includes(query) ||
-      (tache.contextRef ?? '').toLowerCase().includes(query);
+      tache.bien.nom.toLowerCase().includes(query) ||
+      tache.bien.adresse.toLowerCase().includes(query);
 
-    const matchesStatus = statusFilter === 'Tous' ? true : tache.status === statusFilter;
-
-    const matchesPriority =
-      priorityFilter === 'Toutes' ? true : tache.priority === priorityFilter;
+    const matchesStatus = statusFilter === 'Tous' ? true : tache.statut === statusFilter;
 
     const matchesUser =
       userFilter === 'Tous'
         ? true
-        : tache.assignedTo.id === userFilter || tache.createdBy.id === userFilter;
+        : tache.bien.conciergerie?.id === userFilter;
 
-    return matchesSearch && matchesStatus && matchesPriority && matchesUser;
+    return matchesSearch && matchesStatus && matchesUser;
   });
 
-  const openDrawer = (tache?: Tache) => {
+  const openDrawer = (tache?: BackendTache) => {
     setSelectedTache(tache ?? null);
     setDrawerOpen(true);
   };
@@ -135,38 +146,28 @@ const TachesPage: React.FC = () => {
         <FiltersSection
           searchValue={search}
           onSearchChange={setSearch}
-          searchPlaceholder="Rechercher par titre, description ou référence liée…"
-          summary={`${filteredTaches.length} tâche${filteredTaches.length > 1 ? 's' : ''} affichée${
-            filteredTaches.length > 1 ? 's' : ''
-          }`}
+          searchPlaceholder="Rechercher par titre, description ou bien…"
+          summary={
+            loading
+              ? 'Chargement des tâches…'
+              : `${filteredTaches.length} tâche${filteredTaches.length > 1 ? 's' : ''} affichée${
+                  filteredTaches.length > 1 ? 's' : ''
+                }`
+          }
           onReset={() => {
             setSearch('');
             setStatusFilter('Tous');
-            setPriorityFilter('Toutes');
             setUserFilter('Tous');
           }}
         >
           <SelectField
             label="Statut"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as TacheStatus | 'Tous')}
+            onChange={(e) => setStatusFilter(e.target.value as BackendTacheStatus | 'Tous')}
           >
             <option value="Tous">Tous les statuts</option>
-            <option value="À faire">À faire</option>
-            <option value="En cours">En cours</option>
-            <option value="Terminée">Terminée</option>
-            <option value="En retard">En retard</option>
-          </SelectField>
-
-          <SelectField
-            label="Priorité"
-            value={priorityFilter}
-            onChange={(e) => setPriorityFilter(e.target.value as TachePriority | 'Toutes')}
-          >
-            <option value="Toutes">Toutes les priorités</option>
-            <option value="Haute">Haute</option>
-            <option value="Moyenne">Moyenne</option>
-            <option value="Basse">Basse</option>
+            <option value="à faire">À faire</option>
+            <option value="terminée">Terminée</option>
           </SelectField>
 
           <SelectField
@@ -177,16 +178,20 @@ const TachesPage: React.FC = () => {
             }
           >
             <option value="Tous">Tous les utilisateurs</option>
-            {mockUsers.map((user) => (
+            {utilisateursConciergerie.map((user) => (
               <option key={user.id} value={user.id}>
-                {user.name} ({user.role})
+                {user.prenom} {user.nom} ({user.email})
               </option>
             ))}
           </SelectField>
         </FiltersSection>
 
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {filteredTaches.length === 0 ? (
+          {error && !loading ? (
+            <div className="col-span-full rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
+              {error}
+            </div>
+          ) : !loading && filteredTaches.length === 0 ? (
             <div className="col-span-full rounded-2xl border border-dashed border-[#E0E6ED] bg-[#F9FBFF] p-6 text-center text-sm text-[#6E7B8B]">
               <p className="font-medium mb-1">Aucune tâche ne correspond à vos filtres.</p>
               <p className="text-[12px] text-[#9EABB8] mb-3">
@@ -209,28 +214,23 @@ const TachesPage: React.FC = () => {
                 <div className="p-4 border-b border-[#E0E6ED] bg-gradient-to-r from-[#E0F7F4] via-[#F9FBFF] to-[#E0F2FE] flex flex-col gap-2">
                   <div className="flex items-start justify-between gap-2">
                     <h3 className="text-sm font-semibold text-[#1F2933] line-clamp-2">
-                      {tache.title}
+                      {tache.titre}
                     </h3>
                     <div className="flex flex-col items-end gap-1">
                       <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${getStatusClasses(tache.status)}`}
+                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${getStatusClasses(tache.statut)}`}
                       >
-                        {tache.status}
-                      </span>
-                      <span
-                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${getPriorityClasses(tache.priority)}`}
-                      >
-                        Priorité {tache.priority}
+                        {tache.statut}
                       </span>
                     </div>
                   </div>
+                  {tache.bien && (
+                    <p className="text-[11px] text-[#6E7B8B]">
+                      {tache.bien.nom} · {tache.bien.adresse}
+                    </p>
+                  )}
                   {tache.description && (
                     <p className="text-[11px] text-[#6E7B8B] line-clamp-2">{tache.description}</p>
-                  )}
-                  {tache.contextRef && (
-                    <p className="text-[11px] text-[#0369A1]">
-                      {tache.contextType ?? 'Contexte'} · {tache.contextRef}
-                    </p>
                   )}
                 </div>
 
@@ -239,45 +239,37 @@ const TachesPage: React.FC = () => {
                     <div>
                       <p className="text-[11px] text-[#9EABB8]">Échéance</p>
                       <p className="text-sm font-semibold text-[#1F2933]">
-                        {formatDateFR(tache.dueDate)}
+                        {tache.dateEcheance ? formatDateFR(tache.dateEcheance) : 'Non définie'}
                       </p>
                     </div>
                     <div>
                       <p className="text-[11px] text-[#9EABB8]">Créée le</p>
                       <p className="text-sm font-semibold text-[#1F2933]">
-                        {formatDateFR(tache.createdAt)}
+                        {formatDateFR(tache.dateCreation)}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-8 rounded-full bg-[#0F172A]/5 flex items-center justify-center text-[10px] font-semibold text-[#0F172A]">
-                        {tache.assignedTo.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')}
+                    {tache.bien.conciergerie && (
+                      <div className="flex items-center gap-2">
+                        <div className="h-8 w-8 rounded-full bg-[#0F172A]/5 flex items-center justify-center text-[10px] font-semibold text-[#0F172A]">
+                          {`${tache.bien.conciergerie.prenom} ${tache.bien.conciergerie.nom}`
+                            .split(' ')
+                            .map((n) => n[0])
+                            .join('')}
+                        </div>
+                        <div className="space-y-0.5">
+                          <p className="text-xs font-medium text-[#1F2933]">
+                            {tache.bien.conciergerie.prenom} {tache.bien.conciergerie.nom}
+                          </p>
+                          <p className="text-[11px] text-[#6E7B8B]">
+                            {tache.bien.conciergerie.email}
+                          </p>
+                          <p className="text-[11px] text-[#9EABB8]">Conciergerie en charge du bien</p>
+                        </div>
                       </div>
-                      <div className="space-y-0.5">
-                        <p className="text-xs font-medium text-[#1F2933]">
-                          {tache.assignedTo.name}
-                        </p>
-                        <p className="text-[11px] text-[#6E7B8B]">
-                          {tache.assignedTo.email}
-                        </p>
-                        <p className="text-[11px] text-[#9EABB8]">Assignée à cet utilisateur</p>
-                      </div>
-                    </div>
-
-                    <div className="text-right space-y-0.5">
-                      <p className="text-[11px] text-[#9EABB8]">Créée par</p>
-                      <p className="text-xs font-medium text-[#1F2933]">
-                        {tache.createdBy.name}
-                      </p>
-                      <p className="text-[11px] text-[#6E7B8B]">
-                        {tache.createdBy.email}
-                      </p>
-                    </div>
+                    )}
                   </div>
                 </div>
 
@@ -290,15 +282,9 @@ const TachesPage: React.FC = () => {
                     >
                       Voir le détail de la tâche
                     </button>
-                    <button
-                      type="button"
-                      className="rounded-full border border-transparent px-2 py-0.5 text-[#9EABB8] hover:bg-[#F4F7FA]"
-                    >
-                      Marquer comme terminée (mock)
-                    </button>
                   </div>
                   <p className="text-[10px] text-[#9EABB8]">
-                    Actions simulées à connecter à ton API Nest (module tâches / to-do interne).
+                    Vue connectée à ton API Nest (module tâches / to-do interne, vue admin).
                   </p>
                 </footer>
               </article>
@@ -310,14 +296,14 @@ const TachesPage: React.FC = () => {
       <DrawerShell
         open={drawerOpen}
         title={selectedTache ? 'Détail de la tâche' : 'Nouvelle tâche'}
-        subtitle="Formulaire mocké à connecter à ton backend Nest (tâches / assignation utilisateurs)."
+        subtitle="Vue connectée à ton backend Nest (tâches / assignation utilisateurs). Le formulaire de création reste à brancher."
         onClose={closeDrawer}
       >
         {selectedTache ? (
           <>
             <div>
               <p className="text-xs font-medium text-[#9EABB8] mb-1">Titre</p>
-              <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.title}</p>
+              <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.titre}</p>
             </div>
             {selectedTache.description && (
               <div>
@@ -328,45 +314,35 @@ const TachesPage: React.FC = () => {
             <div className="grid grid-cols-2 gap-3 text-xs">
               <div>
                 <p className="text-[11px] text-[#9EABB8]">Statut</p>
-                <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.status}</p>
-              </div>
-              <div>
-                <p className="text-[11px] text-[#9EABB8]">Priorité</p>
-                <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.priority}</p>
+                <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.statut}</p>
               </div>
               <div>
                 <p className="text-[11px] text-[#9EABB8]">Échéance</p>
                 <p className="text-sm font-semibold text-[#1F2933]">
-                  {formatDateFR(selectedTache.dueDate)}
+                  {selectedTache.dateEcheance ? formatDateFR(selectedTache.dateEcheance) : 'Non définie'}
                 </p>
               </div>
               <div>
                 <p className="text-[11px] text-[#9EABB8]">Créée le</p>
                 <p className="text-sm font-semibold text-[#1F2933]">
-                  {formatDateFR(selectedTache.createdAt)}
+                  {formatDateFR(selectedTache.dateCreation)}
                 </p>
               </div>
             </div>
-            <div>
-              <p className="text-xs font-medium text-[#9EABB8] mb-1">Utilisateur assigné</p>
-              <p className="text-sm font-semibold text-[#1F2933]">
-                {selectedTache.assignedTo.name}
-              </p>
-              <p className="text-xs text-[#6E7B8B]">{selectedTache.assignedTo.email}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-[#9EABB8] mb-1">Créée par</p>
-              <p className="text-sm font-semibold text-[#1F2933]">
-                {selectedTache.createdBy.name}
-              </p>
-              <p className="text-xs text-[#6E7B8B]">{selectedTache.createdBy.email}</p>
-            </div>
-            {selectedTache.contextRef && (
+            {selectedTache.bien && (
               <div>
-                <p className="text-xs font-medium text-[#9EABB8] mb-1">Contexte lié</p>
+                <p className="text-xs font-medium text-[#9EABB8] mb-1">Bien concerné</p>
+                <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.bien.nom}</p>
+                <p className="text-xs text-[#6E7B8B]">{selectedTache.bien.adresse}</p>
+              </div>
+            )}
+            {selectedTache.bien.conciergerie && (
+              <div>
+                <p className="text-xs font-medium text-[#9EABB8] mb-1">Conciergerie en charge</p>
                 <p className="text-sm font-semibold text-[#1F2933]">
-                  {selectedTache.contextType ?? 'Contexte'} · {selectedTache.contextRef}
+                  {selectedTache.bien.conciergerie.prenom} {selectedTache.bien.conciergerie.nom}
                 </p>
+                <p className="text-xs text-[#6E7B8B]">{selectedTache.bien.conciergerie.email}</p>
               </div>
             )}
             <p className="text-[11px] text-[#9EABB8]">
@@ -380,8 +356,8 @@ const TachesPage: React.FC = () => {
               une échéance, une priorité, et en la liant à une réservation ou une prestation.
             </p>
             <p className="text-[11px] text-[#9EABB8]">
-              Pour l’instant, cette interface est mockée : lorsque tu auras les endpoints
-              correspondants dans ton API Nest, on pourra brancher ce formulaire.
+              Pour l’instant, ce formulaire de création est mocké : lorsque tu auras les endpoints
+              correspondants dans ton API Nest, on pourra le brancher.
             </p>
           </>
         )}
