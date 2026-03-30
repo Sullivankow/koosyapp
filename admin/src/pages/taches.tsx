@@ -6,6 +6,7 @@ import Sidebar from '../components/sidebar';
 import SelectField from '../ui/selectField';
 import ButtonCreate from '../ui/buttonCreate';
 import FiltersSection from '../components/filters/filtersSection';
+import DrawerShell from '../ui/DrawerShell';
 import useSidebar from '../hooks/useSidebar';
 // Import centralisé des types et données mock pour les tâches
 import type { Tache, TacheStatus, TachePriority } from '../models/mocks';
@@ -55,101 +56,83 @@ const getPriorityClasses = (priority: TachePriority) => {
 const TachesPage: React.FC = () => {
   // État pour la sidebar mobile (ouvert / fermé)
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar(false);
+      </main>
 
-  // États pour les filtres
-  const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<'Tous' | TacheStatus>('Tous');
-  const [priorityFilter, setPriorityFilter] = useState<'Toutes' | TachePriority>('Toutes');
-  const [userFilter, setUserFilter] = useState<'Tous' | number>('Tous');
-
-  // Tâche sélectionnée pour le panneau de détail
-  const [selectedTache, setSelectedTache] = useState<Tache | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
-
-  // Filtrage des tâches (mock)
-  const filteredTaches = mockTaches.filter((tache) => {
-    const query = search.trim().toLowerCase();
-
-    const matchesSearch =
-      query.length === 0 ||
-      tache.title.toLowerCase().includes(query) ||
-      (tache.description && tache.description.toLowerCase().includes(query)) ||
-      (tache.contextRef && tache.contextRef.toLowerCase().includes(query));
-
-    const matchesStatus = statusFilter === 'Tous' ? true : tache.status === statusFilter;
-    const matchesPriority = priorityFilter === 'Toutes' ? true : tache.priority === priorityFilter;
-
-    const matchesUser =
-      userFilter === 'Tous'
-        ? true
-        : tache.assignedTo.id === userFilter || tache.createdBy.id === userFilter;
-
-    return matchesSearch && matchesStatus && matchesPriority && matchesUser;
-  });
-
-  // Ouvre le drawer sur une tâche (ou null pour une future création)
-  const openDrawer = (tache?: Tache) => {
-    setSelectedTache(tache ?? null);
-    setDrawerOpen(true);
-  };
-
-  // Ferme le drawer
-  const closeDrawer = () => {
-    setDrawerOpen(false);
-    setSelectedTache(null);
-  };
-
-  return (
-    <div className="min-h-screen bg-[#F4F7FA]">
-      {/* Sidebar responsive : visible sur desktop, coulissante sur mobile */}
-      <Sidebar isOpen={sidebarOpen} />
-
-      {/* Overlay mobile pour fermer la sidebar en cliquant à l'extérieur */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 z-30 bg-black/40 md:hidden"
-          onClick={closeSidebar}
-        />
-      )}
-
-      {/* Topbar mobile avec bouton burger et titre */}
-      <header className="flex items-center justify-between px-4 py-3 border-b border-[#E0E6ED] bg-[#F4F7FA] md:hidden">
-        <button
-          type="button"
-          onClick={openSidebar}
-          className="inline-flex items-center justify-center rounded-md border border-[#CBD5E1] bg-white p-2 text-[#0F172A] shadow-sm"
-        >
-          <span className="sr-only">Ouvrir le menu</span>
-          <div className="flex flex-col space-y-1">
-            <span className="block h-0.5 w-4 bg-[#0F172A]" />
-            <span className="block h-0.5 w-4 bg-[#0F172A]" />
-            <span className="block h-0.5 w-4 bg-[#0F172A]" />
-          </div>
-        </button>
-        <h1 className="text-sm font-semibold text-[#222B45]">Tâches</h1>
-        <div className="w-8" />
-      </header>
-
-      {/* Contenu principal de la page Tâches */}
-      <main className="px-4 py-4 md:ml-60 md:px-6 md:py-6 min-h-screen flex flex-col gap-4">
-        {/* En-tête */}
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-[#222B45]">Tâches</h2>
-            <p className="text-sm text-[#6E7B8B]">
-              Centralisez les tâches des utilisateurs (check-in, ménage, suivi propriétaire, litiges, etc.).
-            </p>
-          </div>
-          <ButtonCreate label="Nouvelle tâche" onClick={() => openDrawer()} />
+      {/* Drawer latéral pour consulter / créer une tâche (mock) */}
+      <DrawerShell
+        open={drawerOpen}
+        title={selectedTache ? 'Détail de la tâche' : 'Nouvelle tâche'}
+        subtitle="Formulaire mocké à connecter à ton backend Nest (tâches / assignation utilisateurs)."
+        onClose={closeDrawer}
+      >
+        {/* Contenu du drawer */}
+        <div className="flex-1 overflow-y-auto p-5 space-y-4 text-sm text-[#6E7B8B]">
+          {selectedTache ? (
+            <>
+              <div>
+                <p className="text-xs font-medium text-[#9EABB8] mb-1">Titre</p>
+                <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.title}</p>
+              </div>
+              {selectedTache.description && (
+                <div>
+                  <p className="text-xs font-medium text-[#9EABB8] mb-1">Description</p>
+                  <p className="text-sm text-[#1F2933]">{selectedTache.description}</p>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <p className="text-[11px] text-[#9EABB8]">Statut</p>
+                  <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.status}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-[#9EABB8]">Priorité</p>
+                  <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.priority}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-[#9EABB8]">Échéance</p>
+                  <p className="text-sm font-semibold text-[#1F2933]">{formatDateFR(selectedTache.dueDate)}</p>
+                </div>
+                <div>
+                  <p className="text-[11px] text-[#9EABB8]">Créée le</p>
+                  <p className="text-sm font-semibold text-[#1F2933]">{formatDateFR(selectedTache.createdAt)}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-[#9EABB8] mb-1">Utilisateur assigné</p>
+                <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.assignedTo.name}</p>
+                <p className="text-xs text-[#6E7B8B]">{selectedTache.assignedTo.email}</p>
+              </div>
+              <div>
+                <p className="text-xs font-medium text-[#9EABB8] mb-1">Créée par</p>
+                <p className="text-sm font-semibold text-[#1F2933]">{selectedTache.createdBy.name}</p>
+                <p className="text-xs text-[#6E7B8B]">{selectedTache.createdBy.email}</p>
+              </div>
+              {selectedTache.contextRef && (
+                <div>
+                  <p className="text-xs font-medium text-[#9EABB8] mb-1">Contexte lié</p>
+                  <p className="text-sm font-semibold text-[#1F2933]">
+                    {selectedTache.contextType ?? 'Contexte'} · {selectedTache.contextRef}
+                  </p>
+                </div>
+              )}
+              <p className="text-[11px] text-[#9EABB8]">
+                Ici tu pourras plus tard modifier le statut, réassigner la tâche, ou créer un lien direct vers la réservation / prestation concernée.
+              </p>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-[#6E7B8B]">
+                Ici, tu pourras créer une nouvelle tâche en choisissant un utilisateur assigné,
+                une échéance, une priorité, et en la liant à une réservation ou une prestation.
+              </p>
+              <p className="text-[11px] text-[#9EABB8]">
+                Pour l’instant, cette interface est mockée : lorsque tu auras les endpoints
+                correspondants dans ton API Nest, on pourra brancher ce formulaire.
+              </p>
+            </>
+          )}
         </div>
-
-        {/* Bloc de filtres */}
-        <FiltersSection
-          searchValue={search}
-          onSearchChange={setSearch}
-          searchPlaceholder="Rechercher par titre, description ou référence liée…"
-          summary={`${filteredTaches.length} tâche${
-            filteredTaches.length > 1 ? 's' : ''
+      </DrawerShell>
           } affichée${filteredTaches.length > 1 ? 's' : ''}`}
           onReset={() => {
             setSearch('');

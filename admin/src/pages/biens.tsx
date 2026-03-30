@@ -9,6 +9,7 @@ import BienImagesCarousel from '../components/bienImagesCarousel';
 import SelectField from '../ui/selectField';
 import BiensForm from '../components/forms/biens/biensEditForm';
 import BienCreateForm from '../components/forms/biens/bienCreateForm';
+import DrawerShell from '../ui/DrawerShell';
 import FiltersSection from '../components/filters/filtersSection';
 import useSidebar from '../hooks/useSidebar';
 import type { BackendBien, BackendProprietaire, BackendUser } from '../models/models';
@@ -409,31 +410,47 @@ const BiensPage: React.FC = () => {
       </main>
 
       {/* Drawer latéral pour créer un bien (admin) ou consulter un bien existant */}
-      {drawerOpen && (
-        <div className="fixed inset-0 z-40 flex">
-          <div className="fixed inset-0 bg-black/20" onClick={closeDrawer} />
-          <div className="relative ml-auto h-full w-full max-w-md bg-white shadow-xl border-l border-[#E0E6ED] flex flex-col">
-            <header className="px-5 py-4 border-b border-[#E0E6ED] flex items-center justify-between">
-              <div>
-                <h2 className="text-sm font-semibold text-[#222B45]">
-                  {selectedBien ? 'Détail du bien' : 'Nouveau bien (admin)'}
-                </h2>
-                <p className="text-[11px] text-[#9EABB8]">
-                  {selectedBien
-                    ? 'Visualisation des informations du bien existant.'
-                    : 'Créer un bien pour un utilisateur (conciergerie) choisi.'}
-                </p>
-              </div>
+      <DrawerShell
+        open={drawerOpen}
+        title={selectedBien ? 'Détail du bien' : 'Nouveau bien (admin)'}
+        subtitle={
+          selectedBien
+            ? 'Visualisation des informations du bien existant.'
+            : 'Créer un bien pour un utilisateur (conciergerie) choisi.'
+        }
+        onClose={closeDrawer}
+        footer={
+          <>
+            <button
+              type="button"
+              onClick={closeDrawer}
+              className="rounded-lg border border-[#E0E6ED] bg-white px-4 py-2 text-xs font-medium text-[#6E7B8B] hover:bg-[#F4F7FA]"
+            >
+              Annuler
+            </button>
+            {!selectedBien && (
               <button
                 type="button"
-                onClick={closeDrawer}
-                className="rounded-full p-1.5 text-[#9EABB8] hover:bg-[#F4F7FA]"
+                onClick={handleCreateBien}
+                disabled={formSaving}
+                className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B] disabled:opacity-60 disabled:cursor-not-allowed"
               >
-                ✕
+                {formSaving ? 'Création…' : 'Créer le bien'}
               </button>
-            </header>
-
-            <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6 text-sm">
+            )}
+            {selectedBien && (
+              <button
+                type="button"
+                onClick={handleUpdateBien}
+                disabled={formSaving}
+                className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B] disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {formSaving ? 'Enregistrement…' : 'Enregistrer les modifications'}
+              </button>
+            )}
+          </>
+        }
+      >
               {selectedBien && (
                 <section className="rounded-xl border border-[#E0E6ED] bg-white p-3">
                   <BienImagesCarousel
@@ -544,40 +561,7 @@ const BiensPage: React.FC = () => {
                   onChangeStatut={setFormStatut as any}
                 />
               )}
-            </div>
-
-            <footer className="px-5 py-4 border-t border-[#E0E6ED] flex justify-end gap-2 bg-white">
-              <button
-                type="button"
-                onClick={closeDrawer}
-                className="rounded-lg border border-[#E0E6ED] bg-white px-4 py-2 text-xs font-medium text-[#6E7B8B] hover:bg-[#F4F7FA]"
-              >
-                Annuler
-              </button>
-              {!selectedBien && (
-                <button
-                  type="button"
-                  onClick={handleCreateBien}
-                  disabled={formSaving}
-                  className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B] disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {formSaving ? 'Création…' : 'Créer le bien'}
-                </button>
-              )}
-              {selectedBien && (
-                <button
-                  type="button"
-                  onClick={handleUpdateBien}
-                  disabled={formSaving}
-                  className="rounded-lg bg-[#00A896] px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-[#00897B] disabled:opacity-60 disabled:cursor-not-allowed"
-                >
-                  {formSaving ? 'Enregistrement…' : 'Enregistrer les modifications'}
-                </button>
-              )}
-            </footer>
-          </div>
-        </div>
-      )}
+      </DrawerShell>
     </div>
   );
 };

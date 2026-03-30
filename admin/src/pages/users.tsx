@@ -7,6 +7,7 @@ import SelectField from '../ui/selectField';
 import FiltersSection from '../components/filters/filtersSection';
 import { fetchUsersList, createUser, updateUser, deleteUser } from '../utils/usersApi';
 import UsersForm from '../components/forms/users/usersForm';
+import DrawerShell from '../ui/DrawerShell';
 import type { BackendUser } from '../models/models';
 import useSidebar from '../hooks/useSidebar';
 

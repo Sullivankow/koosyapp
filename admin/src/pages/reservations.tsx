@@ -1,4 +1,3 @@
-
 // Page de gestion des réservations
 // Permet à l'équipe de suivre les séjours par bien, voyageur et utilisateur Koosy
 import React, { useState } from 'react';
@@ -7,7 +6,6 @@ import SelectField from '../ui/selectField';
 import ButtonCreate from '../ui/buttonCreate';
 import FiltersSection from '../components/filters/filtersSection';
 import useSidebar from '../hooks/useSidebar';
-// Import centralisé des types et données mock pour les réservations
 import type { Reservation, ReservationStatus } from '../models/mocks';
 import { mockReservations, mockUsers, mockBiensLight } from '../models/mocks';
 
@@ -21,22 +19,17 @@ const formatDateFR = (dateString: string) => {
   });
 };
 
-// Composant principal de la page Réservations
 const ReservationsPage: React.FC = () => {
-  // État pour la sidebar mobile (ouvert / fermé)
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar(false);
 
-  // États pour les filtres
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'Tous' | ReservationStatus>('Tous');
   const [userFilter, setUserFilter] = useState<'Tous' | number>('Tous');
   const [propertyFilter, setPropertyFilter] = useState<'Tous' | number>('Tous');
 
-  // Réservation sélectionnée (pour le panneau de détail / création)
   const [selectedReservation, setSelectedReservation] = useState<Reservation | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
-  // Filtrage des réservations (mock)
   const filteredReservations = mockReservations.filter((reservation) => {
     const query = search.trim().toLowerCase();
 
@@ -61,19 +54,16 @@ const ReservationsPage: React.FC = () => {
     return matchesSearch && matchesStatus && matchesUser && matchesProperty;
   });
 
-  // Ouvre le drawer pour créer ou afficher une réservation
   const openDrawer = (reservation?: Reservation) => {
     setSelectedReservation(reservation ?? null);
     setDrawerOpen(true);
   };
 
-  // Ferme le drawer
   const closeDrawer = () => {
     setDrawerOpen(false);
     setSelectedReservation(null);
   };
 
-  // Badge de couleur selon le statut
   const getStatusClasses = (status: ReservationStatus) => {
     switch (status) {
       case 'Confirmée':
@@ -90,7 +80,6 @@ const ReservationsPage: React.FC = () => {
     }
   };
 
-  // Texte d'aide sous le badge
   const getStatusHelper = (status: ReservationStatus) => {
     switch (status) {
       case 'Confirmée':
@@ -109,10 +98,8 @@ const ReservationsPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-[#F4F7FA]">
-      {/* Sidebar responsive : visible sur desktop, coulissante sur mobile */}
       <Sidebar isOpen={sidebarOpen} />
 
-      {/* Overlay mobile pour fermer la sidebar en cliquant à l'extérieur */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 z-30 bg-black/40 md:hidden"
@@ -120,7 +107,6 @@ const ReservationsPage: React.FC = () => {
         />
       )}
 
-      {/* Topbar mobile avec bouton burger et titre */}
       <header className="flex items-center justify-between px-4 py-3 border-b border-[#E0E6ED] bg-[#F4F7FA] md:hidden">
         <button
           type="button"
@@ -138,9 +124,7 @@ const ReservationsPage: React.FC = () => {
         <div className="w-8" />
       </header>
 
-      {/* Contenu principal de la page Réservations */}
       <main className="px-4 py-4 md:ml-60 md:px-6 md:py-6 min-h-screen flex flex-col gap-4">
-        {/* En-tête */}
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 className="text-2xl font-bold text-[#222B45]">Réservations</h2>
@@ -151,7 +135,6 @@ const ReservationsPage: React.FC = () => {
           <ButtonCreate label="Nouvelle réservation" onClick={() => openDrawer()} />
         </div>
 
-        {/* Bloc de filtres (recherche + selects) */}
         <FiltersSection
           searchValue={search}
           onSearchChange={setSearch}
@@ -166,11 +149,10 @@ const ReservationsPage: React.FC = () => {
             setPropertyFilter('Tous');
           }}
         >
-          {/* Ligne de filtres détaillés */}
           <SelectField
             label="Statut de la réservation"
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value as any)}
+            onChange={(e) => setStatusFilter(e.target.value as ReservationStatus | 'Tous')}
           >
             <option value="Tous">Tous les statuts</option>
             <option value="Brouillon">Brouillon</option>
@@ -211,7 +193,6 @@ const ReservationsPage: React.FC = () => {
           </SelectField>
         </FiltersSection>
 
-        {/* Liste des réservations sous forme de cartes responsive */}
         <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           {filteredReservations.length === 0 ? (
             <div className="col-span-full rounded-2xl border border-dashed border-[#E0E6ED] bg-[#F9FBFF] p-6 text-center text-sm text-[#6E7B8B]">
@@ -233,7 +214,6 @@ const ReservationsPage: React.FC = () => {
                 key={reservation.id}
                 className="flex flex-col rounded-2xl border border-[#E0E6ED] bg-white shadow-sm overflow-hidden"
               >
-                {/* Bandeau supérieur avec bien + statut */}
                 <div className="p-4 border-b border-[#E0E6ED] bg-gradient-to-r from-[#E0F7F4] via-[#F9FBFF] to-[#E0F2FE] flex flex-col gap-2">
                   <div className="flex items-start justify-between gap-2">
                     <div className="space-y-0.5">
@@ -243,9 +223,7 @@ const ReservationsPage: React.FC = () => {
                       <p className="text-xs text-[#6E7B8B]">
                         {reservation.property.city}, {reservation.property.country}
                       </p>
-                      <p className="text-[11px] text-[#9EABB8]">
-                        Réf. {reservation.reference}
-                      </p>
+                      <p className="text-[11px] text-[#9EABB8]">Réf. {reservation.reference}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1">
                       <span
@@ -258,14 +236,10 @@ const ReservationsPage: React.FC = () => {
                       </span>
                     </div>
                   </div>
-                  <p className="text-[11px] text-[#6E7B8B]">
-                    {getStatusHelper(reservation.status)}
-                  </p>
+                  <p className="text-[11px] text-[#6E7B8B]">{getStatusHelper(reservation.status)}</p>
                 </div>
 
-                {/* Corps de la carte : voyageur + dates + montants */}
                 <div className="flex-1 p-4 space-y-3 text-xs text-[#6E7B8B]">
-                  {/* Voyageur */}
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-center gap-2">
                       <div className="h-8 w-8 rounded-full bg-[#0F172A]/5 flex items-center justify-center text-[10px] font-semibold text-[#0F172A]">
@@ -295,7 +269,6 @@ const ReservationsPage: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Ligne montants + utilisateur Koosy concerné */}
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                     <div className="space-y-0.5">
                       <p className="text-[11px] text-[#9EABB8]">Montant total</p>
@@ -317,7 +290,6 @@ const ReservationsPage: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Pied de carte : actions backoffice (mock) */}
                 <footer className="flex flex-col gap-2 border-t border-[#E0E6ED] bg-[#F9FBFF] px-4 py-2.5 text-xs sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap items-center gap-2">
                     <button
@@ -344,7 +316,6 @@ const ReservationsPage: React.FC = () => {
         </section>
       </main>
 
-      {/* Drawer latéral pour créer / consulter une réservation (mock) */}
       {drawerOpen && (
         <div className="fixed inset-0 z-40 flex">
           <div className="fixed inset-0 bg-black/20" onClick={closeDrawer} />
@@ -367,7 +338,6 @@ const ReservationsPage: React.FC = () => {
               </button>
             </header>
 
-            {/* Contenu du drawer : résumé simple en attendant la vraie intégration */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4 text-sm text-[#6E7B8B]">
               {selectedReservation ? (
                 <>
@@ -434,10 +404,6 @@ const ReservationsPage: React.FC = () => {
                 </>
               )}
             </div>
-
-            <footer className="px-5 py-3 border-t border-[#E0E6ED] bg-[#F9FBFF] text-[11px] text-[#9EABB8]">
-              Mock UI uniquement – à brancher sur tes endpoints Nest (création / mise à jour de réservation).
-            </footer>
           </div>
         </div>
       )}
