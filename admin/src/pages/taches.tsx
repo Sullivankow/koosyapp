@@ -9,6 +9,7 @@ import DrawerShell from '../ui/DrawerShell';
 import useSidebar from '../hooks/useSidebar';
 import type { BackendTache, BackendTacheStatus, BackendUser } from '../models/models';
 import { fetchTachesAdminList } from '../utils/tachesApi';
+import { fetchUsersList } from '../utils/usersApi';
 
 // Formattage simple de la date en français
 const formatDateFR = (dateString: string | Date) => {
@@ -36,6 +37,7 @@ const TachesPage: React.FC = () => {
   const { sidebarOpen, openSidebar, closeSidebar } = useSidebar(false);
 
   const [taches, setTaches] = useState<BackendTache[]>([]);
+  const [users, setUsers] = useState<BackendUser[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,14 +67,19 @@ const TachesPage: React.FC = () => {
     void loadTaches();
   }, []);
 
-  const utilisateursConciergerie: BackendUser[] = Array.from(
-    new Map(
-      taches
-        .map((t) => t.bien.conciergerie)
-        .filter((u): u is BackendUser => !!u)
-        .map((u) => [u.id, u]),
-    ).values(),
-  );
+  // Chargement de la liste complète des utilisateurs (vue admin)
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const data = await fetchUsersList();
+        setUsers(data ?? []);
+      } catch (e) {
+        console.error('Impossible de récupérer les utilisateurs :', e);
+      }
+    };
+
+    void loadUsers();
+  }, []);
 
   const filteredTaches = taches.filter((tache) => {
     const query = search.trim().toLowerCase();
@@ -178,7 +185,7 @@ const TachesPage: React.FC = () => {
             }
           >
             <option value="Tous">Tous les utilisateurs</option>
-            {utilisateursConciergerie.map((user) => (
+            {users.map((user) => (
               <option key={user.id} value={user.id}>
                 {user.prenom} {user.nom} ({user.email})
               </option>
