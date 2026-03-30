@@ -2,7 +2,7 @@
 // Formulaire latéral (drawer) pour créer ou modifier un utilisateur Koosy côté admin.
 // Toute la logique (chargement, validation, appel API) reste dans la page `users.tsx`.
 import React from 'react';
-import type { User } from '../../pages/users';
+import type { User } from '../../../pages/users';
 
 // Décrit les props nécessaires pour piloter le formulaire depuis la page
 interface UsersFormProps {
