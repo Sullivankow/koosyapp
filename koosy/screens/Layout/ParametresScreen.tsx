@@ -17,6 +17,7 @@ type MaterialCommunityIconName =
 
 const sections: { label: string; icon: MaterialCommunityIconName }[] = [
     { label: 'Profil utilisateur', icon: 'account-circle' },
+    { label: 'Thème', icon: 'theme-light-dark' },
     { label: 'Notifications', icon: 'bell' },
     { label: 'Sécurité', icon: 'shield-lock' },
     { label: 'À propos', icon: 'information' },
@@ -40,6 +41,7 @@ const ParametresScreen: React.FC = () => {
     // Mapping entre label et nom de route
     const routeMap: { [key: string]: string } = {
         'Profil utilisateur': 'Profil',
+        'Thème': 'Theme',
         'Notifications': 'Notifications',
         'Sécurité': 'Securite',
         'À propos': 'APropos',

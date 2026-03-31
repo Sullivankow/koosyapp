@@ -58,15 +58,15 @@ export const FactureList = memo(function FactureList({ factures, colors, handleP
 				style={[
 					styles.factureItem,
 					{
-						backgroundColor: colors.surface,
-						borderBottomColor: colors.border,
+						backgroundColor: colors.primary,
+						borderBottomColor: colors.primary,
 					},
 				]}
 			>
 				<View style={styles.factureContent}>
-					<Text style={[styles.factureTitle, { color: colors.primary }]}>{displayTitle}</Text>
-					<Text style={[styles.factureDate, { color: colors.textSecondary }]}>Date échéance : {displayDate}</Text>
-					<Text style={[styles.factureMontant, { color: colors.text }]}>
+					  <Text style={[styles.factureTitle, { color: colors.surface }]}>{displayTitle}</Text>
+					  <Text style={[styles.factureDate, { color: colors.surface }]}>Date échéance : {displayDate}</Text>
+					  <Text style={[styles.factureMontant, { color: colors.surface }]}>
 						Montant TTC : {montantTTC} €
 					</Text>
 				</View>
@@ -77,7 +77,7 @@ export const FactureList = memo(function FactureList({ factures, colors, handleP
 						onPress={() => handlePreviewFacture(item)}
 						style={styles.actionButton}
 					>
-						<Ionicons name="eye-outline" size={24} color={colors.primary} />
+						<Ionicons name="eye-outline" size={24} color={colors.surface} />
 					</TouchableOpacity>
 
 					{/* Bouton pour demander la suppression de la facture */}

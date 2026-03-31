@@ -1,5 +1,53 @@
+export const PinkPalette = {
+    primary: '#C2185B', // rose framboise
+    secondary: '#F8BBD0', // rose pâle
+    background: '#FFF0F6', // rose très clair
+    surface: '#FFFFFF',
+    accent: '#F06292', // rose accent
+    text: '#222B45',
+    textSecondary: '#6E7B8B',
+    border: '#F8BBD0',
+    error: '#E53935',
+    success: '#43A047',
+    info: '#1976D2',
+    disabled: '#B0BEC5',
+    shadow: 'rgba(0,0,0,0.07)',
+};
+
+export const GreenVioletPalette = {
+    primary: '#43A047', // vert doux
+    secondary: '#7C4DFF', // violet doux
+    background: '#F3F7F3', // vert très clair
+    surface: '#FFFFFF',
+    accent: '#9575CD', // violet accent
+    text: '#222B45',
+    textSecondary: '#6E7B8B',
+    border: '#C5E1A5',
+    error: '#E53935',
+    success: '#43A047',
+    info: '#1976D2',
+    disabled: '#B0BEC5',
+    shadow: 'rgba(0,0,0,0.07)',
+};
+
+export const OrangePalette = {
+    primary: '#FF9800', // orange doux
+    secondary: '#FFE0B2', // orange pâle
+    background: '#FFF8E1', // orange très clair
+    surface: '#FFFFFF',
+    accent: '#FFB74D', // orange accent
+    text: '#222B45',
+    textSecondary: '#6E7B8B',
+    border: '#FFE0B2',
+    error: '#E53935',
+    success: '#43A047',
+    info: '#1976D2',
+    disabled: '#B0BEC5',
+    shadow: 'rgba(0,0,0,0.07)',
+};
 // Palette de couleurs pour Koosy Conciergerie
-export const LightColors = {
+
+export const BlueGreenPalette = {
     primary: '#009688', // bleu-vert moderne
     secondary: '#FF7043', // corail doux
     background: '#F4F7FA', // gris très clair
@@ -14,6 +62,24 @@ export const LightColors = {
     disabled: '#B0BEC5', // gris désactivé
     shadow: 'rgba(0,0,0,0.07)',
 };
+
+export const RedPalette = {
+    primary: '#e53935', // rouge vif
+    secondary: '#ff7043',
+    background: '#ffebee',
+    surface: '#fff5f5',
+    accent: '#ff5252',
+    text: '#222B45',
+    textSecondary: '#6E7B8B',
+    border: '#ffcdd2',
+    error: '#b71c1c',
+    success: '#43A047',
+    info: '#1976D2',
+    disabled: '#B0BEC5',
+    shadow: 'rgba(0,0,0,0.07)',
+};
+
+export const LightColors = BlueGreenPalette;
 
 export const DarkColors = {
     primary: '#26A69A', // bleu-vert lumineux

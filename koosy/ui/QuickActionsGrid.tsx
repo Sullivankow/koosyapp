@@ -26,7 +26,7 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
           <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter un bien</Text>
         </View>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.secondary }]} onPress={onAddTache}>
+      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]} onPress={onAddTache}>
         <View style={styles.centerContent}>
           <MaterialCommunityIcons name="playlist-plus" size={24} color={colors.surface} style={styles.icon} />
           <Text style={[styles.actionText, { color: colors.surface }]}>Mes tâches</Text>
@@ -34,13 +34,13 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
       </TouchableOpacity>
     </View>
     <View style={styles.quickActionsRow}>
-      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.accent }]} onPress={onAddReservation}>
+      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]} onPress={onAddReservation}>
         <View style={styles.centerContent}>
           <MaterialCommunityIcons name="calendar-plus" size={24} color={colors.surface} style={styles.icon} />
           <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une résa</Text>
         </View>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.success || '#4CAF50' }]} onPress={onAddPrestation}> 
+      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]} onPress={onAddPrestation}> 
         <View style={styles.centerContent}>
           <FontAwesome5 name="user-plus" size={22} color={colors.surface} style={styles.icon} />
           <Text style={[styles.actionText, { color: colors.surface }]}>Ajouter une prestation</Text>
@@ -48,14 +48,14 @@ const QuickActionsGrid: React.FC<QuickActionsGridProps> = ({ colors, styles, onA
       </TouchableOpacity>
     </View>
     <View style={styles.quickActionsRow}>
-      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.info || '#1976D2' }]} onPress={onAddDevis}> 
+      <TouchableOpacity style={[styles.actionBtn, { backgroundColor: colors.primary }]} onPress={onAddDevis}> 
         <View style={styles.centerContent}>
           <MaterialCommunityIcons name="file-document-edit" size={24} color={colors.surface} style={styles.icon} />
           <Text style={[styles.actionText, { color: colors.surface }]}>Mes devis</Text>
         </View>
       </TouchableOpacity>
       <TouchableOpacity
-        style={[styles.actionBtn, { backgroundColor: colors.warning || '#FFA726' }]}
+        style={[styles.actionBtn, { backgroundColor: colors.primary }]}
         onPress={onAddFacture}
         disabled={!onAddFacture}
       >

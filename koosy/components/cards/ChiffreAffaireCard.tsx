@@ -20,17 +20,17 @@ const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({ caMois, caGloba
       </View>
       <View style={styles.valuesGrid}>
         <View style={styles.rowGrid}>
-          <View style={[styles.valueBoxGrid, { backgroundColor: colors.success, borderColor: colors.success }]}> 
+          <View style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]}> 
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mois en cours</Text>
             <Text style={[styles.valueGrid, { color: colors.surface }]}>{caMois.toFixed(2)} €</Text>
           </View>
-          <View style={[styles.valueBoxGrid, { backgroundColor: colors.info, borderColor: colors.info }]}> 
+          <View style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]}> 
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Année en cours</Text>
             <Text style={[styles.valueGrid, { color: colors.surface }]}>{caAnnee.toFixed(2)} €</Text>
           </View>
         </View>
         <View style={styles.rowGrid}>
-          <View style={[styles.valueBoxGrid, { backgroundColor: '#FFA07A', borderColor: '#FFA07A' }]}> 
+          <View style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]}> 
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mois précédent</Text>
             <Text style={[styles.valueGrid, { color: colors.surface }]}>{caMoisN1.toFixed(2)} €</Text>
           </View>

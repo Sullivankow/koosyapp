@@ -16,27 +16,27 @@ interface SummaryCountersProps {
 const SummaryCounters: React.FC<SummaryCountersProps> = ({ biensCount, reservationsCount, tacheCount, prestationsTerminees, colors, styles }) => (
   <View style={styles.summaryGrid}>
     <View style={styles.summaryRow}>
-      <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}> 
-        <FontAwesome5 name="building" size={20} color={colors.primary} style={{ marginBottom: 2 }} />
-        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Biens</Text>
-        <Text style={[styles.summaryValue, { color: colors.primary }]}>{biensCount}</Text>
+      <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.primary }]}> 
+        <FontAwesome5 name="building" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+        <Text style={[styles.summaryLabel, { color: colors.surface }]}>Biens</Text>
+        <Text style={[styles.summaryValue, { color: colors.surface }]}>{biensCount}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}> 
-        <FontAwesome5 name="calendar-check" size={20} color={colors.primary} style={{ marginBottom: 2 }} />
-        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Réserv.</Text>
-        <Text style={[styles.summaryValue, { color: colors.primary }]}>{reservationsCount}</Text>
+      <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.primary }]}> 
+        <FontAwesome5 name="calendar-check" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+        <Text style={[styles.summaryLabel, { color: colors.surface }]}>Réserv.</Text>
+        <Text style={[styles.summaryValue, { color: colors.surface }]}>{reservationsCount}</Text>
       </TouchableOpacity>
     </View>
     <View style={styles.summaryRow}>
-      <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}> 
-        <MaterialCommunityIcons name="alert-circle" size={20} color={colors.error} style={{ marginBottom: 2 }} />
-        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Tâches à faire</Text>
-        <Text style={[styles.summaryValue, { color: colors.error }]}>{tacheCount}</Text>
+      <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.primary }]}> 
+        <MaterialCommunityIcons name="alert-circle" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+        <Text style={[styles.summaryLabel, { color: colors.surface }]}>Tâches à faire</Text>
+        <Text style={[styles.summaryValue, { color: colors.surface }]}>{tacheCount}</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.surface }]}> 
-        <MaterialCommunityIcons name="check-decagram" size={20} color={colors.success || '#43A047'} style={{ marginBottom: 2 }} />
-        <Text style={[styles.summaryLabel, { color: colors.textSecondary }]}>Prest. finies</Text>
-        <Text style={[styles.summaryValue, { color: colors.success || '#43A047'}]}>{prestationsTerminees}</Text>
+      <TouchableOpacity style={[styles.summaryBox, { backgroundColor: colors.primary }]}> 
+        <MaterialCommunityIcons name="check-decagram" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+        <Text style={[styles.summaryLabel, { color: colors.surface }]}>Prest. finies</Text>
+        <Text style={[styles.summaryValue, { color: colors.surface }]}>{prestationsTerminees}</Text>
       </TouchableOpacity>
     </View>
   </View>

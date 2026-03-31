@@ -28,6 +28,13 @@ export default function ListeDevisScreen() {
 	// Hook centralisant la récupération des devis, le token PDF et les callbacks de prévisualisation / suppression.
 	// On passe lastDevis pour forcer le rafraîchissement après création.
 	const { devis, pdfToken, previewId, setPreviewId, handleDeleteDevis, handlePreviewDevis } = useDevisManager(lastDevis);
+
+	// Adapter la fonction pour accepter number | undefined
+	const handleDeleteDevisSafe = (id?: number) => {
+		if (id !== undefined) {
+			handleDeleteDevis(id);
+		}
+	};
     // Couleurs du thème
 	const { colors } = useTheme();
 
@@ -87,7 +94,7 @@ export default function ListeDevisScreen() {
 			</View>
 
 			{/* Liste des devis (extrait dans un composant) */}
-			<DevisList devis={sortedDevis} colors={colors} handlePreviewDevis={handlePreviewDevis} handleDeleteDevis={handleDeleteDevis} />
+            <DevisList devis={sortedDevis} colors={colors} handlePreviewDevis={handlePreviewDevis} handleDeleteDevis={handleDeleteDevisSafe} />
 
 			{/* PlusButton supprimé, remplacé par HeaderWithAddButton */}
 

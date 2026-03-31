@@ -11,7 +11,7 @@ interface UpcomingEventsProps {
 }
 
 const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, loading, colors, styles }) => (
-  <View style={[styles.eventBox, { backgroundColor: colors.accent, alignItems: 'flex-start' }]}> 
+  <View style={[styles.eventBox, { backgroundColor: colors.primary, alignItems: 'flex-start' }]}> 
     <View style={{ marginRight: 8, paddingTop: 2 }}>
       <MaterialCommunityIcons name="calendar" size={20} color={colors.text} />
     </View>

@@ -25,8 +25,8 @@ export default function NotificationBell({ size = 28, color = '#000', style }: P
 	};
 
 	return (
-		<TouchableOpacity onPress={onPress} style={[styles.wrapper, style]}>
-			<MaterialCommunityIcons name="bell-outline" size={size} color={color} />
+		<TouchableOpacity onPress={onPress} style={[styles.wrapper, { backgroundColor: color }, style]}>
+			<MaterialCommunityIcons name="bell-outline" size={size} color={'#fff'} />
 			{unread > 0 && (
 				<View style={styles.badge}>
 					<Text style={styles.badgeText}>{unread > 99 ? '99+' : unread}</Text>

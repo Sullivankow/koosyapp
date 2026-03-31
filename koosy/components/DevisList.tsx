@@ -58,15 +58,15 @@ export const DevisList = memo(function DevisList({ devis, colors, handlePreviewD
         style={[
           styles.devisItem,
           {
-            backgroundColor: colors.surface,
-            borderBottomColor: colors.border,
+            backgroundColor: colors.primary,
+            borderBottomColor: colors.primary,
           },
         ]}
       >
         <View style={styles.devisContent}>
-          <Text style={[styles.devisTitle, { color: colors.primary }]}>{displayTitle}</Text>
-          <Text style={[styles.devisDate, { color: colors.textSecondary }]}>Date validité : {displayDate}</Text>
-          <Text style={[styles.devisMontant, { color: colors.text }]}>
+          <Text style={[styles.devisTitle, { color: colors.surface }]}>{displayTitle}</Text>
+          <Text style={[styles.devisDate, { color: colors.surface }]}>Date validité : {displayDate}</Text>
+          <Text style={[styles.devisMontant, { color: colors.surface }]}>
             Montant TTC : {montantTTC} €
           </Text>
         </View>
@@ -77,7 +77,7 @@ export const DevisList = memo(function DevisList({ devis, colors, handlePreviewD
             onPress={() => handlePreviewDevis(item)}
             style={styles.actionButton}
           >
-            <Ionicons name="eye-outline" size={24} color={colors.primary} />
+            <Ionicons name="eye-outline" size={24} color={colors.surface} />
           </TouchableOpacity>
 
           {/* Bouton pour demander la suppression du devis */}
