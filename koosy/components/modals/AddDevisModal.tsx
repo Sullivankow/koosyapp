@@ -138,15 +138,21 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 		return value;
 	}, []);
 
-	// Gère les différentes saisies acceptées pour la date de validité
+	// Formate la date automatiquement avec des / lors de la saisie
+	const formatDateInput = (value: string) => {
+		// On enlève tout sauf les chiffres
+		const cleaned = value.replace(/\D/g, '');
+		let formatted = '';
+		if (cleaned.length > 0) formatted = cleaned.slice(0, 2);
+		if (cleaned.length > 2) formatted += '/' + cleaned.slice(2, 4);
+		if (cleaned.length > 4) formatted += '/' + cleaned.slice(4, 8);
+		return formatted;
+	};
+
+	// Gère la saisie de la date de validité avec formatage automatique
 	const handleDateChange = (val: string) => {
-		if (/^\d{2}\/\d{2}\/\d{4}$/.test(val)) {
-			setDateValidite(val);
-		} else if (/^\d{4}-\d{2}-\d{2}$/.test(val)) {
-			setDateValidite(dayjs(val).format('DD/MM/YYYY'));
-		} else {
-			setDateValidite(val);
-		}
+		const formatted = formatDateInput(val);
+		setDateValidite(formatted);
 	};
 
 	// Soumission du formulaire : validation des champs, construction du payload et appel du callback parent

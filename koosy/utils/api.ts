@@ -84,7 +84,14 @@ export async function getTachesAFaireTotal(): Promise<{ total: number }> {
 
 // Récupérer la liste des biens de l'utilisateur connecté
 export async function getBiens(): Promise<Bien[]> {
-  return apiFetch('/biens');
+  const biens = await apiFetch('/biens');
+  // On mappe proprietaire -> proprio si besoin
+  return (biens || []).map((bien: any) => {
+    if (bien.proprietaire && !bien.proprio) {
+      return { ...bien, proprio: bien.proprietaire };
+    }
+    return bien;
+  });
 }
 
 // Récupère un bien par son id

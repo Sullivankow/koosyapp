@@ -39,22 +39,9 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
 		pieces: bien.pieces ? String(bien.pieces) : '',
 		equipements: Array.isArray(bien.equipements) ? bien.equipements.join(', ') : (bien.equipements || ''),
 	});
-	const [selectedProprioId, setSelectedProprioId] = useState<number | undefined>(
-		bien.proprio?.id !== undefined && bien.proprio?.id !== null ? Number(bien.proprio.id) : undefined
-	);
-	const [proprietaires, setProprietaires] = useState<any[]>([]);
-	const [loadingProprios, setLoadingProprios] = useState(false);
-	const [showProprioModal, setShowProprioModal] = useState(false);
+	// Suppression de la sélection du propriétaire en édition
 
-	useEffect(() => {
-		if (isEditing) {
-			setLoadingProprios(true);
-			getProprietaires()
-				.then((data) => setProprietaires(data || []))
-				.catch(() => setProprietaires([]))
-				.finally(() => setLoadingProprios(false));
-		}
-	}, [isEditing]);
+	// Suppression de la récupération des propriétaires en édition
 
 	const handleChange = (field: keyof typeof editValues, value: string) => {
 		setEditValues(prev => ({ ...prev, [field]: value }));
@@ -71,15 +58,11 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
 				superficie: Number(editValues.superficie),
 				pieces: Number(editValues.pieces),
 				equipements: editValues.equipements.split(',').map((e: string) => e.trim()).filter(Boolean),
-				proprietaire: selectedProprioId,
 			};
 			if (bien.statut) payload.statut = bien.statut;
 			if (bien.lat) payload.lat = bien.lat;
 			if (bien.lng) payload.lng = bien.lng;
 			onEdit({ id: bien.id, ...payload });
-			// Mise à jour locale du proprio pour affichage immédiat
-			const newProprio = selectedProprioId ? (proprietaires.find(p => p.id === selectedProprioId) || null) : null;
-			setLocalProprio(newProprio);
 			setIsEditing(false);
 		} else {
 			setIsEditing(true);
@@ -95,7 +78,6 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
 			pieces: bien.pieces ? String(bien.pieces) : '',
 			equipements: Array.isArray(bien.equipements) ? bien.equipements.join(', ') : (bien.equipements || ''),
 		});
-		setSelectedProprioId(bien.proprio?.id !== undefined && bien.proprio?.id !== null ? Number(bien.proprio.id) : undefined);
 		setIsEditing(false);
 	};
 
@@ -201,68 +183,7 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
 			{/* Propriétaire */}
 			<View style={{ marginTop: 8 }}>
 				<Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Propriétaire</Text>
-				{isEditing ? (
-					loadingProprios ? (
-						<ActivityIndicator color={colors.primary} />
-					) : (
-						<>
-							<TouchableOpacity
-								style={{
-									paddingVertical: 12,
-									paddingHorizontal: 16,
-									borderWidth: 1,
-									borderColor: colors.primary,
-									borderRadius: 10,
-									backgroundColor: colors.surface,
-									width: '100%',
-									marginBottom: 6,
-								}}
-								onPress={() => setShowProprioModal(true)}
-							>
-								<Text style={{ color: colors.text }}>
-									{selectedProprioId
-										? (proprietaires.find(p => p.id === selectedProprioId)?.nom || 'Sélectionner un propriétaire')
-										: 'Sélectionner un propriétaire'}
-								</Text>
-							</TouchableOpacity>
-							<Modal visible={showProprioModal} transparent animationType="fade">
-								<TouchableOpacity style={{ flex: 1, backgroundColor: 'rgba(0,0,0,0.3)' }} activeOpacity={1} onPress={() => setShowProprioModal(false)}>
-									<View style={{
-										position: 'absolute',
-										top: '30%',
-										left: '5%',
-										width: '90%',
-										backgroundColor: colors.surface,
-										borderRadius: 12,
-										padding: 12,
-										elevation: 8,
-										shadowColor: '#000',
-									}}>
-										<ScrollView style={{ maxHeight: 300 }}>
-											{proprietaires.map((item) => (
-												<TouchableOpacity
-													key={item.id}
-													style={{ paddingVertical: 12, borderBottomWidth: 1, borderColor: colors.primary }}
-													onPress={() => {
-														setSelectedProprioId(Number(item.id));
-														setShowProprioModal(false);
-													}}
-												>
-													<Text style={{ color: colors.text, fontSize: 16 }}>{item.nom}{item.prenom ? ' ' + item.prenom : ''}</Text>
-												</TouchableOpacity>
-											))}
-											<TouchableOpacity onPress={() => setShowProprioModal(false)} style={{ padding: 12, alignItems: 'center' }}>
-												<Text style={{ color: colors.error }}>Annuler</Text>
-											</TouchableOpacity>
-										</ScrollView>
-									</View>
-								</TouchableOpacity>
-							</Modal>
-						</>
-					)
-				) : (
-					<ProprioBox proprio={localProprio} colors={colors} styles={styles} />
-				)}
+				<ProprioBox proprio={localProprio} colors={colors} styles={styles} />
 			</View>
 			{/* Réservations */}
 			<View style={styles.sectionRow}>
