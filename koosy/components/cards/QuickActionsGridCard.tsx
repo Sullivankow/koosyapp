@@ -25,35 +25,35 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.primary, shadowColor: colors.shadow }]}> 
       <View style={styles.headerRow}>
-        <MaterialCommunityIcons name="lightning-bolt" size={24} color={colors.primary} style={{ marginRight: 8 }} />
+        <MaterialCommunityIcons name="lightning-bolt" size={20} color={colors.primary} style={{ marginRight: 6 }} />
         <Text style={[styles.title, { color: colors.primary }]}>Actions rapides</Text>
       </View>
       <View style={styles.valuesGrid}>
         <View style={styles.rowGrid}>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onAddBien}>
-            <FontAwesome5 name="building" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+            <FontAwesome5 name="building" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Ajouter un bien</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onAddTache}>
-            <MaterialCommunityIcons name="playlist-plus" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+            <MaterialCommunityIcons name="playlist-plus" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes tâches</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToDevis}>
-            <MaterialCommunityIcons name="file-document-edit" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+            <MaterialCommunityIcons name="file-document-edit" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes devis</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.rowGrid}>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onAddReservation}>
-            <MaterialCommunityIcons name="calendar-plus" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+            <MaterialCommunityIcons name="calendar-plus" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Ajouter une résa</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onAddPrestation}>
-            <FontAwesome5 name="user-plus" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
-            <Text style={[styles.labelGrid, { color: colors.surface }]}>Ajouter une prestation</Text>
+            <FontAwesome5 name="user-plus" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Prestations</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToFacture}>
-            <MaterialCommunityIcons name="file-document-outline" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+            <MaterialCommunityIcons name="file-document-outline" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes factures</Text>
           </TouchableOpacity>
         </View>
@@ -93,22 +93,22 @@ const styles = StyleSheet.create({
   valueBoxGrid: {
     flex: 1,
     alignItems: 'center',
-    borderRadius: 14,
-    borderWidth: 1.5,
-    paddingVertical: 18,
-    paddingHorizontal: 12,
-    marginHorizontal: 4,
-    shadowOpacity: 0.10,
-    shadowRadius: 4,
-    elevation: 2,
-    minWidth: 120,
-    maxWidth: 260,
+    borderRadius: 12,
+    borderWidth: 1.2,
+    paddingVertical: 8,
+    paddingHorizontal: 6,
+    marginHorizontal: 2,
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 1,
+    minWidth: 80,
+    maxWidth: 120,
   },
   labelGrid: {
-    fontSize: 16,
-    fontWeight: '700',
-    marginBottom: 6,
-    letterSpacing: 0.2,
+    fontSize: 13,
+    fontWeight: '600',
+    marginBottom: 3,
+    letterSpacing: 0.1,
     textAlign: 'center',
   },
   title: {

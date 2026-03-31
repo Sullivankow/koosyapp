@@ -96,3 +96,54 @@ export const DarkColors = {
     disabled: '#6E7B8B', // gris moyen
     shadow: 'rgba(0,0,0,0.38)',
 };
+
+// Thème bleu pastel doux
+export const PastelBluePalette = {
+    primary: '#5C6BC0', // bleu pastel
+    secondary: '#B3E5FC', // bleu clair
+    background: '#E3F2FD', // bleu très pâle
+    surface: '#FFFFFF',
+    accent: '#64B5F6', // bleu accent
+    text: '#222B45',
+    textSecondary: '#6E7B8B',
+    border: '#B3E5FC',
+    error: '#E53935',
+    success: '#43A047',
+    info: '#1976D2',
+    disabled: '#B0BEC5',
+    shadow: 'rgba(0,0,0,0.07)',
+};
+
+// Thème jaune solaire
+export const SunnyYellowPalette = {
+    primary: '#FFD600', // jaune solaire
+    secondary: '#FFF9C4', // jaune pâle
+    background: '#FFFDE7', // jaune très clair
+    surface: '#FFFFFF',
+    accent: '#FFE082', // jaune accent
+    text: '#222B45',
+    textSecondary: '#6E7B8B',
+    border: '#FFF9C4',
+    error: '#E53935',
+    success: '#43A047',
+    info: '#1976D2',
+    disabled: '#B0BEC5',
+    shadow: 'rgba(0,0,0,0.07)',
+};
+
+// Thème gris urbain moderne
+export const UrbanGreyPalette = {
+    primary: '#607D8B', // gris urbain
+    secondary: '#CFD8DC', // gris clair
+    background: '#F5F7FA', // gris très pâle
+    surface: '#FFFFFF',
+    accent: '#90A4AE', // gris accent
+    text: '#222B45',
+    textSecondary: '#6E7B8B',
+    border: '#CFD8DC',
+    error: '#E53935',
+    success: '#43A047',
+    info: '#1976D2',
+    disabled: '#B0BEC5',
+    shadow: 'rgba(0,0,0,0.07)',
+};

@@ -28,6 +28,22 @@ const palettes = [
 		name: 'Orange',
 		colors: ['#FF9800', '#FFF8E1', '#FFB74D'],
 	},
+	// Nouveaux thèmes
+	{
+		key: 'pastelblue',
+		name: 'Bleu Pastel',
+		colors: ['#5C6BC0', '#E3F2FD', '#64B5F6'],
+	},
+	{
+		key: 'sunnyyellow',
+		name: 'Jaune Solaire',
+		colors: ['#FFD600', '#FFFDE7', '#FFE082'],
+	},
+	{
+		key: 'urbangrey',
+		name: 'Gris Urbain',
+		colors: ['#607D8B', '#F5F7FA', '#90A4AE'],
+	},
 ];
 
 const ThemeScreen = () => {
