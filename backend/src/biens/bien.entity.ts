@@ -13,7 +13,7 @@ export class Bien {
 
   @PrimaryGeneratedColumn()
   id: number;
-  @ManyToOne(() => Proprietaire, proprietaire => proprietaire.biens, { nullable: true, onDelete: 'CASCADE' })
+  @ManyToOne(() => Proprietaire, proprietaire => proprietaire.biens, { nullable: true, onDelete: 'SET NULL' })
   proprietaire: Proprietaire;
   @Column()
   nom: string;
