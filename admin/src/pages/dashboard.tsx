@@ -85,6 +85,13 @@ const Dashboard: React.FC = () => {
               <p className="text-[11px] text-[#B0BEC5] mt-1">Nombre total d’utilisateurs Koosy</p>
             </div>
             <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
+              <p className="text-xs uppercase text-[#6E7B8B] mb-1">Propriétaires</p>
+              <p className="text-2xl font-semibold text-[#222B45]">
+                {formatNumber(stats?.proprietairesTotal)}
+              </p>
+              <p className="text-[11px] text-[#B0BEC5] mt-1">Nombre total de propriétaires</p>
+            </div>
+            <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
               <p className="text-xs uppercase text-[#6E7B8B] mb-1">Biens</p>
               <p className="text-2xl font-semibold text-[#222B45]">
                 {formatNumber(stats?.biensTotal)}

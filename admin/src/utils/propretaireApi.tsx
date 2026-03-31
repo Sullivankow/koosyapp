@@ -1,7 +1,7 @@
 
 
 
-import { API_BASE_URL, buildHeaders, getJson } from './api';
+import { getJson } from './api';
 import type { BackendProprietaire } from '../models/models';
 
 // Liste complète des propriétaires
