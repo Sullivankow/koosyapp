@@ -184,11 +184,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
 
                                 {/* Actions principales en grille 2x2 */}
                                 <QuickActionsGridCard
-                                        onAddBien={() => setAddBienModalVisible(true)}
-                                        onAddTache={() => navigation && navigation.navigate('TachesScreen')}
-                                        onAddReservation={() => setAddReservationModalVisible(true)}
-                                        onAddPrestation={() => setAddPrestationModalVisible(true)}
-                />
+                                    onAddBien={() => setAddBienModalVisible(true)}
+                                    onAddTache={() => navigation && navigation.navigate('TachesScreen')}
+                                    onAddReservation={() => setAddReservationModalVisible(true)}
+                                    onAddPrestation={() => setAddPrestationModalVisible(true)}
+                                    onGoToDevis={handleGoToListeDevis}
+                                    onGoToFacture={handleGoToListeFacture}
+                        />
             </ScrollView>
             {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}
         {/* Modal d'ajout de bien */}

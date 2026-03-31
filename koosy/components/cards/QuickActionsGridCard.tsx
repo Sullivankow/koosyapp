@@ -3,14 +3,24 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 
+
 interface QuickActionsGridCardProps {
   onAddBien: () => void;
   onAddTache: () => void;
   onAddReservation: () => void;
   onAddPrestation: () => void;
+  onGoToDevis: () => void;
+  onGoToFacture: () => void;
 }
 
-const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({ onAddBien, onAddTache, onAddReservation, onAddPrestation }) => {
+const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
+  onAddBien,
+  onAddTache,
+  onAddReservation,
+  onAddPrestation,
+  onGoToDevis,
+  onGoToFacture,
+}) => {
   const { colors } = useTheme();
   return (
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.primary, shadowColor: colors.shadow }]}> 
@@ -28,6 +38,10 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({ onAddBien, 
             <MaterialCommunityIcons name="playlist-plus" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes tâches</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToDevis}>
+            <MaterialCommunityIcons name="file-document-edit" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes devis</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.rowGrid}>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onAddReservation}>
@@ -37,6 +51,10 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({ onAddBien, 
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onAddPrestation}>
             <FontAwesome5 name="user-plus" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Ajouter une prestation</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToFacture}>
+            <MaterialCommunityIcons name="file-document-outline" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes factures</Text>
           </TouchableOpacity>
         </View>
       </View>
