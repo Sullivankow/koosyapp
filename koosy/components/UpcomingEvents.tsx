@@ -11,15 +11,15 @@ interface UpcomingEventsProps {
 }
 
 const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, loading, colors, styles }) => (
-  <View style={[styles.eventBox, { backgroundColor: colors.primary, alignItems: 'flex-start' }]}> 
+  <View style={[styles.eventBox, { backgroundColor: colors.background, alignItems: 'flex-start', borderWidth: 1.5, borderColor: colors.primary }]}> 
     <View style={{ marginRight: 8, paddingTop: 2 }}>
-      <MaterialCommunityIcons name="calendar" size={20} color={colors.text} />
+      <MaterialCommunityIcons name="calendar" size={20} color={colors.primary} />
     </View>
     <View style={{ flex: 1 }}>
-      <Text style={[styles.eventText, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">Prochains événements :</Text>
+      <Text style={[styles.eventText, { color: colors.primary }]} numberOfLines={1} ellipsizeMode="tail">Prochains événements :</Text>
       <View style={{ marginTop: 6 }}>
         {loading ? (
-          <Text style={{ color: colors.text }}>Chargement...</Text>
+          <Text style={{ color: colors.primary }}>Chargement...</Text>
         ) : events && events.length > 0 ? (
           <View>
             <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled={true}>
@@ -44,15 +44,15 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, loading, colors
 
                 return (
                   <View key={`ev-${idx}`} style={styles.eventRow}>
-                    <Text style={[styles.eventRowTitle, { color: colors.text }]} numberOfLines={1} ellipsizeMode="tail">{humanType} · {ev.bien?.nom ?? ev.bienNom ?? 'Bien inconnu'}</Text>
-                    <Text style={[styles.eventRowSubtitle, { color: colors.textSecondary }]} numberOfLines={1} ellipsizeMode="tail">{locataireName}{dateStr ? ` — ${dateStr}` : ''}</Text>
+                    <Text style={[styles.eventRowTitle, { color: colors.primary }]} numberOfLines={1} ellipsizeMode="tail">{humanType} · {ev.bien?.nom ?? ev.bienNom ?? 'Bien inconnu'}</Text>
+                    <Text style={[styles.eventRowSubtitle, { color: colors.primary, opacity: 0.7 }]} numberOfLines={1} ellipsizeMode="tail">{locataireName}{dateStr ? ` — ${dateStr}` : ''}</Text>
                   </View>
                 );
               })}
             </ScrollView>
           </View>
         ) : (
-          <Text style={{ color: colors.text }}>Aucun événement prévu</Text>
+          <Text style={{ color: colors.primary }}>Aucun événement prévu</Text>
         )}
       </View>
     </View>

@@ -4,7 +4,7 @@
 // et des actions rapides pour créer un bien, une tâche, une réservation ou une prestation.
 // Les commentaires ci-dessous expliquent le rôle des hooks, handlers et sections principales
 // pour faciliter la maintenance et la relecture du code.
-import QuickActionsGrid from '../../ui/QuickActionsGrid';
+import QuickActionsGridCard from '../../components/cards/QuickActionsGridCard';
 import UpcomingEvents from '../../components/UpcomingEvents';
 import React, { useState, useEffect } from 'react';
 import { useSuccessMessage } from '../../hooks/useSuccessMessage';
@@ -13,7 +13,7 @@ import { clearSession } from '../../utils/session';
 import { useUserInfo } from '../../hooks/useUserInfo';
 import { useTheme } from '../../contexts/ThemeContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import SummaryCounters from '../../ui/SummaryCounters';
+import SummaryGridCard from '../../components/cards/SummaryGridCard';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import NotificationBell from '../../ui/NotificationBell';
 import { getReservationsCount } from '../../utils/api';
@@ -165,36 +165,29 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                     </TouchableOpacity>
                 </View>
 
-                {/* Résumé interactif */}
-                <ChiffreAffaireCard caMois={caMois} caGlobal={caGlobal} caAnnee={caAnnee} caMoisN1={caMoisN1} />
-                <SummaryCounters
-                  biensCount={biensCount}
-                  reservationsCount={reservationsCount}
-                  tacheCount={tacheCount}
-                  prestationsTerminees={prestationsTerminees}
-                  colors={colors}
-                  styles={styles}
-                />
+                                {/* Prochain(s) événement(s) */}
+                                <UpcomingEvents
+                                    events={events}
+                                    loading={eventsLoading}
+                                    colors={colors}
+                                    styles={styles}
+                                />
 
-                {/* Prochain(s) événement(s) */}
-                <UpcomingEvents
-                  events={events}
-                  loading={eventsLoading}
-                  colors={colors}
-                  styles={styles}
-                />
+                                {/* Résumé interactif */}
+                                <ChiffreAffaireCard caMois={caMois} caGlobal={caGlobal} caAnnee={caAnnee} caMoisN1={caMoisN1} />
+                                <SummaryGridCard
+                                        biensCount={biensCount}
+                                        reservationsCount={reservationsCount}
+                                        tacheCount={tacheCount}
+                                        prestationsTerminees={prestationsTerminees}
+                                />
 
-                {/* Actions principales en grille 2x2 */}
-                <QuickActionsGrid
-                    colors={colors}
-                    styles={styles}
-                    onAddBien={() => setAddBienModalVisible(true)}
-                        onAddTache={() => navigation && navigation.navigate('TachesScreen')}
-                    onAddReservation={() => setAddReservationModalVisible(true)}
-                    onAddPrestation={() => setAddPrestationModalVisible(true)}
-                    onAddDevis={handleGoToListeDevis}
-                    onAddFacture={handleGoToListeFacture}
-                    onGoToRepertoireProprietaire={handleGoToRepertoireProprietaire}
+                                {/* Actions principales en grille 2x2 */}
+                                <QuickActionsGridCard
+                                        onAddBien={() => setAddBienModalVisible(true)}
+                                        onAddTache={() => navigation && navigation.navigate('TachesScreen')}
+                                        onAddReservation={() => setAddReservationModalVisible(true)}
+                                        onAddPrestation={() => setAddPrestationModalVisible(true)}
                 />
             </ScrollView>
             {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}
