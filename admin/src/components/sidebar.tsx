@@ -12,7 +12,8 @@ const menuItems = [
 	{ to: '/admin/biens', label: 'Biens' },
 	{ to: '/admin/reservations', label: 'Réservations' },
 	{ to: '/admin/taches', label: 'Tâches' },
- 	{ to: '/admin/prestations', label: 'Prestations' },
+	{ to: '/admin/prestations', label: 'Prestations' },
+	{ to: '/admin/proprietaires', label: 'Propriétaires' },
 ];
 
 // Props de la sidebar

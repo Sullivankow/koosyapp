@@ -31,6 +31,8 @@ export interface BackendProprietaire {
   nom: string;
   prenom: string;
   email: string;
+  adresse: string;
+  telephone: string;
 }
 
 export interface BackendBienImage {

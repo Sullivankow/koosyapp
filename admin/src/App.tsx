@@ -9,6 +9,7 @@ import Notifications from './pages/notifications';
 import Biens from './pages/biens';
 import Reservations from './pages/reservations';
 import Prestations from './pages/prestations';
+import Proprietaires from './pages/proprietaires';
 import Taches from './pages/taches';
 
 // Composant racine de l'application React
@@ -45,6 +46,9 @@ function App() {
 
         {/* Gestion des tâches internes */}
         <Route path="/admin/taches" element={<Taches />} />
+
+        {/* Gestion des propriétaires */}
+        <Route path="/admin/proprietaires" element={<Proprietaires />} />
 
         {/* Redirection par défaut vers la page de login */}
         <Route path="/" element={<Navigate to="/login" replace />} />
