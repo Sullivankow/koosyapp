@@ -50,10 +50,10 @@ const SummaryGridCard: React.FC<SummaryGridCardProps> = ({ biensCount, reservati
 
 const styles = StyleSheet.create({
   card: {
-    padding: 18,
+    padding: 12,
     borderRadius: 16,
     borderWidth: 1.5,
-    marginVertical: 16,
+    marginVertical: 12,
     alignItems: 'center',
     shadowOpacity: 0.12,
     shadowRadius: 8,
@@ -81,29 +81,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 14,
     borderWidth: 1.5,
-    paddingVertical: 18,
-    paddingHorizontal: 12,
-    marginHorizontal: 4,
+    paddingVertical: 10,
+    paddingHorizontal: 8,
+    marginHorizontal: 2,
     shadowOpacity: 0.10,
     shadowRadius: 4,
     elevation: 2,
-    minWidth: 120,
-    maxWidth: 260,
+    minWidth: 90,
+    maxWidth: 180,
   },
   labelGrid: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: '700',
-    marginBottom: 6,
+    marginBottom: 4,
     letterSpacing: 0.2,
   },
   valueGrid: {
-    fontSize: 18,
+    fontSize: 15,
     fontWeight: 'bold',
     letterSpacing: 0.5,
   },
   title: {
     fontWeight: 'bold',
-    fontSize: 20,
+    fontSize: 16,
   },
 });
 

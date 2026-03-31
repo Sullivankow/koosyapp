@@ -50,7 +50,7 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
           </TouchableOpacity>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onAddPrestation}>
             <FontAwesome5 name="user-plus" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
-            <Text style={[styles.labelGrid, { color: colors.surface }]}>Prestations</Text>
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Presta</Text>
           </TouchableOpacity>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToFacture}>
             <MaterialCommunityIcons name="file-document-outline" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
@@ -93,6 +93,7 @@ const styles = StyleSheet.create({
   valueBoxGrid: {
     flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
     borderRadius: 12,
     borderWidth: 1.2,
     paddingVertical: 8,
@@ -110,6 +111,7 @@ const styles = StyleSheet.create({
     marginBottom: 3,
     letterSpacing: 0.1,
     textAlign: 'center',
+    alignSelf: 'center',
   },
   title: {
     fontWeight: 'bold',
