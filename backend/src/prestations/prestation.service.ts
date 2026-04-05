@@ -33,6 +33,10 @@ export class PrestationService {
 		private bienRepo: Repository<Bien>,
 	) {}
 
+	private normalizeStatus(status?: string): string {
+		return (status || '').toLocaleLowerCase('fr-FR');
+	}
+
 	/**
 	 * Crée une prestation. Le montant envoyé est en euros (float) et sera converti
 	 * en centimes pour stockage (integer) afin d'éviter les imprécisions.
@@ -149,6 +153,17 @@ async update(id: number, dto: UpdatePrestationDto) {
   const prestation = await this.prestationRepo.findOne({ where: { id } });
   if (!prestation) throw new NotFoundException('Prestation non trouvée');
 
+	const currentStatus = this.normalizeStatus(prestation.status);
+	const requestedStatus = this.normalizeStatus(dto.status);
+
+	if (
+		dto.status !== undefined &&
+		currentStatus === this.normalizeStatus(PrestationStatus.COMPLETED) &&
+		requestedStatus !== this.normalizeStatus(PrestationStatus.COMPLETED)
+	) {
+		throw new BadRequestException('Une prestation terminée est définitive et ne peut plus repasser à un autre statut.');
+	}
+
   if (dto.bienId) {
     const bien = await this.bienRepo.findOne({ where: { id: dto.bienId } });
     if (!bien) throw new NotFoundException('Bien non trouvé');
@@ -184,6 +199,15 @@ async changeStatus(id: number, status: PrestationStatus) {
 	}
 	const prestation = await this.prestationRepo.findOne({ where: { id } });
 	if (!prestation) throw new NotFoundException('Prestation non trouvée');
+	const currentStatus = this.normalizeStatus(prestation.status);
+	const requestedStatus = this.normalizeStatus(status);
+	const completedStatus = this.normalizeStatus(PrestationStatus.COMPLETED);
+	if (currentStatus === completedStatus && requestedStatus !== completedStatus) {
+		throw new BadRequestException('Une prestation terminée est définitive et ne peut plus repasser à un autre statut.');
+	}
+	if (currentStatus === requestedStatus) {
+		return prestation;
+	}
 	prestation.status = status;
 	return this.prestationRepo.save(prestation);
 }

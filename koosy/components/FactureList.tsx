@@ -85,7 +85,7 @@ export const FactureList = memo(function FactureList({ factures, colors, handleP
 						onPress={() => confirmDeleteFacture(item.id)}
 						style={styles.actionButton}
 					>
-						<MaterialIcons name="delete-outline" size={24} color="#d32f2f" />
+						<MaterialIcons name="delete-outline" size={24} color={colors.surface} />
 					</TouchableOpacity>
 				</View>
 			</View>

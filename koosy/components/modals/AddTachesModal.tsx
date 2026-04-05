@@ -30,6 +30,18 @@ const TACHE_STATUTS = [
 
 type TacheStatutValue = 'à faire' | 'terminée';
 
+const getContrastTextColor = (hexColor: string) => {
+	const sanitized = (hexColor || '').replace('#', '');
+	if (sanitized.length !== 6) return '#FFFFFF';
+
+	const r = parseInt(sanitized.slice(0, 2), 16);
+	const g = parseInt(sanitized.slice(2, 4), 16);
+	const b = parseInt(sanitized.slice(4, 6), 16);
+	const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+
+	return yiq >= 170 ? '#1E242B' : '#FFFFFF';
+};
+
 // Structure d'état pour le formulaire de tâche
 type TacheFormState = {
 	titre: string;
@@ -71,7 +83,12 @@ const normalizeDate = (d: string) => {
 };
 
 const AddTachesModal: React.FC<AddTachesModalProps> = ({ visible, onClose, onSuccess, bienId }) => {
-	const { colors } = useTheme();
+	const { colors, isDarkMode } = useTheme();
+	const activeStatusColor = colors.primary;
+	const activeStatusTextColor = getContrastTextColor(activeStatusColor);
+	const bienPickerBackground = isDarkMode ? colors.surface : '#f9f9ff';
+	const bienOptionBackground = isDarkMode ? colors.background : '#e6e6fa';
+	const bienOptionTextColor = isDarkMode ? colors.text : '#222';
 	const { signalTacheAdded } = useTache();
 
 	const [form, setForm] = useState<TacheFormState>(() => buildInitialForm(bienId));
@@ -180,15 +197,18 @@ const AddTachesModal: React.FC<AddTachesModalProps> = ({ visible, onClose, onSuc
 								{TACHE_STATUTS.map(opt => (
 									<TouchableOpacity
 										key={opt.value}
+										activeOpacity={0.8}
 										style={{
 											padding: 8,
 											borderRadius: 8,
-											backgroundColor: form.statut === opt.value ? colors.primary : '#f5f5f5',
+											backgroundColor: form.statut === opt.value ? activeStatusColor : colors.surface,
 											marginBottom: 4,
+											borderWidth: form.statut === opt.value ? 2 : 1,
+											borderColor: form.statut === opt.value ? activeStatusColor : colors.border,
 										}}
 										onPress={() => updateField('statut', opt.value as TacheStatutValue)}
 									>
-										<Text style={{ color: form.statut === opt.value ? colors.surface : '#222', fontWeight: 'bold' }}>
+										<Text style={{ color: form.statut === opt.value ? activeStatusTextColor : colors.text, fontWeight: 'bold' }}>
 											{opt.label}
 										</Text>
 									</TouchableOpacity>
@@ -201,11 +221,11 @@ const AddTachesModal: React.FC<AddTachesModalProps> = ({ visible, onClose, onSuc
 									borderWidth: 1,
 									borderColor: colors.primary,
 									borderRadius: 10,
-									backgroundColor: '#f9f9ff',
+									backgroundColor: bienPickerBackground,
 									padding: 8,
 								}}
 							>
-								<Text style={{ color: colors.primary, fontWeight: 'bold', marginBottom: 8, fontSize: 16 }}>
+								<Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 8, fontSize: 16 }}>
 									Sélectionner un bien
 								</Text>
 								<ScrollView style={{ maxHeight: 140 }}>
@@ -220,14 +240,14 @@ const AddTachesModal: React.FC<AddTachesModalProps> = ({ visible, onClose, onSuc
 												style={{
 													padding: 10,
 													borderRadius: 8,
-													backgroundColor: form.bienId === bien.id ? colors.primary : '#e6e6fa',
+														backgroundColor: form.bienId === bien.id ? colors.primary : bienOptionBackground,
 													marginBottom: 6,
 													borderWidth: form.bienId === bien.id ? 2 : 0,
 													borderColor: colors.primary,
 												}}
 												onPress={() => updateField('bienId', bien.id)}
 											>
-												<Text style={{ color: form.bienId === bien.id ? colors.surface : '#222', fontWeight: 'bold', fontSize: 15 }}>
+													<Text style={{ color: form.bienId === bien.id ? colors.surface : bienOptionTextColor, fontWeight: 'bold', fontSize: 15 }}>
 													{bien.nom} ({bien.adresse})
 												</Text>
 											</TouchableOpacity>

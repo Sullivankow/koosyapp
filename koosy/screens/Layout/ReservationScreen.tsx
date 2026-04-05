@@ -32,8 +32,19 @@ function formatDateFR(dateStr: string) {
   return d.toLocaleDateString('fr-FR');
 }
 
+const getContrastTextColor = (hexColor: string) => {
+  const sanitized = hexColor.replace('#', '');
+  if (!/^[0-9a-fA-F]{6}$/.test(sanitized)) return '#fff';
+  const r = parseInt(sanitized.slice(0, 2), 16);
+  const g = parseInt(sanitized.slice(2, 4), 16);
+  const b = parseInt(sanitized.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? '#111' : '#fff';
+};
+
 function ReservationScreen() {
   const { colors } = useTheme();
+  const activeStatusTextColor = getContrastTextColor(colors.primary);
   const { signalBienAdded } = useBienCount();
   const { lastReservationAdded } = useReservationRefresh();
   const { lastRefresh } = useGlobalRefresh();
@@ -135,7 +146,7 @@ function ReservationScreen() {
                 }}
                 onPress={() => setTab(s)}
               >
-                <Text style={{ color: tab === s ? '#fff' : colors.text, fontWeight: 'bold' }}>{s.charAt(0).toUpperCase() + s.slice(1)}</Text>
+                <Text style={{ color: tab === s ? activeStatusTextColor : colors.text, fontWeight: 'bold' }}>{s.charAt(0).toUpperCase() + s.slice(1)}</Text>
               </TouchableOpacity>
             ))}
           </View>

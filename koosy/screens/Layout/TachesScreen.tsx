@@ -13,9 +13,20 @@ import styles from './styles/TachesScreen.styles';
 import { useTaches } from '../../hooks/useTaches';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 
+const getContrastTextColor = (hexColor: string) => {
+  const sanitized = hexColor.replace('#', '');
+  if (!/^[0-9a-fA-F]{6}$/.test(sanitized)) return '#fff';
+  const r = parseInt(sanitized.slice(0, 2), 16);
+  const g = parseInt(sanitized.slice(2, 4), 16);
+  const b = parseInt(sanitized.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? '#111' : '#fff';
+};
+
 // Écran principal des tâches
 function TachesScreen() {
   const { colors } = useTheme();
+  const activeStatusTextColor = getContrastTextColor(colors.primary);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedTab, setSelectedTab] = useState<'à faire' | 'terminée'>('à faire');
   const { lastRefresh } = useGlobalRefresh();
@@ -94,6 +105,10 @@ function TachesScreen() {
         <TouchableOpacity
           style={[
             styles.tabBtn,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+            },
             selectedTab === 'à faire' && {
               backgroundColor: colors.primary,
               borderColor: colors.primary,
@@ -104,7 +119,7 @@ function TachesScreen() {
           <Text
             style={[
               styles.tabText,
-              { color: selectedTab === 'à faire' ? '#fff' : colors.text },
+              { color: selectedTab === 'à faire' ? activeStatusTextColor : colors.text },
             ]}
           >
             À faire
@@ -113,6 +128,10 @@ function TachesScreen() {
         <TouchableOpacity
           style={[
             styles.tabBtn,
+            {
+              backgroundColor: colors.surface,
+              borderColor: colors.border,
+            },
             selectedTab === 'terminée' && {
               backgroundColor: colors.primary,
               borderColor: colors.primary,
@@ -123,7 +142,7 @@ function TachesScreen() {
           <Text
             style={[
               styles.tabText,
-              { color: selectedTab === 'terminée' ? '#fff' : colors.text },
+              { color: selectedTab === 'terminée' ? activeStatusTextColor : colors.text },
             ]}
           >
             Terminée

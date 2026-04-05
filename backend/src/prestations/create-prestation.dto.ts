@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNumber, Min, IsOptional, IsString, IsDateString } from 'class-validator';
+import { IsInt, IsNumber, Min, IsOptional, IsString, IsDateString, IsEnum } from 'class-validator';
 import { PrestationStatus } from './prestation.service';
 
 
@@ -66,5 +66,6 @@ export class UpdatePrestationDto {
 // DTO pour le changement de statut
 export class ChangeStatusDto {
   @ApiProperty({ example: PrestationStatus.PENDING, enum: PrestationStatus })
+  @IsEnum(PrestationStatus, { message: 'Statut invalide.' })
   status: PrestationStatus;
 }

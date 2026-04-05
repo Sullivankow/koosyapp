@@ -10,9 +10,17 @@ import { Modal, View, Text, FlatList, TextInput, TouchableOpacity, StyleSheet, K
 import DateTimePicker from '@react-native-community/datetimepicker';
 
 dayjs.locale('fr');
-const statutColor = {
-	'confirmée': '#43A047',
-	'en attente': '#FF7043',
+
+const getContrastTextColor = (hexColor: string) => {
+	const sanitized = (hexColor || '').replace('#', '');
+	if (sanitized.length !== 6) return '#FFFFFF';
+
+	const r = parseInt(sanitized.slice(0, 2), 16);
+	const g = parseInt(sanitized.slice(2, 4), 16);
+	const b = parseInt(sanitized.slice(4, 6), 16);
+	const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+
+	return yiq >= 170 ? '#1E242B' : '#FFFFFF';
 };
 
 // Structure d'état représentant une réservation complète
@@ -199,10 +207,18 @@ export default function AddReservationsModal({
 									{(['confirmée', 'en attente'] as const).map(s => (
 										<TouchableOpacity
 											key={s}
-											style={[styles.chip, form.statut === s && { backgroundColor: statutColor[s] }]}
+											activeOpacity={0.8}
+											style={[
+												styles.chip,
+												{
+													backgroundColor: form.statut === s ? colors.primary : colors.surface,
+													borderColor: form.statut === s ? colors.primary : colors.border,
+													borderWidth: form.statut === s ? 2 : 1,
+												},
+											]}
 											onPress={() => updateField('statut', s)}
 										>
-											<Text style={{ color: form.statut === s ? '#fff' : colors.text }}>{s}</Text>
+											<Text style={{ color: form.statut === s ? getContrastTextColor(colors.primary) : colors.text, fontWeight: '600' }}>{s}</Text>
 										</TouchableOpacity>
 									))}
 								</View>
@@ -227,7 +243,7 @@ const styles = StyleSheet.create({
 	modalBox: { width: '90%', borderRadius: 18, padding: 18 },
 	modalTitle: { fontSize: 20, fontWeight: 'bold', marginBottom: 12 },
 	row: { flexDirection: 'row', gap: 12, marginTop: 10 },
-	chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, marginRight: 8, marginBottom: 8, borderWidth: 1, borderColor: '#eee' },
+	chip: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 16, marginRight: 8, marginBottom: 8 },
 	input: { borderWidth: 1, borderRadius: 10, padding: 10, marginBottom: 10, fontSize: 15, minWidth: 120 },
 	modalActions: { flexDirection: 'row', justifyContent: 'flex-end', gap: 12, marginTop: 18 },
 	modalBtn: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 10 },

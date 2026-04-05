@@ -24,6 +24,18 @@ const PRESTATION_STATUTS = [
 
 export type PrestationStatus = 'En attente' | 'Confirmée' | 'Terminée';
 
+const getContrastTextColor = (hexColor: string) => {
+  const sanitized = (hexColor || '').replace('#', '');
+  if (sanitized.length !== 6) return '#FFFFFF';
+
+  const r = parseInt(sanitized.slice(0, 2), 16);
+  const g = parseInt(sanitized.slice(2, 4), 16);
+  const b = parseInt(sanitized.slice(4, 6), 16);
+  const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+
+  return yiq >= 170 ? '#1E242B' : '#FFFFFF';
+};
+
 type PrestationFormState = {
 	bienId: number | '';
 	amount: string;
@@ -41,7 +53,12 @@ const buildInitialForm = (bienId?: number): PrestationFormState => ({
 });
 
 const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClose, onSuccess, bienId }) => {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
+  const activeStatusColor = colors.primary;
+  const activeStatusTextColor = getContrastTextColor(activeStatusColor);
+  const bienPickerBackground = isDarkMode ? colors.surface : '#f9f9ff';
+  const bienOptionBackground = isDarkMode ? colors.background : '#e6e6fa';
+  const bienOptionTextColor = isDarkMode ? colors.text : '#222';
   const { refreshPrestationsTerminees } = usePrestationsCount();
   const [form, setForm] = useState<PrestationFormState>(() => buildInitialForm(bienId));
   const [loading, setLoading] = useState(false);
@@ -114,8 +131,8 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
           <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', alignItems: 'center' }}>
             <View style={[styles.modalContentAdd, { backgroundColor: colors.surface }]}> 
               <Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12, color: colors.primary }}>Ajouter une prestation</Text>
-              <View style={{ width: SCREEN_WIDTH * 0.8, marginBottom: 10, borderWidth: 1, borderColor: colors.primary, borderRadius: 10, backgroundColor: '#f9f9ff', padding: 8 }}>
-                <Text style={{ color: colors.primary, fontWeight: 'bold', marginBottom: 8, fontSize: 16 }}>Sélectionner un bien</Text>
+              <View style={{ width: SCREEN_WIDTH * 0.8, marginBottom: 10, borderWidth: 1, borderColor: colors.primary, borderRadius: 10, backgroundColor: bienPickerBackground, padding: 8 }}>
+                <Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 8, fontSize: 16 }}>Sélectionner un bien</Text>
                 <ScrollView style={{ maxHeight: 140 }}>
                   {biens.length === 0 ? (
                     <Text style={{ color: colors.error, textAlign: 'center', marginVertical: 12 }}>Aucun bien disponible</Text>
@@ -123,10 +140,10 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
                     biens.map(bien => (
                       <TouchableOpacity
                         key={bien.id}
-                        style={{ padding: 10, borderRadius: 8, backgroundColor: form.bienId === bien.id ? colors.primary : '#e6e6fa', marginBottom: 6, borderWidth: form.bienId === bien.id ? 2 : 0, borderColor: colors.primary }}
+                        style={{ padding: 10, borderRadius: 8, backgroundColor: form.bienId === bien.id ? colors.primary : bienOptionBackground, marginBottom: 6, borderWidth: form.bienId === bien.id ? 2 : 0, borderColor: colors.primary }}
                         onPress={() => updateField('bienId', bien.id)}
                       >
-                        <Text style={{ color: form.bienId === bien.id ? colors.surface : '#222', fontWeight: 'bold', fontSize: 15 }}>{bien.nom} ({bien.adresse})</Text>
+                        <Text style={{ color: form.bienId === bien.id ? colors.surface : bienOptionTextColor, fontWeight: 'bold', fontSize: 15 }}>{bien.nom} ({bien.adresse})</Text>
                       </TouchableOpacity>
                     ))
                   )}
@@ -141,10 +158,18 @@ const AddPrestationModal: React.FC<AddPrestationModalProps> = ({ visible, onClos
                 {PRESTATION_STATUTS.map(opt => (
                   <TouchableOpacity
                     key={opt.value}
-                    style={{ padding: 8, borderRadius: 8, backgroundColor: form.status === opt.value ? colors.primary : '#f5f5f5', marginBottom: 4 }}
+                    activeOpacity={0.8}
+                    style={{
+                      padding: 8,
+                      borderRadius: 8,
+                      backgroundColor: form.status === opt.value ? activeStatusColor : colors.surface,
+                      marginBottom: 4,
+                      borderWidth: form.status === opt.value ? 2 : 1,
+                      borderColor: form.status === opt.value ? activeStatusColor : colors.border,
+                    }}
                     onPress={() => updateField('status', opt.value as PrestationStatus)}
                   >
-                    <Text style={{ color: form.status === opt.value ? colors.surface : '#222', fontWeight: 'bold' }}>{opt.label}</Text>
+                    <Text style={{ color: form.status === opt.value ? activeStatusTextColor : colors.text, fontWeight: 'bold' }}>{opt.label}</Text>
                   </TouchableOpacity>
                 ))}
               </View>

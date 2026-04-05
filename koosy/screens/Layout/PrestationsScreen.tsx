@@ -30,17 +30,43 @@ const TABS = [
   { key: 'terminée', label: 'Terminée' },
 ];
 
+const getContrastTextColor = (hexColor: string) => {
+	const sanitized = hexColor.replace('#', '');
+	if (!/^[0-9a-fA-F]{6}$/.test(sanitized)) return '#fff';
+	const r = parseInt(sanitized.slice(0, 2), 16);
+	const g = parseInt(sanitized.slice(2, 4), 16);
+	const b = parseInt(sanitized.slice(4, 6), 16);
+	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+	return luminance > 0.6 ? '#111' : '#fff';
+};
+
 
 const PrestationsScreen: React.FC = () => {
 	const { refreshPrestationsTerminees } = usePrestationsCount();
 	const { colors } = useTheme();
 	const statusPillColor = colors.primary;
+	const activeStatusTextColor = getContrastTextColor(statusPillColor);
 	const { signalRefresh } = useChiffreAffaireRefresh(); // Ajout du contexte CA
 	const { lastRefresh } = useGlobalRefresh();
 	const [prestations, setPrestations] = useState<Prestation[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [modalVisible, setModalVisible] = useState(false);
 	const [tab, setTab] = useState<'en attente' | 'confirmée' | 'terminée' | 'annulée'>('en attente');
+
+	const getApiErrorMessage = (error: unknown) => {
+		if (error instanceof Error && error.message) {
+			try {
+				const parsed = JSON.parse(error.message);
+				if (parsed?.message) {
+					return Array.isArray(parsed.message) ? parsed.message.join(' ') : parsed.message;
+				}
+			} catch {
+				return error.message;
+			}
+			return error.message;
+		}
+		return 'Impossible de modifier le statut pour le moment.';
+	};
 
 	// Récupère les prestations depuis l'API et met à jour l'état local.
 	// En cas d'erreur, on vide simplement la liste pour éviter un blocage d'affichage.
@@ -84,7 +110,7 @@ const PrestationsScreen: React.FC = () => {
 							}}
 							onPress={() => setTab(tabObj.key as any)}
 						>
-							<Text style={{ color: tab === tabObj.key ? '#fff' : colors.text, fontWeight: 'bold' }}>{tabObj.label}</Text>
+							<Text style={{ color: tab === tabObj.key ? activeStatusTextColor : colors.text, fontWeight: 'bold' }}>{tabObj.label}</Text>
 						</TouchableOpacity>
 					))}
 				</View>
@@ -125,19 +151,38 @@ const PrestationsScreen: React.FC = () => {
 															<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4, marginBottom: 2 }}>
 																{['en attente', 'confirmée', 'terminée'].map((s) => {
 																	const isActive = p.status === STATUS_CONFIG[s]?.label || p.status === s;
+																	const isAlreadyCompleted = (p.status || '').toLocaleLowerCase('fr-FR') === 'terminée';
+																	const isLockedByCompleted = isAlreadyCompleted && s !== 'terminée';
+																	const handleStatusChange = async () => {
+																		try {
+																			await updatePrestationStatut(p.id, STATUS_CONFIG[s]?.label || s);
+																			await fetchPrestations();
+																			if (refreshPrestationsTerminees) refreshPrestationsTerminees();
+																			signalRefresh();
+																		} catch (error) {
+																			Alert.alert('Impossible de modifier le statut', getApiErrorMessage(error));
+																		}
+																	};
 																	return (
 																		<TouchableOpacity
 																			key={s}
-																			disabled={isActive}
+																			disabled={isActive || isLockedByCompleted}
 																			onPress={async () => {
-																				if (!isActive) {
-																					await updatePrestationStatut(p.id, STATUS_CONFIG[s]?.label || s);
-																					await fetchPrestations();
-																					if (refreshPrestationsTerminees) refreshPrestationsTerminees();
-																					signalRefresh();
+																				if (isActive || isLockedByCompleted) return;
+																				if (s === 'terminée') {
+																					Alert.alert(
+																						'Confirmation',
+																						'Êtes vous sûr de vouloir valider cette prestation ?',
+																						[
+																							{ text: 'Annuler', style: 'cancel' },
+																							{ text: 'Valider', onPress: () => { void handleStatusChange(); } },
+																						]
+																					);
+																					return;
 																				}
+																				await handleStatusChange();
 																			}}
-																			style={{ opacity: isActive ? 1 : 0.5, marginRight: 6 }}
+																			style={{ opacity: isActive || isLockedByCompleted ? 1 : 0.5, marginRight: 6 }}
 																		>
 																			<BadgeStatus
 																				statut={s}

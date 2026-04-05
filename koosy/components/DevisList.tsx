@@ -85,7 +85,7 @@ export const DevisList = memo(function DevisList({ devis, colors, handlePreviewD
             onPress={() => confirmDeleteDevis(item.id)}
             style={styles.actionButton}
           >
-            <MaterialIcons name="delete-outline" size={24} color="#d32f2f" />
+            <MaterialIcons name="delete-outline" size={24} color={colors.surface} />
           </TouchableOpacity>
         </View>
       </View>

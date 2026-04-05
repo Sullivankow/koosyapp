@@ -159,7 +159,7 @@ const ProprietaireListComponent: React.FC<ProprietaireListProps> = ({ data, load
                   onPress={() => onDelete(item.id)}
                   style={styles.actionIconButton}
                 >
-                  <MaterialCommunityIcons name="trash-can-outline" size={26} color={colors.error || '#d32f2f'} />
+                  <MaterialCommunityIcons name="trash-can-outline" size={26} color={colors.primary} />
                 </TouchableOpacity>
               )}
             </View>
