@@ -16,7 +16,7 @@ const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({ caMois, caGloba
     <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.primary, shadowColor: colors.shadow }]}> 
       <View style={styles.headerRow}>
         <MaterialCommunityIcons name="chart-bar" size={28} color={colors.primary} style={{ marginRight: 8 }} />
-        <Text style={[styles.title, { color: colors.primary }]}>Chiffre d'affaires</Text>
+        <Text style={[styles.title, { color: colors.primary }]}>Chiffre d'affaire</Text>
       </View>
       <View style={styles.valuesGrid}>
         <View style={styles.rowGrid}>
