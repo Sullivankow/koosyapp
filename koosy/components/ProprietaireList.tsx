@@ -44,7 +44,7 @@ const ProprietaireListComponent: React.FC<ProprietaireListProps> = ({ data, load
             style={[
               styles.card,
               styles.cardRow,
-              { backgroundColor: colors.surface, borderColor: colors.border },
+              { backgroundColor: colors.surface, borderColor: colors.border, borderLeftColor: colors.primary },
             ]}
           >
             <View style={styles.cardContent}>
@@ -177,6 +177,7 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 10,
     borderWidth: 1,
+    borderLeftWidth: 5,
     padding: 16,
     marginBottom: 16,
     elevation: 2,
