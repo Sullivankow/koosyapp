@@ -82,7 +82,7 @@ export const RedPalette = {
 export const LightColors = BlueGreenPalette;
 
 export const DarkColors = {
-    primary: '#26A69A', // bleu-vert lumineux
+    primary: '#ffffff', // bleu-vert lumineux
     secondary: '#FF8A65', // corail accentué
     background: '#12171E', // bleu nuit profond
     surface: '#1E242B', // gris-bleu foncé

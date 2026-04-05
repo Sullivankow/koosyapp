@@ -16,6 +16,13 @@ export const styles = StyleSheet.create({
 		height: 56,
 		borderRadius: 28,
 		backgroundColor: '#eee',
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	avatarInitials: {
+		fontSize: 20,
+		fontWeight: 'bold',
+		color: '#fff',
 	},
 	welcome: {
 		fontSize: 22,
@@ -23,9 +30,17 @@ export const styles = StyleSheet.create({
 		marginBottom: 2,
 	},
 	subtitle: {
-		fontSize: 16,
-		marginBottom: 20,
+		fontSize: 13,
+		fontWeight: '700',
 		textAlign: 'center',
+	},
+	subtitleBadge: {
+		alignSelf: 'flex-start',
+		paddingHorizontal: 10,
+		paddingVertical: 6,
+		borderRadius: 999,
+		marginTop: 4,
+		marginBottom: 20,
 	},
 	topActions: {
 		flexDirection: 'row',

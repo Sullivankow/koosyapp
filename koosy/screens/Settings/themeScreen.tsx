@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 
-const palettes = [
+const palettes = [// Nouveaux thèmes
 	{
 		key: 'bluegreen',
 		name: 'Bleu-vert',
@@ -28,7 +28,7 @@ const palettes = [
 		name: 'Orange',
 		colors: ['#FF9800', '#FFF8E1', '#FFB74D'],
 	},
-	// Nouveaux thèmes
+	
 	{
 		key: 'pastelblue',
 		name: 'Bleu Pastel',

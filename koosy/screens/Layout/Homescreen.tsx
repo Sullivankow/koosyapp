@@ -8,7 +8,7 @@ import QuickActionsGridCard from '../../components/cards/QuickActionsGridCard';
 import UpcomingEvents from '../../components/UpcomingEvents';
 import React, { useState, useEffect } from 'react';
 import { useSuccessMessage } from '../../hooks/useSuccessMessage';
-import { View, Text, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { clearSession } from '../../utils/session';
 import { useUserInfo } from '../../hooks/useUserInfo';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -46,7 +46,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
     // Theme et couleurs fournis par le contexte `ThemeContext`
     const { colors, isDarkMode, toggleTheme } = useTheme();
     // Infos utilisateur via hook personnalisé
-    const { userName, avatarUrl } = useUserInfo();
+    const { userName } = useUserInfo();
     // Compteur global de biens et signaux de rafraîchissement lorsque des biens sont ajoutés.
     const { biensCount, refreshBiensCount, lastBienAdded, signalBienAdded } = useBienCount();
     // Nombre total de réservations (affiché dans le résumé)
@@ -134,6 +134,17 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
         if (navigation) navigation.navigate('RepertoireProprietaireScreen');
     };
 
+    const userInitials = userName
+        ? userName
+              .trim()
+              .split(/\s+/)
+              .slice(0, 2)
+              .map((part) => part.charAt(0).toUpperCase())
+              .join('')
+        : 'U';
+
+    const avatarBackgroundColor = isDarkMode ? colors.secondary : colors.primary;
+
     return (
         <>
             {successMsg ? (
@@ -144,13 +155,14 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
             <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.container}>
                 {/* Avatar et message personnalisé */}
                 <View style={styles.avatarRow}>
-                    <Image
-                        source={avatarUrl && avatarUrl.trim() !== '' ? { uri: avatarUrl } : require('../../assets/house.jpg')}
-                        style={styles.avatar}
-                    />
+                    <View style={[styles.avatar, { backgroundColor: avatarBackgroundColor }]}>
+                        <Text style={styles.avatarInitials}>{userInitials}</Text>
+                    </View>
                     <View style={{ marginLeft: 12 }}>
                         <Text style={[styles.welcome, { color: colors.primary }]}>Bonjour, {userName} 👋</Text>
-                        <Text style={[styles.subtitle, { color: colors.text }]}>Votre tableau de bord conciergerie</Text>
+                        <View style={[styles.subtitleBadge, { backgroundColor: colors.primary }]}>
+                            <Text style={[styles.subtitle, { color: isDarkMode ? colors.background : colors.surface }]}>Votre tableau de bord prestataire</Text>
+                        </View>
                     </View>
                 </View>
 
