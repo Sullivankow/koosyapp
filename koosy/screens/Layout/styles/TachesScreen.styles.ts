@@ -44,6 +44,8 @@
 		flex: 1,
 		paddingVertical: 10,
 		backgroundColor: '#eee',
+		borderWidth: 1,
+		borderColor: '#ddd',
 		borderRadius: 16,
 		marginHorizontal: 4,
 		alignItems: 'center',

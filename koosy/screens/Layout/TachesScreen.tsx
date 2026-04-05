@@ -92,16 +92,42 @@ function TachesScreen() {
       {/* Onglets */}
       <View style={styles.tabsContainer}>
         <TouchableOpacity
-          style={[styles.tabBtn, selectedTab === 'à faire' && styles.tabBtnActive]}
+          style={[
+            styles.tabBtn,
+            selectedTab === 'à faire' && {
+              backgroundColor: colors.primary,
+              borderColor: colors.primary,
+            },
+          ]}
           onPress={() => setSelectedTab('à faire')}
         >
-          <Text style={[styles.tabText, selectedTab === 'à faire' && styles.tabTextActive]}>À faire</Text>
+          <Text
+            style={[
+              styles.tabText,
+              { color: selectedTab === 'à faire' ? '#fff' : colors.text },
+            ]}
+          >
+            À faire
+          </Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.tabBtn, selectedTab === 'terminée' && styles.tabBtnTermineeActive]}
+          style={[
+            styles.tabBtn,
+            selectedTab === 'terminée' && {
+              backgroundColor: colors.primary,
+              borderColor: colors.primary,
+            },
+          ]}
           onPress={() => setSelectedTab('terminée')}
         >
-          <Text style={[styles.tabText, selectedTab === 'terminée' && styles.tabTextActive]}>Terminée</Text>
+          <Text
+            style={[
+              styles.tabText,
+              { color: selectedTab === 'terminée' ? '#fff' : colors.text },
+            ]}
+          >
+            Terminée
+          </Text>
         </TouchableOpacity>
       </View>
       {/* Titre bleu sous les onglets, comme sur ReservationScreen */}
@@ -163,7 +189,7 @@ function TachesScreen() {
                   disabled={item.statut === 'à faire'}
                   style={{ opacity: item.statut === 'à faire' ? 1 : 0.5 }}
                 >
-                  <BadgeStatus statut={'à faire'} />
+                  <BadgeStatus statut={'à faire'} style={{ backgroundColor: colors.primary }} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => handleMarkTerminee(item.id)}
@@ -171,7 +197,7 @@ function TachesScreen() {
                   disabled={item.statut === 'terminée'}
                   style={{ opacity: item.statut === 'terminée' ? 1 : 0.5 }}
                 >
-                  <BadgeStatus statut={'terminée'} />
+                  <BadgeStatus statut={'terminée'} style={{ backgroundColor: colors.primary }} />
                 </TouchableOpacity>
               </View>
             </View>

@@ -34,6 +34,7 @@ const TABS = [
 const PrestationsScreen: React.FC = () => {
 	const { refreshPrestationsTerminees } = usePrestationsCount();
 	const { colors } = useTheme();
+	const statusPillColor = colors.primary;
 	const { signalRefresh } = useChiffreAffaireRefresh(); // Ajout du contexte CA
 	const { lastRefresh } = useGlobalRefresh();
 	const [prestations, setPrestations] = useState<Prestation[]>([]);
@@ -71,18 +72,19 @@ const PrestationsScreen: React.FC = () => {
 						<TouchableOpacity
 							key={tabObj.key}
 							style={{
-								paddingHorizontal: 8,
-								paddingVertical: 4,
-								borderRadius: 10,
-								marginHorizontal: 3,
-								minWidth: 0,
-								backgroundColor: tab === tabObj.key ? statutColor[tabObj.key] : colors.surface,
+								paddingHorizontal: 16,
+								paddingVertical: 8,
+								borderRadius: 20,
+								marginHorizontal: 6,
+								alignItems: 'center',
+								justifyContent: 'center',
+								backgroundColor: tab === tabObj.key ? statusPillColor : colors.surface,
 								borderWidth: 1,
-								borderColor: tab === tabObj.key ? statutColor[tabObj.key] : colors.border,
+								borderColor: tab === tabObj.key ? statusPillColor : colors.border,
 							}}
 							onPress={() => setTab(tabObj.key as any)}
 						>
-							<Text style={{ color: tab === tabObj.key ? '#fff' : colors.text, fontWeight: 'bold', fontSize: 12 }}>{tabObj.label}</Text>
+							<Text style={{ color: tab === tabObj.key ? '#fff' : colors.text, fontWeight: 'bold' }}>{tabObj.label}</Text>
 						</TouchableOpacity>
 					))}
 				</View>
@@ -90,9 +92,9 @@ const PrestationsScreen: React.FC = () => {
 					<ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
 				) : (
 					<ScrollView style={{ flex: 1, width: '100%' }} contentContainerStyle={{ paddingBottom: 32 }}>
-							<Text style={[styles.title, { color: colors.primary }]}>Prestations {tab}</Text>
+							<Text style={[styles.title, { color: colors.primary }]}>Prestations {tab === 'terminée' ? 'terminées' : tab === 'confirmée' ? 'confirmées' : tab}</Text>
 								{prestations.filter(p => p.status === TABS.find(t => t.key === tab)?.label).length === 0 ? (
-									<Text style={{ textAlign: 'center', color: colors.textSecondary, marginTop: 24 }}>Aucune prestation {TABS.find(t => t.key === tab)?.label.toLowerCase()}</Text>
+									<Text style={{ textAlign: 'center', color: colors.textSecondary, marginTop: 24 }}>Aucune prestation {tab === 'terminée' ? 'terminée' : tab === 'confirmée' ? 'confirmées' : TABS.find(t => t.key === tab)?.label.toLowerCase()}</Text>
 								) : (
 									prestations.filter(p => p.status === TABS.find(t => t.key === tab)?.label).map((p: Prestation) => (
 										<View key={p.id} style={[styles.card, { borderLeftColor: statutColor[p.status] || colors.primary }]}> 
@@ -137,7 +139,15 @@ const PrestationsScreen: React.FC = () => {
 																			}}
 																			style={{ opacity: isActive ? 1 : 0.5, marginRight: 6 }}
 																		>
-																			<BadgeStatus statut={s} />
+																			<BadgeStatus
+																				statut={s}
+																				style={{
+																					backgroundColor: statusPillColor,
+																					paddingHorizontal: 10,
+																					paddingVertical: 3,
+																					borderRadius: 11,
+																				}}
+																			/>
 																		</TouchableOpacity>
 																	);
 																})}

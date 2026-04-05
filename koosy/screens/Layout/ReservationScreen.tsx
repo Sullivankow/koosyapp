@@ -129,9 +129,9 @@ function ReservationScreen() {
                   paddingVertical: 10,
                   borderRadius: 20,
                   marginHorizontal: 8,
-                  backgroundColor: tab === s ? statutColor[s] : colors.surface,
+                  backgroundColor: tab === s ? colors.primary : colors.surface,
                   borderWidth: 1,
-                  borderColor: tab === s ? statutColor[s] : colors.border,
+                  borderColor: tab === s ? colors.primary : colors.border,
                 }}
                 onPress={() => setTab(s)}
               >
@@ -223,7 +223,7 @@ function ReservationScreen() {
                                     }}
                                     style={{ opacity: isActive ? 1 : 0.5, marginRight: 6 }}
                                   >
-                                    <BadgeStatus statut={s} />
+                                    <BadgeStatus statut={s} style={{ backgroundColor: colors.primary }} />
                                   </TouchableOpacity>
                                 );
                               })}
