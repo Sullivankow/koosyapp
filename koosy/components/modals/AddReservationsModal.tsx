@@ -23,6 +23,18 @@ const getContrastTextColor = (hexColor: string) => {
 	return yiq >= 170 ? '#1E242B' : '#FFFFFF';
 };
 
+const isDarkColor = (hexColor: string) => {
+	const sanitized = (hexColor || '').replace('#', '');
+	if (sanitized.length !== 6) return false;
+
+	const r = parseInt(sanitized.slice(0, 2), 16);
+	const g = parseInt(sanitized.slice(2, 4), 16);
+	const b = parseInt(sanitized.slice(4, 6), 16);
+	const yiq = (r * 299 + g * 587 + b * 114) / 1000;
+
+	return yiq < 140;
+};
+
 // Structure d'état représentant une réservation complète
 type ReservationForm = {
 	bienId: string;
@@ -57,6 +69,7 @@ export default function AddReservationsModal({
    biens,
    colors
 }: AddReservationsModalProps) {
+	const isDarkMode = isDarkColor(colors.background);
 	// État local pour savoir quel champ de date on est en train d'éditer
    const [showDatePicker, setShowDatePicker] = useState<{ field: 'dateArrivee' | 'dateDepart' | null, visible: boolean }>({ field: null, visible: false });
 
@@ -67,6 +80,12 @@ export default function AddReservationsModal({
 		},
 		[setForm],
 	);
+
+	const formatTimeInput = useCallback((value: string) => {
+		const digitsOnly = value.replace(/\D/g, '').slice(0, 4);
+		if (digitsOnly.length <= 2) return digitsOnly;
+		return `${digitsOnly.slice(0, 2)}:${digitsOnly.slice(2)}`;
+	}, []);
 
 	// Gestion du changement de date (via le DateTimePicker natif)
    const handleDateChange = (event: any, selectedDate?: Date) => {
@@ -164,7 +183,7 @@ export default function AddReservationsModal({
 									   placeholder="Heure (HH:mm)"
 									   placeholderTextColor={colors.textSecondary}
 									   value={form.heureArrivee}
-								   	   onChangeText={v => updateField('heureArrivee', v)}
+								   	   onChangeText={v => updateField('heureArrivee', formatTimeInput(v))}
 								   />
 								</View>
 							{/* Bloc date / heure de départ */}
@@ -183,7 +202,7 @@ export default function AddReservationsModal({
 									   placeholder="Heure (HH:mm)"
 									   placeholderTextColor={colors.textSecondary}
 									   value={form.heureDepart}
-								   	   onChangeText={v => updateField('heureDepart', v)}
+								   	   onChangeText={v => updateField('heureDepart', formatTimeInput(v))}
 								   />
 								</View>
    {showDatePicker.visible && (
@@ -199,6 +218,9 @@ export default function AddReservationsModal({
 		   display={Platform.OS === 'ios' ? 'spinner' : 'calendar'}
 		   onChange={handleDateChange}
 		   locale="fr-FR"
+		   themeVariant={isDarkMode ? 'dark' : 'light'}
+		   textColor={isDarkMode ? colors.text : '#1E242B'}
+		   accentColor={colors.primary}
 	   />
    )}
 							{/* Choix du statut de la réservation */}

@@ -161,14 +161,8 @@ function TachesScreen() {
         ListEmptyComponent={<Text style={{ color: colors.textSecondary, textAlign: 'center', marginTop: 40 }}>Aucune tâche</Text>}
         renderItem={({ item }) => {
           const dateAffichee = item.dateEcheance ? formatDateFr(item.dateEcheance) : '';
-          // Couleur de bordure gauche selon le statut
-          const statutColor = {
-            'à faire': '#FF7043',
-            'en cours': '#FFA726',
-            'terminée': '#43A047',
-          };
           return (
-            <View style={[styles.card, { backgroundColor: '#fff', borderLeftWidth: 6, borderLeftColor: statutColor[item.statut] || colors.primary }]}> 
+            <View style={[styles.card, { backgroundColor: '#fff', borderLeftWidth: 6, borderLeftColor: colors.primary }]}> 
               {/* Header avec titre et corbeille */}
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                 <Text style={[styles.cardTitle, { color: '#000' }]}>{item.titre}</Text>
@@ -189,7 +183,7 @@ function TachesScreen() {
                     );
                   }}
                 >
-                  <MaterialCommunityIcons name="delete" size={20} color={colors.error} />
+                  <MaterialCommunityIcons name="delete" size={20} color={colors.primary} />
                 </TouchableOpacity>
               </View>
               {/* Titre du bien associé */}

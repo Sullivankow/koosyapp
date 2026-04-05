@@ -142,7 +142,7 @@ const PrestationsScreen: React.FC = () => {
 														);
 													}}
 													style={{ marginLeft: 8, padding: 4 }}>
-													<MaterialCommunityIcons name="delete" size={22} color={colors.error || '#e53935'} />
+													<MaterialCommunityIcons name="delete" size={22} color={colors.primary} />
 												</TouchableOpacity>
 											</View>
 											<Text style={{ color: '#111', fontWeight: 'bold', fontSize: 16 }}>{p.description || 'Sans description'}</Text>

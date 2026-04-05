@@ -17,13 +17,6 @@ import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 import dayjs from 'dayjs';
 import AddReservationsModal from '../../components/modals/AddReservationsModal';
 
-const statutColor = {
-  'confirmée': '#43A047',
-  'en attente': '#FF7043',
-  'annulée': '#B71C1C',
-  'terminée': '#1976D2',
-};
-
 // Fonction utilitaire pour formatage date FR
 function formatDateFR(dateStr: string) {
   if (!dateStr) return '';
@@ -172,7 +165,7 @@ function ReservationScreen() {
                       const dateDebut = r.dateDebut || r.dateArrivee || '';
                       const dateFin = r.dateFin || r.dateDepart || '';
                       return (
-                        <View key={r.id} style={[styles.card, { borderLeftColor: statutColor[r.statut] || colors.primary }]}> 
+                        <View key={r.id} style={[styles.card, { borderLeftColor: colors.primary }]}> 
                           {/* Header avec titre et corbeille */}
                           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
                             <Text style={styles.cardTitle}>{bienNom}</Text>
@@ -198,7 +191,7 @@ function ReservationScreen() {
                                 );
                               }}
                             >
-                              <MaterialCommunityIcons name="delete" size={22} color="#B71C1C" />
+                              <MaterialCommunityIcons name="delete" size={22} color={colors.primary} />
                             </TouchableOpacity>
                           </View>
                           {/* Le reste de la card */}
