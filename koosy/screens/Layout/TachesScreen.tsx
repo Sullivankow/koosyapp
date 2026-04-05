@@ -221,7 +221,7 @@ function TachesScreen() {
       {selectedTab === 'terminée' && (
         <TouchableOpacity
           style={{
-            backgroundColor: '#e53935',
+            backgroundColor: colors.primary,
             paddingVertical: 8,
             paddingHorizontal: 18,
             borderRadius: 20,
@@ -232,7 +232,7 @@ function TachesScreen() {
           }}
           onPress={handleDeleteAllTerminees}
         >
-          <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 13 }}>Tout supprimer</Text>
+          <Text style={{ color: activeStatusTextColor, fontWeight: 'bold', fontSize: 13 }}>Tout supprimer</Text>
         </TouchableOpacity>
       )}
       {/* Bouton pour ouvrir le modal d'ajout de tâche */}
