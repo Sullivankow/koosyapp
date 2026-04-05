@@ -35,6 +35,14 @@ const defaultLigne: LigneFactureForm = {
 	totalLigneTTC: 0,
 };
 
+const getTodayDateForInput = (): string => {
+	const today = new Date();
+	const day = String(today.getDate()).padStart(2, '0');
+	const month = String(today.getMonth() + 1).padStart(2, '0');
+	const year = String(today.getFullYear());
+	return `${day}/${month}/${year}`;
+};
+
 type ThemeColors = ReturnType<typeof useTheme>['colors'];
 
 interface ProprietairePickerProps {
@@ -148,7 +156,7 @@ const ProprietairePicker: React.FC<ProprietairePickerProps> = ({
 const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSubmit, entreprises }) => {
 	// Champs principaux de la facture
 	const [numero, setNumero] = useState('');
-	const [dateEmission, setDateEmission] = useState('');
+	const [dateEmission, setDateEmission] = useState(getTodayDateForInput());
 	const [dateEcheance, setDateEcheance] = useState('');
 	const [entreprise, setEntreprise] = useState<Entreprise | null>(null);
 
@@ -174,6 +182,12 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 			setEntreprise(entreprises[0]);
 		}
 	}, [isOpen, entreprises]);
+
+	useEffect(() => {
+		if (isOpen) {
+			setDateEmission(getTodayDateForInput());
+		}
+	}, [isOpen]);
 
 	// Chargement des propriétaires liés à un bien à l'ouverture
 	useEffect(() => {
@@ -263,7 +277,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 		onClose();
 		// Reset du formulaire
 		setNumero('');
-		setDateEmission('');
+		setDateEmission(getTodayDateForInput());
 		setDateEcheance('');
 		setLignes([{ ...defaultLigne }]);
 		setConditionsPaiement('');
