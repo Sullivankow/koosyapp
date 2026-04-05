@@ -162,10 +162,10 @@ function TachesScreen() {
         renderItem={({ item }) => {
           const dateAffichee = item.dateEcheance ? formatDateFr(item.dateEcheance) : '';
           return (
-            <View style={[styles.card, { backgroundColor: '#fff', borderLeftWidth: 6, borderLeftColor: colors.primary }]}> 
+            <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, borderLeftWidth: 6, borderLeftColor: colors.primary }]}> 
               {/* Header avec titre et corbeille */}
               <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Text style={[styles.cardTitle, { color: '#000' }]}>{item.titre}</Text>
+                <Text style={[styles.cardTitle, { color: colors.primary }]}>{item.titre}</Text>
                 <TouchableOpacity
                   style={{ padding: 4 }}
                   onPress={() => {
@@ -188,7 +188,7 @@ function TachesScreen() {
               </View>
               {/* Titre du bien associé */}
               {item.bienTitre ? (
-                <Text style={[styles.cardBien, { color: '#1976D2' }]}>Bien : {item.bienTitre}</Text>
+                <Text style={[styles.cardBien, { color: colors.primary }]}>Bien : {item.bienTitre}</Text>
               ) : null}
               <Text style={[styles.cardDesc, { color: colors.textSecondary }]}>{item.description}</Text>
               {dateAffichee ? (

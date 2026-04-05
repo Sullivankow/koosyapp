@@ -18,12 +18,6 @@ import HeaderWithAddButton from '../../ui/HeaderWithAddButton';
 import { Alert } from 'react-native';
 
 
-const statutColor: Record<string, string> = {
-	'confirmée': '#43A047',
-	'en attente': '#FF7043',
-	'terminée': '#1976D2',
-};
-
 const TABS = [
   { key: 'en attente', label: 'En attente' },
   { key: 'confirmée', label: 'Confirmée' },
@@ -123,9 +117,9 @@ const PrestationsScreen: React.FC = () => {
 									<Text style={{ textAlign: 'center', color: colors.textSecondary, marginTop: 24 }}>Aucune prestation {tab === 'terminée' ? 'terminée' : tab === 'confirmée' ? 'confirmées' : TABS.find(t => t.key === tab)?.label.toLowerCase()}</Text>
 								) : (
 									prestations.filter(p => p.status === TABS.find(t => t.key === tab)?.label).map((p: Prestation) => (
-										<View key={p.id} style={[styles.card, { borderLeftColor: statutColor[p.status] || colors.primary }]}> 
+										<View key={p.id} style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, borderLeftColor: colors.primary }]}> 
 											<View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-												<Text style={styles.cardTitle}>{p.bien?.nom || 'Bien inconnu'}</Text>
+												<Text style={[styles.cardTitle, { color: colors.primary }]}>{p.bien?.nom || 'Bien inconnu'}</Text>
 												<TouchableOpacity
 													onPress={() => {
 														Alert.alert(
@@ -145,7 +139,7 @@ const PrestationsScreen: React.FC = () => {
 													<MaterialCommunityIcons name="delete" size={22} color={colors.primary} />
 												</TouchableOpacity>
 											</View>
-											<Text style={{ color: '#111', fontWeight: 'bold', fontSize: 16 }}>{p.description || 'Sans description'}</Text>
+											<Text style={{ color: colors.text, fontWeight: 'bold', fontSize: 16 }}>{p.description || 'Sans description'}</Text>
 											<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Montant : {(p.amount_cents / 100).toFixed(2)} €</Text>
 											<Text style={{ color: colors.textSecondary, fontSize: 14 }}>Créée le : {p.created_at ? new Date(p.created_at).toLocaleDateString('fr-FR') : ''}</Text>
 															<View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginTop: 4, marginBottom: 2 }}>
@@ -218,7 +212,7 @@ const PrestationsScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
 	title: { fontSize: 26, fontWeight: 'bold', margin: 18 },
-	card: { borderRadius: 16, padding: 16, marginBottom: 18, elevation: 2, backgroundColor: '#fff', borderLeftWidth: 6 },
+	card: { borderRadius: 16, padding: 16, marginBottom: 18, elevation: 2, borderWidth: 1, borderLeftWidth: 6 },
 	cardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
 	fab: { position: 'absolute', right: 24, bottom: 24, width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', elevation: 4 },
 });

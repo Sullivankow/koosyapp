@@ -165,10 +165,10 @@ function ReservationScreen() {
                       const dateDebut = r.dateDebut || r.dateArrivee || '';
                       const dateFin = r.dateFin || r.dateDepart || '';
                       return (
-                        <View key={r.id} style={[styles.card, { borderLeftColor: colors.primary }]}> 
+                        <View key={r.id} style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border, borderLeftColor: colors.primary }]}> 
                           {/* Header avec titre et corbeille */}
                           <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Text style={styles.cardTitle}>{bienNom}</Text>
+                            <Text style={[styles.cardTitle, { color: colors.primary }]}>{bienNom}</Text>
                             <TouchableOpacity
                               style={{ padding: 4 }}
                               onPress={async () => {
@@ -195,7 +195,7 @@ function ReservationScreen() {
                             </TouchableOpacity>
                           </View>
                           {/* Le reste de la card */}
-                          <Text style={{ color: '#111', fontWeight: 'bold', fontSize: 16 }}>
+                          <Text style={{ color: colors.text, fontWeight: 'bold', fontSize: 16 }}>
                             {locNom}{locPrenom ? ' ' + locPrenom : ''}
                           </Text>
                           <Text style={{ color: colors.textSecondary, fontSize: 14 }}>
@@ -207,7 +207,7 @@ function ReservationScreen() {
                             </Text>
                           ) : null}
                           {/* Dates sous le téléphone */}
-                          <Text style={{ color: '#1976D2', fontSize: 13, fontWeight: 'bold', marginTop: 2 }}>
+                          <Text style={{ color: colors.primary, fontSize: 13, fontWeight: 'bold', marginTop: 2 }}>
                             {formatDateFR(dateDebut)} → {formatDateFR(dateFin)}
                           </Text>
                           <View style={{ flexDirection: 'row', alignItems: 'center', marginVertical: 4 }}>
@@ -258,7 +258,7 @@ function ReservationScreen() {
 
 const styles = StyleSheet.create({
   title: { fontSize: 26, fontWeight: 'bold', margin: 18 },
-  card: { borderRadius: 16, padding: 16, marginBottom: 18, elevation: 2, backgroundColor: '#fff', borderLeftWidth: 6 },
+  card: { borderRadius: 16, padding: 16, marginBottom: 18, elevation: 2, borderWidth: 1, borderLeftWidth: 6 },
   cardTitle: { fontSize: 18, fontWeight: 'bold', marginBottom: 4 },
   fab: { position: 'absolute', right: 24, bottom: 24, width: 56, height: 56, borderRadius: 28, alignItems: 'center', justifyContent: 'center', elevation: 4 },
   modalOverlay: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: 'rgba(0,0,0,0.18)' },
