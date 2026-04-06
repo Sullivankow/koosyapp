@@ -43,6 +43,16 @@ const getTodayDateForInput = (): string => {
 	return `${day}/${month}/${year}`;
 };
 
+// Ajoute automatiquement les / pendant la saisie d'une date (JJ/MM/AAAA)
+const formatDateInput = (value: string): string => {
+	const cleaned = value.replace(/\D/g, '');
+	let formatted = '';
+	if (cleaned.length > 0) formatted = cleaned.slice(0, 2);
+	if (cleaned.length > 2) formatted += '/' + cleaned.slice(2, 4);
+	if (cleaned.length > 4) formatted += '/' + cleaned.slice(4, 8);
+	return formatted;
+};
+
 type ThemeColors = ReturnType<typeof useTheme>['colors'];
 
 interface ProprietairePickerProps {
@@ -175,6 +185,11 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 	const [selectedProprioId, setSelectedProprioId] = useState<number | undefined>(undefined);
 
 	const { colors } = useTheme();
+
+	// Formate la date d'échéance à la frappe pour conserver un format lisible.
+	const handleDateEcheanceChange = (value: string) => {
+		setDateEcheance(formatDateInput(value));
+	};
 
 	// Sélection automatique de la première entreprise si disponible
 	useEffect(() => {
@@ -358,6 +373,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 								onChangeText={setDateEmission}
 								placeholder="JJ/MM/AAAA"
 								placeholderTextColor={colors.textSecondary}
+								keyboardType="numeric"
 							/>
 							<Text style={[styles.label, { color: colors.text }]}>Date d'échéance</Text>
 							<TextInput
@@ -366,9 +382,10 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 									{ color: colors.text, backgroundColor: colors.surface, borderColor: colors.border },
 								]}
 								value={dateEcheance}
-								onChangeText={setDateEcheance}
+								onChangeText={handleDateEcheanceChange}
 								placeholder="JJ/MM/AAAA"
 								placeholderTextColor={colors.textSecondary}
+								keyboardType="numeric"
 							/>
 							{/* Lignes de facture dynamiques */}
 							<Text style={[styles.sectionTitle, { color: colors.text }]}>Articles</Text>

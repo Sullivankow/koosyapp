@@ -107,17 +107,23 @@ export const DevisList = memo(function DevisList({ devis, colors, handlePreviewD
       keyExtractor={keyExtractor}
       renderItem={renderItem}
       ListEmptyComponent={ListEmptyComponent}
+      contentContainerStyle={styles.listContent}
     />
   );
 });
 
 const styles = StyleSheet.create({
+  listContent: {
+    paddingHorizontal: 12,
+    paddingBottom: 16,
+  },
   devisItem: {
     padding: 16,
-    borderBottomWidth: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    borderRadius: 14,
+    marginBottom: 10,
   },
   devisContent: {
     flex: 1,
