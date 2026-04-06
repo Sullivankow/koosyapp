@@ -7,7 +7,6 @@ import SelectField from '../ui/selectField';
 import FiltersSection from '../components/filters/filtersSection';
 import { fetchUsersList, createUser, updateUser, deleteUser } from '../utils/usersApi';
 import UsersForm from '../components/forms/users/usersForm';
-import DrawerShell from '../ui/DrawerShell';
 import type { BackendUser } from '../models/models';
 import useSidebar from '../hooks/useSidebar';
 
@@ -20,6 +19,7 @@ export type User = {
   status: 'Actif' | 'Inactif';
   lastLogin: string;
   entrepriseName: string | null;
+  betaAccessUntil: string | null;
 };
 
 const Users: React.FC = () => {
@@ -41,12 +41,46 @@ const Users: React.FC = () => {
   const [formEmail, setFormEmail] = useState('');
   const [formRole, setFormRole] = useState<'Admin' | 'Utilisateur'>('Utilisateur');
   const [formPassword, setFormPassword] = useState('');
+  const [formBetaAccess, setFormBetaAccess] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   // Liste récupérée depuis l'API backend
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const getBetaBadge = (betaAccessUntil: string | null) => {
+    if (!betaAccessUntil) {
+      return {
+        label: 'Non',
+        hint: 'Aucun accès bêta',
+        className: 'bg-[#F1F5F9] text-[#475569]',
+      };
+    }
+
+    const endDate = new Date(betaAccessUntil);
+    if (Number.isNaN(endDate.getTime())) {
+      return {
+        label: 'Non',
+        hint: 'Date invalide',
+        className: 'bg-[#F1F5F9] text-[#475569]',
+      };
+    }
+
+    if (endDate.getTime() >= Date.now()) {
+      return {
+        label: 'Oui',
+        hint: `Jusqu’au ${endDate.toLocaleDateString('fr-FR')}`,
+        className: 'bg-[#ECFDF3] text-[#166534]',
+      };
+    }
+
+    return {
+      label: 'Expiré',
+      hint: `Depuis le ${endDate.toLocaleDateString('fr-FR')}`,
+      className: 'bg-[#FEF2F2] text-[#B91C1C]',
+    };
+  };
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -68,6 +102,7 @@ const Users: React.FC = () => {
           status: 'Actif',
           lastLogin: '—',
           entrepriseName: u.entreprise?.nom ?? null,
+          betaAccessUntil: u.betaAccessUntil ?? null,
         }));
 
         setUsers(mapped);
@@ -102,11 +137,13 @@ const Users: React.FC = () => {
       setFormNom(nom);
       setFormEmail(user.email);
       setFormRole(user.role);
+      setFormBetaAccess(Boolean(user.betaAccessUntil));
     } else {
       setFormPrenom('');
       setFormNom('');
       setFormEmail('');
       setFormRole('Utilisateur');
+      setFormBetaAccess(false);
     }
     setFormPassword('');
     setFormError(null);
@@ -121,6 +158,7 @@ const Users: React.FC = () => {
     setFormNom('');
     setFormEmail('');
     setFormPassword('');
+    setFormBetaAccess(false);
     setFormError(null);
   };
 
@@ -140,6 +178,9 @@ const Users: React.FC = () => {
         nom: formNom,
         prenom: formPrenom,
         role: formRole === 'Admin' ? 'admin' : 'user',
+        betaAccessUntil: formBetaAccess
+          ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+          : null,
       } as const;
 
       if (isEdit && selectedUser) {
@@ -165,6 +206,7 @@ const Users: React.FC = () => {
         status: 'Actif',
         lastLogin: '—',
         entrepriseName: u.entreprise?.nom ?? null,
+        betaAccessUntil: u.betaAccessUntil ?? null,
       }));
       setUsers(mapped);
 
@@ -194,6 +236,7 @@ const Users: React.FC = () => {
         status: 'Actif',
         lastLogin: '—',
         entrepriseName: u.entreprise?.nom ?? null,
+        betaAccessUntil: u.betaAccessUntil ?? null,
       }));
       setUsers(mapped);
     } catch (e) {
@@ -334,13 +377,16 @@ const Users: React.FC = () => {
                       <th className="px-5 py-3 font-medium">Utilisateur</th>
                       <th className="px-5 py-3 font-medium">Entreprise</th>
                       <th className="px-5 py-3 font-medium">Rôle</th>
+                      <th className="px-5 py-3 font-medium">Bêta</th>
                       <th className="px-5 py-3 font-medium">Statut</th>
                       <th className="px-5 py-3 font-medium">Dernière connexion</th>
                       <th className="px-5 py-3 font-medium text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#E0E6ED] bg-white">
-                    {filteredUsers.map((user) => (
+                    {filteredUsers.map((user) => {
+                      const betaBadge = getBetaBadge(user.betaAccessUntil);
+                      return (
                       <tr key={user.id} className="hover:bg-[#F9FBFF] transition-colors">
                         <td className="px-5 py-3">
                           <div className="flex items-center gap-3">
@@ -365,6 +411,15 @@ const Users: React.FC = () => {
                           <span className="inline-flex rounded-full bg-[#F1F5F9] px-2.5 py-1 text-[11px] font-medium text-[#475569]">
                             {user.role}
                           </span>
+                        </td>
+
+                        <td className="px-5 py-3">
+                          <div className="flex flex-col gap-1">
+                            <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[11px] font-medium ${betaBadge.className}`}>
+                              {betaBadge.label}
+                            </span>
+                            <span className="text-[11px] text-[#9EABB8]">{betaBadge.hint}</span>
+                          </div>
                         </td>
 
                         <td className="px-5 py-3">
@@ -400,7 +455,7 @@ const Users: React.FC = () => {
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    );})}
                   </tbody>
                 </table>
               </div>
@@ -421,6 +476,7 @@ const Users: React.FC = () => {
                 formEmail={formEmail}
                 formRole={formRole}
                 formPassword={formPassword}
+                formBetaAccess={formBetaAccess}
                 formError={formError}
                 saving={saving}
                 onChangeNom={setFormNom}
@@ -428,6 +484,7 @@ const Users: React.FC = () => {
                 onChangeEmail={setFormEmail}
                 onChangeRole={(role) => setFormRole(role)}
                 onChangePassword={setFormPassword}
+                onChangeBetaAccess={setFormBetaAccess}
                 onSubmit={handleSubmit}
                 onCancel={handleCloseDrawer}
               />

@@ -75,6 +75,7 @@ export interface BackendUser {
   abonnement: 'gratuit' | 'premium';
   role: BackendUserRole;
   entreprise?: BackendEntreprise | null;
+  betaAccessUntil?: string | null;
   // Champs supplémentaires disponibles côté backend mais pas encore utilisés dans l'admin :
   // entreprise?: any;
   // settings?: any;

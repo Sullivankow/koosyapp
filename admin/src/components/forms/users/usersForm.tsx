@@ -12,6 +12,7 @@ interface UsersFormProps {
   formEmail: string;
   formRole: 'Admin' | 'Utilisateur';
   formPassword: string;
+  formBetaAccess: boolean;
   formError: string | null;
   saving: boolean;
   onChangeNom: (value: string) => void;
@@ -19,6 +20,7 @@ interface UsersFormProps {
   onChangeEmail: (value: string) => void;
   onChangeRole: (value: 'Admin' | 'Utilisateur') => void;
   onChangePassword: (value: string) => void;
+  onChangeBetaAccess: (value: boolean) => void;
   onSubmit: () => void;
   onCancel: () => void;
 }
@@ -30,6 +32,7 @@ const UsersForm: React.FC<UsersFormProps> = ({
   formEmail,
   formRole,
   formPassword,
+  formBetaAccess,
   formError,
   saving,
   onChangeNom,
@@ -37,6 +40,7 @@ const UsersForm: React.FC<UsersFormProps> = ({
   onChangeEmail,
   onChangeRole,
   onChangePassword,
+  onChangeBetaAccess,
   onSubmit,
   onCancel,
 }) => {
@@ -135,6 +139,27 @@ const UsersForm: React.FC<UsersFormProps> = ({
                   ? 'Laisser vide pour conserver le mot de passe actuel.'
                   : "L'utilisateur pourra le changer plus tard depuis son espace."}
               </p>
+            </div>
+
+            <div className="rounded-xl border border-dashed border-[#CBD5E1] bg-[#F9FBFF] p-4 space-y-2">
+              <div className="flex items-start gap-3">
+                <input
+                  id="beta-access"
+                  type="checkbox"
+                  checked={formBetaAccess}
+                  onChange={(e) => onChangeBetaAccess(e.target.checked)}
+                  className="mt-1 h-4 w-4 rounded border-[#CBD5E1] text-[#00A896] focus:ring-[#00A896]"
+                />
+                <div className="space-y-1">
+                  <label htmlFor="beta-access" className="block text-sm font-medium text-[#222B45]">
+                    Accès bêta pendant 30 jours
+                  </label>
+                  <p className="text-[11px] text-[#6E7B8B]">
+                    Si activé, l’utilisateur pourra tester toutes les fonctionnalités pro sans payer.
+                    La date d’expiration sera calculée automatiquement côté backend.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </section>

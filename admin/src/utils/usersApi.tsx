@@ -32,6 +32,7 @@ export type CreateUserPayload = {
   role?: 'user' | 'admin';
   abonnement?: 'gratuit' | 'premium';
   telephone?: string;
+  betaAccessUntil?: string | null;
 };
 
 export type UpdateUserPayload = {
@@ -42,6 +43,7 @@ export type UpdateUserPayload = {
   role?: 'user' | 'admin';
   abonnement?: 'gratuit' | 'premium';
   telephone?: string;
+  betaAccessUntil?: string | null;
 };
 
 // Création d'un nouvel utilisateur
