@@ -2,6 +2,7 @@ import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards } from '@nes
 import { DevisService } from './devis.service';
 import { CreateDevisDto } from './create-devis.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ProAccessGuard } from '../auth/pro-access.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 import type { Response } from 'express';
@@ -9,7 +10,7 @@ import { Res } from '@nestjs/common';
 
 @ApiTags('Devis')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ProAccessGuard)
 @Controller('devis')
 export class DevisController {
   constructor(private readonly devisService: DevisService) {}
@@ -77,8 +78,9 @@ export class DevisController {
         'Content-Disposition': `attachment; filename="devis_${id}.pdf"`,
       });
       res.end(pdfBuffer);
-    } catch (err) {
-      res.status(404).json({ message: err.message || 'Erreur lors de la génération du PDF' });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Erreur lors de la génération du PDF';
+      res.status(404).json({ message });
     }
   }
 }

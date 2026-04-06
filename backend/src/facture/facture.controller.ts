@@ -2,12 +2,13 @@ import { Controller, Get, Post, Body, Param, Delete, Put, UseGuards, Res } from 
 import { FactureService } from './facture.service';
 import { CreateFactureDto } from './create-facture.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ProAccessGuard } from '../auth/pro-access.guard';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 import type { Response } from 'express';
 
 @ApiTags('Facture')
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, ProAccessGuard)
 @Controller('facture')
 export class FactureController {
   constructor(private readonly factureService: FactureService) {}
