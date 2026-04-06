@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { createFacture } from '../utils/api';
+import { Alert } from 'react-native';
+import { ApiError, createFacture } from '../utils/api';
 import AddFactureModal from '../components/modals/AddFactureModal';
+import SubscriptionPaywallModal from '../components/modals/SubscriptionPaywallModal';
 import { Entreprise } from '../models/models';
 
 // Type minimal pour ce que le hook expose au reste de l'application
@@ -27,6 +29,7 @@ export const useAddFactureModal = (entreprises: Entreprise[]): UseAddFactureModa
   const [visible, setVisible] = useState(false);
   // Stocke la dernière facture créée via ce hook
   const [lastFacture, setLastFacture] = useState<any | null>(null);
+  const [paywallVisible, setPaywallVisible] = useState(false);
 
   const open = () => setVisible(true);
   const close = () => setVisible(false);
@@ -49,6 +52,10 @@ export const useAddFactureModal = (entreprises: Entreprise[]): UseAddFactureModa
       setVisible(false);
       alert('La facture a bien été créée !');
     } catch (e: any) {
+      if (e instanceof ApiError && e.status === 403) {
+        setPaywallVisible(true);
+        return;
+      }
       const msg =
         typeof e === 'object' && e !== null && 'message' in e
           ? (e as any).message
@@ -59,12 +66,27 @@ export const useAddFactureModal = (entreprises: Entreprise[]): UseAddFactureModa
 
   // Composant modale prêt à être utilisé dans le screen
   const modal = (
-    <AddFactureModal
-      isOpen={visible}
-      onClose={close}
-      onSubmit={handleSubmit}
-      entreprises={entreprises}
-    />
+    <>
+      <AddFactureModal
+        isOpen={visible}
+        onClose={close}
+        onSubmit={handleSubmit}
+        entreprises={entreprises}
+      />
+      <SubscriptionPaywallModal
+        isOpen={paywallVisible}
+        onClose={() => setPaywallVisible(false)}
+        onSubscribe={() => {
+          setPaywallVisible(false);
+          Alert.alert(
+            'Abonnement Pro',
+            'Le parcours de souscription Stripe sera branche dans la prochaine etape.',
+          );
+        }}
+        price={9.99}
+        periodLabel="mois"
+      />
+    </>
   );
 
   return { open, close, modal, lastFacture };

@@ -8,6 +8,16 @@ import { Bien, Devis } from '../models/models';
 import { getSession } from './session';
 import { BASE_URL } from '../constants/config';
 
+export class ApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+  }
+}
+
 
 // Simule la récupération d'un token JWT stocké localement
 
@@ -26,7 +36,19 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     ...options.headers,
   };
   const response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
-  if (!response.ok) throw new Error(await response.text() || `Erreur API: ${response.status}`);
+  if (!response.ok) {
+    const errorText = await response.text();
+    let message = errorText || `Erreur API: ${response.status}`;
+    try {
+      const parsed = errorText ? JSON.parse(errorText) : null;
+      if (parsed && typeof parsed.message === 'string') {
+        message = parsed.message;
+      }
+    } catch {
+      // Si le body n'est pas du JSON, on garde le texte brut.
+    }
+    throw new ApiError(message, response.status);
+  }
   if (response.status === 204) return;
   const text = await response.text();
   if (!text) return;

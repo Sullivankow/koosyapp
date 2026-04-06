@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { createDevis } from '../utils/api';
+import { Alert } from 'react-native';
+import { ApiError, createDevis } from '../utils/api';
 import AddDevisModal from '../components/modals/AddDevisModal';
+import SubscriptionPaywallModal from '../components/modals/SubscriptionPaywallModal';
 import { Entreprise } from '../models/models';
 
 // Type minimal pour ce que le hook expose au reste de l'application
@@ -18,6 +20,7 @@ export const useAddDevisModal = (entreprises: Entreprise[]): UseAddDevisModalRes
   const [visible, setVisible] = useState(false);
   // Stocke le dernier devis créé via ce hook
   const [lastDevis, setLastDevis] = useState<any | null>(null);
+  const [paywallVisible, setPaywallVisible] = useState(false);
 
   const open = () => setVisible(true);
   const close = () => setVisible(false);
@@ -39,6 +42,10 @@ export const useAddDevisModal = (entreprises: Entreprise[]): UseAddDevisModalRes
       setVisible(false);
       alert('Le devis a bien été créé !');
     } catch (e: any) {
+      if (e instanceof ApiError && e.status === 403) {
+        setPaywallVisible(true);
+        return;
+      }
       // Construction d'un message d'erreur lisible quel que soit le type de l'exception
       const msg =
         typeof e === 'object' && e !== null && 'message' in e
@@ -50,12 +57,27 @@ export const useAddDevisModal = (entreprises: Entreprise[]): UseAddDevisModalRes
 
   // Instance de la modale, prête à être rendue dans un composant parent
   const modal = (
-    <AddDevisModal
-      isOpen={visible}
-      onClose={close}
-      onSubmit={handleSubmit}
-      entreprises={entreprises}
-    />
+    <>
+      <AddDevisModal
+        isOpen={visible}
+        onClose={close}
+        onSubmit={handleSubmit}
+        entreprises={entreprises}
+      />
+      <SubscriptionPaywallModal
+        isOpen={paywallVisible}
+        onClose={() => setPaywallVisible(false)}
+        onSubscribe={() => {
+          setPaywallVisible(false);
+          Alert.alert(
+            'Abonnement Pro',
+            'Le parcours de souscription Stripe sera branche dans la prochaine etape.',
+          );
+        }}
+        price={9.99}
+        periodLabel="mois"
+      />
+    </>
   );
 
   return { open, close, modal, lastDevis };

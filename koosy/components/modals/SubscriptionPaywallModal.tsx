@@ -1,0 +1,247 @@
+import React from 'react';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
+
+interface SubscriptionPaywallModalProps {
+	isOpen: boolean;
+	onClose: () => void;
+	onSubscribe: () => void;
+	price?: number;
+	periodLabel?: string;
+}
+
+const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
+	isOpen,
+	onClose,
+	onSubscribe,
+	price = 9.99,
+	periodLabel = 'mois',
+}) => {
+	const { colors } = useTheme();
+
+	const features = [
+		'Creation illimitee de devis',
+		'Creation illimitee de factures',
+		'Export PDF illimite',
+		'Support prioritaire',
+	];
+
+	return (
+		<Modal visible={isOpen} animationType="fade" transparent onRequestClose={onClose}>
+			<View style={styles.overlay}>
+				<View
+					style={[
+						styles.card,
+						{
+							backgroundColor: colors.surface,
+							borderColor: colors.border,
+							shadowColor: colors.shadow,
+						},
+					]}
+				>
+					<TouchableOpacity onPress={onClose} style={styles.closeButton}>
+						<MaterialCommunityIcons name="close" size={22} color={colors.textSecondary} />
+					</TouchableOpacity>
+
+					<View style={[styles.hero, { backgroundColor: colors.primary }]}> 
+						<Text style={styles.heroBadge}>OFFRE PRO</Text>
+						<Text style={styles.heroTitle}>Passez au plan premium</Text>
+						<Text style={styles.heroSubtitle}>Debloquez toutes les fonctionnalites de Koosy</Text>
+					</View>
+
+					<ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+						<View style={[styles.priceBlock, { borderColor: colors.border, backgroundColor: colors.background }]}>
+							<Text style={[styles.priceCurrency, { color: colors.textSecondary }]}>EUR</Text>
+							<Text style={[styles.priceValue, { color: colors.text }]}>{price.toFixed(2)}</Text>
+							<Text style={[styles.pricePeriod, { color: colors.textSecondary }]}>/{periodLabel}</Text>
+						</View>
+
+						<View style={styles.featureList}>
+							{features.map((feature) => (
+								<View key={feature} style={styles.featureRow}>
+									<View style={[styles.featureIcon, { backgroundColor: colors.secondary }]}> 
+										<MaterialCommunityIcons name="check" size={14} color={colors.surface} />
+									</View>
+									<Text style={[styles.featureText, { color: colors.text }]}>{feature}</Text>
+								</View>
+							))}
+						</View>
+
+						<View style={[styles.highlight, { backgroundColor: colors.background, borderColor: colors.border }]}> 
+							<MaterialCommunityIcons name="rocket-launch" size={18} color={colors.primary} />
+							<Text style={[styles.highlightText, { color: colors.text }]}>Passez pro en 1 clic et continuez votre creation sans interruption.</Text>
+						</View>
+
+						<TouchableOpacity
+							activeOpacity={0.9}
+							onPress={onSubscribe}
+							style={[styles.subscribeButton, { backgroundColor: colors.primary }]}
+						>
+							<MaterialCommunityIcons name="crown" size={18} color={colors.surface} />
+							<Text style={styles.subscribeButtonText}>S'abonner maintenant</Text>
+						</TouchableOpacity>
+
+						<TouchableOpacity onPress={onClose} style={styles.secondaryAction}>
+							<Text style={[styles.secondaryActionText, { color: colors.textSecondary }]}>Continuer plus tard</Text>
+						</TouchableOpacity>
+					</ScrollView>
+				</View>
+			</View>
+		</Modal>
+	);
+};
+
+const styles = StyleSheet.create({
+	overlay: {
+		flex: 1,
+		backgroundColor: 'rgba(0, 0, 0, 0.45)',
+		justifyContent: 'center',
+		alignItems: 'center',
+		paddingHorizontal: 16,
+	},
+	card: {
+		width: '100%',
+		maxWidth: 420,
+		borderRadius: 24,
+		borderWidth: 1,
+		overflow: 'hidden',
+		elevation: 10,
+		shadowOpacity: 0.25,
+		shadowRadius: 14,
+		shadowOffset: { width: 0, height: 8 },
+		maxHeight: '90%',
+	},
+	closeButton: {
+		position: 'absolute',
+		top: 12,
+		right: 12,
+		zIndex: 2,
+		width: 32,
+		height: 32,
+		borderRadius: 16,
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: 'rgba(255, 255, 255, 0.92)',
+	},
+	hero: {
+		paddingTop: 28,
+		paddingBottom: 20,
+		paddingHorizontal: 20,
+	},
+	heroBadge: {
+		alignSelf: 'flex-start',
+		backgroundColor: 'rgba(255,255,255,0.18)',
+		color: '#FFFFFF',
+		fontSize: 11,
+		fontWeight: '700',
+		paddingHorizontal: 10,
+		paddingVertical: 4,
+		borderRadius: 999,
+		marginBottom: 12,
+		letterSpacing: 0.4,
+	},
+	heroTitle: {
+		color: '#FFFFFF',
+		fontSize: 24,
+		lineHeight: 28,
+		fontWeight: '800',
+	},
+	heroSubtitle: {
+		marginTop: 6,
+		color: 'rgba(255,255,255,0.92)',
+		fontSize: 14,
+	},
+	body: {
+		paddingHorizontal: 18,
+		paddingTop: 16,
+		paddingBottom: 22,
+		gap: 14,
+	},
+	priceBlock: {
+		flexDirection: 'row',
+		alignItems: 'flex-end',
+		justifyContent: 'center',
+		borderWidth: 1,
+		borderRadius: 16,
+		paddingVertical: 12,
+		paddingHorizontal: 14,
+	},
+	priceCurrency: {
+		fontSize: 12,
+		fontWeight: '700',
+		marginRight: 4,
+		marginBottom: 8,
+	},
+	priceValue: {
+		fontSize: 38,
+		fontWeight: '800',
+		letterSpacing: -0.5,
+	},
+	pricePeriod: {
+		fontSize: 14,
+		fontWeight: '600',
+		marginBottom: 8,
+		marginLeft: 4,
+	},
+	featureList: {
+		gap: 10,
+	},
+	featureRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+	featureIcon: {
+		width: 20,
+		height: 20,
+		borderRadius: 10,
+		alignItems: 'center',
+		justifyContent: 'center',
+		marginRight: 10,
+	},
+	featureText: {
+		fontSize: 14,
+		fontWeight: '600',
+		flex: 1,
+	},
+	highlight: {
+		borderWidth: 1,
+		borderRadius: 14,
+		paddingVertical: 10,
+		paddingHorizontal: 12,
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 8,
+	},
+	highlightText: {
+		flex: 1,
+		fontSize: 12,
+		lineHeight: 18,
+		fontWeight: '500',
+	},
+	subscribeButton: {
+		borderRadius: 14,
+		paddingVertical: 14,
+		alignItems: 'center',
+		justifyContent: 'center',
+		flexDirection: 'row',
+		gap: 8,
+	},
+	subscribeButtonText: {
+		color: '#FFFFFF',
+		fontSize: 15,
+		fontWeight: '800',
+		letterSpacing: 0.2,
+	},
+	secondaryAction: {
+		alignItems: 'center',
+		justifyContent: 'center',
+		paddingVertical: 4,
+	},
+	secondaryActionText: {
+		fontSize: 13,
+		fontWeight: '600',
+	},
+});
+
+export default SubscriptionPaywallModal;
