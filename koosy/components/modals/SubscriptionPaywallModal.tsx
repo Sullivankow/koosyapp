@@ -3,6 +3,16 @@ import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'rea
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 
+const getOnColor = (hexColor: string): string => {
+	const hex = hexColor.replace('#', '');
+	if (hex.length !== 6) return '#FFFFFF';
+	const r = parseInt(hex.slice(0, 2), 16);
+	const g = parseInt(hex.slice(2, 4), 16);
+	const b = parseInt(hex.slice(4, 6), 16);
+	const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+	return luminance > 0.6 ? '#0F172A' : '#FFFFFF';
+};
+
 interface SubscriptionPaywallModalProps {
 	isOpen: boolean;
 	onClose: () => void;
@@ -19,6 +29,9 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 	periodLabel = 'mois',
 }) => {
 	const { colors } = useTheme();
+	const onPrimary = getOnColor(colors.primary);
+	const heroBadgeBg = onPrimary === '#0F172A' ? 'rgba(15,23,42,0.12)' : 'rgba(255,255,255,0.18)';
+	const heroSubtitleColor = onPrimary === '#0F172A' ? 'rgba(15,23,42,0.82)' : 'rgba(255,255,255,0.92)';
 
 	const features = [
 		'Creation illimitee de devis',
@@ -45,9 +58,9 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 					</TouchableOpacity>
 
 					<View style={[styles.hero, { backgroundColor: colors.primary }]}> 
-						<Text style={styles.heroBadge}>OFFRE PRO</Text>
-						<Text style={styles.heroTitle}>Passez au plan premium</Text>
-						<Text style={styles.heroSubtitle}>Debloquez toutes les fonctionnalites de Koosy</Text>
+						<Text style={[styles.heroBadge, { backgroundColor: heroBadgeBg, color: onPrimary }]}>OFFRE PRO</Text>
+						<Text style={[styles.heroTitle, { color: onPrimary }]}>Passez au plan premium</Text>
+						<Text style={[styles.heroSubtitle, { color: heroSubtitleColor }]}>Debloquez toutes les fonctionnalites de Koosy</Text>
 					</View>
 
 					<ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
@@ -78,8 +91,8 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 							onPress={onSubscribe}
 							style={[styles.subscribeButton, { backgroundColor: colors.primary }]}
 						>
-							<MaterialCommunityIcons name="crown" size={18} color={colors.surface} />
-							<Text style={styles.subscribeButtonText}>S'abonner maintenant</Text>
+							<MaterialCommunityIcons name="crown" size={18} color={onPrimary} />
+							<Text style={[styles.subscribeButtonText, { color: onPrimary }]}>S'abonner maintenant</Text>
 						</TouchableOpacity>
 
 						<TouchableOpacity onPress={onClose} style={styles.secondaryAction}>
@@ -131,8 +144,6 @@ const styles = StyleSheet.create({
 	},
 	heroBadge: {
 		alignSelf: 'flex-start',
-		backgroundColor: 'rgba(255,255,255,0.18)',
-		color: '#FFFFFF',
 		fontSize: 11,
 		fontWeight: '700',
 		paddingHorizontal: 10,
@@ -142,14 +153,12 @@ const styles = StyleSheet.create({
 		letterSpacing: 0.4,
 	},
 	heroTitle: {
-		color: '#FFFFFF',
 		fontSize: 24,
 		lineHeight: 28,
 		fontWeight: '800',
 	},
 	heroSubtitle: {
 		marginTop: 6,
-		color: 'rgba(255,255,255,0.92)',
 		fontSize: 14,
 	},
 	body: {
@@ -228,7 +237,6 @@ const styles = StyleSheet.create({
 		gap: 8,
 	},
 	subscribeButtonText: {
-		color: '#FFFFFF',
 		fontSize: 15,
 		fontWeight: '800',
 		letterSpacing: 0.2,

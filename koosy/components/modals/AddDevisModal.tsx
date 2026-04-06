@@ -290,7 +290,8 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 							</View>
 							{/* Champs principaux du devis */}
 							<Text style={[styles.label, { color: colors.text }]}>Numéro</Text>
-							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={numero} onChangeText={setNumero} placeholder="Numéro du devis (optionnel)" placeholderTextColor={colors.textSecondary} />
+							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={numero} onChangeText={setNumero} placeholder="Numéro du devis (optionnel)" placeholderTextColor={colors.textSecondary} keyboardType="numeric" />
+							
 							<Text style={[styles.label, { color: colors.text }]}>Date de validité</Text>
 							<TextInput
 								style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}
@@ -298,7 +299,7 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 								onChangeText={handleDateChange}
 								placeholder="JJ/MM/AAAA"
 								placeholderTextColor={colors.textSecondary}
-								keyboardType="default"
+								keyboardType="numeric"
 							/>
 							{/* Lignes d'articles composant le devis */}
 							<Text style={[styles.sectionTitle, { color: colors.text }]}>Articles</Text>
