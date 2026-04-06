@@ -1,7 +1,9 @@
-import React from 'react';
-import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { Modal, View, Text, TouchableOpacity, StyleSheet, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
+import { useSubscription } from '../../hooks/useSubscription';
+import { STRIPE_PRICES } from '../../constants/config';
 
 const getOnColor = (hexColor: string): string => {
 	const hex = hexColor.replace('#', '');
@@ -16,7 +18,8 @@ const getOnColor = (hexColor: string): string => {
 interface SubscriptionPaywallModalProps {
 	isOpen: boolean;
 	onClose: () => void;
-	onSubscribe: () => void;
+	onSubscribe?: () => void;
+	userToken?: string;
 	price?: number;
 	periodLabel?: string;
 }
@@ -25,10 +28,14 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 	isOpen,
 	onClose,
 	onSubscribe,
+	userToken = '',
 	price = 9.99,
 	periodLabel = 'mois',
 }) => {
 	const { colors } = useTheme();
+	const { loading, error, startCheckout } = useSubscription(userToken);
+	const [isProcessing, setIsProcessing] = useState(false);
+
 	const onPrimary = getOnColor(colors.primary);
 	const heroBadgeBg = onPrimary === '#0F172A' ? 'rgba(15,23,42,0.12)' : 'rgba(255,255,255,0.18)';
 	const heroSubtitleColor = onPrimary === '#0F172A' ? 'rgba(15,23,42,0.82)' : 'rgba(255,255,255,0.92)';
@@ -39,6 +46,42 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 		'Export PDF illimite',
 		'Support prioritaire',
 	];
+
+	const handleSubscribeClick = async () => {
+		setIsProcessing(true);
+		try {
+			// Lancer le checkout Stripe
+			const result = await startCheckout(STRIPE_PRICES.premium_monthly);
+
+			// Fermer seulement si le navigateur Stripe a bien ete ouvert.
+			if (result) {
+				onSubscribe?.();
+			}
+		} catch (err) {
+			Alert.alert('Erreur', 'Impossible de démarrer le paiement');
+		} finally {
+			setIsProcessing(false);
+		}
+	};
+
+	if (error) {
+		return (
+			<Modal visible={isOpen} animationType="fade" transparent onRequestClose={onClose}>
+				<View style={styles.overlay}>
+					<View style={[styles.card, { backgroundColor: colors.surface }]}>
+						<Text style={[styles.errorText, { color: colors.text }]}>
+							Erreur: {error}
+						</Text>
+						<TouchableOpacity onPress={onClose} style={styles.secondaryAction}>
+							<Text style={[styles.secondaryActionText, { color: colors.textSecondary }]}>
+								Fermer
+							</Text>
+						</TouchableOpacity>
+					</View>
+				</View>
+			</Modal>
+		);
+	}
 
 	return (
 		<Modal visible={isOpen} animationType="fade" transparent onRequestClose={onClose}>
@@ -88,14 +131,21 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 
 						<TouchableOpacity
 							activeOpacity={0.9}
-							onPress={onSubscribe}
+							onPress={handleSubscribeClick}
+							disabled={loading || isProcessing}
 							style={[styles.subscribeButton, { backgroundColor: colors.primary }]}
 						>
-							<MaterialCommunityIcons name="crown" size={18} color={onPrimary} />
-							<Text style={[styles.subscribeButtonText, { color: onPrimary }]}>S'abonner maintenant</Text>
+							{loading || isProcessing ? (
+								<ActivityIndicator color={onPrimary} size="small" />
+							) : (
+								<>
+									<MaterialCommunityIcons name="crown" size={18} color={onPrimary} />
+									<Text style={[styles.subscribeButtonText, { color: onPrimary }]}>S'abonner maintenant</Text>
+								</>
+							)}
 						</TouchableOpacity>
 
-						<TouchableOpacity onPress={onClose} style={styles.secondaryAction}>
+						<TouchableOpacity onPress={onClose} style={styles.secondaryAction} disabled={loading || isProcessing}>
 							<Text style={[styles.secondaryActionText, { color: colors.textSecondary }]}>Continuer plus tard</Text>
 						</TouchableOpacity>
 					</ScrollView>
@@ -249,6 +299,13 @@ const styles = StyleSheet.create({
 	secondaryActionText: {
 		fontSize: 13,
 		fontWeight: '600',
+	},
+	errorText: {
+		fontSize: 14,
+		fontWeight: '600',
+		textAlign: 'center',
+		paddingVertical: 16,
+		paddingHorizontal: 20,
 	},
 });
 

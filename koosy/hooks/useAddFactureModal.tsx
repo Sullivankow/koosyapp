@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
 import { ApiError, createFacture } from '../utils/api';
 import AddFactureModal from '../components/modals/AddFactureModal';
 import SubscriptionPaywallModal from '../components/modals/SubscriptionPaywallModal';
@@ -78,10 +77,6 @@ export const useAddFactureModal = (entreprises: Entreprise[]): UseAddFactureModa
         onClose={() => setPaywallVisible(false)}
         onSubscribe={() => {
           setPaywallVisible(false);
-          Alert.alert(
-            'Abonnement Pro',
-            'Le parcours de souscription Stripe sera branche dans la prochaine etape.',
-          );
         }}
         price={9.99}
         periodLabel="mois"

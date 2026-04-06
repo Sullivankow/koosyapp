@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Alert } from 'react-native';
 import { ApiError, createDevis } from '../utils/api';
 import AddDevisModal from '../components/modals/AddDevisModal';
 import SubscriptionPaywallModal from '../components/modals/SubscriptionPaywallModal';
@@ -69,10 +68,6 @@ export const useAddDevisModal = (entreprises: Entreprise[]): UseAddDevisModalRes
         onClose={() => setPaywallVisible(false)}
         onSubscribe={() => {
           setPaywallVisible(false);
-          Alert.alert(
-            'Abonnement Pro',
-            'Le parcours de souscription Stripe sera branche dans la prochaine etape.',
-          );
         }}
         price={9.99}
         periodLabel="mois"

@@ -8,12 +8,12 @@ export class CreateSubscriptionDto {
 
 	// URL où Stripe renvoie l'utilisateur après paiement validé.
 	@IsString()
-	@IsUrl()
+	@IsUrl({ require_tld: false, require_protocol: true })
 	successUrl!: string;
 
 	// URL où Stripe renvoie l'utilisateur si le paiement est annulé.
 	@IsString()
-	@IsUrl()
+	@IsUrl({ require_tld: false, require_protocol: true })
 	cancelUrl!: string;
 
 	// Montant du plan en euros pour mémoriser le tarif historique (grandfathering).

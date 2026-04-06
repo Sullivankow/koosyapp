@@ -80,6 +80,7 @@ export class SubscriptionService {
 		userId: number;
 		stripeCustomerId?: string;
 		stripeSubscriptionId?: string;
+		stripePriceId?: string;
 		status?: SubscriptionStatus;
 		currentPeriodStart?: Date | null;
 		currentPeriodEnd?: Date | null;
@@ -101,6 +102,9 @@ export class SubscriptionService {
 		}
 		if (input.stripeSubscriptionId !== undefined) {
 			subscription.stripeSubscriptionId = input.stripeSubscriptionId;
+		}
+		if (input.stripePriceId !== undefined) {
+			subscription.stripePriceId = input.stripePriceId;
 		}
 		if (input.status !== undefined) {
 			subscription.status = input.status;

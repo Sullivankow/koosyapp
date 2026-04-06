@@ -1,0 +1,4 @@
+{
+  "typescript.tsdk": "koosy/node_modules/typescript/lib",
+  "typescript.enablePromptUseWorkspaceTsdk": true
+}
