@@ -22,6 +22,7 @@ export class UsersService {
     const user = this.usersRepository.create({
       ...createUserDto,
       password: hashedPassword,
+      betaAccessUntil: createUserDto.betaAccessUntil ? new Date(createUserDto.betaAccessUntil) : null,
     });
     return this.usersRepository.save(user);
   }
@@ -49,10 +50,48 @@ async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     throw new NotFoundException('Utilisateur non trouvé');
   }
   Object.assign(user, updateUserDto);
+  if (updateUserDto.betaAccessUntil !== undefined) {
+    user.betaAccessUntil = updateUserDto.betaAccessUntil ? new Date(updateUserDto.betaAccessUntil) : null;
+  }
   if (updateUserDto.password) {
     user.password = await bcrypt.hash(updateUserDto.password, 10);
   }
   return this.usersRepository.save(user);
+}
+
+// Permet d'activer un accès bêta pour une durée donnée à partir d'aujourd'hui.
+async grantBetaAccess(userId: number, durationInDays = 30): Promise<User> {
+  const user = await this.usersRepository.findOne({ where: { id: userId } });
+  if (!user) {
+    throw new NotFoundException('Utilisateur non trouvé');
+  }
+
+  const betaEndDate = new Date();
+  betaEndDate.setDate(betaEndDate.getDate() + durationInDays);
+  user.betaAccessUntil = betaEndDate;
+
+  return this.usersRepository.save(user);
+}
+
+// Permet de retirer immédiatement l'accès bêta à un utilisateur.
+async revokeBetaAccess(userId: number): Promise<User> {
+  const user = await this.usersRepository.findOne({ where: { id: userId } });
+  if (!user) {
+    throw new NotFoundException('Utilisateur non trouvé');
+  }
+
+  user.betaAccessUntil = null;
+  return this.usersRepository.save(user);
+}
+
+// Indique si l'utilisateur a encore un accès bêta valide aujourd'hui.
+async hasBetaAccess(userId: number): Promise<boolean> {
+  const user = await this.usersRepository.findOne({ where: { id: userId } });
+  if (!user || !user.betaAccessUntil) {
+    return false;
+  }
+
+  return new Date(user.betaAccessUntil).getTime() >= new Date().getTime();
 }
 
 

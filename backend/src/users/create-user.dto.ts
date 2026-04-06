@@ -1,4 +1,4 @@
-import { IsEmail, IsString, MinLength, MaxLength, ValidateIf } from 'class-validator';
+import { IsDateString, IsEmail, IsOptional, IsString, MinLength, MaxLength, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 
@@ -31,6 +31,11 @@ export class CreateUserDto {
    
   @ApiProperty({ example: '0601020304', required: false })
   telephone?: string;
+
+  @ApiProperty({ example: '2026-05-06T00:00:00.000Z', required: false, description: 'Date de fin d’accès bêta' })
+  @IsOptional()
+  @IsDateString()
+  betaAccessUntil?: string;
 }
 
 //DTO pour mettre à jour un utilisateur, tous les champs sont optionnels
@@ -62,6 +67,11 @@ export class UpdateUserDto {
 
   @ApiProperty({ example: '0601020304', required: false })
   telephone?: string;
+
+  @ApiProperty({ example: '2026-05-06T00:00:00.000Z', required: false, description: 'Date de fin d’accès bêta' })
+  @IsOptional()
+  @IsDateString()
+  betaAccessUntil?: string;
 
   @ApiProperty({ example: 1, required: false, description: 'ID de l\'entreprise associée' })
   entreprise?: number;

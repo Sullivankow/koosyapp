@@ -36,6 +36,11 @@ telephone: string;
    @Column({ default: 'gratuit' })
   abonnement: 'gratuit' | 'premium';
 
+  // Date jusqu'à laquelle l'utilisateur a le droit d'accéder aux fonctionnalités bêta/pro.
+  // Si cette date est absente ou dépassée, l'accès bêta est considéré comme expiré.
+  @Column({ type: 'timestamptz', nullable: true })
+  betaAccessUntil: Date | null;
+
 
 // Token Expo Push pour notifications
 @Column({ type: 'text', nullable: true })

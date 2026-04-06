@@ -1,4 +1,4 @@
-import { ApiBearerAuth, ApiTags, ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags, ApiBody, ApiOperation, ApiResponse, ApiPropertyOptional } from '@nestjs/swagger';
 import { Controller, Post, Body, Get, Patch, Delete, Param, ForbiddenException, Request, BadRequestException, Put } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { TachesService } from '../taches/taches.service';
@@ -9,6 +9,18 @@ import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
 import { SettingsDto } from './settings.dto';
+import { IsOptional, IsNumber } from 'class-validator';
+
+
+class BetaAccessDto {
+  @ApiPropertyOptional({
+    example: 30,
+    description: 'Nombre de jours pendant lesquels l’accès bêta est actif. Par défaut: 30 jours.',
+  })
+  @IsOptional()
+  @IsNumber()
+  durationInDays?: number;
+}
 
 
 @ApiTags('Utilisateur (Conciergerie)')
@@ -118,6 +130,27 @@ export class UsersController {
     @ApiResponse({ status: 404, description: 'Utilisateur non trouvé.' })
     async adminRemove(@Param('id') id: number) {
       return this.userService.remove(Number(id));
+    }
+
+    // Activer l'accès bêta pour un utilisateur pendant une durée donnée, 30 jours par défaut.
+    @Post('admin/:id/beta-access')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @ApiOperation({ summary: 'Activer l’accès bêta pour un utilisateur' })
+    @ApiBody({ type: BetaAccessDto })
+    async grantBetaAccess(@Param('id') id: number, @Body() body: BetaAccessDto) {
+      return this.userService.grantBetaAccess(Number(id), body.durationInDays ?? 30);
+    }
+
+    // Retirer immédiatement l'accès bêta d'un utilisateur.
+    @Delete('admin/:id/beta-access')
+    @ApiBearerAuth()
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('admin')
+    @ApiOperation({ summary: 'Retirer l’accès bêta à un utilisateur' })
+    async revokeBetaAccess(@Param('id') id: number) {
+      return this.userService.revokeBetaAccess(Number(id));
     }
 
 
