@@ -17,9 +17,9 @@ export class CreateLigneFactureDto {
   @IsNumber()
   prixUnitaireHT: number;
 
-  @ApiProperty({ description: 'TVA en %', example: 20 })
+  @ApiProperty({ description: 'Taux TVA en %', example: 20 })
   @IsNumber()
-  tva: number;
+  tauxTVA: number;
 
   @ApiProperty({ description: 'Total ligne HT', example: 100.00 })
   @IsNotEmpty()

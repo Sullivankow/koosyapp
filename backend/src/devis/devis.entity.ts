@@ -36,7 +36,8 @@ export class Devis {
 	@Column({ type: 'text', nullable: true })
 	notes: string;
 
-
+	@Column({ type: 'text', nullable: true })
+	lieuPrestation: string;
 
 	@ManyToOne(() => Entreprise, { nullable: false, onDelete: 'CASCADE' })
 	entreprise: Entreprise;

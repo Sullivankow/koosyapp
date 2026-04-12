@@ -15,8 +15,9 @@ export class LigneDevis {
   @Column('decimal', { precision: 10, scale: 2 })
   prixUnitaireHT: number;
 
-  @Column('decimal', { precision: 5, scale: 2, default: 0 })
-  tva: number;
+  // Taux TVA en pourcentage (ex: 20 pour 20%)
+  @Column('decimal', { precision: 5, scale: 2, default: 20 })
+  tauxTVA: number;
 
   @Column('decimal', { precision: 10, scale: 2 })
   totalLigneHT: number;

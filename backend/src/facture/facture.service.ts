@@ -98,10 +98,21 @@ export class FactureService {
     // Entreprise à gauche
     let yCursor = infoY;
     doc.font('Helvetica-Bold').text(facture.entreprise?.nom || '', xLeft, yCursor);
-    doc.font('Helvetica');
-    if (facture.entreprise?.adresse) doc.text(facture.entreprise.adresse, xLeft);
+    doc.font('Helvetica').fontSize(9);
     if (facture.entreprise?.siret) doc.text(`SIRET : ${facture.entreprise.siret}`, xLeft);
+    if (facture.entreprise?.siren) doc.text(`SIREN : ${facture.entreprise.siren}`, xLeft);
+    if (facture.entreprise?.codeAPE) doc.text(`Code APE : ${facture.entreprise.codeAPE}`, xLeft);
+    if (facture.entreprise?.tva) doc.text(`TVA : ${facture.entreprise.tva}`, xLeft);
+    doc.fontSize(10);
+    if (facture.entreprise?.adresse) doc.text(facture.entreprise.adresse, xLeft);
+    if (facture.entreprise?.codePostal || facture.entreprise?.ville)
+      doc.text(
+        `${facture.entreprise.codePostal || ''} ${facture.entreprise.ville || ''}`.trim(),
+        xLeft,
+      );
+    if (facture.entreprise?.pays) doc.text(facture.entreprise.pays, xLeft);
     if (facture.entreprise?.email) doc.text(facture.entreprise.email, xLeft);
+    if (facture.entreprise?.telephone) doc.text(`Tél : ${facture.entreprise.telephone}`, xLeft);
 
     // Propriétaire à droite, aligné avec l'entreprise
     yCursor = infoY;
@@ -113,7 +124,7 @@ export class FactureService {
     }
 
     // Ajout d'un espace avant le tableau
-    doc.moveDown(2.5);
+    doc.moveDown(3.2);
 
     // Ligne de séparation
     doc.moveTo(30, doc.y).lineTo(565, doc.y).stroke(mainColor);
@@ -131,9 +142,10 @@ export class FactureService {
     doc.font('Helvetica-Bold').fontSize(11).fillColor(mainColor);
     doc.text('Désignation', tableX + 5, tableY + 6, { width: 170 });
     doc.text('Qté', tableX + 180, tableY + 6, { width: 35, align: 'right' });
-    doc.text('PU HT', tableX + 225, tableY + 6, { width: 60, align: 'right' });
-    doc.text('Total HT', tableX + 295, tableY + 6, { width: 70, align: 'right' });
-    doc.text('Total TTC', tableX + 375, tableY + 6, { width: 85, align: 'right' });
+    doc.text('PU HT', tableX + 225, tableY + 6, { width: 50, align: 'right' });
+    doc.text('TVA %', tableX + 290, tableY + 6, { width: 35, align: 'right' });
+    doc.text('Total HT', tableX + 340, tableY + 6, { width: 60, align: 'right' });
+    doc.text('Total TTC', tableX + 410, tableY + 6, { width: 75, align: 'right' });
     doc.moveTo(tableX, tableY + rowHeight).lineTo(tableX + tableWidth, tableY + rowHeight).stroke(mainColor);
     // Lignes du tableau
     doc.font('Helvetica').fontSize(10).fillColor('black');
@@ -141,9 +153,10 @@ export class FactureService {
     facture.lignes?.forEach((ligne: any) => {
       doc.text(ligne.description, tableX + 5, y, { width: 170 });
       doc.text(ligne.quantite?.toString() || '', tableX + 180, y, { width: 35, align: 'right' });
-      doc.text(ligne.prixUnitaireHT !== undefined && ligne.prixUnitaireHT !== null ? Number(ligne.prixUnitaireHT).toFixed(2) + ' €' : '', tableX + 225, y, { width: 60, align: 'right' });
-      doc.text(ligne.totalLigneHT !== undefined && ligne.totalLigneHT !== null ? Number(ligne.totalLigneHT).toFixed(2) + ' €' : '', tableX + 295, y, { width: 70, align: 'right' });
-      doc.text(ligne.totalLigneTTC !== undefined && ligne.totalLigneTTC !== null ? Number(ligne.totalLigneTTC).toFixed(2) + ' €' : '', tableX + 375, y, { width: 85, align: 'right' });
+      doc.text(ligne.prixUnitaireHT !== undefined && ligne.prixUnitaireHT !== null ? Number(ligne.prixUnitaireHT).toFixed(2) + ' €' : '', tableX + 225, y, { width: 50, align: 'right' });
+      doc.text(ligne.tauxTVA !== undefined && ligne.tauxTVA !== null ? ligne.tauxTVA.toString() + '%' : '', tableX + 290, y, { width: 35, align: 'right' });
+      doc.text(ligne.totalLigneHT !== undefined && ligne.totalLigneHT !== null ? Number(ligne.totalLigneHT).toFixed(2) + ' €' : '', tableX + 340, y, { width: 60, align: 'right' });
+      doc.text(ligne.totalLigneTTC !== undefined && ligne.totalLigneTTC !== null ? Number(ligne.totalLigneTTC).toFixed(2) + ' €' : '', tableX + 410, y, { width: 75, align: 'right' });
       y += rowHeight;
     });
     // Bordure du tableau
@@ -158,9 +171,16 @@ export class FactureService {
     doc.text(`Montant TVA : ${facture.montantTVA !== undefined && facture.montantTVA !== null ? Number(facture.montantTVA).toFixed(2) : '0.00'} €`, tableX + 310, totalY + 22);
     doc.font('Helvetica-Bold').text(`Montant TTC : ${facture.montantTTC !== undefined && facture.montantTTC !== null ? Number(facture.montantTTC).toFixed(2) : '0.00'} €`, tableX + 310, totalY + 36);
     doc.font('Helvetica').fillColor('black');
-
-    // --- Notes et conditions à gauche sous l'entreprise ---
+    // --- LIEU DE PRESTATION, CONDITIONS ET NOTES ---
     let notesY = totalY + 3 * rowHeight + 30;
+    if (facture.lieuPrestation) {
+      doc
+        .font('Helvetica-Oblique')
+        .fontSize(10)
+        .fillColor('#009688')
+        .text(`Lieu de prestation : ${facture.lieuPrestation}`, tableX, notesY, { width: 400 });
+      notesY = doc.y + 4;
+    }
     if (facture.conditionsPaiement) {
       doc.font('Helvetica-Oblique').fontSize(10).fillColor('#666').text(`Conditions de paiement : ${facture.conditionsPaiement}`, tableX, notesY, { width: 400 });
       notesY = doc.y + 4;

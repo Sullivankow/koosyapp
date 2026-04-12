@@ -28,7 +28,7 @@ const defaultLigne: Omit<LigneDevis, 'id'> = {
 	description: '',
 	quantite: 1,
 	prixUnitaireHT: 0,
-	tva: 20,
+	tauxTVA: 20,
 	totalLigneHT: 0,
 	totalLigneTTC: 0,
 };
@@ -48,6 +48,7 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 	// Champs texte complémentaires
 	const [conditions, setConditions] = useState('');
 	const [notes, setNotes] = useState('');
+	const [lieuPrestation, setLieuPrestation] = useState('');
 	const [error, setError] = useState('');
 	const { colors } = useTheme();
 
@@ -88,7 +89,7 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 	const calcLigne = useCallback(
 		(ligne: Omit<LigneDevis, 'id' | 'devis'>): Omit<LigneDevis, 'id' | 'devis'> => {
 			const totalHT = Number(ligne.quantite) * Number(ligne.prixUnitaireHT);
-			const totalTTC = totalHT * (1 + Number(ligne.tva) / 100);
+			const totalTTC = totalHT * (1 + Number(ligne.tauxTVA) / 100);
 			return { ...ligne, totalLigneHT: totalHT, totalLigneTTC: totalTTC };
 		},
 		[],
@@ -111,7 +112,7 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 	const { montantHT, montantTVA, montantTTC } = useMemo(() => {
 		const totalHT = lignes.reduce((sum, l) => sum + (l.totalLigneHT ?? 0), 0);
 		const totalTVA = lignes.reduce(
-			(sum, l) => sum + ((l.totalLigneHT ?? 0) * (l.tva ?? 0)) / 100,
+			(sum, l) => sum + ((l.totalLigneHT ?? 0) * (l.tauxTVA ?? 0)) / 100,
 			0,
 		);
 		return {
@@ -187,12 +188,13 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 			montantTTC,
 			conditions,
 			notes,
+			lieuPrestation,
 			proprietaire: Number(selectedProprioId),
 		};
 		onSubmit(payload);
 		onClose();
 		// Optionnel: reset form
-		setNumero(''); setDateValidite(''); setLignes([{ ...defaultLigne }]); setConditions(''); setNotes(''); setSelectedProprioId(undefined);
+		setNumero(''); setDateValidite(''); setLignes([{ ...defaultLigne }]); setConditions(''); setNotes(''); setLieuPrestation(''); setSelectedProprioId(undefined);
 	};
 
 	if (!isOpen) return null;
@@ -301,6 +303,16 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 								placeholderTextColor={colors.textSecondary}
 								keyboardType="numeric"
 							/>
+
+							<Text style={[styles.label, { color: colors.text }]}>Lieu de prestation</Text>
+							<TextInput
+								style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]}
+								value={lieuPrestation}
+								onChangeText={setLieuPrestation}
+								placeholder="Ex : 12 rue de Paris, 75001 Paris"
+								placeholderTextColor={colors.textSecondary}
+							/>
+
 							{/* Lignes d'articles composant le devis */}
 							<Text style={[styles.sectionTitle, { color: colors.text }]}>Articles</Text>
 							{lignes.map((ligne, idx) => (
@@ -337,8 +349,8 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 										placeholder="Ex : 20"
 										placeholderTextColor={colors.textSecondary}
 										keyboardType="numeric"
-										value={String(ligne.tva)}
-										onChangeText={v => handleLigneChange(idx, 'tva', Number(v))}
+										value={String(ligne.tauxTVA)}
+										onChangeText={v => handleLigneChange(idx, 'tauxTVA', Number(v))}
 									/> 
 									<Text style={{ color: colors.text }}>Total HT: {(ligne.totalLigneHT ?? 0).toFixed(2)} €</Text>
 									<Text style={{ color: colors.text }}>Total TTC: {(ligne.totalLigneTTC ?? 0).toFixed(2)} €</Text>
@@ -354,9 +366,9 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 							<Text style={[styles.summary, { color: colors.text }]}>Total HT: {montantHT.toFixed(2)} € | TVA: {montantTVA.toFixed(2)} € | TTC: {montantTTC.toFixed(2)} €</Text>
 							{/* Zones de texte complémentaires */}
 							<Text style={[styles.label, { color: colors.text }]}>Conditions</Text>
-							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={conditions} onChangeText={setConditions} placeholder="Conditions" placeholderTextColor={colors.textSecondary} multiline />
+							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={conditions} onChangeText={setConditions} placeholder="Conditions" placeholderTextColor={colors.textSecondary} multiline={true} />
 							<Text style={[styles.label, { color: colors.text }]}>Notes</Text>
-							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={notes} onChangeText={setNotes} placeholder="Notes" placeholderTextColor={colors.textSecondary} multiline />
+							<TextInput style={[styles.input, { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border }]} value={notes} onChangeText={setNotes} placeholder="Notes" placeholderTextColor={colors.textSecondary} multiline={true} />
 							{error ? <Text style={{ color: colors.error, marginTop: 10, textAlign: 'center' }}>{error}</Text> : null}
 							{/* Boutons d'action de la modale */}
 							<View style={styles.btnRow}>

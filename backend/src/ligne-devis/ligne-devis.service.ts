@@ -16,14 +16,14 @@ export class LigneDevisService {
    * Calcule automatiquement le montant TTC à partir du HT et du taux de TVA.
    */
   create(createLigneDevisDto: CreateLigneDevisDto) {
-    const { devis, totalLigneHT, tva, ...rest } = createLigneDevisDto;
+    const { devis, totalLigneHT, tauxTVA, ...rest } = createLigneDevisDto;
     // Calcul automatique du TTC
-    const totalLigneTTC = totalLigneHT + (totalLigneHT * (tva ?? 0) / 100);
+    const totalLigneTTC = totalLigneHT + (totalLigneHT * (tauxTVA ?? 0) / 100);
     // Création de l'entité LigneDevis avec la relation vers le devis
     const ligne = this.ligneDevisRepository.create({
       ...rest,
       totalLigneHT,
-      tva,
+      tauxTVA,
       totalLigneTTC,
       devis: { id: devis },
     });
@@ -49,13 +49,13 @@ export class LigneDevisService {
    * Recalcule le montant TTC si le HT ou la TVA changent.
    */
   update(id: number, updateLigneDevisDto: Partial<CreateLigneDevisDto>) {
-    const { devis, totalLigneHT, tva, ...rest } = updateLigneDevisDto;
+    const { devis, totalLigneHT, tauxTVA, ...rest } = updateLigneDevisDto;
     const updatePayload: any = { ...rest };
     // Si le HT ou la TVA sont fournis, on recalcule le TTC
-    if (typeof totalLigneHT === 'number' && typeof tva === 'number') {
-      updatePayload.totalLigneTTC = totalLigneHT + (totalLigneHT * tva / 100);
+    if (typeof totalLigneHT === 'number' && typeof tauxTVA === 'number') {
+      updatePayload.totalLigneTTC = totalLigneHT + (totalLigneHT * tauxTVA / 100);
       updatePayload.totalLigneHT = totalLigneHT;
-      updatePayload.tva = tva;
+      updatePayload.tauxTVA = tauxTVA;
     }
     if (devis) {
       updatePayload.devis = { id: devis };

@@ -41,6 +41,11 @@ export class CreateDevisDto {
   @IsString()
   notes?: string;
 
+  @ApiPropertyOptional({ description: 'Lieu de prestation (adresse ou ville)' })
+  @IsOptional()
+  @IsString()
+  lieuPrestation?: string;
+
   @ApiProperty({ description: "ID de l'entreprise liée au devis" })
   @IsNotEmpty()
   entreprise: number; // id de l'entreprise

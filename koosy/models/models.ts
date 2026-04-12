@@ -164,6 +164,7 @@ export interface Devis {
   montantTTC: number;
   conditions?: string;
   notes?: string;
+  lieuPrestation?: string;
   entreprise: Entreprise;
   proprietaire: Proprietaire;
   lignes?: LigneDevis[];
@@ -180,6 +181,7 @@ export interface Facture {
   montantTTC: number;
   conditionsPaiement?: string;
   notes?: string;
+  lieuPrestation?: string;
   entreprise: Entreprise;
   lignes?: LigneFacture[];
 }
@@ -189,7 +191,7 @@ export interface LigneDevis {
   id: number;
   description: string;
   quantite: number;
-  prixUnitaireHT: number;
+  pauxTVAxUnitaireHT: number;
   tva: number;
   totalLigneHT: number;
   totalLigneTTC: number;
@@ -201,7 +203,7 @@ export interface LigneFacture {
   description: string;
   quantite: number;
   prixUnitaireHT: number;
-  tva: number;
+  tauxTVA: number;
   totalLigneHT: number;
   totalLigneTTC: number;
   facture?: Facture;

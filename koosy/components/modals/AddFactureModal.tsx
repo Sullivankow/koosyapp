@@ -30,7 +30,7 @@ const defaultLigne: LigneFactureForm = {
 	description: '',
 	quantite: 1,
 	prixUnitaireHT: 0,
-	tva: 20,
+	tauxTVA: 20,
 	totalLigneHT: 0,
 	totalLigneTTC: 0,
 };
@@ -176,6 +176,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 	// Champs optionnels
 	const [conditionsPaiement, setConditionsPaiement] = useState('');
 	const [notes, setNotes] = useState('');
+	const [lieuPrestation, setLieuPrestation] = useState('');
 
 	// Gestion des erreurs
 	const [error, setError] = useState('');
@@ -230,7 +231,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 	const calcLigne = useCallback(
 		(ligne: LigneFactureForm): LigneFactureForm => {
 			const totalHT = Number(ligne.quantite) * Number(ligne.prixUnitaireHT);
-			const totalTTC = totalHT * (1 + Number(ligne.tva) / 100);
+			const totalTTC = totalHT * (1 + Number(ligne.tauxTVA) / 100);
 			return { ...ligne, totalLigneHT: totalHT, totalLigneTTC: totalTTC };
 		},
 		[],
@@ -254,7 +255,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 	const { montantHT, montantTVA, montantTTC } = useMemo(() => {
 		const totalHT = lignes.reduce((sum, l) => sum + (l.totalLigneHT ?? 0), 0);
 		const totalTVA = lignes.reduce(
-			(sum, l) => sum + ((l.totalLigneHT ?? 0) * (l.tva ?? 0)) / 100,
+			(sum, l) => sum + ((l.totalLigneHT ?? 0) * (l.tauxTVA ?? 0)) / 100,
 			0,
 		);
 		return {
@@ -286,6 +287,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 			montantTTC,
 			conditionsPaiement,
 			notes,
+			lieuPrestation,
 			statut: 'brouillon',
 			proprietaire: selectedProprioId,
 		});
@@ -297,6 +299,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 		setLignes([{ ...defaultLigne }]);
 		setConditionsPaiement('');
 		setNotes('');
+		setLieuPrestation('');
 		setSelectedProprioId(undefined);
 	};
 
@@ -474,8 +477,8 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 										placeholder="Ex : 20"
 										placeholderTextColor={colors.textSecondary}
 										keyboardType="numeric"
-										value={String(ligne.tva)}
-										onChangeText={v => handleLigneChange(idx, 'tva', Number(v))}
+										value={String(ligne.tauxTVA)}
+										onChangeText={v => handleLigneChange(idx, 'tauxTVA', Number(v))}
 									/>
 									{/* Totaux de la ligne */}
 									<Text style={{ color: colors.text }}>
@@ -507,6 +510,18 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 							<Text style={[styles.summary, { color: colors.text }]}>
 								Total HT: {montantHT.toFixed(2)} € | TVA: {montantTVA.toFixed(2)} € | TTC: {montantTTC.toFixed(2)} €
 							</Text>
+							{/* Lieu de prestation */}
+							<Text style={[styles.label, { color: colors.text }]}>Lieu de prestation</Text>
+							<TextInput
+								style={[
+									styles.input,
+									{ color: colors.text, backgroundColor: colors.surface, borderColor: colors.border },
+								]}
+								value={lieuPrestation}
+								onChangeText={setLieuPrestation}
+								placeholder="Ex : 12 rue de Paris, 75001 Paris"
+								placeholderTextColor={colors.textSecondary}
+							/>
 							{/* Conditions de paiement et notes */}
 							<Text style={[styles.label, { color: colors.text }]}>Conditions de paiement</Text>
 							<TextInput
@@ -518,7 +533,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 								onChangeText={setConditionsPaiement}
 								placeholder="Conditions de paiement"
 								placeholderTextColor={colors.textSecondary}
-								multiline
+								multiline={true}
 							/>
 							<Text style={[styles.label, { color: colors.text }]}>Notes</Text>
 							<TextInput
@@ -530,7 +545,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 								onChangeText={setNotes}
 								placeholder="Notes"
 								placeholderTextColor={colors.textSecondary}
-								multiline
+								multiline={true}
 							/>
 							{/* Affichage des erreurs éventuelles */}
 							{error ? (

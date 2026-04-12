@@ -14,6 +14,15 @@ export class Entreprise {
   @Column({ unique: true })
   siret: string;
 
+  // Numéro SIREN (9 chiffres, dérivé du SIRET)
+  // Nullable pour compatibilité avec les anciennes lignes déjà en base.
+  @Column({ unique: true, nullable: true })
+  siren: string;
+
+  // Code APE/NAF (5 caractères)
+  @Column({ nullable: true })
+  codeAPE: string;
+
   // Numéro de TVA (optionnel)
   @Column({ nullable: true })
   tva: string;

@@ -46,6 +46,11 @@ export class CreateFactureDto {
   @IsString()
   notes?: string;
 
+  @ApiPropertyOptional({ description: 'Lieu de prestation (adresse ou ville)' })
+  @IsOptional()
+  @IsString()
+  lieuPrestation?: string;
+
   @ApiProperty({ description: "ID de l'entreprise liée à la facture" })
   @IsNotEmpty()
   entreprise: number; // id de l'entreprise

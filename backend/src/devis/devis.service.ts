@@ -111,7 +111,12 @@ export class DevisService {
     // Entreprise à gauche
     let yCursor = infoY;
     doc.font('Helvetica-Bold').text(devis.entreprise?.nom || '', xLeft, yCursor);
-    doc.font('Helvetica');
+    doc.font('Helvetica').fontSize(9);
+    if (devis.entreprise?.siret) doc.text(`SIRET : ${devis.entreprise.siret}`, xLeft);
+    if (devis.entreprise?.siren) doc.text(`SIREN : ${devis.entreprise.siren}`, xLeft);
+    if (devis.entreprise?.codeAPE) doc.text(`Code APE : ${devis.entreprise.codeAPE}`, xLeft);
+    if (devis.entreprise?.tva) doc.text(`TVA : ${devis.entreprise.tva}`, xLeft);
+    doc.fontSize(10);
     if (devis.entreprise?.adresse) doc.text(devis.entreprise.adresse, xLeft);
     if (devis.entreprise?.codePostal || devis.entreprise?.ville)
       doc.text(
@@ -131,7 +136,7 @@ export class DevisService {
     }
 
     // Ajout d'un espace plus important avant le tableau
-    doc.moveDown(2.5);
+    doc.moveDown(3.2);
 
     // Ligne de séparation
     doc.moveTo(30, doc.y).lineTo(565, doc.y).stroke(mainColor);
@@ -147,9 +152,9 @@ export class DevisService {
     doc.text('Désignation', 35, tableY + 6, { width: 180 });
     doc.text('Qté', 220, tableY + 6, { width: 35, align: 'right' });
     doc.text('PU HT', 265, tableY + 6, { width: 60, align: 'right' });
-    doc.text('TVA %', 335, tableY + 6, { width: 45, align: 'right' });
-    doc.text('Total HT', 390, tableY + 6, { width: 70, align: 'right' });
-    doc.text('Total TTC', 470, tableY + 6, { width: 85, align: 'right' });
+    doc.text('TVA %', 345, tableY + 6, { width: 45, align: 'right' });
+    doc.text('Total HT', 400, tableY + 6, { width: 70, align: 'right' });
+    doc.text('Total TTC', 480, tableY + 6, { width: 75, align: 'right' });
     doc.moveTo(30, tableY + 22).lineTo(565, tableY + 22).stroke(mainColor);
     // Lignes du tableau
     doc.font('Helvetica').fontSize(10).fillColor('black');
@@ -159,9 +164,9 @@ export class DevisService {
       doc.text(ligne.description, 35, rowY, { width: 180 });
       doc.text(ligne.quantite.toString(), 220, rowY, { width: 35, align: 'right' });
       doc.text(Number(ligne.prixUnitaireHT).toFixed(2) + ' €', 265, rowY, { width: 60, align: 'right' });
-      doc.text(ligne.tva.toString(), 335, rowY, { width: 45, align: 'right' });
-      doc.text(Number(ligne.totalLigneHT).toFixed(2) + ' €', 390, rowY, { width: 70, align: 'right' });
-      doc.text(Number(ligne.totalLigneTTC).toFixed(2) + ' €', 470, rowY, { width: 85, align: 'right' });
+      doc.text(ligne.tauxTVA.toString(), 345, rowY, { width: 45, align: 'right' });
+      doc.text(Number(ligne.totalLigneHT).toFixed(2) + ' €', 400, rowY, { width: 70, align: 'right' });
+      doc.text(Number(ligne.totalLigneTTC).toFixed(2) + ' €', 480, rowY, { width: 75, align: 'right' });
       rowY += rowHeight;
     });
     // Bordure du tableau
@@ -177,8 +182,15 @@ export class DevisService {
     doc.text(`Montant TVA : ${Number(devis.montantTVA).toFixed(2)} €`, 360, totalY + 22);
     doc.font('Helvetica-Bold').text(`Montant TTC : ${Number(devis.montantTTC).toFixed(2)} €`, 360, totalY + 36);
     doc.font('Helvetica').fillColor('black');
-    // === CONDITIONS ET NOTES ===
+    // === LIEU DE PRESTATION ===
     let yCond = totalY + 56;
+    if (devis.lieuPrestation) {
+      doc.fontSize(10).fillColor(mainColor).text('Lieu de prestation :', 30, yCond);
+      doc.fontSize(9).fillColor('black').text(devis.lieuPrestation, 30, doc.y, { width: 535 });
+      yCond = doc.y + 6;
+    }
+
+    // === CONDITIONS ET NOTES ===
     if (devis.conditions) {
       doc.fontSize(10).fillColor(mainColor).text('Conditions de paiement :', 30, yCond);
       doc.fontSize(9).fillColor('black').text(devis.conditions, 30, doc.y, { width: 535 });
