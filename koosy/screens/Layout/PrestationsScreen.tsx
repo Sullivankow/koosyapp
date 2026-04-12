@@ -7,7 +7,7 @@ import { STATUS_CONFIG } from '../../constants/Status';
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { getPrestations, updatePrestationStatut, deletePrestation } from '../../utils/api';
+import { getPrestations, updatePrestationStatut, deletePrestation } from '../../utils/prestationsApi';
 import { Prestation } from '../../models/models';
 import AddPrestationModal from '../../components/modals/AddPrestationModal';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';

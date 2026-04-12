@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
-import { getPrestationsTermineesCount } from '../utils/api';
+import { getPrestationsTermineesCount } from '../utils/prestationsApi';
 
 // Contexte pour partager le nombre de prestations terminées dans l'application
 const PrestationsCountContext = createContext({

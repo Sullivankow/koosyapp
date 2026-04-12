@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getBiens } from '../../utils/bienApi';
-import { createPrestation } from '../../utils/api';
+import { createPrestation } from '../../utils/prestationsApi';
 import { Bien } from '../../models/models';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;

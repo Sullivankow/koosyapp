@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import { getChiffreAffaire, getChargesSummary } from '../utils/api';
+import { getChargesSummary } from '../utils/api';
+import { getChiffreAffaire } from '../utils/prestationsApi';
 import dayjs from 'dayjs';
 import { useChiffreAffaireRefresh } from '../contexts/ChiffreAffaireRefreshContext';
 

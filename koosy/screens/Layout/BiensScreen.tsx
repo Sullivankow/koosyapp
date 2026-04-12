@@ -22,7 +22,7 @@ import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 import { styles } from './styles/BienScreen.styles';
-import { getChiffreAffaire } from '../../utils/api';
+import { getChiffreAffaire } from '../../utils/prestationsApi';
 
 const BiensScreen: React.FC = () => {
   const route: any = useRoute();

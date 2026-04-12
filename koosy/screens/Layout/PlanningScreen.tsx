@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
-import { getPrestations } from '../../utils/api';
+import { getPrestations } from '../../utils/prestationsApi';
 import { Prestation } from '../../models/models';
 import PlanningCalendar from '../../components/PlanningCalendar';
 import { createPlanningScreenStyles } from './styles/PlanningScreen.styles';
