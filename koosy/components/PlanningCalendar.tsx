@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, ActivityIndicator, RefreshControl, 
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../contexts/ThemeContext';
 import { Prestation } from '../models/models';
+import CalendarModal from './modals/CalendarModal';
 
 type PlanningCalendarProps = {
   prestations: Prestation[];
@@ -50,6 +51,17 @@ const statusBg = (status: string, primary: string) => {
   if (normalized.includes('attente')) return primary;
   if (normalized.includes('annul')) return '#C62828';
   return primary;
+};
+
+// Retourne une couleur de texte lisible selon la couleur de fond de la pastille.
+const getContrastTextColor = (hexColor: string) => {
+  const sanitized = hexColor.replace('#', '');
+  if (!/^[0-9a-fA-F]{6}$/.test(sanitized)) return '#FFFFFF';
+  const r = parseInt(sanitized.slice(0, 2), 16);
+  const g = parseInt(sanitized.slice(2, 4), 16);
+  const b = parseInt(sanitized.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.6 ? '#111111' : '#FFFFFF';
 };
 
 const pad2 = (n: number) => String(n).padStart(2, '0');
@@ -137,6 +149,10 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
   const { colors } = useTheme();
   // Curseur du mois affiché en vue grille (permet navigation mois précédent/suivant).
   const [monthCursor, setMonthCursor] = useState<Date>(() => startOfMonth(new Date()));
+  // Données de la modale "toutes les prestations du jour" (vue mois).
+  const [dayModalVisible, setDayModalVisible] = useState(false);
+  const [selectedDayKey, setSelectedDayKey] = useState('');
+  const [selectedDayItems, setSelectedDayItems] = useState<Prestation[]>([]);
 
   const grouped = useMemo<GroupedDay[]>(() => {
     // 1) Tri chronologique pour avoir un planning du plus proche au plus lointain.
@@ -237,6 +253,14 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
     );
   };
 
+  // Ouvre une liste complète des prestations d'un jour pour choisir laquelle consulter.
+  const openDayPrestations = (dateKey: string, items: Prestation[]) => {
+    if (!items.length) return;
+    setSelectedDayKey(dateKey);
+    setSelectedDayItems(items);
+    setDayModalVisible(true);
+  };
+
   if (loading) {
     return (
       <View style={styles.loadingWrap}>
@@ -247,6 +271,7 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
   }
 
   return (
+    <>
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={styles.content}
@@ -266,12 +291,21 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
             {day.items.map((item) => (
               <View key={item.id} style={[styles.itemCard, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
                 <View style={styles.itemHead}>
+                  {/** Fond de pastille calculé une seule fois pour garder une couleur cohérente entre fond et texte. */}
+                  {(() => {
+                    const pillBg = statusBg(item.status, colors.primary);
+                    const pillText = getContrastTextColor(pillBg);
+                    return (
+                      <>
                   <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={1}>
                     {item.bien?.nom || 'Bien non renseigne'}
                   </Text>
-                  <View style={[styles.statusPill, { backgroundColor: statusBg(item.status, colors.primary) }]}>
-                    <Text style={styles.statusText}>{statusLabel(item.status)}</Text>
+                  <View style={[styles.statusPill, { backgroundColor: pillBg }]}>
+                    <Text style={[styles.statusText, { color: pillText }]}>{statusLabel(item.status)}</Text>
                   </View>
+                      </>
+                    );
+                  })()}
                 </View>
                 <Text style={[styles.itemDesc, { color: colors.textSecondary }]} numberOfLines={2}>
                   {item.description || 'Sans description'}
@@ -298,12 +332,20 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
                   items.map((item) => (
                     <View key={item.id} style={[styles.weekItem, { borderColor: colors.border, backgroundColor: colors.background }]}> 
                       <View style={styles.weekItemHead}>
+                        {(() => {
+                          const pillBg = statusBg(item.status, colors.primary);
+                          const pillText = getContrastTextColor(pillBg);
+                          return (
+                            <>
                         <Text style={[styles.weekItemTitle, { color: colors.text }]} numberOfLines={1}>
                           {item.bien?.nom || 'Bien non renseigne'}
                         </Text>
-                        <View style={[styles.weekStatusPill, { backgroundColor: statusBg(item.status, colors.primary) }]}>
-                          <Text style={styles.weekStatusText}>{statusLabel(item.status)}</Text>
+                        <View style={[styles.weekStatusPill, { backgroundColor: pillBg }]}>
+                          <Text style={[styles.weekStatusText, { color: pillText }]}>{statusLabel(item.status)}</Text>
                         </View>
+                            </>
+                          );
+                        })()}
                       </View>
                       <Text style={[styles.weekItemDescription, { color: colors.textSecondary }]} numberOfLines={2}>
                         {item.description || 'Sans description'}
@@ -366,8 +408,10 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
               const isToday = key === todayKey;
 
               return (
-                <View
+                <TouchableOpacity
                   key={key}
+                  activeOpacity={0.92}
+                  onPress={() => openDayPrestations(key, items)}
                   style={[
                     styles.monthCell,
                     { borderColor: colors.border, backgroundColor: colors.surface },
@@ -391,31 +435,41 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
                     ) : null}
                   </View>
 
-                  {/* On limite volontairement à 2 lignes par case pour garder une grille lisible. */}
+                  {/* On limite volontairement à 2 lignes par case pour garder une grille lisible.
+                      Le détail individuel s'ouvre uniquement depuis la modale du jour. */}
                   {items.slice(0, 2).map((item) => (
-                    <TouchableOpacity
+                    <View
                       key={`m-${key}-${item.id}`}
                       style={[styles.monthDotRow, { backgroundColor: colors.background }]}
-                      // Ouvre les infos de la prestation touchée directement depuis la case du jour.
-                      onPress={() => showPrestationDetails(item, key)}
-                      activeOpacity={0.8}
                     >
                       <View style={[styles.monthDot, { backgroundColor: statusBg(item.status, colors.primary) }]} />
                       <Text style={[styles.monthDotLabel, { color: colors.textSecondary }]} numberOfLines={1}>
                         {item.bien?.nom || 'Bien'}
                       </Text>
-                    </TouchableOpacity>
+                    </View>
                   ))}
                   {items.length > 2 ? (
-                    <Text style={[styles.monthMoreText, { color: colors.textSecondary }]}>+{items.length - 2} autres</Text>
+                    <Text style={[styles.monthMoreText, { color: colors.textSecondary }]}>+{items.length - 2} autres (voir)</Text>
                   ) : null}
-                </View>
+                </TouchableOpacity>
               );
             })}
           </View>
         </View>
       )}
     </ScrollView>
+
+    <CalendarModal
+      visible={dayModalVisible}
+      dayKey={selectedDayKey}
+      items={selectedDayItems}
+      onClose={() => setDayModalVisible(false)}
+      onSelectItem={(item, dayKey) => {
+        setDayModalVisible(false);
+        showPrestationDetails(item, dayKey);
+      }}
+    />
+    </>
   );
 };
 

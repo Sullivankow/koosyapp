@@ -1,13 +1,15 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getPrestations } from '../../utils/api';
 import { Prestation } from '../../models/models';
 import PlanningCalendar from '../../components/PlanningCalendar';
+import { createPlanningScreenStyles } from './styles/PlanningScreen.styles';
 
 const PlanningScreen: React.FC = () => {
   const { colors } = useTheme();
+  const styles = createPlanningScreenStyles(colors);
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -43,11 +45,11 @@ const PlanningScreen: React.FC = () => {
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
-      <View style={[styles.header, { borderBottomColor: colors.border, backgroundColor: colors.surface }]}> 
+      <View style={styles.header}> 
         <MaterialCommunityIcons name="calendar-clock" size={22} color={colors.primary} />
-        <Text style={[styles.title, { color: colors.primary }]}>Planning des prestations</Text>
+        <Text style={styles.title}>Planning des prestations</Text>
       </View>
-      <View style={[styles.switchRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}> 
+      <View style={styles.switchRow}> 
         {/* Toggle d'affichage: même source de données, deux présentations UI. */}
         <TouchableOpacity
           style={[
@@ -91,47 +93,5 @@ const PlanningScreen: React.FC = () => {
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: '700',
-  },
-  switchRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 10,
-    paddingHorizontal: 16,
-    paddingTop: 10,
-    paddingBottom: 10,
-    borderBottomWidth: 1,
-  },
-  switchBtn: {
-    minWidth: 112,
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 7,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  switchText: {
-    fontSize: 13,
-    fontWeight: '700',
-    textAlign: 'center',
-  },
-});
 
 export default PlanningScreen;
