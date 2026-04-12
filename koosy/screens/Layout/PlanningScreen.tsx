@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getPrestations } from '../../utils/api';
@@ -11,6 +11,7 @@ const PlanningScreen: React.FC = () => {
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'week' | 'month'>('list');
 
   // Point central de chargement: utilisé au premier rendu et lors du refresh manuel.
   const loadPrestations = useCallback(async (withLoader = true) => {
@@ -46,12 +47,46 @@ const PlanningScreen: React.FC = () => {
         <MaterialCommunityIcons name="calendar-clock" size={22} color={colors.primary} />
         <Text style={[styles.title, { color: colors.primary }]}>Planning des prestations</Text>
       </View>
+      <View style={[styles.switchRow, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}> 
+        {/* Toggle d'affichage: même source de données, deux présentations UI. */}
+        <TouchableOpacity
+          style={[
+            styles.switchBtn,
+            { borderColor: colors.primary },
+            viewMode === 'list' && { backgroundColor: colors.primary },
+          ]}
+          onPress={() => setViewMode('list')}
+        >
+          <Text style={[styles.switchText, { color: viewMode === 'list' ? colors.surface : colors.primary }]}>Liste</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.switchBtn,
+            { borderColor: colors.primary },
+            viewMode === 'week' && { backgroundColor: colors.primary },
+          ]}
+          onPress={() => setViewMode('week')}
+        >
+          <Text style={[styles.switchText, { color: viewMode === 'week' ? colors.surface : colors.primary }]}>Semaine</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[
+            styles.switchBtn,
+            { borderColor: colors.primary },
+            viewMode === 'month' && { backgroundColor: colors.primary },
+          ]}
+          onPress={() => setViewMode('month')}
+        >
+          <Text style={[styles.switchText, { color: viewMode === 'month' ? colors.surface : colors.primary }]}>Mois</Text>
+        </TouchableOpacity>
+      </View>
       <PlanningCalendar
         prestations={prestations}
         loading={loading}
         refreshing={refreshing}
         // Le composant enfant remonte l'action refresh vers cette fonction.
         onRefresh={handleRefresh}
+        viewMode={viewMode}
       />
     </View>
   );
@@ -72,6 +107,30 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '700',
+  },
+  switchRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 10,
+    paddingHorizontal: 16,
+    paddingTop: 10,
+    paddingBottom: 10,
+    borderBottomWidth: 1,
+  },
+  switchBtn: {
+    minWidth: 112,
+    borderWidth: 1,
+    borderRadius: 999,
+    paddingHorizontal: 16,
+    paddingVertical: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  switchText: {
+    fontSize: 13,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });
 
