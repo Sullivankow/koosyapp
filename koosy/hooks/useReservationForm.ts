@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import dayjs from 'dayjs';
-import { createReservation } from '../utils/api';
+import { createReservation } from '../utils/reservationApi';
 
 // Structure de l'état du formulaire de réservation
 export type ReservationFormState = {

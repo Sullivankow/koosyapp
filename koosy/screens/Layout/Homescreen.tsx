@@ -16,7 +16,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SummaryGridCard from '../../components/cards/SummaryGridCard';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import NotificationBell from '../../ui/NotificationBell';
-import { getReservationsCount } from '../../utils/api';
+import { getReservationsCount } from '../../utils/reservationApi';
 import { useBienCount } from '../../contexts/BienCountContext';
 import { useTacheCount } from '../../contexts/TacheCountContext';
 import { useTache } from '../../contexts/TacheContext';

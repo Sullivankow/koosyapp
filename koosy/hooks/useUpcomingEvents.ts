@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { getMe, getEventsUpcoming } from '../utils/api';
+import { getMe } from '../utils/api';
+import { getEventsUpcoming } from '../utils/reservationApi';
 
 /**
  * Hook pour charger les événements à venir (arrivées, départs, réservations).

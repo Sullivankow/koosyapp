@@ -12,7 +12,7 @@ import { Reservation, Bien } from '../../models/models';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import HeaderWithAddButton from '../../ui/HeaderWithAddButton';
 import { getBiens } from '../../utils/bienApi';
-import { createReservation, getReservations } from '../../utils/api';
+import { createReservation, getReservations, deleteReservation, updateReservationStatut } from '../../utils/reservationApi';
 import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 import dayjs from 'dayjs';
@@ -180,7 +180,7 @@ function ReservationScreen() {
                                     { text: 'Annuler', style: 'cancel' },
                                     { text: 'Supprimer', style: 'destructive', onPress: async () => {
                                         try {
-                                          await import('../../utils/api').then(api => api.deleteReservation(r.id));
+                                          await deleteReservation(r.id);
                                           fetchData();
                                           signalBienAdded();
                                         } catch (e) {
@@ -221,7 +221,7 @@ function ReservationScreen() {
                                     disabled={isActive}
                                     onPress={async () => {
                                       if (!isActive) {
-                                        await import('../../utils/api').then(api => api.updateReservationStatut(r.id, s as 'en attente' | 'confirmée' | 'terminée' | 'annulée'));
+                                        await updateReservationStatut(r.id, s as 'en attente' | 'confirmée' | 'terminée' | 'annulée');
                                         fetchData();
                                         signalBienAdded();
                                       }
