@@ -13,7 +13,7 @@ const PlanningScreen: React.FC = () => {
   const [prestations, setPrestations] = useState<Prestation[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-  const [viewMode, setViewMode] = useState<'list' | 'week' | 'month'>('list');
+  const [viewMode, setViewMode] = useState<'list' | 'today' | 'week' | 'month'>('today');
 
   // Point central de chargement: utilisé au premier rendu et lors du refresh manuel.
   const loadPrestations = useCallback(async (withLoader = true) => {
@@ -51,6 +51,16 @@ const PlanningScreen: React.FC = () => {
       </View>
       <View style={styles.switchRow}> 
         {/* Toggle d'affichage: même source de données, deux présentations UI. */}
+        <TouchableOpacity
+          style={[
+            styles.switchBtn,
+            { borderColor: colors.primary },
+            viewMode === 'today' && { backgroundColor: colors.primary },
+          ]}
+          onPress={() => setViewMode('today')}
+        >
+          <Text style={[styles.switchText, { color: viewMode === 'today' ? colors.surface : colors.primary }]}>Jour J</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[
             styles.switchBtn,

@@ -10,7 +10,7 @@ type PlanningCalendarProps = {
   loading: boolean;
   refreshing: boolean;
   onRefresh: () => void;
-  viewMode: 'list' | 'week' | 'month';
+  viewMode: 'list' | 'today' | 'week' | 'month';
 };
 
 type GroupedDay = {
@@ -209,6 +209,16 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
   const today = useMemo(() => new Date(), []);
   const todayKey = useMemo(() => toLocalDateKey(today), [today]);
 
+  const todayItems = useMemo(() => {
+    return prestations
+      .filter((item) => getDateKey(item) === todayKey)
+      .sort((a, b) => {
+        const da = new Date(a.date_prestation || a.created_at).getTime();
+        const db = new Date(b.date_prestation || b.created_at).getTime();
+        return da - db;
+      });
+  }, [prestations, todayKey]);
+
   const monthStart = useMemo(() => startOfMonth(monthCursor), [monthCursor]);
   const monthEnd = useMemo(() => endOfMonth(monthCursor), [monthCursor]);
   const gridStart = useMemo(() => startOfGrid(monthStart), [monthStart]);
@@ -318,6 +328,42 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
             ))}
           </View>
         ))
+      ) : viewMode === 'today' ? (
+        <View style={styles.dayBlock}>
+          {/* Section Jour J: toutes les prestations prévues aujourd'hui. */}
+          <Text style={[styles.dayTitle, { color: colors.primary }]}>Jour J - {formatDateLabel(todayKey)}</Text>
+          {todayItems.length === 0 ? (
+            <View style={[styles.emptyCard, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
+              <MaterialCommunityIcons name="calendar-check" size={28} color={colors.primary} />
+              <Text style={[styles.emptyTitle, { color: colors.text }]}>Aucune prestation aujourd'hui</Text>
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Les prestations du jour apparaitront ici.</Text>
+            </View>
+          ) : (
+            todayItems.map((item) => {
+              const pillBg = statusBg(item.status, colors.primary);
+              const pillText = getContrastTextColor(pillBg);
+              return (
+                <View key={`today-${item.id}`} style={[styles.itemCard, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
+                  <View style={styles.itemHead}>
+                    <Text style={[styles.itemTitle, { color: colors.text }]} numberOfLines={1}>
+                      {item.bien?.nom || 'Bien non renseigne'}
+                    </Text>
+                    <View style={[styles.statusPill, { backgroundColor: pillBg }]}>
+                      <Text style={[styles.statusText, { color: pillText }]}>{statusLabel(item.status)}</Text>
+                    </View>
+                  </View>
+                  <Text style={[styles.itemDesc, { color: colors.textSecondary }]} numberOfLines={2}>
+                    {item.description || 'Sans description'}
+                  </Text>
+                  <View style={styles.metaRow}>
+                    <MaterialCommunityIcons name="currency-eur" size={16} color={colors.textSecondary} />
+                    <Text style={[styles.metaText, { color: colors.textSecondary }]}>{formatAmount(item.amount_cents)}</Text>
+                  </View>
+                </View>
+              );
+            })
+          )}
+        </View>
       ) : viewMode === 'week' ? (
         <View style={styles.weekWrap}>
           {weekDays.map((day) => {
