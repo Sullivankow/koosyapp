@@ -136,6 +136,20 @@ export interface Prestation {
   updated_at: string;
 }
 
+export interface Charge {
+  // Modèle partagé entre l'écran de charges et les helpers API.
+  id: number;
+  userId?: number;
+  libelle: string;
+  amount_cents: number;
+  currency: string;
+  date_charge: string;
+  categorie?: string;
+  notes?: string;
+  created_at?: string;
+  updated_at?: string;
+}
+
 
 // === Devis & Facture ===
 

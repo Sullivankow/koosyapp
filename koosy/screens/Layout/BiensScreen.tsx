@@ -22,6 +22,7 @@ import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 import { styles } from './styles/BienScreen.styles';
+import { getChiffreAffaire } from '../../utils/api';
 
 const BiensScreen: React.FC = () => {
   const route: any = useRoute();
@@ -41,6 +42,7 @@ const BiensScreen: React.FC = () => {
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
   const [editModalData, setEditModalData] = useState<{ visible: boolean; bienId?: string; initialData?: any }>({ visible: false });
   const [successMsg, setSuccessMsg] = useState('');
+  const [totalPerBienMap, setTotalPerBienMap] = useState<Record<string, number>>({});
   const { colors } = useTheme();
 
   // Récupération des biens (ajout de tacheCount comme dépendance)
@@ -76,6 +78,31 @@ const BiensScreen: React.FC = () => {
       navigation.setParams({ focusBienId: undefined });
     }
   }, [focusBienId, sortedBiens]);
+
+  // Charge les totaux historiques des prestations terminées par bien.
+  // Un seul appel API agrégé, puis mapping bienId -> total_euros.
+  useEffect(() => {
+    const loadTotalsPerBien = async () => {
+      try {
+        const now = new Date().toISOString().slice(0, 10);
+        const summary = await getChiffreAffaire('2000-01-01', now);
+        const perBien = Array.isArray(summary?.perBien) ? summary.perBien : [];
+        const nextMap: Record<string, number> = {};
+
+        perBien.forEach((item: any) => {
+          const id = String(item?.bienId ?? '');
+          if (!id) return;
+          nextMap[id] = Number(item?.total_euros ?? 0);
+        });
+
+        setTotalPerBienMap(nextMap);
+      } catch {
+        setTotalPerBienMap({});
+      }
+    };
+
+    loadTotalsPerBien();
+  }, [prestationsTerminees, lastBienAdded]);
 
   // Formatage simple d'une date au format français (JJ/MM/AAAA)
   const formatDateFR = (dateStr?: string) => {
@@ -203,6 +230,7 @@ const BiensScreen: React.FC = () => {
             onStatus={openStatusModal}
             onPhotoPress={handlePhotoPress}
             formatDateFR={formatDateFR}
+            totalPrestationPercu={totalPerBienMap[String(item.id)] ?? 0}
             // La carte n'a plus besoin de remonter les changements de statut de tâche ici
           />
         )}

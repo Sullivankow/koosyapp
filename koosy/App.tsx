@@ -36,6 +36,7 @@ import ListeDevisScreen from './screens/Layout/ListeDevisScreen';
 import ListeFactureScreen from './screens/Layout/ListeFactureScreen';
 import { GlobalRefreshProvider } from './contexts/GlobalRefreshContext';
 import PlanningScreen from './screens/Layout/PlanningScreen';
+import ChargesScreen from './screens/Layout/ChargesScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -56,6 +57,8 @@ function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
       <HomeStack.Screen name="TachesScreen" component={TachesScreen} />
       {/* Route utilisée par le bouton "Planning presta" depuis l'écran d'accueil. */}
       <HomeStack.Screen name="PlanningScreen" component={PlanningScreen} />
+      {/* Route dédiée aux charges pour garder le dashboard principal plus léger. */}
+      <HomeStack.Screen name="ChargesScreen" component={ChargesScreen} />
     </HomeStack.Navigator>
   );
 }

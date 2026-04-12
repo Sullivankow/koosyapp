@@ -13,6 +13,7 @@ import ButtonAction from '../../../ui/ButtonAction';
 
 interface BienCardProps {
 	bien: Bien & { photos?: (string | { uri: string })[] };
+	totalPrestationPercu: number;
 	colors: {
 		surface: string;
 		primary: string;
@@ -29,7 +30,7 @@ interface BienCardProps {
 	formatDateFR: (dateStr?: string) => string;
 }
 
-const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR }) => {
+const BienCard: React.FC<BienCardProps> = ({ bien, totalPrestationPercu, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR }) => {
 	const [isEditing, setIsEditing] = useState(false);
 	const [editValues, setEditValues] = useState({
 		nom: bien.nom || '',
@@ -203,6 +204,11 @@ const BienCard: React.FC<BienCardProps> = ({ bien, colors, onEdit, onDelete, onS
 				<Text style={{ color: colors.text, fontWeight: 'bold' }}>Prestations :</Text>
 			</View>
 			<PrestationTimeline prestations={bien.prestations} colors={colors} formatDateFR={formatDateFR} styles={styles} />
+			{/* Total perçu sur ce bien (prestations terminées agrégées) */}
+			<View style={{ marginTop: 10, marginBottom: 4, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 10, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary }}>
+				<Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: '700', marginBottom: 2 }}>Total perçu (prestations)</Text>
+				<Text style={{ color: colors.primary, fontSize: 18, fontWeight: '800' }}>{Number(totalPrestationPercu || 0).toFixed(2)} €</Text>
+			</View>
 			{/* Actions principales */}
 			<View style={styles.floatingActions}>
 				<ButtonAction

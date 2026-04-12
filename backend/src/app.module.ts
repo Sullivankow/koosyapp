@@ -21,6 +21,7 @@ import { FactureModule } from './facture/facture.module';
 import { LigneDevisModule } from './ligne-devis/ligne-devis.module';
 import { ProprietaireModule } from './proprietaire/proprietaire.module';
 import { SubscriptionModule } from './subscriptions/subscription.module';
+import { ChargesModule } from './charges/charges.module';
 
 @Module({
   imports: [
@@ -55,6 +56,8 @@ import { SubscriptionModule } from './subscriptions/subscription.module';
     LigneDevisModule,
     ProprietaireModule,
     SubscriptionModule,
+    // Le module charges ajoute les routes de dépenses à l'API.
+    ChargesModule,
     
 
 

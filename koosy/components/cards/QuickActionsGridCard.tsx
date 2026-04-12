@@ -13,6 +13,7 @@ interface QuickActionsGridCardProps {
   onGoToFacture: () => void;
   // Ouvre l'écran planning des prestations depuis le dashboard.
   onGoToPlanning: () => void;
+  onGoToCharges: () => void;
 }
 
 const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
@@ -23,6 +24,7 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
   onGoToDevis,
   onGoToFacture,
   onGoToPlanning,
+  onGoToCharges,
 }) => {
   const { colors } = useTheme();
   return (
@@ -41,9 +43,15 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
             <MaterialCommunityIcons name="playlist-plus" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes tâches</Text>
           </TouchableOpacity>
+        </View>
+        <View style={styles.rowGrid}>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToDevis}>
             <MaterialCommunityIcons name="file-document-edit" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes devis</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToFacture}>
+            <MaterialCommunityIcons name="file-document-outline" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes factures</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.rowGrid}>
@@ -55,20 +63,16 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
             <FontAwesome5 name="user-plus" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Presta</Text>
           </TouchableOpacity>
-          <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToFacture}>
-            <MaterialCommunityIcons name="file-document-outline" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
-            <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes factures</Text>
-          </TouchableOpacity>
         </View>
-        {/* Ligne dédiée à l'accès rapide du planning prestation. */}
         <View style={styles.rowGrid}>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToPlanning}>
             <MaterialCommunityIcons name="calendar-clock" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Planning presta</Text>
           </TouchableOpacity>
-          {/* Espaces vides pour conserver la même grille 3 colonnes que les autres lignes. */}
-          <View style={styles.valueBoxSpacer} />
-          <View style={styles.valueBoxSpacer} />
+          <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToCharges}>
+            <MaterialCommunityIcons name="cash-multiple" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes charges</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -99,30 +103,25 @@ const styles = StyleSheet.create({
   },
   rowGrid: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
+    justifyContent: 'space-between',
     marginBottom: 12,
   },
   valueBoxGrid: {
-    flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
     borderWidth: 1.2,
     paddingVertical: 8,
     paddingHorizontal: 6,
-    marginHorizontal: 2,
     shadowOpacity: 0.08,
     shadowRadius: 2,
     elevation: 1,
-    minWidth: 80,
-    maxWidth: 120,
+    width: '48%',
+    minHeight: 68,
   },
   valueBoxSpacer: {
-    flex: 1,
-    minWidth: 80,
-    maxWidth: 120,
-    marginHorizontal: 2,
+    width: '48%',
+    minHeight: 68,
   },
   labelGrid: {
     fontSize: 13,

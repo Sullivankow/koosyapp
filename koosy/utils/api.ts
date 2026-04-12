@@ -4,7 +4,7 @@
 /*  La plupart des helpers ci‑dessous passent par `apiFetch`, qui ajoute      */
 /*  automatiquement la BASE_URL et le token JWT quand il existe.              */
 /* -------------------------------------------------------------------------- */
-import { Bien, Devis } from '../models/models';
+import { Bien, Charge, Devis, Facture, Proprietaire } from '../models/models';
 import { getSession } from './session';
 import { BASE_URL } from '../constants/config';
 
@@ -35,7 +35,8 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
     ...options.headers,
   };
-  const response = await fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+  const url = `${BASE_URL}${endpoint}`;
+  const response = await fetch(url, { ...options, headers });
   if (!response.ok) {
     const errorText = await response.text();
     let message = errorText || `Erreur API: ${response.status}`;
@@ -561,6 +562,59 @@ export async function updateEntreprise(id: number | string, data: Partial<any>):
   });
 }
 
+// Crée une charge utilisateur (montant en euros).
+// La date reste textuelle côté front afin de rester lisible pour l'utilisateur.
+export async function createCharge(data: {
+  libelle: string;
+  amount: number;
+  date_charge?: string;
+  categorie?: string;
+  notes?: string;
+}) {
+  return apiFetch('/charges', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+// Liste les charges de l'utilisateur connecté.
+export async function getCharges(params?: { page?: number; limit?: number; from?: string; to?: string }) {
+  const q = new URLSearchParams();
+  if (params?.page) q.set('page', String(params.page));
+  if (params?.limit) q.set('limit', String(params.limit));
+  if (params?.from) q.set('from', params.from);
+  if (params?.to) q.set('to', params.to);
+  const suffix = q.toString() ? `?${q.toString()}` : '';
+  return apiFetch(`/charges${suffix}`);
+}
+
+// Résumé des charges sur une période.
+export async function getChargesSummary(from: string, to: string) {
+  return apiFetch(`/charges/summary?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`);
+}
+
+export async function updateCharge(
+  id: number | string,
+  data: {
+    libelle?: string;
+    amount?: number;
+    date_charge?: string;
+    categorie?: string;
+    notes?: string;
+  }
+): Promise<Charge> {
+  return apiFetch(`/charges/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export async function deleteCharge(id: number | string): Promise<void> {
+  await apiFetch(`/charges/${id}`, {
+    method: 'DELETE',
+  });
+}
+
 // Supprime une entreprise par son id
 export async function deleteEntreprise(id: number): Promise<void> {
   const session = await getSession();
@@ -613,9 +667,6 @@ export async function deleteDevis(id: number): Promise<void> {
 export function getDevisPdfUrl(id: number) {
   return `${BASE_URL}/devis/${id}/pdf`;
 }
-
-
-import { Facture } from '../models/models';
 // Fonction pour récupérer la liste des factures
 export async function getFactures(): Promise<Facture[]> {
  
@@ -648,7 +699,6 @@ export function getFacturePdfUrl(id: number) {
 }
 
 // Récupérer la liste des propriétaires existants
-import type { Proprietaire } from '../models/models';
 export async function getProprietaires(): Promise<Proprietaire[]> {
   return apiFetch('/proprietaire');
 }

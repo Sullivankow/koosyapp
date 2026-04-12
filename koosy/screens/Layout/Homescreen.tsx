@@ -78,7 +78,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
     const { signalReservationAdded } = useReservationRefresh();
     // Ajout du hook pour le compteur de prestations terminées
     const { prestationsTerminees } = usePrestationsCount();
-    const { caMois, caGlobal, caAnnee, caMoisN1 } = useChiffreAffaire();
+    const {
+        caMois,
+        caGlobal,
+        caAnnee,
+        caMoisN1,
+        caJour,
+        caJourN1,
+        caAnneeN1,
+        caMoisN2,
+        margeMois,
+        margeGlobal,
+        margeAnnee,
+        margeMoisN1,
+        margeJour,
+        margeJourN1,
+        margeAnneeN1,
+        margeMoisN2,
+    } = useChiffreAffaire();
      const { modal: addDevisModal } = useAddDevisModal(entreprises);
 
     // Effet d'initialisation :
@@ -132,6 +149,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
     // Raccourci vers le planning des prestations.
     const handleGoToPlanning = () => {
         if (navigation) navigation.navigate('PlanningScreen');
+    };
+
+    // Raccourci vers l'écran des charges.
+    const handleGoToCharges = () => {
+        if (navigation) navigation.navigate('ChargesScreen');
     };
 
     // Handler pour ouvrir la page Répertoire Propriétaire
@@ -192,7 +214,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                                 />
 
                                 {/* Résumé interactif */}
-                                <ChiffreAffaireCard caMois={caMois} caGlobal={caGlobal} caAnnee={caAnnee} caMoisN1={caMoisN1} />
+                                <ChiffreAffaireCard
+                                    caMois={caMois}
+                                    caGlobal={caGlobal}
+                                    caAnnee={caAnnee}
+                                    caMoisN1={caMoisN1}
+                                    caJour={caJour}
+                                    caJourN1={caJourN1}
+                                    caAnneeN1={caAnneeN1}
+                                    caMoisN2={caMoisN2}
+                                    margeMois={margeMois}
+                                    margeGlobal={margeGlobal}
+                                    margeAnnee={margeAnnee}
+                                    margeMoisN1={margeMoisN1}
+                                    margeJour={margeJour}
+                                    margeJourN1={margeJourN1}
+                                    margeAnneeN1={margeAnneeN1}
+                                    margeMoisN2={margeMoisN2}
+                                />
                                 <SummaryGridCard
                                         biensCount={biensCount}
                                         reservationsCount={reservationsCount}
@@ -208,8 +247,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                                     onAddPrestation={() => setAddPrestationModalVisible(true)}
                                     onGoToDevis={handleGoToListeDevis}
                                     onGoToFacture={handleGoToListeFacture}
-                                    // Bouton ajouté pour ouvrir l'écran planning des prestations.
                                     onGoToPlanning={handleGoToPlanning}
+                                    onGoToCharges={handleGoToCharges}
                         />
             </ScrollView>
             {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}
