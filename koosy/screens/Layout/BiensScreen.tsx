@@ -137,7 +137,7 @@ const BiensScreen: React.FC = () => {
   const handleSelectStatus = async (status: StatusValue) => {
     if (!currentStatusBienId) return;
     try {
-      const fullBien = await (await import('../../utils/api')).getBienById(currentStatusBienId);
+      const fullBien = await (await import('../../utils/bienApi')).getBienById(currentStatusBienId);
       if (!fullBien) throw new Error('Bien introuvable');
       const payload = {
         proprietaireNom: fullBien.proprietaireNom || fullBien.proprio?.nom || '',

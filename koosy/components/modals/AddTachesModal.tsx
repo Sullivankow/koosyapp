@@ -16,7 +16,8 @@ import {
 	ScrollView,
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { getBiens, createTache } from '../../utils/api';
+import { getBiens } from '../../utils/bienApi';
+import { createTache } from '../../utils/api';
 import { useTache } from '../../contexts/TacheContext';
 import { Bien } from '../../models/models';
 

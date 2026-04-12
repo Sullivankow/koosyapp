@@ -23,7 +23,7 @@ import { useTache } from '../../contexts/TacheContext';
 import AddBienModal from '../../components/modals/AddBienModal';
 import AddReservationsModal from '../../components/modals/AddReservationsModal';
 import AddPrestationModal from '../../components/modals/AddPrestationModal';
-import { getBiens } from '../../utils/api';
+import { getBiens } from '../../utils/bienApi';
 import { useReservationForm } from '../../hooks/useReservationForm';
 import { useUpcomingEvents } from '../../hooks/useUpcomingEvents';
 import { Bien, Entreprise } from '../../models/models';

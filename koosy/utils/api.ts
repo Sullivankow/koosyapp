@@ -4,7 +4,7 @@
 /*  La plupart des helpers ci‑dessous passent par `apiFetch`, qui ajoute      */
 /*  automatiquement la BASE_URL et le token JWT quand il existe.              */
 /* -------------------------------------------------------------------------- */
-import { Bien, Charge, Devis, Facture, Proprietaire } from '../models/models';
+import { Charge, Devis, Facture, Proprietaire } from '../models/models';
 import { getSession } from './session';
 import { BASE_URL } from '../constants/config';
 
@@ -88,12 +88,6 @@ export async function login({ email, password }: { email: string; password: stri
 
 
 //PAGE D'ACCUEIL
-//Fonction pour récupérer le nombre total de biens
-export async function getBiensCount(): Promise<{ total: number }> {
-  return apiFetch('/biens/count');
-}
-
-
 //Fonction pour récupérer le nombre total de locataires
 export async function getReservationsCount(): Promise<{ total: number }> {
   return apiFetch('/reservations/count');
@@ -105,109 +99,17 @@ export async function getTachesAFaireTotal(): Promise<{ total: number }> {
   return apiFetch('/taches/count-a-faire-total');
 }
 
-// Récupérer la liste des biens de l'utilisateur connecté
-export async function getBiens(): Promise<Bien[]> {
-  const biens = await apiFetch('/biens');
-  // On mappe proprietaire -> proprio si besoin
-  return (biens || []).map((bien: any) => {
-    if (bien.proprietaire && !bien.proprio) {
-      return { ...bien, proprio: bien.proprietaire };
-    }
-    return bien;
-  });
-}
-
-// Récupère un bien par son id
-export async function getBienById(id: string | number): Promise<any> {
-  return apiFetch(`/biens/${id}`);
-}
-
-
-//Fonction pour récupérer l'URL complète d'une image d'un bien
-export function getImageUrl(url: string): string {
-  if (!url) return '';
-  const cleanUrl = url.replace(/\\\\|\\/g, '/');
-  return cleanUrl.startsWith('http') ? cleanUrl : `${BASE_URL}/${cleanUrl}`;
-}
-
-//Fonction pour créer un nouveau bien
-export async function createBien(data: {
-  nom: string;
-  adresse: string;
-  type?: string;
-  superficie: number;
-  pieces: number;
-  proprietaire: number;
-  equipements?: string[];
-}): Promise<{ id: number }> {
-  // On attend un objet avec l'id du bien créé
-  const res = await apiFetch('/biens', {
-    method: 'POST',
-    body: JSON.stringify(data),
-  });
-  // Si le backend retourne l'objet bien, on extrait l'id
-  return { id: res.id ?? res.bien?.id ?? res["id"] };
-}
-// Fonction pour uploader les images d'un bien
-export async function uploadBienImages(bienId: number, imageUris: string[]): Promise<void> {
-  const session = await getSession();
-  const token = session?.token;
-  for (const uri of imageUris) {
-    const formData = new FormData();
-    // Expo-image-picker retourne un uri local, il faut le transformer en fichier
-    const filename = uri.split('/').pop() || `image_${Date.now()}.jpg`;
-    const match = uri.match(/\.(\w+)$/);
-    const type = match ? `image/${match[1]}` : `image`;
-    formData.append('file', {
-      uri,
-      name: filename,
-      type,
-    } as any);
-    await fetch(`${BASE_URL}/bien-image/biens/${bienId}/images`, {
-      method: 'POST',
-      headers: {
-        'Authorization': token ? `Bearer ${token}` : '',
-        'Content-Type': 'multipart/form-data',
-      },
-      body: formData,
-    });
-  }
-}
-
-
-
-// Fonction pour modifier un bien
-export async function updateBien(id: string, data: any): Promise<any> {
-  // Mise à jour partielle d'un bien (titre, adresse, statut, etc.).
-  // L'authentification est gérée automatiquement par apiFetch.
-  return apiFetch(`/biens/${id}`, {
-    method: 'PATCH',
-    body: JSON.stringify(data),
-  });
-}
-
-// Utilise l'endpoint backend pour géocoder une adresse (le backend centralise la clé)
-export async function geocodeAdresse(adresse: string): Promise<{ lat: number; lng: number } | null> {
-  if (!adresse) return null;
-  try {
-    const res = await apiFetch(`/biens/geocode?adresse=${encodeURIComponent(adresse)}`);
-    // Le backend retourne { lat, lng } ou null
-    return res ?? null;
-  } catch (err) {
-    // Ne pas faire planter l'app si le géocodage échoue
-    return null;
-  }
-}
-
-
-
-//Fonction pour supprimer un bien par son iD
-export async function deleteBien(id: string): Promise<void> {
-  // Supprime définitivement un bien.
-  return apiFetch(`/biens/${id}`, {
-    method: 'DELETE',
-  });
-}
+export {
+  getBiensCount,
+  getBiens,
+  getBienById,
+  getImageUrl,
+  createBien,
+  uploadBienImages,
+  updateBien,
+  geocodeAdresse,
+  deleteBien,
+} from './bienApi';
 
 
 

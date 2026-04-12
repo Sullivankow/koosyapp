@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getBiens, updateBien, deleteBien, getImageUrl } from '../utils/api';
+import { getBiens, updateBien, deleteBien, getImageUrl } from '../utils/bienApi';
 import type { Bien } from '../models/models';
 
 /**

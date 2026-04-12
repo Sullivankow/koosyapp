@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { getBiensCount } from '../utils/api';
+import { getBiensCount } from '../utils/bienApi';
 
 // Type décrivant les données et fonctions exposées par le contexte
 interface BienCountContextType {

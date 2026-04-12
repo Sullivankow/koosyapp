@@ -4,7 +4,8 @@ import { View, Text, TextInput, ScrollView, TouchableOpacity, StyleSheet, Modal,
 import dayjs from 'dayjs';
 import 'dayjs/locale/fr';
 import { CreateDevisPayload, LigneDevis, Entreprise, Bien } from '../../models/models';
-import { getBiens, apiFetchMyEntreprise } from '../../utils/api';
+import { getBiens } from '../../utils/bienApi';
+import { apiFetchMyEntreprise } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
 import PlusButton from '../../ui/PlusButton';
 
@@ -23,8 +24,17 @@ type Proprietaire = {
 	nom: string;
 	prenom?: string | null;
 };
+// Type local pour l'édition dans l'UI, différent du modèle backend.
+type LigneDevisForm = {
+	description: string;
+	quantite: number;
+	prixUnitaireHT: number;
+	tauxTVA: number;
+	totalLigneHT: number;
+	totalLigneTTC: number;
+};
 // Modèle par défaut pour une ligne de devis
-const defaultLigne: Omit<LigneDevis, 'id'> = {
+const defaultLigne: LigneDevisForm = {
 	description: '',
 	quantite: 1,
 	prixUnitaireHT: 0,
@@ -44,7 +54,7 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 	const [selectedProprioId, setSelectedProprioId] = useState<string | undefined>(undefined);
 	const [showProprioModal, setShowProprioModal] = useState(false);
 	// Lignes du devis (articles / prestations)
-	const [lignes, setLignes] = useState<Omit<LigneDevis, 'id' | 'devis'>[]>([{ ...defaultLigne }]);
+	const [lignes, setLignes] = useState<LigneDevisForm[]>([{ ...defaultLigne }]);
 	// Champs texte complémentaires
 	const [conditions, setConditions] = useState('');
 	const [notes, setNotes] = useState('');
@@ -87,7 +97,7 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 
 	// Calculs automatiques sur une ligne de devis (HT / TTC)
 	const calcLigne = useCallback(
-		(ligne: Omit<LigneDevis, 'id' | 'devis'>): Omit<LigneDevis, 'id' | 'devis'> => {
+		(ligne: LigneDevisForm): LigneDevisForm => {
 			const totalHT = Number(ligne.quantite) * Number(ligne.prixUnitaireHT);
 			const totalTTC = totalHT * (1 + Number(ligne.tauxTVA) / 100);
 			return { ...ligne, totalLigneHT: totalHT, totalLigneTTC: totalTTC };
@@ -96,7 +106,7 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 	);
 
 	const handleLigneChange = useCallback(
-		(idx: number, field: keyof Omit<LigneDevis, 'id' | 'devis'>, value: any) => {
+		(idx: number, field: keyof LigneDevisForm, value: any) => {
 			setLignes(prev =>
 				prev.map((l, i) => (i === idx ? calcLigne({ ...l, [field]: value }) : l)),
 			);
@@ -182,7 +192,15 @@ const AddDevisModal: React.FC<AddDevisModalProps> = ({ isOpen, onClose, onSubmit
 			numero,
 			dateValidite: dateBackend || undefined,
 			entreprise,
-			lignes: lignes as any, // le backend générera l'id
+			lignes: lignes.map((ligne) => ({
+				id: 0,
+				description: ligne.description,
+				quantite: ligne.quantite,
+				pauxTVAxUnitaireHT: ligne.prixUnitaireHT,
+				tva: ligne.tauxTVA,
+				totalLigneHT: ligne.totalLigneHT,
+				totalLigneTTC: ligne.totalLigneTTC,
+			})),
 			montantHT,
 			montantTVA,
 			montantTTC,

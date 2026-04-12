@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, ScrollView, KeyboardAvoidingView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../contexts/ThemeContext';
-import { createBien, updateBien, uploadBienImages, geocodeAdresse, getProprietaires } from '../../utils/api';
+import { createBien, updateBien, uploadBienImages, geocodeAdresse } from '../../utils/bienApi';
+import { getProprietaires } from '../../utils/api';
 import { useBienCount } from '../../contexts/BienCountContext';
 import type { Bien, Proprietaire } from '../../models/models';
 

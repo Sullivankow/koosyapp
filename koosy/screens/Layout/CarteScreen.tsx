@@ -104,7 +104,7 @@ const CarteScreen = () => {
 
   // Récupère la liste des biens à chaque ajout ou modification
   useEffect(() => {
-    import('../../utils/api').then(({ getBiens }) => {
+    import('../../utils/bienApi').then(({ getBiens }) => {
       getBiens().then((data) => {
         // Normalize lat/lng in case backend returns strings
         const normalized = Array.isArray(data)

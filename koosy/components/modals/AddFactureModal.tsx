@@ -12,7 +12,7 @@ import {View,Text,TextInput,ScrollView,TouchableOpacity,StyleSheet,
 	FlatList,
 } from 'react-native';
 import { Facture, LigneFacture, Entreprise, Bien, Proprietaire } from '../../models/models';
-import { getBiens } from '../../utils/api';
+import { getBiens } from '../../utils/bienApi';
 import PlusButton from '../../ui/PlusButton';
 import { useTheme } from '../../contexts/ThemeContext';
 
