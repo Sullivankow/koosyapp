@@ -208,6 +208,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                                     onAddPrestation={() => setAddPrestationModalVisible(true)}
                                     onGoToDevis={handleGoToListeDevis}
                                     onGoToFacture={handleGoToListeFacture}
+                                    // Bouton ajouté pour ouvrir l'écran planning des prestations.
                                     onGoToPlanning={handleGoToPlanning}
                         />
             </ScrollView>

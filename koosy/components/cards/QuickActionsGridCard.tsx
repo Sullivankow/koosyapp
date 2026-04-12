@@ -11,6 +11,7 @@ interface QuickActionsGridCardProps {
   onAddPrestation: () => void;
   onGoToDevis: () => void;
   onGoToFacture: () => void;
+  // Ouvre l'écran planning des prestations depuis le dashboard.
   onGoToPlanning: () => void;
 }
 
@@ -59,11 +60,13 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes factures</Text>
           </TouchableOpacity>
         </View>
+        {/* Ligne dédiée à l'accès rapide du planning prestation. */}
         <View style={styles.rowGrid}>
           <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToPlanning}>
             <MaterialCommunityIcons name="calendar-clock" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Planning presta</Text>
           </TouchableOpacity>
+          {/* Espaces vides pour conserver la même grille 3 colonnes que les autres lignes. */}
           <View style={styles.valueBoxSpacer} />
           <View style={styles.valueBoxSpacer} />
         </View>

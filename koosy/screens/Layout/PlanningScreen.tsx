@@ -12,6 +12,7 @@ const PlanningScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  // Point central de chargement: utilisé au premier rendu et lors du refresh manuel.
   const loadPrestations = useCallback(async (withLoader = true) => {
     if (withLoader) setLoading(true);
     try {
@@ -25,9 +26,11 @@ const PlanningScreen: React.FC = () => {
   }, []);
 
   useEffect(() => {
+    // Chargement initial du planning à l'ouverture de l'écran.
     void loadPrestations(true);
   }, [loadPrestations]);
 
+  // Déclenché par le geste "tirer pour rafraîchir" du composant PlanningCalendar.
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
@@ -47,6 +50,7 @@ const PlanningScreen: React.FC = () => {
         prestations={prestations}
         loading={loading}
         refreshing={refreshing}
+        // Le composant enfant remonte l'action refresh vers cette fonction.
         onRefresh={handleRefresh}
       />
     </View>

@@ -17,8 +17,10 @@ type GroupedDay = {
   items: Prestation[];
 };
 
+// Convertit le montant stocké en centimes (backend) en affichage lisible côté UI.
 const formatAmount = (amountCents: number) => `${(amountCents / 100).toFixed(2)} EUR`;
 
+// Formate la date pour obtenir un en-tête de section en français.
 const formatDateLabel = (isoDate: string) => {
   const date = new Date(isoDate);
   if (Number.isNaN(date.getTime())) return 'Date inconnue';
@@ -51,12 +53,14 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
   const { colors } = useTheme();
 
   const grouped = useMemo<GroupedDay[]>(() => {
+    // 1) Tri chronologique pour avoir un planning du plus proche au plus lointain.
     const sorted = [...prestations].sort((a, b) => {
       const da = new Date(a.date_prestation || a.created_at).getTime();
       const db = new Date(b.date_prestation || b.created_at).getTime();
       return da - db;
     });
 
+    // 2) Regroupement par jour pour afficher une section par date.
     const map = new Map<string, Prestation[]>();
     for (const item of sorted) {
       const key = (item.date_prestation || item.created_at || '').slice(0, 10);
@@ -84,6 +88,7 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
     <ScrollView
       style={{ flex: 1 }}
       contentContainerStyle={styles.content}
+      // Pull-to-refresh: recharge les prestations depuis l'API sans quitter l'écran.
       refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.primary} />}
     >
       {grouped.length === 0 ? (

@@ -54,6 +54,7 @@ function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
       <HomeStack.Screen name="NotificationsScreen" component={NotificationScreen} />
       <HomeStack.Screen name="RepertoireProprietaireScreen" component={require('./screens/Layout/RepertoireProprietaireScreen').default} />
       <HomeStack.Screen name="TachesScreen" component={TachesScreen} />
+      {/* Route utilisée par le bouton "Planning presta" depuis l'écran d'accueil. */}
       <HomeStack.Screen name="PlanningScreen" component={PlanningScreen} />
     </HomeStack.Navigator>
   );
