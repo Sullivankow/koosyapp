@@ -4,10 +4,12 @@
 // - Gère un formulaire local pour les informations bancaires et l'abonnement
 // - Offre la création/suppression de l'entreprise liée au compte.
 import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
-import { Utilisateur } from '../../models/models';
+import { View, Text, Image, StyleSheet, TouchableOpacity, TextInput, Alert, KeyboardAvoidingView, Platform, ScrollView, Modal } from 'react-native';
+import { Utilisateur, Subscription } from '../../models/models';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
 import EntrepriseProfileCard, { Entreprise } from '../../components/cards/EntrepriseProfileCard';
+import AbonnementCard from '../../components/cards/AbonnementCard';
+import SubscriptionPaywallModal from '../../components/modals/SubscriptionPaywallModal';
 import { getEntrepriseById } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getMe, updateMe, deleteMe } from '../../utils/api';
@@ -15,6 +17,7 @@ import { clearSession } from '../../utils/session';
 import { useContext } from 'react';
 import { AppContext } from '../../contexts/AppContext';
 import { createEntreprise } from '../../utils/api';
+import { useSubscription } from '../../hooks/useSubscription';
 
 const initialUser: Utilisateur = {
     id: '',
@@ -58,9 +61,16 @@ const ProfilScreen: React.FC = () => {
     const [newPassword, setNewPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [showEntrepriseForm, setShowEntrepriseForm] = useState(false);
+    const [showPaywall, setShowPaywall] = useState(false);
     const [newEntreprise, setNewEntreprise] = useState<Omit<Entreprise, 'id'>>(initialEntreprise);
+    const [showSubscriptionCard, setShowSubscriptionCard] = useState(false);
+    const [subscription, setSubscription] = useState<Subscription | null>(null);
     // Nouveau regex : accepte lettres, chiffres, majuscule, minuscule, caractères spéciaux
     const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=\-{}\[\]:;"'<>,.?/]).{8,}$/;
+    const userPlan = (user as any).formule ?? (user as any).abonnement ?? 'gratuit';
+    const isPaidPlan = userPlan === 'payant' || userPlan === 'premium';
+
+    const { getMySubscription, loading: subscriptionLoading, error: subscriptionError, cancelSubscription: cancelStripeSubscription } = useSubscription('');
 
     // État pour l'entreprise réelle
     const [entreprise, setEntreprise] = useState<Entreprise | null>(null);
@@ -87,6 +97,15 @@ const ProfilScreen: React.FC = () => {
     React.useEffect(() => {
         refreshEntreprise();
     }, []);
+
+    React.useEffect(() => {
+        const loadSubscription = async () => {
+            const data = await getMySubscription();
+            setSubscription(data as Subscription | null);
+        };
+
+        loadSubscription();
+    }, [getMySubscription]);
 
     // Sauvegarde des informations de profil (et éventuellement du mot de passe) côté API.
     // Valide d'abord la cohérence et la robustesse du mot de passe si l'utilisateur souhaite le modifier.
@@ -131,18 +150,26 @@ const ProfilScreen: React.FC = () => {
     // Active un abonnement "payant" en utilisant les informations bancaires saisies
     // (logique purement locale pour l'instant, sans appel API).
     const handleSubscribe = () => {
-        if (!bankInfo.titulaire || !bankInfo.iban || !bankInfo.bic) {
-            Alert.alert('Erreur', 'Veuillez remplir toutes les informations bancaires.');
-            return;
-        }
-        setUser({ ...user, formule: 'payant' });
-        Alert.alert('Abonnement', 'Votre abonnement payant est activé.');
+        setShowPaywall(true);
     };
 
-    // Revient à la formule gratuite (sans persistance côté backend pour le moment).
-    const handleUnsubscribe = () => {
-        setUser({ ...user, formule: 'gratuit' });
-        Alert.alert('Abonnement', 'Vous êtes repassé à la formule gratuite.');
+    // Demande l'annulation réelle de l'abonnement côté backend/Stripe.
+    const handleUnsubscribe = async () => {
+        try {
+            const result = await cancelStripeSubscription(false);
+            if (!result) {
+                Alert.alert('Erreur', 'Impossible d’annuler l’abonnement.');
+                return;
+            }
+
+            // On recharge l'abonnement pour afficher le statut réel côté carte.
+            const refreshed = await getMySubscription();
+            setSubscription(refreshed as Subscription | null);
+
+            Alert.alert('Abonnement', 'Votre abonnement sera annulé en fin de période.');
+        } catch (error) {
+            Alert.alert('Erreur', 'Impossible d’annuler l’abonnement.');
+        }
     };
 
     // Confirme avec l'utilisateur puis supprime le compte côté API,
@@ -178,6 +205,15 @@ const ProfilScreen: React.FC = () => {
     // Affiche le formulaire de création d'entreprise lorsque l'utilisateur n'en a pas encore.
     const handleAddEntreprise = () => {
         setShowEntrepriseForm(true);
+    };
+
+    const handleToggleSubscriptionCard = async () => {
+        setShowSubscriptionCard(prev => !prev);
+
+        if (!subscription) {
+            const data = await getMySubscription();
+            setSubscription(data as Subscription | null);
+        }
     };
 
     // Valide le formulaire puis crée une nouvelle entreprise côté API.
@@ -247,7 +283,19 @@ const ProfilScreen: React.FC = () => {
                                 placeholderTextColor={colors.text}
                             />
                         ) : <Text style={[styles.nom, { color: colors.text }]}>{user.prenom}</Text>}
-                        <Text style={[styles.formuleBadge, { backgroundColor: colors.secondary, color: '#000' }]}>{user.formule === 'gratuit' ? 'Formule gratuite' : 'Formule payante'}</Text>
+                        <TouchableOpacity
+                            activeOpacity={0.8}
+                            onPress={handleToggleSubscriptionCard}
+                            style={styles.badgePressable}
+                        >
+                            <View style={[styles.formuleBadge, { backgroundColor: colors.secondary, opacity: isPaidPlan ? 1 : 0.85 }]}>
+                                <View style={styles.badgeRow}>
+                                    <Text style={styles.badgeText}>{isPaidPlan ? 'Formule payante' : 'Formule gratuite'}</Text>
+                                    {isPaidPlan ? <MaterialCommunityIcons name="chevron-down" size={18} color="#000" style={{ marginLeft: 4 }} /> : null}
+                                </View>
+                                <Text style={styles.badgeHint}>Appuyez pour voir les détails</Text>
+                            </View>
+                        </TouchableOpacity>
                     </View>
                     <View style={styles.infoRow}>
                         <MaterialCommunityIcons name="email" size={20} color={colors.primary} />
@@ -306,7 +354,7 @@ const ProfilScreen: React.FC = () => {
                     {/* Section abonnement */}
                     <View style={{ marginVertical: 16 }}>
                         {user.formule === 'gratuit' ? (
-                            <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={() => setShowBank(!showBank)}>
+                            <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={handleSubscribe}>
                                 <MaterialCommunityIcons name="credit-card" size={20} color={colors.surface} />
                                 <Text style={[styles.btnText, { color: colors.surface }]}>Passer à la formule payante</Text>
                             </TouchableOpacity>
@@ -316,39 +364,9 @@ const ProfilScreen: React.FC = () => {
                                 <Text style={[styles.btnText, { color: '#000' }]}>Se désabonner</Text>
                             </TouchableOpacity>
                         )}
-                        {showBank && (
-                            <View style={styles.bankCard}>
-                                <Text style={{ fontWeight: 'bold', fontSize: 16, color: colors.primary, marginBottom: 8 }}>Informations bancaires</Text>
-                                <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>Titulaire du compte</Text>
-                                <TextInput
-                                    style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
-                                    value={bankInfo.titulaire}
-                                    onChangeText={v => setBankInfo({ ...bankInfo, titulaire: v })}
-                                    placeholder="Ex : Jean Dupont"
-                                    placeholderTextColor={colors.text}
-                                />
-                                <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>IBAN</Text>
-                                <TextInput
-                                    style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
-                                    value={bankInfo.iban}
-                                    onChangeText={v => setBankInfo({ ...bankInfo, iban: v })}
-                                    placeholder="Ex : FR76 3000 6000 0112 3456 7890 189"
-                                    placeholderTextColor={colors.text}
-                                />
-                                <Text style={{ fontWeight: 'bold', color: '#000', marginBottom: 4 }}>BIC</Text>
-                                <TextInput
-                                    style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
-                                    value={bankInfo.bic}
-                                    onChangeText={v => setBankInfo({ ...bankInfo, bic: v })}
-                                    placeholder="Ex : AGRIFRPP"
-                                    placeholderTextColor={colors.text}
-                                />
-                                <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary, marginTop: 8 }]} onPress={handleSubscribe}>
-                                    <MaterialCommunityIcons name="check-circle" size={20} color={colors.surface} />
-                                    <Text style={[styles.btnText, { color: colors.surface }]}>Valider l'abonnement</Text>
-                                </TouchableOpacity>
-                            </View>
-                        )}
+                        <Text style={{ marginTop: 10, color: colors.textSecondary, textAlign: 'center' }}>
+                            Vous serez redirigé vers l'abonnement sécurisé.
+                        </Text>
                     </View>
                     <View style={styles.actions}>
                         <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary }]} onPress={() => modeEdition ? handleSave() : setModeEdition(true)}>
@@ -369,6 +387,28 @@ const ProfilScreen: React.FC = () => {
                         </TouchableOpacity>
                     </View>
                 </View>
+                <Modal
+                    visible={showSubscriptionCard}
+                    animationType="slide"
+                    transparent
+                    onRequestClose={() => setShowSubscriptionCard(false)}
+                >
+                    <View style={styles.modalOverlay}>
+                        <View style={styles.modalContent}>
+                            <AbonnementCard
+                                subscription={subscription}
+                                loading={subscriptionLoading}
+                                error={subscriptionError}
+                                onClose={() => setShowSubscriptionCard(false)}
+                            />
+                        </View>
+                    </View>
+                </Modal>
+                <SubscriptionPaywallModal
+                    isOpen={showPaywall}
+                    onClose={() => setShowPaywall(false)}
+                    onSubscribe={() => setShowPaywall(false)}
+                />
                                 {/* Carte entreprise (affiche la vraie donnée API si dispo) */}
                                 {entreprise && (
                                     <EntrepriseProfileCard 
@@ -455,6 +495,17 @@ const styles = StyleSheet.create({
         marginBottom: 2,
         color: '#222',
     },
+    modalOverlay: {
+        flex: 1,
+        backgroundColor: 'rgba(0,0,0,0.45)',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: 18,
+    },
+    modalContent: {
+        width: '100%',
+        maxWidth: 520,
+    },
     formuleBadge: {
         backgroundColor: '#e0f7fa',
         color: '#000',
@@ -466,6 +517,27 @@ const styles = StyleSheet.create({
         marginBottom: 10,
         alignSelf: 'center',
         fontWeight: 'bold',
+    },
+    badgePressable: {
+        alignSelf: 'center',
+    },
+    badgeRow: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    badgeText: {
+        color: '#000',
+        fontSize: 14,
+        fontWeight: 'bold',
+    },
+    badgeHint: {
+        color: '#000',
+        fontSize: 11,
+        fontWeight: '600',
+        marginTop: 2,
+        textAlign: 'center',
+        opacity: 0.8,
     },
     infoRow: {
         flexDirection: 'row',

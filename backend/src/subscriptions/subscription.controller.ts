@@ -47,6 +47,11 @@ export class SubscriptionController {
 		// Récupérer l'abonnement existant (s'il existe)
 		const subscription = await this.subscriptionService.getMySubscription(userId);
 		const customerId = subscription?.stripeCustomerId || null;
+		const alreadyUsedTrial = Boolean((subscription?.metadata as any)?.trialUsed);
+		const alreadyHasActiveAccess = ['trialing', 'active'].includes(subscription?.status || 'incomplete');
+		const effectiveTrialDays = dto.trialDays && dto.trialDays > 0 && !alreadyUsedTrial && !alreadyHasActiveAccess
+			? dto.trialDays
+			: 0;
 
 		// Créer la session Stripe
 		const checkoutUrl = await this.stripeService.createCheckoutSession(
@@ -54,7 +59,7 @@ export class SubscriptionController {
 			dto.priceId,
 			dto.successUrl,
 			dto.cancelUrl,
-			dto.trialDays,
+			effectiveTrialDays,
 			userId,
 		);
 
@@ -64,6 +69,8 @@ export class SubscriptionController {
 			metadata: {
 				lastCheckoutAt: new Date().toISOString(),
 				priceId: dto.priceId,
+				trialUsed: alreadyUsedTrial || effectiveTrialDays > 0,
+				...(effectiveTrialDays > 0 ? { trialUsedAt: new Date().toISOString() } : {}),
 			},
 		});
 

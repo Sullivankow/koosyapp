@@ -106,6 +106,27 @@ export type Utilisateur = {
   formule: 'gratuit' | 'payant';
 }
 
+export type SubscriptionStatus = 'incomplete' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid';
+
+export interface Subscription {
+  id: number;
+  userId: number;
+  stripeCustomerId?: string | null;
+  stripeSubscriptionId?: string | null;
+  stripePriceId?: string | null;
+  status: SubscriptionStatus;
+  amount?: number | null;
+  currency?: string;
+  currentPeriodStart?: string | null;
+  currentPeriodEnd?: string | null;
+  trialEnd?: string | null;
+  canceledAt?: string | null;
+  cancelAtPeriodEnd: boolean;
+  metadata?: Record<string, any> | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface Entreprise {
   id: number;
   nom: string;
