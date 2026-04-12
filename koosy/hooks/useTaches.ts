@@ -5,7 +5,7 @@ import {
   markTacheAsTerminee,
   updateTacheStatut,
   deleteAllTachesTerminees
-} from '../utils/api';
+} from '../utils/tachesApi';
 import { useTacheCount } from '../contexts/TacheCountContext';
 
 // Type pour une tâche

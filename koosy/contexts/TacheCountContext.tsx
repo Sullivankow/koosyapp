@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import { getTachesAFaireTotal } from '../utils/api';
+import { getTachesAFaireTotal } from '../utils/tachesApi';
 
 // Type décrivant les données et fonctions exposées par le contexte du nombre de tâches
 interface TacheCountContextType {

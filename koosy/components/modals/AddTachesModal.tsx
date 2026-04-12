@@ -17,7 +17,7 @@ import {
 } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getBiens } from '../../utils/bienApi';
-import { createTache } from '../../utils/api';
+import { createTache } from '../../utils/tachesApi';
 import { useTache } from '../../contexts/TacheContext';
 import { Bien } from '../../models/models';
 
