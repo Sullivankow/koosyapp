@@ -11,6 +11,7 @@ interface QuickActionsGridCardProps {
   onAddPrestation: () => void;
   onGoToDevis: () => void;
   onGoToFacture: () => void;
+  onGoToPlanning: () => void;
 }
 
 const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
@@ -20,6 +21,7 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
   onAddPrestation,
   onGoToDevis,
   onGoToFacture,
+  onGoToPlanning,
 }) => {
   const { colors } = useTheme();
   return (
@@ -56,6 +58,14 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
             <MaterialCommunityIcons name="file-document-outline" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
             <Text style={[styles.labelGrid, { color: colors.surface }]}>Mes factures</Text>
           </TouchableOpacity>
+        </View>
+        <View style={styles.rowGrid}>
+          <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]} onPress={onGoToPlanning}>
+            <MaterialCommunityIcons name="calendar-clock" size={16} color={colors.surface} style={{ marginBottom: 1 }} />
+            <Text style={[styles.labelGrid, { color: colors.surface }]}>Planning presta</Text>
+          </TouchableOpacity>
+          <View style={styles.valueBoxSpacer} />
+          <View style={styles.valueBoxSpacer} />
         </View>
       </View>
     </View>
@@ -104,6 +114,12 @@ const styles = StyleSheet.create({
     elevation: 1,
     minWidth: 80,
     maxWidth: 120,
+  },
+  valueBoxSpacer: {
+    flex: 1,
+    minWidth: 80,
+    maxWidth: 120,
+    marginHorizontal: 2,
   },
   labelGrid: {
     fontSize: 13,

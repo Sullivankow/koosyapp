@@ -35,6 +35,7 @@ import { AppContext } from './contexts/AppContext';
 import ListeDevisScreen from './screens/Layout/ListeDevisScreen';
 import ListeFactureScreen from './screens/Layout/ListeFactureScreen';
 import { GlobalRefreshProvider } from './contexts/GlobalRefreshContext';
+import PlanningScreen from './screens/Layout/PlanningScreen';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -53,6 +54,7 @@ function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
       <HomeStack.Screen name="NotificationsScreen" component={NotificationScreen} />
       <HomeStack.Screen name="RepertoireProprietaireScreen" component={require('./screens/Layout/RepertoireProprietaireScreen').default} />
       <HomeStack.Screen name="TachesScreen" component={TachesScreen} />
+      <HomeStack.Screen name="PlanningScreen" component={PlanningScreen} />
     </HomeStack.Navigator>
   );
 }

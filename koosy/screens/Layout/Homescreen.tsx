@@ -128,6 +128,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
         if (navigation) navigation.navigate('ListeFactureScreen');
     };
 
+    // Handler pour ouvrir la page PlanningScreen
+    // Raccourci vers le planning des prestations.
+    const handleGoToPlanning = () => {
+        if (navigation) navigation.navigate('PlanningScreen');
+    };
+
     // Handler pour ouvrir la page Répertoire Propriétaire
     // Raccourci vers le répertoire des propriétaires.
     const handleGoToRepertoireProprietaire = () => {
@@ -202,6 +208,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                                     onAddPrestation={() => setAddPrestationModalVisible(true)}
                                     onGoToDevis={handleGoToListeDevis}
                                     onGoToFacture={handleGoToListeFacture}
+                                    onGoToPlanning={handleGoToPlanning}
                         />
             </ScrollView>
             {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}
