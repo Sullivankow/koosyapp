@@ -44,13 +44,36 @@ const statusLabel = (status: string) => {
 
 const statusBg = (status: string, primary: string) => {
   const normalized = (status || '').toLowerCase();
-  if (normalized.includes('term')) return '#2E7D32';
+  // Harmonisation UI demandée: confirmée / terminée / en attente utilisent la couleur primaire.
+  if (normalized.includes('term')) return primary;
   if (normalized.includes('confirm')) return primary;
+  if (normalized.includes('attente')) return primary;
   if (normalized.includes('annul')) return '#C62828';
-  return '#F9A825';
+  return primary;
 };
 
-const getDateKey = (item: Prestation) => (item.date_prestation || item.created_at || '').slice(0, 10);
+const pad2 = (n: number) => String(n).padStart(2, '0');
+
+// Génère une clé YYYY-MM-DD en heure locale (évite les décalages UTC).
+const toLocalDateKey = (date: Date) => `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
+
+const normalizeDateKey = (rawValue?: string) => {
+  const raw = (rawValue || '').trim();
+  if (!raw) return '';
+
+  // Cas le plus courant venant de l'API: YYYY-MM-DD ou YYYY-MM-DDTHH:mm:ss...
+  if (/^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0, 10);
+
+  // Supporte aussi JJ/MM/AAAA si jamais une source front en envoie.
+  const fr = raw.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  if (fr) return `${fr[3]}-${fr[2]}-${fr[1]}`;
+
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return '';
+  return toLocalDateKey(parsed);
+};
+
+const getDateKey = (item: Prestation) => normalizeDateKey(item.date_prestation) || normalizeDateKey(item.created_at);
 
 const startOfWeekMonday = (date: Date) => {
   const d = new Date(date);
@@ -146,7 +169,7 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
   const weekMap = useMemo(() => {
     const map = new Map<string, Prestation[]>();
     for (const day of weekDays) {
-      map.set(day.toISOString().slice(0, 10), []);
+      map.set(toLocalDateKey(day), []);
     }
 
     for (const item of prestations) {
@@ -168,7 +191,7 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
   }, [prestations, weekDays]);
 
   const today = useMemo(() => new Date(), []);
-  const todayKey = useMemo(() => today.toISOString().slice(0, 10), [today]);
+  const todayKey = useMemo(() => toLocalDateKey(today), [today]);
 
   const monthStart = useMemo(() => startOfMonth(monthCursor), [monthCursor]);
   const monthEnd = useMemo(() => endOfMonth(monthCursor), [monthCursor]);
@@ -188,7 +211,7 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
   const monthMap = useMemo(() => {
     const map = new Map<string, Prestation[]>();
     for (const day of monthDays) {
-      map.set(day.toISOString().slice(0, 10), []);
+      map.set(toLocalDateKey(day), []);
     }
 
     for (const item of prestations) {
@@ -264,7 +287,7 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
       ) : viewMode === 'week' ? (
         <View style={styles.weekWrap}>
           {weekDays.map((day) => {
-            const key = day.toISOString().slice(0, 10);
+            const key = toLocalDateKey(day);
             const items = weekMap.get(key) || [];
             return (
               <View key={key} style={[styles.weekDayCard, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
@@ -337,7 +360,7 @@ const PlanningCalendar: React.FC<PlanningCalendarProps> = ({ prestations, loadin
 
           <View style={styles.monthGrid}>
             {monthDays.map((day) => {
-              const key = day.toISOString().slice(0, 10);
+              const key = toLocalDateKey(day);
               const items = monthMap.get(key) || [];
               const inCurrentMonth = day.getMonth() === monthCursor.getMonth() && day.getFullYear() === monthCursor.getFullYear();
               const isToday = key === todayKey;
