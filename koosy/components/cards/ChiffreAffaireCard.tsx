@@ -27,6 +27,21 @@ interface ChiffreAffaireCardProps {
     return `${sign}${value.toFixed(2)} €`;
   };
 
+  const getMarginColors = (value: number) => {
+    if (value < 0) {
+      return {
+        backgroundColor: '#FFEBEE', // Fond rouge clair
+        borderColor: '#F44336', // Bordure rouge
+        textColor: '#C62828', // Texte rouge foncé
+      };
+    }
+    return {
+      backgroundColor: '#E8F5E9', // Fond vert clair
+      borderColor: '#4CAF50', // Bordure vert
+      textColor: '#2E7D32', // Texte vert foncé
+    };
+  };
+
 const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({
   caMois,
   caGlobal,
@@ -83,25 +98,25 @@ const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({
       <View style={styles.section}>
         <Text style={[styles.sectionTitle, { color: colors.text }]}>Marges</Text>
         <View style={styles.gridContainer}>
-          <View style={[styles.smallBox, { backgroundColor: '#E8F5E9', borderColor: '#4CAF50', borderWidth: 1 }]}>
-            <Text style={[styles.smallLabel, { color: '#2E7D32' }]}>Jour</Text>
-            <Text style={[styles.smallValue, { color: '#2E7D32' }]}>{formatSignedAmount(marginData.jour)}</Text>
+          <View style={[styles.smallBox, { backgroundColor: getMarginColors(marginData.jour).backgroundColor, borderColor: getMarginColors(marginData.jour).borderColor, borderWidth: 1 }]}>
+            <Text style={[styles.smallLabel, { color: getMarginColors(marginData.jour).textColor }]}>Jour</Text>
+            <Text style={[styles.smallValue, { color: getMarginColors(marginData.jour).textColor }]}>{formatSignedAmount(marginData.jour)}</Text>
           </View>
-          <View style={[styles.smallBox, { backgroundColor: '#E8F5E9', borderColor: '#4CAF50', borderWidth: 1 }]}>
-            <Text style={[styles.smallLabel, { color: '#2E7D32' }]}>Mois</Text>
-            <Text style={[styles.smallValue, { color: '#2E7D32' }]}>{formatSignedAmount(marginData.mois)}</Text>
+          <View style={[styles.smallBox, { backgroundColor: getMarginColors(marginData.mois).backgroundColor, borderColor: getMarginColors(marginData.mois).borderColor, borderWidth: 1 }]}>
+            <Text style={[styles.smallLabel, { color: getMarginColors(marginData.mois).textColor }]}>Mois</Text>
+            <Text style={[styles.smallValue, { color: getMarginColors(marginData.mois).textColor }]}>{formatSignedAmount(marginData.mois)}</Text>
           </View>
-          <View style={[styles.smallBox, { backgroundColor: '#E8F5E9', borderColor: '#4CAF50', borderWidth: 1 }]}>
-            <Text style={[styles.smallLabel, { color: '#2E7D32' }]}>Année</Text>
-            <Text style={[styles.smallValue, { color: '#2E7D32' }]}>{formatSignedAmount(marginData.annee)}</Text>
+          <View style={[styles.smallBox, { backgroundColor: getMarginColors(marginData.annee).backgroundColor, borderColor: getMarginColors(marginData.annee).borderColor, borderWidth: 1 }]}>
+            <Text style={[styles.smallLabel, { color: getMarginColors(marginData.annee).textColor }]}>Année</Text>
+            <Text style={[styles.smallValue, { color: getMarginColors(marginData.annee).textColor }]}>{formatSignedAmount(marginData.annee)}</Text>
           </View>
-          <View style={[styles.smallBox, { backgroundColor: '#E8F5E9', borderColor: '#4CAF50', borderWidth: 1 }]}>
-            <Text style={[styles.smallLabel, { color: '#2E7D32' }]}>Mois N-1</Text>
-            <Text style={[styles.smallValue, { color: '#2E7D32' }]}>{formatSignedAmount(marginData.moisN1)}</Text>
+          <View style={[styles.smallBox, { backgroundColor: getMarginColors(marginData.moisN1).backgroundColor, borderColor: getMarginColors(marginData.moisN1).borderColor, borderWidth: 1 }]}>
+            <Text style={[styles.smallLabel, { color: getMarginColors(marginData.moisN1).textColor }]}>Mois N-1</Text>
+            <Text style={[styles.smallValue, { color: getMarginColors(marginData.moisN1).textColor }]}>{formatSignedAmount(marginData.moisN1)}</Text>
           </View>
-          <View style={[styles.smallBox, { backgroundColor: '#E8F5E9', borderColor: '#4CAF50', borderWidth: 1 }]}>
-            <Text style={[styles.smallLabel, { color: '#2E7D32' }]}>Global</Text>
-            <Text style={[styles.smallValue, { color: '#2E7D32' }]}>{formatSignedAmount(marginData.global)}</Text>
+          <View style={[styles.smallBox, { backgroundColor: getMarginColors(marginData.global).backgroundColor, borderColor: getMarginColors(marginData.global).borderColor, borderWidth: 1 }]}>
+            <Text style={[styles.smallLabel, { color: getMarginColors(marginData.global).textColor }]}>Global</Text>
+            <Text style={[styles.smallValue, { color: getMarginColors(marginData.global).textColor }]}>{formatSignedAmount(marginData.global)}</Text>
           </View>
         </View>
       </View>
