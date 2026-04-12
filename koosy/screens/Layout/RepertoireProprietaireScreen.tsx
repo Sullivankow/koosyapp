@@ -9,8 +9,8 @@ import ProprietaireList from '../../components/ProprietaireList';
 import AddProprietaireModal from '../../components/modals/AddProprietaireModal';
 import SearchBar from '../../ui/SearchBar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { getProprietaires, deleteProprietaire, updateProprietaire } from '../../utils/api';
-import type { Proprietaire } from '../../models/proprietaire';
+import { getProprietaires, deleteProprietaire, updateProprietaire } from '../../utils/proprietaireApi';
+import type { Proprietaire } from '../../models/models';
 
 function RepertoireProprietaireScreen() {
   const { colors } = useTheme();

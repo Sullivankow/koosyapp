@@ -6,7 +6,7 @@
 import React, { useState, useCallback } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions, Alert } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { createProprietaire } from '../../utils/api';
+import { createProprietaire } from '../../utils/proprietaireApi';
 import type { Proprietaire } from '../../models/models';
 
 interface AddProprietaireModalProps {

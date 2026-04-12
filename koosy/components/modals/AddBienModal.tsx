@@ -4,7 +4,7 @@ import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions,
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../contexts/ThemeContext';
 import { createBien, updateBien, uploadBienImages, geocodeAdresse } from '../../utils/bienApi';
-import { getProprietaires } from '../../utils/api';
+import { getProprietaires } from '../../utils/proprietaireApi';
 import { useBienCount } from '../../contexts/BienCountContext';
 import type { Bien, Proprietaire } from '../../models/models';
 

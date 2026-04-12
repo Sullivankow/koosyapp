@@ -3,7 +3,7 @@ import { View, Text, TouchableOpacity, TextInput, ActivityIndicator, ScrollView,
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import ProprioBox from './ProprioBox';
 import { styles } from '../../../screens/Layout/styles/BienScreen.styles';
-import { getProprietaires } from '../../../utils/api';
+import { getProprietaires } from '../../../utils/proprietaireApi';
 import type { Bien } from '../../../models/models';
 import PrestationTimeline from './PrestationTimeline';
 import TacheTimeline from './TacheTimeline';
