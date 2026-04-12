@@ -82,15 +82,16 @@ export class PrestationService {
 	 * Renvoie par bien et un total global. Les montants renvoyés incluent
 	 * `total_cents` et `total_euros` pour faciliter l'affichage côté client.
 	 */
-	async summary({ from, to, status }: { from: string; to: string; status?: string }) {
-		const st = status || 'Terminée';
+	async summary({ from, to }: { from: string; to: string }) {
+		// Règle métier: le chiffre d'affaires ne prend en compte que les prestations terminées.
+		const completedStatus = this.normalizeStatus(PrestationStatus.COMPLETED);
 		// Totaux par bien
 		const perBien = await this.prestationRepo
 			.createQueryBuilder('p')
 			.select('p.bien_id', 'bienId')
 			.addSelect('SUM(p.amount_cents)', 'total_cents')
 			.where('p.date_prestation BETWEEN :from AND :to', { from, to })
-			.andWhere("p.status = :st", { st })
+			.andWhere('LOWER(p.status) = :completedStatus', { completedStatus })
 			.groupBy('p.bien_id')
 			.getRawMany();
 
@@ -101,7 +102,7 @@ export class PrestationService {
 			.createQueryBuilder('p')
 			.select('SUM(p.amount_cents)', 'total_cents')
 			.where('p.date_prestation BETWEEN :from AND :to', { from, to })
-			.andWhere("p.status = :st", { st })
+			.andWhere('LOWER(p.status) = :completedStatus', { completedStatus })
 			.getRawOne();
 
 		const globalTotalCents = Number(globalRow?.total_cents ?? 0);
@@ -114,6 +115,7 @@ export class PrestationService {
 
 	// Retourne le CA par mois sur une période donnée
 	async monthlySummary({ from, to }: { from: string; to: string }) {
+		const completedStatus = this.normalizeStatus(PrestationStatus.COMPLETED);
 		const results: { mois: string; total_cents: number; total_euros: number }[] = [];
 		let current = new Date(from);
 		const end = new Date(to);
@@ -130,7 +132,7 @@ export class PrestationService {
 				.createQueryBuilder('p')
 				.select('SUM(p.amount_cents)', 'total_cents')
 				.where('p.date_prestation BETWEEN :from AND :to', { from: fromStr, to: toStr })
-				.andWhere("p.status = :st", { st: 'confirmed' })
+				.andWhere('LOWER(p.status) = :completedStatus', { completedStatus })
 				.getRawOne();
 
 			const totalCents = Number(row?.total_cents ?? 0);

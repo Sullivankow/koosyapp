@@ -28,30 +28,20 @@ export function useChiffreAffaire() {
     const prevMonth = now.subtract(1, 'month');
     const fromMoisN1 = prevMonth.startOf('month').format('YYYY-MM-DD');
     const toMoisN1 = prevMonth.endOf('month').format('YYYY-MM-DD');
-    // Teste plusieurs statuts pour trouver celui qui correspond
-    const tryStatuses = async () => {
-      const statuses = ['Terminée', 'terminée', 'completed', 'confirmed'];
-      let caMoisVal = 0;
-      let caGlobalVal = 0;
-      let caAnneeVal = 0;
-      let caMoisN1Val = 0;
-      for (const status of statuses) {
-        const moisData = await getChiffreAffaire(fromMois, toMois, status);
-        const globalData = await getChiffreAffaire('2000-01-01', now.format('YYYY-MM-DD'), status);
-        const anneeData = await getChiffreAffaire(fromAnnee, toAnnee, status);
-        const moisN1Data = await getChiffreAffaire(fromMoisN1, toMoisN1, status);
-        if (moisData?.global?.total_euros > 0) caMoisVal = moisData.global.total_euros;
-        if (globalData?.global?.total_euros > 0) caGlobalVal = globalData.global.total_euros;
-        if (anneeData?.global?.total_euros > 0) caAnneeVal = anneeData.global.total_euros;
-        if (moisN1Data?.global?.total_euros > 0) caMoisN1Val = moisN1Data.global.total_euros;
-        if (caMoisVal > 0 || caGlobalVal > 0 || caAnneeVal > 0 || caMoisN1Val > 0) break;
-      }
-      setCaMois(caMoisVal);
-      setCaGlobal(caGlobalVal);
-      setCaAnnee(caAnneeVal);
-      setCaMoisN1(caMoisN1Val);
+    const loadChiffreAffaire = async () => {
+      // Le backend renvoie déjà un CA filtré sur les prestations terminées.
+      const moisData = await getChiffreAffaire(fromMois, toMois);
+      const globalData = await getChiffreAffaire('2000-01-01', now.format('YYYY-MM-DD'));
+      const anneeData = await getChiffreAffaire(fromAnnee, toAnnee);
+      const moisN1Data = await getChiffreAffaire(fromMoisN1, toMoisN1);
+
+      setCaMois(Number(moisData?.global?.total_euros ?? 0));
+      setCaGlobal(Number(globalData?.global?.total_euros ?? 0));
+      setCaAnnee(Number(anneeData?.global?.total_euros ?? 0));
+      setCaMoisN1(Number(moisN1Data?.global?.total_euros ?? 0));
     };
-    tryStatuses();
+
+    loadChiffreAffaire();
   }, [refreshKey]);
 
   return { caMois, caGlobal, caAnnee, caMoisN1 };

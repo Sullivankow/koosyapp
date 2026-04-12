@@ -521,9 +521,9 @@ export async function deletePrestation(id: number) {
 
 
 // Fonction pour récupérer le chiffre d'affaires total sur une période donnée
-export async function getChiffreAffaire(from: string, to: string, status = 'Terminée') {
-  // Si le paramètre status n'est pas géré par le backend, retire-le de l'URL
-  return apiFetch(`/prestations/summary?from=${from}&to=${to}&status=${status}`);
+export async function getChiffreAffaire(from: string, to: string) {
+  // Règle métier: le backend calcule le CA uniquement sur les prestations terminées.
+  return apiFetch(`/prestations/summary?from=${from}&to=${to}`);
 }
 
 
