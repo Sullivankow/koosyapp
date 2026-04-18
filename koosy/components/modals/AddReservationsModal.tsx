@@ -184,6 +184,7 @@ export default function AddReservationsModal({
 									   placeholderTextColor={colors.textSecondary}
 									   value={form.heureArrivee}
 								   	   onChangeText={v => updateField('heureArrivee', formatTimeInput(v))}
+									   keyboardType="number-pad"
 								   />
 								</View>
 							{/* Bloc date / heure de départ */}
@@ -203,6 +204,7 @@ export default function AddReservationsModal({
 									   placeholderTextColor={colors.textSecondary}
 									   value={form.heureDepart}
 								   	   onChangeText={v => updateField('heureDepart', formatTimeInput(v))}
+									   keyboardType="number-pad"
 								   />
 								</View>
    {showDatePicker.visible && (

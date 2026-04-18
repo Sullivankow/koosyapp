@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { getMe } from '../utils/api';
 import { getEventsUpcoming } from '../utils/reservationApi';
 
@@ -13,7 +13,7 @@ export function useUpcomingEvents(daysAhead = 7, limit = 10) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchEvents = async () => {
+  const fetchEvents = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -32,12 +32,11 @@ export function useUpcomingEvents(daysAhead = 7, limit = 10) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [daysAhead, limit]);
 
   useEffect(() => {
-    fetchEvents();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    void fetchEvents();
+  }, [fetchEvents]);
 
   return { events, loading, error, refresh: fetchEvents };
 }

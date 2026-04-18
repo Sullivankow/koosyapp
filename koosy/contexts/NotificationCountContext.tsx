@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import * as Notifications from 'expo-notifications';
+import { AppState } from 'react-native';
 import Constants from 'expo-constants';
 import { getNotificationsUnreadCount } from '../utils/api';
 
@@ -70,6 +71,13 @@ export const NotificationCountProvider = ({ children }: { children: ReactNode })
 			refresh();
 		});
 
+		// Si une notif arrive quand l'app est en arrière-plan, on resynchronise au retour au premier plan.
+		const sub3 = AppState.addEventListener('change', (state) => {
+			if (state === 'active') {
+				void refresh();
+			}
+		});
+
 		// Nettoyage des listeners au démontage du provider
 		return () => {
 			try {
@@ -77,6 +85,9 @@ export const NotificationCountProvider = ({ children }: { children: ReactNode })
 			} catch {}
 			try {
 				sub2.remove();
+			} catch {}
+			try {
+				sub3.remove();
 			} catch {}
 		};
 	}, []);

@@ -74,9 +74,9 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
     const [entreprises, setEntreprises] = useState<Entreprise[]>([]);
     // Événements à venir via hook personnalisé
     // Récupère les prochains événements (réservations, échéances) affichés dans la section agenda.
-    const { events, loading: eventsLoading } = useUpcomingEvents();
+    const { events, loading: eventsLoading, refresh: refreshUpcomingEvents } = useUpcomingEvents();
     // Message de succès temporaire via hook personnalisé
-    const { signalReservationAdded } = useReservationRefresh();
+    const { signalReservationAdded, lastReservationAdded } = useReservationRefresh();
     // Ajout du hook pour le compteur de prestations terminées
     const { prestationsTerminees } = usePrestationsCount();
     const {
@@ -121,6 +121,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
             .catch(() => setEntreprises([]));
         // Les événements sont désormais gérés par le hook useUpcomingEvents
     }, [lastTacheAdded, lastBienAdded]);
+
+    // Recharge les événements dès qu'une réservation est ajoutée.
+    useEffect(() => {
+        void refreshUpcomingEvents();
+    }, [lastReservationAdded, refreshUpcomingEvents]);
 
     // Les autres valeurs restent statiques pour l'instant
 

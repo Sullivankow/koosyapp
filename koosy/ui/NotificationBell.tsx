@@ -3,7 +3,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation, NavigationProp } from '@react-navigation/native';
+import { useNavigation, NavigationProp, useFocusEffect } from '@react-navigation/native';
 import { useNotificationCount } from '../contexts/NotificationCountContext';
 
 
@@ -16,7 +16,14 @@ type Props = {
 export default function NotificationBell({ size = 28, color = '#000', style }: Props) {
 	// Typage minimal de la navigation : on sait juste qu'il existe une route NotificationsScreen.
 	const navigation = useNavigation<NavigationProp<Record<string, object | undefined>>>();
-	const { unread } = useNotificationCount();
+	const { unread, refresh } = useNotificationCount();
+
+	// Synchronise le badge à chaque focus de l'écran qui contient la cloche.
+	useFocusEffect(
+		React.useCallback(() => {
+			void refresh();
+		}, [refresh]),
+	);
 
 	const onPress = () => {
 		// navigate to Notifications screen - adapte le nom de route si besoin

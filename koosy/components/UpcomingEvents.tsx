@@ -10,6 +10,50 @@ interface UpcomingEventsProps {
   styles: any;
 }
 
+const getEventTypeMeta = (type: string, colors: any) => {
+  const normalized = String(type || '').toLowerCase();
+
+  if (normalized.includes('new') || normalized.includes('nouveau') || normalized.includes('reservation')) {
+    return {
+      label: 'Nouvelle reservation',
+      icon: 'calendar-plus' as const,
+      accent: colors.info || '#1976D2',
+    };
+  }
+
+  if (normalized.includes('arrival') || normalized.includes('arrive') || normalized.includes('arrivee')) {
+    return {
+      label: 'Arrivee',
+      icon: 'login' as const,
+      accent: colors.success || '#2E7D32',
+    };
+  }
+
+  if (normalized.includes('departure') || normalized.includes('depart')) {
+    return {
+      label: 'Depart',
+      icon: 'logout' as const,
+      accent: colors.warning || '#ED6C02',
+    };
+  }
+
+  return {
+    label: 'Evenement',
+    icon: 'calendar' as const,
+    accent: colors.primary,
+  };
+};
+
+const formatEventDate = (event: any) => {
+  const raw = event.dateDebut || event.dateFin || event.createdAt || event.date;
+  if (!raw) return 'Date non renseignee';
+
+  const parsed = dayjs(raw);
+  if (!parsed.isValid()) return String(raw);
+
+  return parsed.format('dddd DD MMMM YYYY');
+};
+
 const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, loading, colors, styles }) => (
   <View style={[styles.eventBox, { backgroundColor: colors.background, alignItems: 'flex-start', borderWidth: 1.5, borderColor: colors.primary }]}> 
     <View style={{ marginRight: 8, paddingTop: 2 }}>
@@ -24,28 +68,53 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, loading, colors
           <View>
             <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled={true}>
               {events.map((ev: any, idx: number) => {
-                const humanType = (() => {
-                  const t = (ev.type || '').toLowerCase();
-                  if (t.includes('new') || t.includes('nouveau') || t.includes('reservation')) return 'Nouvelle réservation';
-                  if (t.includes('arrival') || t.includes('arrive') || t.includes('arrivée')) return 'Arrivée';
-                  if (t.includes('departure') || t.includes('depart') || t.includes('départ')) return 'Départ';
-                  return ev.type || 'Événement';
-                })();
-
-                const dateStr = (() => {
-                  if (ev.dateDebut) return dayjs(ev.dateDebut).format('DD/MM/YYYY');
-                  if (ev.dateFin) return dayjs(ev.dateFin).format('DD/MM/YYYY');
-                  if (ev.createdAt) return dayjs(ev.createdAt).format('DD/MM/YYYY');
-                  if (ev.date) return dayjs(ev.date).format('DD/MM/YYYY');
-                  return '';
-                })();
-
-                const locataireName = ev.locataire ? `${ev.locataire.prenom ?? ''} ${ev.locataire.nom ?? ''}`.trim() : (ev.locataireNom ? `${ev.locatairePrenom ?? ''} ${ev.locataireNom ?? ''}`.trim() : 'Locataire inconnu');
+                const meta = getEventTypeMeta(ev.type, colors);
+                const dateStr = formatEventDate(ev);
+                const locataireName = ev.locataire
+                  ? `${ev.locataire.prenom ?? ''} ${ev.locataire.nom ?? ''}`.trim()
+                  : (ev.locataireNom ? `${ev.locatairePrenom ?? ''} ${ev.locataireNom ?? ''}`.trim() : 'Locataire inconnu');
+                const bienName = ev.bien?.nom ?? ev.bienNom ?? 'Bien inconnu';
 
                 return (
-                  <View key={`ev-${idx}`} style={styles.eventRow}>
-                    <Text style={[styles.eventRowTitle, { color: colors.primary }]} numberOfLines={1} ellipsizeMode="tail">{humanType} · {ev.bien?.nom ?? ev.bienNom ?? 'Bien inconnu'}</Text>
-                    <Text style={[styles.eventRowSubtitle, { color: colors.primary, opacity: 0.7 }]} numberOfLines={1} ellipsizeMode="tail">{locataireName}{dateStr ? ` — ${dateStr}` : ''}</Text>
+                  <View
+                    key={`ev-${idx}`}
+                    style={[
+                      styles.eventRow,
+                      {
+                        borderBottomWidth: 0,
+                        backgroundColor: colors.surface,
+                        borderRadius: 10,
+                        paddingHorizontal: 10,
+                        paddingVertical: 10,
+                        marginBottom: 8,
+                      },
+                    ]}
+                  >
+                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 6 }}>
+                      <View
+                        style={{
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          backgroundColor: `${meta.accent}22`,
+                          borderRadius: 999,
+                          paddingHorizontal: 8,
+                          paddingVertical: 4,
+                        }}
+                      >
+                        <MaterialCommunityIcons name={meta.icon} size={14} color={meta.accent} />
+                        <Text style={{ color: meta.accent, fontWeight: '700', marginLeft: 5, fontSize: 12 }}>{meta.label}</Text>
+                      </View>
+                    </View>
+
+                    <Text style={[styles.eventRowTitle, { color: colors.text, fontSize: 14 }]} numberOfLines={1} ellipsizeMode="tail">
+                      Bien: {bienName}
+                    </Text>
+                    <Text style={[styles.eventRowSubtitle, { color: colors.textSecondary, fontSize: 12 }]} numberOfLines={1} ellipsizeMode="tail">
+                      Locataire: {locataireName}
+                    </Text>
+                    <Text style={[styles.eventRowSubtitle, { color: colors.textSecondary, fontSize: 12 }]} numberOfLines={1} ellipsizeMode="tail">
+                      Date: {dateStr}
+                    </Text>
                   </View>
                 );
               })}
