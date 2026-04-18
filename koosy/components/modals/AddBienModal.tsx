@@ -3,10 +3,12 @@ import React, { useState, useEffect } from 'react';
 import { Modal, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, ScrollView, KeyboardAvoidingView } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
 import { useTheme } from '../../contexts/ThemeContext';
-import { createBien, updateBien, uploadBienImages, geocodeAdresse } from '../../utils/bienApi';
+import { createBien, updateBien, uploadBienImages, geocodeAdresse, getBienQuota } from '../../utils/bienApi';
 import { getProprietaires } from '../../utils/proprietaireApi';
 import { useBienCount } from '../../contexts/BienCountContext';
 import type { Bien, Proprietaire } from '../../models/models';
+import type { BienQuota } from '../../utils/bienApi';
+import { ApiError } from '../../utils/api';
 
 // Récupération des dimensions de l'écran pour dimensionner la modale
 const SCREEN_WIDTH = Dimensions.get('window').width;
@@ -84,6 +86,10 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 	const [loading, setLoading] = useState(false);
 	// Message de succès ou d'erreur affiché dans la modale
 	const [successMsg, setSuccessMsg] = useState('');
+	// Informations de quota affichées à l'utilisateur en mode ajout
+	const [bienQuota, setBienQuota] = useState<BienQuota | null>(null);
+	const [quotaLoading, setQuotaLoading] = useState(false);
+	const [quotaError, setQuotaError] = useState<string | null>(null);
 
 	// Au moment où la modale devient visible, charger la liste des propriétaires
 	useEffect(() => {
@@ -97,6 +103,23 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 			})
 			.catch(() => setProprietaires([]));
 	}, [visible, selectedProprioId]);
+
+	// Chargement du quota pour afficher clairement la limite en mode ajout
+	useEffect(() => {
+		if (!visible || mode !== 'add') return;
+		setQuotaLoading(true);
+		setQuotaError(null);
+		getBienQuota()
+			.then((quota) => {
+				setBienQuota(quota);
+				setQuotaError(null);
+			})
+			.catch(() => {
+				setBienQuota(null);
+				setQuotaError('Quota indisponible pour le moment. Vérifiez que le backend est redémarré.');
+			})
+			.finally(() => setQuotaLoading(false));
+	}, [visible, mode]);
 
 	// Lorsque l'on est en mode édition, pré-remplir le formulaire avec les données du bien
 	useEffect(() => {
@@ -149,6 +172,12 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 		setLoading(true);
 		setSuccessMsg('');
 		try {
+			if (mode === 'add' && bienQuota?.isLimited && (bienQuota.remaining ?? 0) <= 0) {
+				setSuccessMsg('Vous avez atteint votre quota de 5 créations de biens. Passez en premium pour continuer.');
+				setLoading(false);
+				return;
+			}
+
 			const validationError = validateBienForm(form, selectedProprioId);
 			if (validationError) {
 				alert(validationError);
@@ -179,6 +208,13 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 				setSuccessMsg('Bien modifié avec succès !');
 			}
 			await refreshBiensCount();
+			if (mode === 'add') {
+				try {
+					setBienQuota(await getBienQuota());
+				} catch {
+					// Ignore une erreur quota secondaire après succès de création.
+				}
+			}
 			signalBienAdded();
 			setTimeout(() => {
 				setSuccessMsg('');
@@ -189,8 +225,12 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 				onClose();
 				if (onSuccess) onSuccess();
 			}, 1200);
-		} catch (_error) {
-			setSuccessMsg(mode === 'add' ? "Erreur lors de l'ajout du bien" : "Erreur lors de la modification du bien");
+		} catch (error) {
+			if (error instanceof ApiError && mode === 'add' && error.status === 403) {
+				setSuccessMsg(error.message || 'Quota atteint pour votre abonnement.');
+			} else {
+				setSuccessMsg(mode === 'add' ? "Erreur lors de l'ajout du bien" : "Erreur lors de la modification du bien");
+			}
 			setLoading(false);
 		}
 	};
@@ -213,6 +253,46 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 							horizontal={false}
 						>
 							<Text style={{ fontSize: 20, fontWeight: 'bold', marginBottom: 12, color: colors.primary }}>Ajouter un bien</Text>
+							{mode === 'add' ? (
+								<View
+									style={{
+										width: '100%',
+										padding: 10,
+										borderRadius: 10,
+										borderWidth: 1,
+										borderColor: colors.border,
+										backgroundColor: '#eef4ff',
+										marginBottom: 10,
+									}}
+								>
+									{quotaLoading ? (
+										<Text style={{ color: colors.text, fontWeight: '700' }}>
+											Chargement du quota de création...
+										</Text>
+									) : quotaError ? (
+										<Text style={{ color: colors.error, fontWeight: '700' }}>
+											{quotaError}
+										</Text>
+									) : bienQuota?.isLimited ? (
+										<>
+											<Text style={{ color: colors.text, fontWeight: '700' }}>
+												Plan gratuit: {bienQuota.used}/{bienQuota.limit} créations utilisées
+											</Text>
+											<Text style={{ color: colors.text }}>
+												Il vous reste {bienQuota.remaining ?? 0} création(s).
+											</Text>
+										</>
+									) : bienQuota ? (
+										<Text style={{ color: colors.text, fontWeight: '700' }}>
+											Plan premium: créations de biens illimitées.
+										</Text>
+									) : (
+										<Text style={{ color: colors.text, fontWeight: '700' }}>
+											Quota non disponible.
+										</Text>
+									)}
+								</View>
+							) : null}
 							{/* Sélecteur de propriétaire en haut de la modale */}
 							<View style={{ width: '100%', marginBottom: 10 }}>
 								<Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 4, alignSelf: 'flex-start' }}>Propriétaire</Text>

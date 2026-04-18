@@ -93,6 +93,15 @@ async getBiensCount(@Request() req) {
   return { total: await this.biensService.countBiens(req.user.userId) };
 }
 
+@Get('quota')
+@UseGuards(JwtAuthGuard)
+@ApiResponse({ status: 200, description: 'Quota d’ajout de biens de l’utilisateur connecté.' })
+@ApiResponse({ status: 401, description: 'Non authentifié.' })
+@ApiOperation({ summary: 'Récupérer le quota d’ajout de biens de l’utilisateur connecté' })
+async getBiensQuota(@Request() req) {
+  return this.biensService.getBienQuota(req.user.userId);
+}
+
 
 
 

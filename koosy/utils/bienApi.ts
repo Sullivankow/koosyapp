@@ -3,9 +3,23 @@ import { BASE_URL } from '../constants/config';
 import { apiFetch } from './api';
 import { getSession } from './session';
 
+export type BienQuota = {
+  plan: 'gratuit' | 'premium';
+  limit: number | null;
+  used: number;
+  remaining: number | null;
+  active: number;
+  isLimited: boolean;
+};
+
 // Fonction pour récupérer le nombre total de biens
 export async function getBiensCount(): Promise<{ total: number }> {
   return apiFetch('/biens/count');
+}
+
+// Récupère les informations de quota d'ajout de biens de l'utilisateur connecté
+export async function getBienQuota(): Promise<BienQuota> {
+  return apiFetch('/biens/quota');
 }
 
 // Récupérer la liste des biens de l'utilisateur connecté

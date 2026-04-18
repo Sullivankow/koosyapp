@@ -166,12 +166,6 @@ const BienCard: React.FC<BienCardProps> = ({ bien, totalPrestationPercu, colors,
 						<Text style={[styles.infoValue, { color: colors.text }]}>{bien.pieces || '-'}</Text>
 					)}
 				</View>
-				<View style={styles.infoCol}>
-					<Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Statut</Text>
-					<TouchableOpacity onPress={() => onStatus(bien)} disabled={isEditing} style={[styles.statusPillInline, { backgroundColor: statutBg }]}>
-						<Text style={[styles.infoValue, { color: statutColor, fontSize: 13 }]}>{bien.statut || '-'}</Text>
-					</TouchableOpacity>
-				</View>
 			</View>
 
 			<View style={styles.rowDenseBetween}>

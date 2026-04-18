@@ -19,33 +19,50 @@ export class BiensService {
 
   //Méthode pour créer un bien en lié à l'utilisateur(conciergerie)
   async createBien(createBienDto: CreateBienDto, userId: number): Promise<Bien> {
-    const user = await this.usersRepository.findOne({ where: { id: userId }, relations: ['biens'] });
-    if (!user) {
-      throw new NotFoundException('Utilisateur non trouvé');
-    }
-
-    const biensCount = await this.biensRepository.count({ where: { conciergerie: { id: userId } } });
-    if (user.abonnement === 'gratuit' && biensCount >= 5) {
-      throw new ForbiddenException('Limite atteinte : abonnement gratuit limité à 5 biens.');
-    }
-
     // Géocodage automatique de l'adresse
+    const payload: CreateBienDto = { ...createBienDto };
     if (createBienDto.adresse) {
       const coords = await this.geocodeAdresse(createBienDto.adresse);
       if (coords) {
-        createBienDto.lat = coords.lat;
-        createBienDto.lng = coords.lng;
+        payload.lat = coords.lat;
+        payload.lng = coords.lng;
       }
     }
 
-    const { proprietaire, ...rest } = createBienDto;
+    return this.biensRepository.manager.transaction(async (manager) => {
+      const usersRepo = manager.getRepository(User);
+      const biensRepo = manager.getRepository(Bien);
 
-    const bien = this.biensRepository.create({
-      ...rest,
-      conciergerie: user,
-      ...(proprietaire ? { proprietaire: { id: proprietaire } } : {}),
+      const user = await usersRepo
+        .createQueryBuilder('user')
+        .setLock('pessimistic_write')
+        .where('user.id = :userId', { userId })
+        .getOne();
+
+      if (!user) {
+        throw new NotFoundException('Utilisateur non trouvé');
+      }
+
+      if (user.abonnement === 'gratuit') {
+        const biensCount = await biensRepo.count({ where: { conciergerie: { id: userId } } });
+        const effectiveCreationsCount = Math.max(user.freeBienCreationsCount || 0, biensCount);
+
+        if (effectiveCreationsCount >= 5) {
+          throw new ForbiddenException('Limite atteinte : abonnement gratuit limité à 5 créations de biens.');
+        }
+
+        user.freeBienCreationsCount = effectiveCreationsCount + 1;
+        await usersRepo.save(user);
+      }
+
+      const { proprietaire, ...rest } = payload;
+      const bien = biensRepo.create({
+        ...rest,
+        conciergerie: user,
+        ...(proprietaire ? { proprietaire: { id: proprietaire } } : {}),
+      });
+      return biensRepo.save(bien);
     });
-    return this.biensRepository.save(bien);
   }
 
 
@@ -208,6 +225,47 @@ async deleteRemarqueBien(id: number): Promise<{ success: boolean; message: strin
 // Compte les biens de l'utilisateur connecté
 async countBiens(userId: number): Promise<number> {
   return this.biensRepository.count({ where: { conciergerie: { id: userId } } });
+}
+
+// Retourne les informations de quota d'ajout de biens pour l'utilisateur connecté
+async getBienQuota(userId: number): Promise<{
+  plan: 'gratuit' | 'premium';
+  limit: number | null;
+  used: number;
+  remaining: number | null;
+  active: number;
+  isLimited: boolean;
+}> {
+  const user = await this.usersRepository.findOne({ where: { id: userId } });
+  if (!user) {
+    throw new NotFoundException('Utilisateur non trouvé');
+  }
+
+  const active = await this.countBiens(userId);
+
+  if (user.abonnement !== 'gratuit') {
+    return {
+      plan: 'premium',
+      limit: null,
+      used: active,
+      remaining: null,
+      active,
+      isLimited: false,
+    };
+  }
+
+  const limit = 5;
+  const used = Math.max(user.freeBienCreationsCount || 0, active);
+  const remaining = Math.max(0, limit - used);
+
+  return {
+    plan: 'gratuit',
+    limit,
+    used,
+    remaining,
+    active,
+    isLimited: true,
+  };
 }
 
 
