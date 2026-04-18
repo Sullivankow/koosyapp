@@ -114,6 +114,29 @@ async findByEmail(email: string): Promise<User | null> {
   return this.usersRepository.findOne({ where: { email } });
 }
 
+  async findByEmailWithRefreshTokenHash(email: string): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { email },
+      select: ['id', 'email', 'password', 'nom', 'prenom', 'role', 'abonnement', 'betaAccessUntil', 'expoPushToken', 'settings', 'telephone', 'refreshTokenHash'],
+    });
+  }
+
+  async findOneWithRefreshTokenHash(userId: number): Promise<User | null> {
+    return this.usersRepository.findOne({
+      where: { id: userId },
+      select: ['id', 'email', 'password', 'nom', 'prenom', 'role', 'abonnement', 'betaAccessUntil', 'expoPushToken', 'settings', 'telephone', 'refreshTokenHash'],
+    });
+  }
+
+  async setRefreshTokenHash(userId: number, refreshTokenHash: string | null): Promise<void> {
+    const user = await this.usersRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException('Utilisateur non trouvé');
+    }
+    user.refreshTokenHash = refreshTokenHash;
+    await this.usersRepository.save(user);
+  }
+
 
 
 

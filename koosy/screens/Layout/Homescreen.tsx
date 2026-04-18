@@ -10,6 +10,7 @@ import React, { useState, useEffect } from 'react';
 import { useSuccessMessage } from '../../hooks/useSuccessMessage';
 import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
 import { clearSession } from '../../utils/session';
+import { logoutCurrentSession } from '../../utils/api';
 import { useUserInfo } from '../../hooks/useUserInfo';
 import { useTheme } from '../../contexts/ThemeContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -126,7 +127,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
     // Handler de déconnexion : efface la session côté client et notifie le parent
     // Déconnecte l'utilisateur : nettoyage de la session puis éventuelle notification au parent.
     const handleLogout = async () => {
-        await clearSession();
+        await logoutCurrentSession();
         if (onLogout) {
             onLogout();
         }

@@ -5,7 +5,7 @@
 /*  automatiquement la BASE_URL et le token JWT quand il existe.              */
 /* -------------------------------------------------------------------------- */
 import { Charge, Devis, Facture } from '../models/models';
-import { getSession } from './session';
+import { clearSession, getSession, saveSession } from './session';
 import { BASE_URL } from '../constants/config';
 
 export class ApiError extends Error {
@@ -18,25 +18,76 @@ export class ApiError extends Error {
   }
 }
 
+let refreshInFlight: Promise<boolean> | null = null;
 
-// Simule la récupération d'un token JWT stocké localement
+async function doApiFetch(endpoint: string, options: RequestInit = {}, accessToken?: string) {
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
+    ...options.headers,
+  };
+  return fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
+}
+
+async function refreshSessionTokens(): Promise<boolean> {
+  if (!refreshInFlight) {
+    refreshInFlight = (async () => {
+      const session = await getSession();
+      const refreshToken = session?.refreshToken;
+      if (!refreshToken || !session?.email) {
+        return false;
+      }
+
+      const response = await fetch(`${BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken }),
+      });
+
+      if (!response.ok) {
+        await clearSession();
+        return false;
+      }
+
+      const payload = await response.json();
+      if (!payload?.access_token) {
+        await clearSession();
+        return false;
+      }
+
+      await saveSession(session.email, payload.access_token, payload.refresh_token ?? refreshToken);
+      return true;
+    })().finally(() => {
+      refreshInFlight = null;
+    });
+  }
+
+  return refreshInFlight;
+}
 
 /**
  * Helper HTTP générique pour appeler l'API Koosy côté client.
  * - Préfixe automatiquement l'URL avec BASE_URL
  * - Ajoute le header Authorization Bearer <token> si une session existe
+ * - Tente un refresh automatique une fois en cas de 401
  * - Gère les réponses vides (204, body vide) et parse le JSON sinon.
  */
 export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   const session = await getSession();
-  const token = session?.token;
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...options.headers,
-  };
-  const url = `${BASE_URL}${endpoint}`;
-  const response = await fetch(url, { ...options, headers });
+  const token = session?.accessToken || session?.token;
+  let response = await doApiFetch(endpoint, options, token);
+
+  if (response.status === 401 && !endpoint.startsWith('/auth/')) {
+    const refreshed = await refreshSessionTokens();
+    if (refreshed) {
+      const updatedSession = await getSession();
+      response = await doApiFetch(endpoint, options, updatedSession?.accessToken || updatedSession?.token);
+      if (response.status === 401) {
+        await clearSession();
+      }
+    }
+  }
+
   if (!response.ok) {
     const errorText = await response.text();
     let message = errorText || `Erreur API: ${response.status}`;
@@ -56,9 +107,6 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
   return JSON.parse(text);
 }
 
-
- 
-
 // Fonction d'inscription d'un utilisateur (écran SignUp)
 export function signup(data: { nom: string; prenom: string; email: string; password: string }) {
   return apiFetch('/users', {
@@ -72,7 +120,7 @@ export function signup(data: { nom: string; prenom: string; email: string; passw
   });
 }
 
-// Fonction de connexion : renvoie typiquement { access_token } utilisé par saveSession
+// Fonction de connexion : renvoie typiquement { access_token, refresh_token }
 export async function login({ email, password }: { email: string; password: string }) {
   const response = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
@@ -82,7 +130,27 @@ export async function login({ email, password }: { email: string; password: stri
   if (!response.ok) {
     throw new Error('Identifiants invalides');
   }
-  return await response.json(); // { access_token: ... }
+  return await response.json();
+}
+
+/**
+ * Déconnecte la session courante côté serveur puis efface la session locale.
+ * Utilise le refresh token pour révoquer la session même si l'access token a expiré.
+ */
+export async function logoutCurrentSession() {
+  const session = await getSession();
+  if (session?.refreshToken) {
+    try {
+      await fetch(`${BASE_URL}/auth/logout`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: session.refreshToken }),
+      });
+    } catch {
+      // On nettoie quand même la session locale.
+    }
+  }
+  await clearSession();
 }
 
 

@@ -71,10 +71,10 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
 
             // Sauvegarde le token JWT dans la session pour les appels API
             if (res.access_token) {
-                const { access_token, prenom } = res as { access_token: string; prenom?: string };
+                const { access_token, refresh_token, prenom } = res as { access_token: string; refresh_token?: string; prenom?: string };
 
                 // Stocke le token et l'email dans la session pour les prochains appels API
-                await saveSession(email, access_token);
+                await saveSession(email, access_token, refresh_token);
 
                 // Stocke le prénom pour l'accueil
                 if (prenom) {

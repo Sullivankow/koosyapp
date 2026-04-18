@@ -35,6 +35,7 @@ import { AppContext } from './contexts/AppContext';
 import ListeDevisScreen from './screens/Layout/ListeDevisScreen';
 import ListeFactureScreen from './screens/Layout/ListeFactureScreen';
 import { GlobalRefreshProvider } from './contexts/GlobalRefreshContext';
+import { logoutCurrentSession } from './utils/api';
 import PlanningScreen from './screens/Layout/PlanningScreen';
 import ChargesScreen from './screens/Layout/ChargesScreen';
 
@@ -190,7 +191,7 @@ export default function App() {
                                         {() => (
                                           <HomeStackScreen
                                             onLogout={async () => {
-                                              await clearSession();
+                                              await logoutCurrentSession();
                                               setIsLoggedIn(false);
                                             }}
                                           />

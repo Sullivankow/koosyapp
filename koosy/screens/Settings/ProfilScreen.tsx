@@ -13,7 +13,7 @@ import SubscriptionPaywallModal from '../../components/modals/SubscriptionPaywal
 import { getEntrepriseById } from '../../utils/api';
 import { useTheme } from '../../contexts/ThemeContext';
 import { getMe, updateMe, deleteMe } from '../../utils/api';
-import { clearSession } from '../../utils/session';
+import { logoutCurrentSession } from '../../utils/api';
 import { useContext } from 'react';
 import { AppContext } from '../../contexts/AppContext';
 import { createEntreprise } from '../../utils/api';
@@ -189,7 +189,7 @@ const ProfilScreen: React.FC = () => {
                     onPress: async () => {
                         try {
                             await deleteMe();
-                            await clearSession();
+                            await logoutCurrentSession();
                             appContext?.setIsLoggedIn(false);
                         } catch (error) {
                             // ...log supprimé...

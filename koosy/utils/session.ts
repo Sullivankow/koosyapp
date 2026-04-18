@@ -6,6 +6,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export type Session = {
   email: string;
   token: string;
+  accessToken?: string;
+  refreshToken?: string;
 };
 
 // Génère un token aléatoire (UUID simple).
@@ -15,9 +17,17 @@ export function generateToken(): string {
   return 'koosy_' + Math.random().toString(36).slice(2, 18);
 }
 
-// Sauvegarde la session (email + token)
-export async function saveSession(email: string, token: string): Promise<void> {
-  await AsyncStorage.setItem('koosy_session', JSON.stringify({ email, token }));
+// Sauvegarde la session (email + access token + refresh token)
+export async function saveSession(email: string, accessToken: string, refreshToken?: string): Promise<void> {
+  await AsyncStorage.setItem(
+    'koosy_session',
+    JSON.stringify({
+      email,
+      token: accessToken,
+      accessToken,
+      refreshToken: refreshToken ?? null,
+    }),
+  );
 }
 
 // Récupère la session stockée

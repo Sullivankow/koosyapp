@@ -46,6 +46,10 @@ telephone: string;
 @Column({ type: 'text', nullable: true })
 expoPushToken: string | null;
 
+  // Hash du refresh token courant. Stocké en base pour permettre la révocation et la rotation.
+  @Column({ type: 'text', nullable: true, select: false })
+  refreshTokenHash: string | null;
+
   /**
    * Paramètres utilisateur génériques (JSONB recommandé en production).
    *
