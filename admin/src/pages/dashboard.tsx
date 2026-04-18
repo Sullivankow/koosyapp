@@ -132,21 +132,26 @@ const Dashboard: React.FC = () => {
           <div className="grid gap-4 lg:grid-cols-3">
             <div className="rounded-2xl bg-white border border-[#E0E6ED] p-5 lg:col-span-2">
               <h2 className="text-sm font-semibold text-[#222B45] mb-3">Abonnements</h2>
-              <div className="grid gap-3 md:grid-cols-3 text-sm">
+              <div className="grid gap-3 md:grid-cols-4 text-sm">
                 <div className="rounded-xl bg-[#F4F7FA] p-4 border border-[#E0E6ED]">
                   <p className="text-xs uppercase text-[#6E7B8B] mb-1">Total</p>
-                  <p className="text-xl font-semibold text-[#222B45]">—</p>
+                  <p className="text-xl font-semibold text-[#222B45]">{formatNumber(stats?.subscriptionsTotal)}</p>
                   <p className="text-[11px] text-[#B0BEC5] mt-1">Tous les comptes</p>
                 </div>
                 <div className="rounded-xl bg-[#E3F2FD] p-4 border border-[#BBDEFB]">
                   <p className="text-xs uppercase text-[#1976D2] mb-1">Premium</p>
-                  <p className="text-xl font-semibold text-[#0D47A1]">—</p>
+                  <p className="text-xl font-semibold text-[#0D47A1]">{formatNumber(stats?.premiumSubscriptionsTotal)}</p>
                   <p className="text-[11px] text-[#1565C0] mt-1">abonnement = 'premium'</p>
                 </div>
                 <div className="rounded-xl bg-[#F1F8E9] p-4 border border-[#DCEDC8]">
                   <p className="text-xs uppercase text-[#558B2F] mb-1">Gratuit</p>
-                  <p className="text-xl font-semibold text-[#33691E]">—</p>
+                  <p className="text-xl font-semibold text-[#33691E]">{formatNumber(stats?.gratuitSubscriptionsTotal)}</p>
                   <p className="text-[11px] text-[#689F38] mt-1">abonnement = 'gratuit'</p>
+                </div>
+                <div className="rounded-xl bg-[#FFF8E1] p-4 border border-[#FFECB3]">
+                  <p className="text-xs uppercase text-[#8D6E00] mb-1">Bêta actif</p>
+                  <p className="text-xl font-semibold text-[#6D4C41]">{formatNumber(stats?.betaUsersTotal)}</p>
+                  <p className="text-[11px] text-[#8D6E63] mt-1">betaAccessUntil &gt;= aujourd'hui</p>
                 </div>
               </div>
             </div>
