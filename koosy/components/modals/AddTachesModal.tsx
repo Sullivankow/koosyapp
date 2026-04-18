@@ -83,6 +83,16 @@ const normalizeDate = (d: string) => {
 	return d;
 };
 
+// Ajoute automatiquement les / pendant la saisie d'une date (JJ/MM/AAAA)
+const formatDateInput = (value: string): string => {
+	const cleaned = value.replace(/\D/g, '');
+	let formatted = '';
+	if (cleaned.length > 0) formatted = cleaned.slice(0, 2);
+	if (cleaned.length > 2) formatted += '/' + cleaned.slice(2, 4);
+	if (cleaned.length > 4) formatted += '/' + cleaned.slice(4, 8);
+	return formatted;
+};
+
 const AddTachesModal: React.FC<AddTachesModalProps> = ({ visible, onClose, onSuccess, bienId }) => {
 	const { colors, isDarkMode } = useTheme();
 	const activeStatusColor = colors.primary;
@@ -120,6 +130,11 @@ const AddTachesModal: React.FC<AddTachesModalProps> = ({ visible, onClose, onSuc
 		},
 		[],
 	);
+
+	// Formate la date d'échéance à la frappe pour garder un format lisible.
+	const handleDateEcheanceChange = (value: string) => {
+		setForm(prev => ({ ...prev, dateEcheance: formatDateInput(value) }));
+	};
 
 	// Validation et envoi de la tâche au backend
 	const handleSubmit = async () => {
@@ -191,7 +206,9 @@ const AddTachesModal: React.FC<AddTachesModalProps> = ({ visible, onClose, onSuc
 								placeholder="Date d'échéance (JJ/MM/AAAA)"
 								placeholderTextColor="#888"
 								value={form.dateEcheance}
-								onChangeText={v => updateField('dateEcheance', v)}
+								onChangeText={handleDateEcheanceChange}
+								keyboardType="numeric"
+								maxLength={10}
 							/>
 							<View style={{ width: SCREEN_WIDTH * 0.8, marginBottom: 10 }}>
 								<Text style={{ color: colors.textSecondary, marginBottom: 4 }}>Statut</Text>
