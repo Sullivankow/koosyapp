@@ -5,6 +5,7 @@ import { getSession } from './session';
 
 export type BienQuota = {
   plan: 'gratuit' | 'premium';
+  accessLevel: 'gratuit' | 'premium' | 'beta';
   limit: number | null;
   used: number;
   remaining: number | null;

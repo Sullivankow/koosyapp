@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ApiError, createFacture } from '../utils/api';
+import { ApiError, createFacture, getMe } from '../utils/api';
 import AddFactureModal from '../components/modals/AddFactureModal';
 import SubscriptionPaywallModal from '../components/modals/SubscriptionPaywallModal';
 import { Entreprise } from '../models/models';
@@ -30,7 +30,19 @@ export const useAddFactureModal = (entreprises: Entreprise[]): UseAddFactureModa
   const [lastFacture, setLastFacture] = useState<any | null>(null);
   const [paywallVisible, setPaywallVisible] = useState(false);
 
-  const open = () => setVisible(true);
+  // Nouvelle logique : vérifie l’abonnement avant d’ouvrir la modale
+  const open = async () => {
+    try {
+      const me = await getMe();
+      if (me?.abonnement === 'premium') {
+        setVisible(true);
+      } else {
+        setPaywallVisible(true);
+      }
+    } catch {
+      setPaywallVisible(true);
+    }
+  };
   const close = () => setVisible(false);
 
   // Soumission de la facture (appel API)
@@ -46,15 +58,10 @@ export const useAddFactureModal = (entreprises: Entreprise[]): UseAddFactureModa
 
       const res = await createFacture(payload);
 
-      // On mémorise la facture créée avec l'id retourné par l'API
       setLastFacture({ ...facture, id: res.id });
       setVisible(false);
       alert('La facture a bien été créée !');
     } catch (e: any) {
-      if (e instanceof ApiError && e.status === 403) {
-        setPaywallVisible(true);
-        return;
-      }
       const msg =
         typeof e === 'object' && e !== null && 'message' in e
           ? (e as any).message

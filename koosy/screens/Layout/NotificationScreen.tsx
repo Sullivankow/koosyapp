@@ -128,7 +128,7 @@ export default function NotificationScreen() {
           </TouchableOpacity>
         )}
         <TouchableOpacity onPress={() => handleDelete(item.id)} style={{ marginLeft: 8, padding: 6 }}>
-          <MaterialCommunityIcons name="trash-can-outline" size={20} color={colors.error} />
+          <MaterialCommunityIcons name="trash-can-outline" size={20} color={colors.primary} />
         </TouchableOpacity>
       </View>
     </View>

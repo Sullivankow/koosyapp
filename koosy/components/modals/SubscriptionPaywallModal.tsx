@@ -41,11 +41,12 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 	const heroSubtitleColor = onPrimary === '#0F172A' ? 'rgba(15,23,42,0.82)' : 'rgba(255,255,255,0.92)';
 
 	const features = [
-		'Creation illimitee de devis',
-		'Creation illimitee de factures',
-		'Export PDF illimite',
-		'Ajout des charges simplifie',
-		'Calcul de la marge en temps reel',
+		'Création illimitée de biens',
+		'Création illimitée de devis',
+		'Création illimitée de factures',
+		'Export PDF illimité',
+		'Ajout des charges simplifié',
+		'Calcul de la marge en temps réel',
 		'Support prioritaire',
 	];
 

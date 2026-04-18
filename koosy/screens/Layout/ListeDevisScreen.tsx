@@ -66,7 +66,7 @@ export default function ListeDevisScreen() {
 			{/* En-tête réutilisable déplacé à l'intérieur du SafeAreaView */}
 			<HeaderWithAddButton
 				title="Mes devis"
-				onAdd={open}
+				onAdd={() => open()}
 				colors={colors}
 			/>
 

@@ -16,6 +16,14 @@ export class BiensService {
     private usersRepository: Repository<User>,
   ) {}
 
+  // Vérifie si l'utilisateur dispose actuellement d'un accès bêta valide.
+  private hasUserBetaAccess(user: User): boolean {
+    if (!user.betaAccessUntil) {
+      return false;
+    }
+    return new Date(user.betaAccessUntil).getTime() >= new Date().getTime();
+  }
+
 
   //Méthode pour créer un bien en lié à l'utilisateur(conciergerie)
   async createBien(createBienDto: CreateBienDto, userId: number): Promise<Bien> {
@@ -43,7 +51,9 @@ export class BiensService {
         throw new NotFoundException('Utilisateur non trouvé');
       }
 
-      if (user.abonnement === 'gratuit') {
+      const hasBetaAccess = this.hasUserBetaAccess(user);
+
+      if (user.abonnement === 'gratuit' && !hasBetaAccess) {
         const biensCount = await biensRepo.count({ where: { conciergerie: { id: userId } } });
         const effectiveCreationsCount = Math.max(user.freeBienCreationsCount || 0, biensCount);
 
@@ -230,6 +240,7 @@ async countBiens(userId: number): Promise<number> {
 // Retourne les informations de quota d'ajout de biens pour l'utilisateur connecté
 async getBienQuota(userId: number): Promise<{
   plan: 'gratuit' | 'premium';
+  accessLevel: 'gratuit' | 'premium' | 'beta';
   limit: number | null;
   used: number;
   remaining: number | null;
@@ -242,10 +253,24 @@ async getBienQuota(userId: number): Promise<{
   }
 
   const active = await this.countBiens(userId);
+  const hasBetaAccess = this.hasUserBetaAccess(user);
+
+  if (hasBetaAccess) {
+    return {
+      plan: user.abonnement === 'premium' ? 'premium' : 'gratuit',
+      accessLevel: 'beta',
+      limit: null,
+      used: active,
+      remaining: null,
+      active,
+      isLimited: false,
+    };
+  }
 
   if (user.abonnement !== 'gratuit') {
     return {
       plan: 'premium',
+      accessLevel: 'premium',
       limit: null,
       used: active,
       remaining: null,
@@ -260,6 +285,7 @@ async getBienQuota(userId: number): Promise<{
 
   return {
     plan: 'gratuit',
+    accessLevel: 'gratuit',
     limit,
     used,
     remaining,

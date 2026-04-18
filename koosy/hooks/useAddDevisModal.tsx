@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ApiError, createDevis } from '../utils/api';
+import { ApiError, createDevis, getMe } from '../utils/api';
 import AddDevisModal from '../components/modals/AddDevisModal';
 import SubscriptionPaywallModal from '../components/modals/SubscriptionPaywallModal';
 import { Entreprise } from '../models/models';
@@ -21,7 +21,19 @@ export const useAddDevisModal = (entreprises: Entreprise[]): UseAddDevisModalRes
   const [lastDevis, setLastDevis] = useState<any | null>(null);
   const [paywallVisible, setPaywallVisible] = useState(false);
 
-  const open = () => setVisible(true);
+  // Nouvelle logique : vérifie l’abonnement avant d’ouvrir la modale
+  const open = async () => {
+    try {
+      const me = await getMe();
+      if (me?.abonnement === 'premium') {
+        setVisible(true);
+      } else {
+        setPaywallVisible(true);
+      }
+    } catch {
+      setPaywallVisible(true);
+    }
+  };
   const close = () => setVisible(false);
 
   // Soumission du formulaire de création de devis
@@ -30,21 +42,15 @@ export const useAddDevisModal = (entreprises: Entreprise[]): UseAddDevisModalRes
       // On envoie seulement l'id de l'entreprise au backend
       const payload = {
         ...devis,
-        // si l'entreprise est un objet avec id, on envoie l'id, sinon on envoie tel quel
         entreprise: devis.entreprise?.id ?? devis.entreprise,
       };
 
       const res = await createDevis(payload);
 
-      // On mémorise le devis créé avec l'id retourné par l'API
       setLastDevis({ ...devis, id: res.id });
       setVisible(false);
       alert('Le devis a bien été créé !');
     } catch (e: any) {
-      if (e instanceof ApiError && e.status === 403) {
-        setPaywallVisible(true);
-        return;
-      }
       // Construction d'un message d'erreur lisible quel que soit le type de l'exception
       const msg =
         typeof e === 'object' && e !== null && 'message' in e

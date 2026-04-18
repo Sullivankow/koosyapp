@@ -32,7 +32,7 @@ import { useReservationRefresh } from '../../contexts/ReservationRefreshContext'
 import { useChiffreAffaire } from '../../hooks/useChiffreAffaire';
 import ChiffreAffaireCard from '../../components/cards/ChiffreAffaireCard';
 import { useAddDevisModal } from '../../hooks/useAddDevisModal';
-import { apiFetchMyEntreprise } from '../../utils/api';
+import { apiFetchMyEntreprise, getMe } from '../../utils/api';
 
 
 type HomeScreenProps = {
@@ -55,6 +55,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
     const [addBienModalVisible, setAddBienModalVisible] = useState(false);
     const [addReservationModalVisible, setAddReservationModalVisible] = useState(false);
     const [addPrestationModalVisible, setAddPrestationModalVisible] = useState(false);
+    const [isBetaUser, setIsBetaUser] = useState(false);
+    const [isPremiumUser, setIsPremiumUser] = useState(false);
     // Formulaire de réservation via hook personnalisé
     const { successMsg, showSuccess } = useSuccessMessage();
     // Hook formulaire de réservation rapide utilisé dans le dashboard (modale de réservation).
@@ -121,6 +123,24 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
             .catch(() => setEntreprises([]));
         // Les événements sont désormais gérés par le hook useUpcomingEvents
     }, [lastTacheAdded, lastBienAdded]);
+
+    // Récupère le profil utilisateur pour afficher un badge discret si l'accès bêta est actif.
+    useEffect(() => {
+        const loadUserAccess = async () => {
+            try {
+                const me = await getMe();
+                const betaAccessUntil = (me as any)?.betaAccessUntil;
+                const betaTs = betaAccessUntil ? new Date(betaAccessUntil).getTime() : Number.NaN;
+                setIsBetaUser(Number.isFinite(betaTs) && betaTs >= Date.now());
+                setIsPremiumUser((me as any)?.abonnement === 'premium');
+            } catch {
+                setIsBetaUser(false);
+                setIsPremiumUser(false);
+            }
+        };
+
+        loadUserAccess();
+    }, []);
 
     // Recharge les événements dès qu'une réservation est ajoutée.
     useEffect(() => {
@@ -189,13 +209,52 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
             <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.container}>
                 {/* Avatar et message personnalisé */}
                 <View style={styles.avatarRow}>
-                    <View style={[styles.avatar, { backgroundColor: avatarBackgroundColor }]}>
+                    <View style={[styles.avatar, { backgroundColor: avatarBackgroundColor }]}> 
                         <Text style={styles.avatarInitials}>{userInitials}</Text>
                     </View>
                     <View style={{ marginLeft: 12 }}>
                         <Text style={[styles.welcome, { color: colors.primary }]}>Bonjour, {userName} 👋</Text>
-                        <View style={[styles.subtitleBadge, { backgroundColor: colors.primary }]}>
-                            <Text style={[styles.subtitle, { color: isDarkMode ? colors.background : colors.surface }]}>Votre tableau de bord prestataire</Text>
+                        <View style={{ flexDirection: 'column', alignItems: 'flex-start', marginTop: 2 }}>
+                            <View style={[styles.subtitleBadge, { backgroundColor: colors.primary, marginBottom: 2 }]}> 
+                                <Text style={[styles.subtitle, { color: isDarkMode ? colors.background : colors.surface }]}>Votre tableau de bord prestataire</Text>
+                            </View>
+                            {isBetaUser ? (
+                                <View
+                                    style={{
+                                        alignSelf: 'flex-start',
+                                        marginTop: 0,
+                                        marginBottom: 2,
+                                        paddingHorizontal: 7,
+                                        paddingVertical: 2,
+                                        borderRadius: 999,
+                                        borderWidth: 1,
+                                        borderColor: colors.primary,
+                                        backgroundColor: colors.surface,
+                                    }}
+                                >
+                                    <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '700', letterSpacing: 0.4 }}>
+                                        BETA
+                                    </Text>
+                                </View>
+                            ) : isPremiumUser ? (
+                                <View
+                                    style={{
+                                        alignSelf: 'flex-start',
+                                        marginTop: 0,
+                                        marginBottom: 2,
+                                        paddingHorizontal: 7,
+                                        paddingVertical: 2,
+                                        borderRadius: 999,
+                                        borderWidth: 1,
+                                        borderColor: colors.primary,
+                                        backgroundColor: colors.surface,
+                                    }}
+                                >
+                                    <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '700', letterSpacing: 0.4 }}>
+                                        PREMIUM
+                                    </Text>
+                                </View>
+                            ) : null}
                         </View>
                     </View>
                 </View>

@@ -56,9 +56,9 @@ export default function ListeFactureScreen() {
 		 <View style={{ flex: 1, backgroundColor: colors.surface }}>
 			<StatusBar barStyle="dark-content" backgroundColor={colors.surface} />
 			 {/* En-tête réutilisable déplacé à l'intérieur du SafeAreaView */}
-			 <HeaderWithAddButton
+			<HeaderWithAddButton
 				title="Mes factures"
-				onAdd={openAddFacture}
+				onAdd={() => openAddFacture()}
 				colors={colors}
 			/>
 

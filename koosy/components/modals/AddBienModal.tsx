@@ -284,7 +284,9 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 										</>
 									) : bienQuota ? (
 										<Text style={{ color: colors.text, fontWeight: '700' }}>
-											Plan premium: créations de biens illimitées.
+											{bienQuota.accessLevel === 'beta'
+												? 'Accès bêta: créations de biens illimitées pendant la période de test.'
+												: 'Plan premium: créations de biens illimitées.'}
 										</Text>
 									) : (
 										<Text style={{ color: colors.text, fontWeight: '700' }}>
