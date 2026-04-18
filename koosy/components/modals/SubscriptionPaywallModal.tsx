@@ -42,6 +42,7 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 
 	const features = [
 		'Création illimitée de biens',
+		'Création illimitée de propriétaires',
 		'Création illimitée de devis',
 		'Création illimitée de factures',
 		'Export PDF illimité',
