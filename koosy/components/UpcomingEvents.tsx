@@ -23,7 +23,7 @@ const getEventTypeMeta = (type: string, colors: any) => {
 
   if (normalized.includes('arrival') || normalized.includes('arrive') || normalized.includes('arrivee')) {
     return {
-      label: 'Arrivee',
+      label: 'Arrivée',
       icon: 'login' as const,
       accent: colors.success || '#2E7D32',
     };
@@ -31,7 +31,7 @@ const getEventTypeMeta = (type: string, colors: any) => {
 
   if (normalized.includes('departure') || normalized.includes('depart')) {
     return {
-      label: 'Depart',
+      label: 'Départ',
       icon: 'logout' as const,
       accent: colors.warning || '#ED6C02',
     };
