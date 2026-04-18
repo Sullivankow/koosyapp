@@ -23,6 +23,9 @@ import { useNavigation, useRoute } from '@react-navigation/native';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
 import { styles } from './styles/BienScreen.styles';
 import { getChiffreAffaire } from '../../utils/prestationsApi';
+import { getBienQuota } from '../../utils/bienApi';
+import type { BienQuota } from '../../utils/bienApi';
+import SubscriptionPaywallModal from '../../components/modals/SubscriptionPaywallModal';
 
 const BiensScreen: React.FC = () => {
   const route: any = useRoute();
@@ -43,6 +46,8 @@ const BiensScreen: React.FC = () => {
   const [editModalData, setEditModalData] = useState<{ visible: boolean; bienId?: string; initialData?: any }>({ visible: false });
   const [successMsg, setSuccessMsg] = useState('');
   const [totalPerBienMap, setTotalPerBienMap] = useState<Record<string, number>>({});
+  const [bienQuota, setBienQuota] = useState<BienQuota | null>(null);
+  const [showSubscriptionPaywall, setShowSubscriptionPaywall] = useState(false);
   const { colors } = useTheme();
 
   // Récupération des biens (ajout de tacheCount comme dépendance)
@@ -103,6 +108,34 @@ const BiensScreen: React.FC = () => {
 
     loadTotalsPerBien();
   }, [prestationsTerminees, lastBienAdded]);
+
+  // Charge le quota de créations de biens pour savoir si l'utilisateur gratuit a atteint sa limite.
+  useEffect(() => {
+    const loadBienQuota = async () => {
+      try {
+        const quota = await getBienQuota();
+        setBienQuota(quota);
+      } catch {
+        setBienQuota(null);
+      }
+    };
+
+    loadBienQuota();
+  }, [lastBienAdded]);
+
+  // Indique si la limite de création est atteinte pour un compte limité (plan gratuit).
+  const isQuotaReached = Boolean(
+    bienQuota?.isLimited && (bienQuota.remaining ?? 0) <= 0,
+  );
+
+  // Gère le bouton "+" : ouvre la modale d'ajout si possible, sinon affiche directement l'offre d'abonnement.
+  const handleAddBienPress = () => {
+    if (isQuotaReached) {
+      setShowSubscriptionPaywall(true);
+      return;
+    }
+    setAddBienModalVisible(true);
+  };
 
   // Formatage simple d'une date au format français (JJ/MM/AAAA)
   const formatDateFR = (dateStr?: string) => {
@@ -191,10 +224,47 @@ const BiensScreen: React.FC = () => {
       <StatusModal visible={statutModalVisible} onClose={() => setStatutModalVisible(false)} onSelect={handleSelectStatus} currentStatus={currentBienStatus} />
       <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}> 
         <Text style={[styles.title, { color: colors.text }]}>Mes biens</Text>
-        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={() => setAddBienModalVisible(true)}>
+        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={handleAddBienPress}>
           <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
         </TouchableOpacity>
       </View>
+      {/* Affiche une carte d'upgrade uniquement quand l'utilisateur gratuit a atteint la limite de créations. */}
+      {isQuotaReached && (
+        <View
+          style={{
+            marginHorizontal: 16,
+            marginTop: 12,
+            marginBottom: 2,
+            padding: 12,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+            <MaterialCommunityIcons name="crown" size={18} color={colors.primary} />
+            <Text style={{ marginLeft: 8, fontWeight: '700', color: colors.text }}>
+              Limite atteinte: {bienQuota?.used ?? 5}/{bienQuota?.limit ?? 5} créations utilisées
+            </Text>
+          </View>
+          <Text style={{ color: colors.textSecondary, marginBottom: 10 }}>
+            Passez au plan premium pour continuer à créer des biens sans limite.
+          </Text>
+          <TouchableOpacity
+            style={{
+              alignSelf: 'flex-start',
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: 8,
+              backgroundColor: colors.primary,
+            }}
+            onPress={() => setShowSubscriptionPaywall(true)}
+          >
+            <Text style={{ color: colors.surface, fontWeight: '700' }}>Voir l’abonnement</Text>
+          </TouchableOpacity>
+        </View>
+      )}
       <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, marginTop: 18 }}>
         <View style={{ flex: 1 }}>
           <SearchBar
@@ -246,6 +316,11 @@ const BiensScreen: React.FC = () => {
           )}
         </View>
       </Modal>
+      <SubscriptionPaywallModal
+        isOpen={showSubscriptionPaywall}
+        onClose={() => setShowSubscriptionPaywall(false)}
+        onSubscribe={() => setShowSubscriptionPaywall(false)}
+      />
     </View>
   );
 };
