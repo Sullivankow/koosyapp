@@ -29,7 +29,7 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 	onClose,
 	onSubscribe,
 	userToken = '',
-	price = 9.99,
+	price = 14.99,
 	periodLabel = 'mois',
 }) => {
 	const { colors } = useTheme();
@@ -44,6 +44,8 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 		'Creation illimitee de devis',
 		'Creation illimitee de factures',
 		'Export PDF illimite',
+		'Ajout des charges simplifie',
+		'Calcul de la marge en temps reel',
 		'Support prioritaire',
 	];
 
@@ -108,8 +110,8 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 
 					<ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
 						<View style={[styles.priceBlock, { borderColor: colors.border, backgroundColor: colors.background }]}>
-							<Text style={[styles.priceCurrency, { color: colors.textSecondary }]}>EUR</Text>
-							<Text style={[styles.priceValue, { color: colors.text }]}>{price.toFixed(2)}</Text>
+							<Text style={[styles.priceValue, { color: colors.text }]}>{price.toFixed(2).replace('.', ',')}</Text>
+							<Text style={[styles.priceCurrency, { color: colors.textSecondary }]}>€</Text>
 							<Text style={[styles.pricePeriod, { color: colors.textSecondary }]}>/{periodLabel}</Text>
 						</View>
 

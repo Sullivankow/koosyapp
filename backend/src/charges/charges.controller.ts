@@ -13,6 +13,7 @@ import {
 } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { ProAccessGuard } from '../auth/pro-access.guard';
 import { CreateChargeDto, UpdateChargeDto } from './create-charge.dto';
 import { ChargesService } from './charges.service';
 
@@ -25,6 +26,7 @@ export class ChargesController {
 
   // Le token JWT identifie toujours le propriétaire de la charge.
   @Post()
+  @UseGuards(ProAccessGuard)
   @ApiOperation({ summary: 'Créer une charge (utilisateur connecté)' })
   @ApiResponse({ status: 201, description: 'Charge créée.' })
   async create(@Body() dto: CreateChargeDto, @Req() req: any) {

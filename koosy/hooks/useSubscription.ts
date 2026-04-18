@@ -73,7 +73,7 @@ export const useSubscription = (token: string) => {
 					},
 					body: JSON.stringify({
 						priceId,
-						amount: 9.99, // À adapter selon le plan
+						amount: 14.99, // Tarif du plan premium affiché sur la carte
 						currency: 'EUR',
 						successUrl: successUrl || 'http://localhost:5173/dashboard?session_id={CHECKOUT_SESSION_ID}',
 						cancelUrl: cancelUrl || 'http://localhost:5173/subscribe',

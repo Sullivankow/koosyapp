@@ -8,6 +8,8 @@ import { createChargesScreenStyles } from './styles/ChargesScreen.styles';
 import AddChargeModal from '../../components/modals/AddChargeModal';
 import ChargesList from '../../components/ChargesList';
 import { useChiffreAffaireRefresh } from '../../contexts/ChiffreAffaireRefreshContext';
+import { useSubscription } from '../../hooks/useSubscription';
+import SubscriptionPaywallModal from '../../components/modals/SubscriptionPaywallModal';
 
 const PERIODS = [
   { key: 'month', label: 'Ce mois' },
@@ -67,11 +69,14 @@ const ChargesScreen: React.FC = () => {
   const { colors } = useTheme();
   const styles = useMemo(() => createChargesScreenStyles(colors), [colors]);
   const { signalRefresh } = useChiffreAffaireRefresh();
+  const { getMySubscription } = useSubscription('');
   const [period, setPeriod] = useState<PeriodKey>('month');
   const [charges, setCharges] = useState<Charge[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [summary, setSummary] = useState<SummaryState>({ currentMonth: 0, previousMonth: 0, global: 0 });
+  const [canViewSummary, setCanViewSummary] = useState(false);
+  const [summaryPaywallVisible, setSummaryPaywallVisible] = useState(false);
   const [addChargeModalVisible, setAddChargeModalVisible] = useState(false);
 
   const selectedRange = useMemo(() => {
@@ -110,10 +115,21 @@ const ChargesScreen: React.FC = () => {
     setCharges(response.items ?? []);
   };
 
+  const loadSummaryAccess = async () => {
+    const subscription = await getMySubscription();
+    const canAccess = !!subscription && ['trialing', 'active'].includes(String(subscription.status));
+    setCanViewSummary(canAccess);
+    return canAccess;
+  };
+
   const refreshData = async () => {
     setRefreshing(true);
     try {
-      await Promise.all([loadSummaries(), loadCharges()]);
+      const canAccess = await loadSummaryAccess();
+      await loadCharges();
+      if (canAccess) {
+        await loadSummaries();
+      }
     } catch (error) {
       setCharges([]);
     } finally {
@@ -125,7 +141,11 @@ const ChargesScreen: React.FC = () => {
     const bootstrap = async () => {
       setLoading(true);
       try {
-        await Promise.all([loadSummaries(), loadCharges()]);
+        const canAccess = await loadSummaryAccess();
+        await loadCharges();
+        if (canAccess) {
+          await loadSummaries();
+        }
       } catch (error) {
         setCharges([]);
       } finally {
@@ -177,20 +197,42 @@ const ChargesScreen: React.FC = () => {
       >
         <View style={styles.card}>
           <Text style={styles.sectionTitle}>Résumé</Text>
-          <View style={styles.summaryRow}>
-            <View style={styles.summaryBox}>
-              <Text style={[styles.summaryLabel, { color: summaryTextColor }]}>Ce mois</Text>
-              <Text style={[styles.summaryValue, { color: summaryTextColor }]}>{formatMoney(summary.currentMonth)}</Text>
+          {canViewSummary ? (
+            <View style={styles.summaryRow}>
+              <View style={styles.summaryBox}>
+                <Text style={[styles.summaryLabel, { color: summaryTextColor }]}>Ce mois</Text>
+                <Text style={[styles.summaryValue, { color: summaryTextColor }]}>{formatMoney(summary.currentMonth)}</Text>
+              </View>
+              <View style={styles.summaryBox}>
+                <Text style={[styles.summaryLabel, { color: summaryTextColor }]}>Mois précédent</Text>
+                <Text style={[styles.summaryValue, { color: summaryTextColor }]}>{formatMoney(summary.previousMonth)}</Text>
+              </View>
+              <View style={styles.summaryBox}>
+                <Text style={[styles.summaryLabel, { color: summaryTextColor }]}>Global</Text>
+                <Text style={[styles.summaryValue, { color: summaryTextColor }]}>{formatMoney(summary.global)}</Text>
+              </View>
             </View>
-            <View style={styles.summaryBox}>
-              <Text style={[styles.summaryLabel, { color: summaryTextColor }]}>Mois précédent</Text>
-              <Text style={[styles.summaryValue, { color: summaryTextColor }]}>{formatMoney(summary.previousMonth)}</Text>
+          ) : (
+            <View style={{ gap: 10 }}>
+              <Text style={{ color: colors.textSecondary }}>
+                Le résumé des charges et le calcul de marge sont disponibles avec l’abonnement premium.
+              </Text>
+              <TouchableOpacity
+                style={{
+                  alignSelf: 'flex-start',
+                  backgroundColor: colors.primary,
+                  paddingHorizontal: 14,
+                  paddingVertical: 10,
+                  borderRadius: 10,
+                }}
+                onPress={() => setSummaryPaywallVisible(true)}
+              >
+                <Text style={{ color: getContrastTextColor(colors.primary), fontWeight: '700' }}>
+                  Voir l’abonnement
+                </Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.summaryBox}>
-              <Text style={[styles.summaryLabel, { color: summaryTextColor }]}>Global</Text>
-              <Text style={[styles.summaryValue, { color: summaryTextColor }]}>{formatMoney(summary.global)}</Text>
-            </View>
-          </View>
+          )}
         </View>
 
         <View style={styles.card}>
@@ -240,9 +282,20 @@ const ChargesScreen: React.FC = () => {
           visible={addChargeModalVisible}
           onClose={() => setAddChargeModalVisible(false)}
           onSuccess={async () => {
-            await Promise.all([loadSummaries(), loadCharges()]);
+            await loadCharges();
+            if (canViewSummary) {
+              await loadSummaries();
+            }
             signalRefresh();
           }}
+        />
+
+        <SubscriptionPaywallModal
+          isOpen={summaryPaywallVisible}
+          onClose={() => setSummaryPaywallVisible(false)}
+          onSubscribe={() => setSummaryPaywallVisible(false)}
+          price={14.99}
+          periodLabel="mois"
         />
       </ScrollView>
     </View>

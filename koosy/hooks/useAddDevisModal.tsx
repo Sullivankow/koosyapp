@@ -69,7 +69,7 @@ export const useAddDevisModal = (entreprises: Entreprise[]): UseAddDevisModalRes
         onSubscribe={() => {
           setPaywallVisible(false);
         }}
-        price={9.99}
+        price={14.99}
         periodLabel="mois"
       />
     </>

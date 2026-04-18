@@ -78,7 +78,7 @@ export const useAddFactureModal = (entreprises: Entreprise[]): UseAddFactureModa
         onSubscribe={() => {
           setPaywallVisible(false);
         }}
-        price={9.99}
+        price={14.99}
         periodLabel="mois"
       />
     </>
