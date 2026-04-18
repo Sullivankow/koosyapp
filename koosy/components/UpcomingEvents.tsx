@@ -112,8 +112,13 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, loading, colors
                     <Text style={[styles.eventRowSubtitle, { color: colors.textSecondary, fontSize: 12 }]} numberOfLines={1} ellipsizeMode="tail">
                       Locataire: {locataireName}
                     </Text>
-                    <Text style={[styles.eventRowSubtitle, { color: colors.textSecondary, fontSize: 12 }]} numberOfLines={1} ellipsizeMode="tail">
-                      Date: {dateStr}
+                    <Text
+                      style={[styles.eventRowSubtitle, { color: colors.primary, fontWeight: 'bold', fontSize: 15, marginTop: 2, marginBottom: 2, flexDirection: 'row', alignItems: 'center' }]} 
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                    >
+                      <MaterialCommunityIcons name="calendar" size={15} color={colors.primary} />
+                      <Text style={{ marginLeft: 6, color: colors.primary, fontWeight: 'bold', fontSize: 15 }}>Date : {dateStr}</Text>
                     </Text>
                   </View>
                 );
