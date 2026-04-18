@@ -16,6 +16,7 @@ export type User = {
   name: string;
   email: string;
   role: 'Admin' | 'Utilisateur';
+  abonnement: 'gratuit' | 'premium';
   status: 'Actif' | 'Inactif';
   lastLogin: string;
   entrepriseName: string | null;
@@ -82,6 +83,22 @@ const Users: React.FC = () => {
     };
   };
 
+  const getAbonnementBadge = (abonnement: 'gratuit' | 'premium') => {
+    if (abonnement === 'premium') {
+      return {
+        label: 'Premium',
+        hint: 'Utilisateur abonné',
+        className: 'bg-[#ECFDF3] text-[#166534]',
+      };
+    }
+
+    return {
+      label: 'Gratuit',
+      hint: 'Pas d’abonnement actif',
+      className: 'bg-[#F1F5F9] text-[#475569]',
+    };
+  };
+
   useEffect(() => {
     const loadUsers = async () => {
       try {
@@ -99,6 +116,7 @@ const Users: React.FC = () => {
           email: u.email,
           // On mappe les rôles back vers les rôles visibles dans le backoffice
           role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
+          abonnement: u.abonnement,
           status: 'Actif',
           lastLogin: '—',
           entrepriseName: u.entreprise?.nom ?? null,
@@ -203,6 +221,7 @@ const Users: React.FC = () => {
         name: `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email,
         email: u.email,
         role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
+        abonnement: u.abonnement,
         status: 'Actif',
         lastLogin: '—',
         entrepriseName: u.entreprise?.nom ?? null,
@@ -233,6 +252,7 @@ const Users: React.FC = () => {
         name: `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email,
         email: u.email,
         role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
+        abonnement: u.abonnement,
         status: 'Actif',
         lastLogin: '—',
         entrepriseName: u.entreprise?.nom ?? null,
@@ -377,6 +397,7 @@ const Users: React.FC = () => {
                       <th className="px-5 py-3 font-medium">Utilisateur</th>
                       <th className="px-5 py-3 font-medium">Entreprise</th>
                       <th className="px-5 py-3 font-medium">Rôle</th>
+                      <th className="px-5 py-3 font-medium">Abonnement</th>
                       <th className="px-5 py-3 font-medium">Bêta</th>
                       <th className="px-5 py-3 font-medium">Statut</th>
                       <th className="px-5 py-3 font-medium">Dernière connexion</th>
@@ -386,6 +407,7 @@ const Users: React.FC = () => {
                   <tbody className="divide-y divide-[#E0E6ED] bg-white">
                     {filteredUsers.map((user) => {
                       const betaBadge = getBetaBadge(user.betaAccessUntil);
+                      const abonnementBadge = getAbonnementBadge(user.abonnement);
                       return (
                       <tr key={user.id} className="hover:bg-[#F9FBFF] transition-colors">
                         <td className="px-5 py-3">
@@ -411,6 +433,15 @@ const Users: React.FC = () => {
                           <span className="inline-flex rounded-full bg-[#F1F5F9] px-2.5 py-1 text-[11px] font-medium text-[#475569]">
                             {user.role}
                           </span>
+                        </td>
+
+                        <td className="px-5 py-3">
+                          <div className="flex flex-col gap-1">
+                            <span className={`inline-flex w-fit rounded-full px-2.5 py-1 text-[11px] font-medium ${abonnementBadge.className}`}>
+                              {abonnementBadge.label}
+                            </span>
+                            <span className="text-[11px] text-[#9EABB8]">{abonnementBadge.hint}</span>
+                          </div>
                         </td>
 
                         <td className="px-5 py-3">
