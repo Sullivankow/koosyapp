@@ -55,6 +55,37 @@ export const useSubscription = (token: string) => {
 		return ['trialing', 'active'].includes(subscription.status);
 	}, [getMySubscription]);
 
+	// Vérifier si l'utilisateur a accès aux features premium: abonnement actif ou accès bêta valide.
+	const hasPremiumOrBetaAccess = useCallback(async (): Promise<boolean> => {
+		const [subscription, me] = await Promise.all([
+			getMySubscription(),
+			(async () => {
+				try {
+					const authToken = await resolveToken();
+					if (!authToken) return null;
+					const response = await fetch(`${API_URL}/users/me`, {
+						method: 'GET',
+						headers: {
+							'Content-Type': 'application/json',
+							Authorization: `Bearer ${authToken}`,
+						},
+					});
+					if (!response.ok) return null;
+					return await response.json();
+				} catch {
+					return null;
+				}
+			})(),
+		]);
+
+		const hasSubscriptionAccess = !!subscription && ['trialing', 'active'].includes(String(subscription.status));
+		const betaDateRaw = (me as any)?.betaAccessUntil;
+		const betaTs = betaDateRaw ? new Date(betaDateRaw).getTime() : Number.NaN;
+		const hasBetaAccess = Number.isFinite(betaTs) && betaTs >= Date.now();
+
+		return hasSubscriptionAccess || hasBetaAccess;
+	}, [getMySubscription, resolveToken]);
+
 	// Créer une session checkout et ouvrir le lien
 	const startCheckout = useCallback(
 		async (priceId: string, successUrl?: string, cancelUrl?: string) => {
@@ -159,6 +190,7 @@ export const useSubscription = (token: string) => {
 		error,
 		getMySubscription,
 		hasProAccess,
+		hasPremiumOrBetaAccess,
 		startCheckout,
 		cancelSubscription,
 	};

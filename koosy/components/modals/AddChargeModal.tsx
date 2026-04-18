@@ -76,7 +76,7 @@ const formatDateInput = (value: string) => {
 
 const AddChargeModal: React.FC<AddChargeModalProps> = ({ visible, onClose, onSuccess }) => {
   const { colors, isDarkMode } = useTheme();
-  const { getMySubscription } = useSubscription('');
+  const { hasPremiumOrBetaAccess } = useSubscription('');
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
   const [paywallVisible, setPaywallVisible] = useState(false);
@@ -115,10 +115,9 @@ const AddChargeModal: React.FC<AddChargeModalProps> = ({ visible, onClose, onSuc
     setLoading(true);
     setSuccessMsg('');
     try {
-      // Pré-check côté front: si un abonnement existe mais n'accorde pas l'accès pro,
-      // on affiche directement la carte paywall.
-      const subscription = await getMySubscription();
-      if (subscription && !['trialing', 'active'].includes(String(subscription.status))) {
+      // Pré-check côté front: abonnement actif OU accès bêta valide autorise l'ajout.
+      const canAccessPremiumFeatures = await hasPremiumOrBetaAccess();
+      if (!canAccessPremiumFeatures) {
         openPaywall();
         setLoading(false);
         return;

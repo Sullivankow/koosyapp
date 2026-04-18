@@ -69,7 +69,7 @@ const ChargesScreen: React.FC = () => {
   const { colors } = useTheme();
   const styles = useMemo(() => createChargesScreenStyles(colors), [colors]);
   const { signalRefresh } = useChiffreAffaireRefresh();
-  const { getMySubscription } = useSubscription('');
+  const { hasPremiumOrBetaAccess } = useSubscription('');
   const [period, setPeriod] = useState<PeriodKey>('month');
   const [charges, setCharges] = useState<Charge[]>([]);
   const [loading, setLoading] = useState(true);
@@ -116,8 +116,7 @@ const ChargesScreen: React.FC = () => {
   };
 
   const loadSummaryAccess = async () => {
-    const subscription = await getMySubscription();
-    const canAccess = !!subscription && ['trialing', 'active'].includes(String(subscription.status));
+    const canAccess = await hasPremiumOrBetaAccess();
     setCanViewSummary(canAccess);
     return canAccess;
   };
