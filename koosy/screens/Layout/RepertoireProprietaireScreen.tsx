@@ -1,4 +1,3 @@
-
 // Répertoire des propriétaires.
 // - Charge la liste via l'API
 // - Permet la recherche, le tri et l'édition/suppression des propriétaires.
@@ -7,6 +6,8 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import ProprietaireList from '../../components/ProprietaireList';
 import AddProprietaireModal from '../../components/modals/AddProprietaireModal';
+import SubscriptionPaywallModal from '../../components/modals/SubscriptionPaywallModal';
+import { getProprietaireQuota, type ProprietaireQuota } from '../../utils/proprietaireApi';
 import SearchBar from '../../ui/SearchBar';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { getProprietaires, deleteProprietaire, updateProprietaire } from '../../utils/proprietaireApi';
@@ -19,14 +20,26 @@ function RepertoireProprietaireScreen() {
   const [proprietaires, setProprietaires] = useState<Proprietaire[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showPaywall, setShowPaywall] = useState(false);
+  const [proprioQuota, setProprioQuota] = useState<ProprietaireQuota | null>(null);
 
   const fetchProprietaires = () => {
     setLoading(true);
     getProprietaires().then(setProprietaires).finally(() => setLoading(false));
   };
 
+  // Charge la liste ET le quota au chargement
   React.useEffect(() => {
     fetchProprietaires();
+    const loadQuota = async () => {
+      try {
+        const quota = await getProprietaireQuota();
+        setProprioQuota(quota);
+      } catch {
+        setProprioQuota(null);
+      }
+    };
+    loadQuota();
   }, []);
 
   const handleDeleteProprietaire = (id: number) => {
@@ -79,15 +92,63 @@ function RepertoireProprietaireScreen() {
     }
   };
 
+  // Gestion ouverture modale d'ajout avec vérification du quota
+  // Affiche le paywall si la limite est atteinte
+  const isQuotaReached = Boolean(proprioQuota?.isLimited && (proprioQuota.remaining ?? 0) <= 0);
+  const handleOpenAddModal = async () => {
+    if (isQuotaReached) {
+      setShowPaywall(true);
+      return;
+    }
+    setShowAddModal(true);
+  };
+
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
       {/* Header sticky comme BiensScreen */}
       <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}> 
         <Text style={[styles.title, { color: colors.text }]}>Propriétaires</Text>
-        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={() => setShowAddModal(true)}>
+        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={handleOpenAddModal}>
           <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
         </TouchableOpacity>
       </View>
+      {/* Affiche une carte d'upgrade uniquement quand la limite est atteinte, comme pour les biens */}
+      {isQuotaReached && (
+        <View
+          style={{
+            marginHorizontal: 16,
+            marginTop: 12,
+            marginBottom: 2,
+            padding: 12,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: colors.border,
+            backgroundColor: colors.surface,
+          }}
+        >
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
+            <MaterialCommunityIcons name="crown" size={18} color={colors.primary} />
+            <Text style={{ marginLeft: 8, fontWeight: '700', color: colors.text }}>
+              Limite atteinte: {proprioQuota?.used ?? 5}/{proprioQuota?.limit ?? 5} propriétaires utilisés
+            </Text>
+          </View>
+          <Text style={{ color: colors.textSecondary, marginBottom: 10 }}>
+            Passez au plan premium pour continuer à ajouter des propriétaires sans limite.
+          </Text>
+          <TouchableOpacity
+            style={{
+              alignSelf: 'flex-start',
+              paddingHorizontal: 12,
+              paddingVertical: 8,
+              borderRadius: 8,
+              backgroundColor: colors.primary,
+            }}
+            onPress={() => setShowPaywall(true)}
+          >
+            <Text style={{ color: colors.surface, fontWeight: '700' }}>Voir l’abonnement</Text>
+          </TouchableOpacity>
+        </View>
+      )}
 
       {/* Barre de recherche et tri */}
       <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, marginTop: 18 }}>
@@ -127,6 +188,11 @@ function RepertoireProprietaireScreen() {
           setShowAddModal(false);
           fetchProprietaires();
         }}
+      />
+      {/* Paywall modal */}
+      <SubscriptionPaywallModal
+        isOpen={showPaywall}
+        onClose={() => setShowPaywall(false)}
       />
     </View>
   );

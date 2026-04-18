@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, ManyToOne } from 'typeorm';
+import { User } from '../users/user.entity';
 import { Devis } from '../devis/devis.entity';
 
 /**
@@ -31,4 +32,11 @@ export class Proprietaire {
 	// Un propriétaire peut être lié à plusieurs biens
 	@OneToMany(() => require('../biens/bien.entity').Bien, (bien: any) => bien.proprietaire)
 	biens: any[];
+
+    /**
+     * Lien vers l'utilisateur (conciergerie) qui a créé ce propriétaire.
+     * Permet de gérer le quota par utilisateur.
+     */
+    @ManyToOne(() => User, user => user.id, { onDelete: 'CASCADE' })
+    conciergerie: User;
 }

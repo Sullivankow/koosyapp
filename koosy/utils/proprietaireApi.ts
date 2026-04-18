@@ -1,5 +1,17 @@
+
 import { Proprietaire } from '../models/models';
 import { apiFetch } from './api';
+
+// Type pour le quota de propriétaires (similaire à BienQuota)
+export type ProprietaireQuota = {
+	plan: 'gratuit' | 'premium';
+	accessLevel: 'gratuit' | 'premium' | 'beta';
+	limit: number | null;
+	used: number;
+	remaining: number | null;
+	active: number;
+	isLimited: boolean;
+};
 
 // Récupérer la liste des propriétaires existants
 export async function getProprietaires(): Promise<Proprietaire[]> {
@@ -27,4 +39,9 @@ export async function deleteProprietaire(id: number | string): Promise<void> {
 	return apiFetch(`/proprietaire/${id}`, {
 		method: 'DELETE',
 	});
+}
+
+// Fonction pour récupérer le quota de propriétaires
+export async function getProprietaireQuota(): Promise<ProprietaireQuota> {
+	return apiFetch('/proprietaire/quota/info');
 }

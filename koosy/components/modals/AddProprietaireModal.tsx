@@ -3,10 +3,11 @@
 // - Valide les champs obligatoires
 // - Appelle l'API createProprietaire puis remonte le propriétaire créé au parent
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Modal, KeyboardAvoidingView, Dimensions, Alert } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import { createProprietaire } from '../../utils/proprietaireApi';
+import { createProprietaire, getProprietaireQuota, ProprietaireQuota } from '../../utils/proprietaireApi';
+import SubscriptionPaywallModal from './SubscriptionPaywallModal';
 import type { Proprietaire } from '../../models/models';
 
 interface AddProprietaireModalProps {
@@ -50,6 +51,27 @@ const AddProprietaireModal: React.FC<AddProprietaireModalProps> = ({ visible, on
 	const [form, setForm] = useState<ProprietaireFormState>(buildInitialForm);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
+	// Gestion du quota
+	const [quota, setQuota] = useState<ProprietaireQuota | null>(null);
+	const [quotaLoading, setQuotaLoading] = useState(false);
+	const [quotaError, setQuotaError] = useState<string | null>(null);
+	const [showPaywall, setShowPaywall] = useState(false);
+	// Chargement du quota à l'ouverture de la modale
+	useEffect(() => {
+		if (!visible) return;
+		setQuotaLoading(true);
+		setQuotaError(null);
+		getProprietaireQuota()
+			.then((q) => {
+				setQuota(q);
+				setQuotaError(null);
+			})
+			.catch(() => {
+				setQuota(null);
+				setQuotaError('Quota indisponible pour le moment. Vérifiez que le backend est redémarré.');
+			})
+			.finally(() => setQuotaLoading(false));
+	}, [visible]);
 
 	// Met à jour un champ du formulaire de manière générique
 	const updateField = useCallback(
@@ -59,12 +81,13 @@ const AddProprietaireModal: React.FC<AddProprietaireModalProps> = ({ visible, on
 		[],
 	);
 
-	// Soumission du formulaire :
-	// - valide les champs
-	// - appelle l'API
-	// - réinitialise le formulaire et notifie le parent en cas de succès
+	// Soumission du formulaire avec gestion du quota
 	const handleSubmit = async () => {
 		setError('');
+		if (quota && quota.isLimited && (quota.remaining ?? 0) <= 0) {
+			setShowPaywall(true);
+			return;
+		}
 		const validationError = validateForm(form);
 		if (validationError) {
 			setError(validationError);
@@ -85,69 +108,101 @@ const AddProprietaireModal: React.FC<AddProprietaireModalProps> = ({ visible, on
 	};
 
 	return (
-		<Modal visible={visible} animationType="slide" transparent>
-			<KeyboardAvoidingView behavior="padding" style={styles.centered}>
-				<View style={[styles.modal, { backgroundColor: colors.surface, width: SCREEN_WIDTH > 500 ? 400 : '90%' }]}> 
-					<Text style={[styles.title, { color: colors.primary }]}>Nouveau propriétaire</Text>
-					<TextInput
-						style={[styles.input, { color: colors.text, borderColor: colors.border }]}
-						placeholder="Nom*"
-						placeholderTextColor={colors.text + 'CC'}
-						value={form.nom}
-						onChangeText={v => updateField('nom', v)}
-						autoFocus
-					/>
-					<TextInput
-						style={[styles.input, { color: colors.text, borderColor: colors.border }]}
-						placeholder="Prénom*"
-						placeholderTextColor={colors.text + 'CC'}
-						value={form.prenom}
-						onChangeText={v => updateField('prenom', v)}
-					/>
-					<TextInput
-						style={[styles.input, { color: colors.text, borderColor: colors.border }]}
-						placeholder="Email*"
-						placeholderTextColor={colors.text + 'CC'}
-						value={form.email}
-						onChangeText={v => updateField('email', v)}
-						keyboardType="email-address"
-						autoCapitalize="none"
-					/>
-					<TextInput
-						style={[styles.input, { color: colors.text, borderColor: colors.border }]}
-						placeholder="Adresse"
-						placeholderTextColor={colors.text + 'CC'}
-						value={form.adresse}
-						onChangeText={v => updateField('adresse', v)}
-					/>
-					<TextInput
-						style={[styles.input, { color: colors.text, borderColor: colors.border }]}
-						placeholder="Téléphone"
-						placeholderTextColor={colors.text + 'CC'}
-						value={form.telephone}
-						onChangeText={v => updateField('telephone', v)}
-						keyboardType="phone-pad"
-					/>
-					{error ? <Text style={[styles.error, { color: colors.error || '#d32f2f' }]}>{error}</Text> : null}
-					<View style={styles.rowBtns}>
-						<TouchableOpacity
-							style={[styles.btn, { backgroundColor: colors.primary }]}
-							onPress={handleSubmit}
-							disabled={loading}
-						>
-							<Text style={{ color: colors.surface, fontWeight: 'bold' }}>{loading ? 'Création...' : 'Créer'}</Text>
-						</TouchableOpacity>
-						<TouchableOpacity
-							style={[styles.btn, { backgroundColor: colors.border }]}
-							onPress={onClose}
-							disabled={loading}
-						>
-							<Text style={{ color: colors.text }}>Annuler</Text>
-						</TouchableOpacity>
+		<>
+			<Modal visible={visible} animationType="slide" transparent>
+				<KeyboardAvoidingView behavior="padding" style={styles.centered}>
+					<View style={[styles.modal, { backgroundColor: colors.surface, width: SCREEN_WIDTH > 500 ? 400 : '90%' }]}> 
+						<Text style={[styles.title, { color: colors.primary }]}>Nouveau propriétaire</Text>
+						{/* Affichage du quota */}
+						<View style={{ marginBottom: 10 }}>
+							{quotaLoading ? (
+								<Text style={{ color: colors.text, fontWeight: '700' }}>Chargement du quota...</Text>
+							) : quotaError ? (
+								<Text style={{ color: colors.error, fontWeight: '700' }}>{quotaError}</Text>
+							) : quota?.isLimited ? (
+								<>
+									<Text style={{ color: colors.text, fontWeight: '700' }}>
+										Plan gratuit: {quota.used}/{quota.limit} propriétaires utilisés
+									</Text>
+									<Text style={{ color: colors.text }}>
+										Il vous reste {quota.remaining ?? 0} création(s) gratuite(s).
+									</Text>
+								</>
+							) : quota ? (
+								<Text style={{ color: colors.text, fontWeight: '700' }}>
+									{quota.accessLevel === 'beta'
+										? 'Accès bêta: créations de propriétaires illimitées pendant la période de test.'
+										: 'Plan premium: créations de propriétaires illimitées.'}
+								</Text>
+							) : (
+								<Text style={{ color: colors.text, fontWeight: '700' }}>Quota non disponible.</Text>
+							)}
+						</View>
+						<TextInput
+							style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+							placeholder="Nom*"
+							placeholderTextColor={colors.text + 'CC'}
+							value={form.nom}
+							onChangeText={v => updateField('nom', v)}
+							autoFocus
+						/>
+						<TextInput
+							style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+							placeholder="Prénom*"
+							placeholderTextColor={colors.text + 'CC'}
+							value={form.prenom}
+							onChangeText={v => updateField('prenom', v)}
+						/>
+						<TextInput
+							style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+							placeholder="Email*"
+							placeholderTextColor={colors.text + 'CC'}
+							value={form.email}
+							onChangeText={v => updateField('email', v)}
+							keyboardType="email-address"
+							autoCapitalize="none"
+						/>
+						<TextInput
+							style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+							placeholder="Adresse"
+							placeholderTextColor={colors.text + 'CC'}
+							value={form.adresse}
+							onChangeText={v => updateField('adresse', v)}
+						/>
+						<TextInput
+							style={[styles.input, { color: colors.text, borderColor: colors.border }]}
+							placeholder="Téléphone"
+							placeholderTextColor={colors.text + 'CC'}
+							value={form.telephone}
+							onChangeText={v => updateField('telephone', v)}
+							keyboardType="phone-pad"
+						/>
+						{error ? <Text style={[styles.error, { color: colors.error || '#d32f2f' }]}>{error}</Text> : null}
+						<View style={styles.rowBtns}>
+							<TouchableOpacity
+								style={[styles.btn, { backgroundColor: colors.primary }]}
+								onPress={handleSubmit}
+								disabled={loading}
+							>
+								<Text style={{ color: colors.surface, fontWeight: 'bold' }}>{loading ? 'Création...' : 'Créer'}</Text>
+							</TouchableOpacity>
+							<TouchableOpacity
+								style={[styles.btn, { backgroundColor: colors.border }]}
+								onPress={onClose}
+								disabled={loading}
+							>
+								<Text style={{ color: colors.text }}>Annuler</Text>
+							</TouchableOpacity>
+						</View>
 					</View>
-				</View>
-			</KeyboardAvoidingView>
-		</Modal>
+				</KeyboardAvoidingView>
+			</Modal>
+			{/* Paywall modal */}
+			<SubscriptionPaywallModal
+				isOpen={showPaywall}
+				onClose={() => setShowPaywall(false)}
+			/>
+		</>
 	);
 };
 
