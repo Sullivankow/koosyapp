@@ -45,12 +45,89 @@ export const styles = StyleSheet.create({
     borderRadius: 14,
     // overflow: 'hidden', // Non supporté sur ScrollView
   },
+  carouselDense: {
+    marginBottom: 10,
+    borderRadius: 12,
+  },
   carouselPhoto: {
     width: undefined, // à adapter dynamiquement dans le composant si besoin
     height: 180,
     borderRadius: 14,
     marginRight: 4,
     // Pas de style View/Text ici
+  },
+  carouselPhotoDense: {
+    width: undefined,
+    height: 150,
+    borderRadius: 12,
+    marginRight: 4,
+  },
+  denseHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    justifyContent: 'space-between',
+    gap: 10,
+    marginBottom: 8,
+  },
+  denseHeaderLeft: {
+    flex: 1,
+  },
+  statusPill: {
+    borderRadius: 999,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    alignSelf: 'flex-start',
+  },
+  statusPillInline: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    alignSelf: 'flex-start',
+    marginTop: 2,
+  },
+  infoGridDense: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 6,
+    gap: 10,
+  },
+  rowDenseBetween: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 4,
+  },
+  detailsToggle: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+  },
+  detailsModalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.45)',
+    justifyContent: 'flex-end',
+  },
+  detailsModalCard: {
+    maxHeight: '84%',
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 10,
+  },
+  detailsModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  detailsModalTitle: {
+    fontSize: 17,
+    fontWeight: '800',
+  },
+  detailsModalBody: {
+    paddingBottom: 16,
   },
   infoGrid: {
     flexDirection: 'row',
