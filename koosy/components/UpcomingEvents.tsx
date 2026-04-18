@@ -44,13 +44,24 @@ const getEventTypeMeta = (type: string, colors: any) => {
   };
 };
 
-const formatEventDate = (event: any) => {
-  const raw = event.dateDebut || event.dateFin || event.createdAt || event.date;
-  if (!raw) return 'Date non renseignee';
 
+// Formate la date et l'heure pour affichage
+const formatEventDate = (event: any) => {
+  // Si le backend fournit déjà une date + heure sous forme de string (ex: '2026-04-18 14:00')
+  if (event.date && typeof event.date === 'string') {
+    const [datePart, heurePart] = event.date.split(' ');
+    const parsed = dayjs(datePart);
+    if (!parsed.isValid()) return String(event.date);
+    let res = parsed.format('dddd DD MMMM YYYY');
+    if (heurePart) res += ` à ${heurePart}`;
+    else if (event.heure) res += ` à ${event.heure}`;
+    return res;
+  }
+  // Fallback : ancienne logique
+  const raw = event.dateDebut || event.dateFin || event.createdAt || event.date;
+  if (!raw) return 'Date non renseignée';
   const parsed = dayjs(raw);
   if (!parsed.isValid()) return String(raw);
-
   return parsed.format('dddd DD MMMM YYYY');
 };
 
@@ -67,9 +78,15 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, loading, colors
         ) : events && events.length > 0 ? (
           <View>
             <ScrollView style={{ maxHeight: 220 }} nestedScrollEnabled={true}>
-              {events.map((ev: any, idx: number) => {
+              {events.filter(ev => ev.type === 'arrival' || ev.type === 'departure').map((ev: any, idx: number) => {
                 const meta = getEventTypeMeta(ev.type, colors);
                 const dateStr = formatEventDate(ev);
+                // Affichage explicite de l'heure si présente
+                let heureLabel = '';
+                if (ev.heure && String(ev.heure).trim()) {
+                  if (ev.type === 'arrival') heureLabel = `Heure d'arrivée : ${ev.heure}`;
+                  else if (ev.type === 'departure') heureLabel = `Heure de départ : ${ev.heure}`;
+                }
                 const locataireName = ev.locataire
                   ? `${ev.locataire.prenom ?? ''} ${ev.locataire.nom ?? ''}`.trim()
                   : (ev.locataireNom ? `${ev.locatairePrenom ?? ''} ${ev.locataireNom ?? ''}`.trim() : 'Locataire inconnu');
@@ -114,11 +131,15 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, loading, colors
                     </Text>
                     <Text
                       style={[styles.eventRowSubtitle, { color: colors.primary, fontWeight: 'bold', fontSize: 15, marginTop: 2, marginBottom: 2, flexDirection: 'row', alignItems: 'center' }]} 
-                      numberOfLines={1}
+                      numberOfLines={2}
                       ellipsizeMode="tail"
                     >
                       <MaterialCommunityIcons name="calendar" size={15} color={colors.primary} />
-                      <Text style={{ marginLeft: 6, color: colors.primary, fontWeight: 'bold', fontSize: 15 }}>Date : {dateStr}</Text>
+                      <Text style={{ marginLeft: 6, color: colors.primary, fontWeight: 'bold', fontSize: 15 }}>
+                        {ev.type === 'arrival' ? 'Arrivée le ' : ev.type === 'departure' ? 'Départ le ' : 'Date : '}{dateStr}
+                        {heureLabel ? `
+${heureLabel}` : ''}
+                      </Text>
                     </Text>
                   </View>
                 );

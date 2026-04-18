@@ -15,11 +15,18 @@ export class Reservation {
   @ManyToOne(() => Locataire, locataire => locataire.reservations)
   locataire: Locataire;
 
+
   @Column({ type: 'date' })
   dateDebut: Date;
 
+  @Column({ type: 'varchar', length: 5, nullable: true })
+  heureArrivee?: string; // format HH:mm
+
   @Column({ type: 'date' })
   dateFin: Date;
+
+  @Column({ type: 'varchar', length: 5, nullable: true })
+  heureDepart?: string; // format HH:mm
 
   @Column({ default: 'en attente' })
   statut: 'en attente' | 'confirmée' | 'terminée' | 'annulée';

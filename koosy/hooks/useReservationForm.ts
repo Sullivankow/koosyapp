@@ -72,7 +72,9 @@ export function useReservationForm(onSuccess?: () => void, onError?: (e: any) =>
         locataireEmail: form.locataireEmail,
         locataireTelephone: form.locataireTelephone,
         dateDebut: formatToFR(form.dateArrivee),
+        heureArrivee: form.heureArrivee,
         dateFin: formatToFR(form.dateDepart),
+        heureDepart: form.heureDepart,
         statut: form.statut,
       });
       resetForm();

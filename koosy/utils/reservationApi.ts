@@ -13,7 +13,9 @@ export async function createReservation(data: {
   locataireEmail: string;
   locataireTelephone: string;
   dateDebut: string; // format JJ/MM/AAAA
+  heureArrivee?: string;
   dateFin: string; // format JJ/MM/AAAA
+  heureDepart?: string;
   statut?: 'en attente' | 'confirmée' | 'terminée' | 'annulée';
 }) {
   return apiFetch('/reservations', {

@@ -49,7 +49,9 @@ export class ReservationsService {
       bien,
       locataire,
       dateDebut,
+      heureArrivee: dto.heureArrivee,
       dateFin,
+      heureDepart: dto.heureDepart,
       statut: dto.statut || 'en attente',
     });
     return this.reservationRepo.save(reservation);
@@ -136,17 +138,43 @@ async countReservations(): Promise<number> {
 
       if (dDebut && dDebut >= start && dDebut <= end) {
         if (!types || types.includes('arrival')) {
-          items.push({ id: reservationId, type: 'arrival', date: dDebut.toISOString().slice(0,10), reservationId, bien: { id: r.bien.id, nom: (r.bien as any).nom }, locataire: { id: r.locataire.id, nom: r.locataire.nom, prenom: r.locataire.prenom } });
+          //
+          items.push({
+            id: reservationId,
+            type: 'arrival',
+            date: dDebut.toISOString().slice(0,10) + (r.heureArrivee ? ' ' + r.heureArrivee : ''),
+            heure: r.heureArrivee || '',
+            reservationId,
+            bien: { id: r.bien.id, nom: (r.bien as any).nom },
+            locataire: { id: r.locataire.id, nom: r.locataire.nom, prenom: r.locataire.prenom }
+          });
         }
       }
       if (dFin && dFin >= start && dFin <= end) {
         if (!types || types.includes('departure')) {
-          items.push({ id: reservationId, type: 'departure', date: dFin.toISOString().slice(0,10), reservationId, bien: { id: r.bien.id, nom: (r.bien as any).nom }, locataire: { id: r.locataire.id, nom: r.locataire.nom, prenom: r.locataire.prenom } });
+          //
+          items.push({
+            id: reservationId,
+            type: 'departure',
+            date: dFin.toISOString().slice(0,10) + (r.heureDepart ? ' ' + r.heureDepart : ''),
+            heure: r.heureDepart || '',
+            reservationId,
+            bien: { id: r.bien.id, nom: (r.bien as any).nom },
+            locataire: { id: r.locataire.id, nom: r.locataire.nom, prenom: r.locataire.prenom }
+          });
         }
       }
       if (cAt && cAt >= start && cAt <= end) {
         if (!types || types.includes('new_reservation')) {
-          items.push({ id: reservationId, type: 'new_reservation', date: cAt.toISOString().slice(0,10), reservationId, bien: { id: r.bien.id, nom: (r.bien as any).nom }, locataire: { id: r.locataire.id, nom: r.locataire.nom, prenom: r.locataire.prenom } });
+          items.push({
+            id: reservationId,
+            type: 'new_reservation',
+            date: cAt.toISOString().slice(0,10),
+            heure: null,
+            reservationId,
+            bien: { id: r.bien.id, nom: (r.bien as any).nom },
+            locataire: { id: r.locataire.id, nom: r.locataire.nom, prenom: r.locataire.prenom }
+          });
         }
       }
     }

@@ -22,21 +22,34 @@ export class CreateReservationDto {
   @IsString()
   locataireTelephone: string;
 
+
   @ApiProperty({ example: '15/09/2025' })
   @IsString()
   @Matches(/^\d{2}\/\d{2}\/\d{4}$/, { message: 'La date doit être au format JJ/MM/AAAA' })
   dateDebut: string;
+
+  @ApiProperty({ example: '14:00', required: false })
+  @IsOptional()
+  @Matches(/^([01][0-9]|2[0-3]):[0-5][0-9]$/, { message: "L'heure doit être au format HH:mm" })
+  heureArrivee?: string;
+
 
   @ApiProperty({ example: '30/09/2025' })
   @IsString()
   @Matches(/^\d{2}\/\d{2}\/\d{4}$/, { message: 'La date doit être au format JJ/MM/AAAA' })
   dateFin: string;
 
+  @ApiProperty({ example: '10:00', required: false })
+  @IsOptional()
+  @Matches(/^([01][0-9]|2[0-3]):[0-5][0-9]$/, { message: "L'heure doit être au format HH:mm" })
+  heureDepart?: string;
+
   @ApiProperty({ example: 'en attente', required: false })
   @IsOptional()
   @IsString()
   statut?: 'en attente' | 'confirmée' | 'terminée' | 'annulée';
 }
+
 
 export class UpdateReservationDto {
   @ApiProperty({ example: 1, required: false })

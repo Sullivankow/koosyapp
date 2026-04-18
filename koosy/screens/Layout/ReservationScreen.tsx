@@ -6,6 +6,7 @@ import BadgeStatus from '../../ui/BadgeStatus';
 import { STATUS_CONFIG } from '../../constants/Status';
 import React, { useState, useEffect } from 'react';
 import { useBienCount } from '../../contexts/BienCountContext';
+import { useSuccessMessage } from '../../hooks/useSuccessMessage';
 import { View, Text, StyleSheet, TouchableOpacity, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
 import { Reservation, Bien } from '../../models/models';
@@ -40,7 +41,8 @@ function ReservationScreen() {
   const { colors } = useTheme();
   const activeStatusTextColor = getContrastTextColor(colors.primary);
   const { signalBienAdded } = useBienCount();
-  const { lastReservationAdded } = useReservationRefresh();
+  const { lastReservationAdded, signalReservationAdded } = useReservationRefresh();
+  const { successMsg, showSuccess } = useSuccessMessage();
   const { lastRefresh } = useGlobalRefresh();
   const [reservations, setReservations] = useState<Reservation[]>([]);
   const [biens, setBiens] = useState<Bien[]>([]);
@@ -94,15 +96,18 @@ function ReservationScreen() {
         locataireEmail: form.locataireEmail,
         locataireTelephone: form.locataireTelephone,
         dateDebut: formatToFR(form.dateArrivee),
+        heureArrivee: form.heureArrivee,
         dateFin: formatToFR(form.dateDepart),
+        heureDepart: form.heureDepart,
         statut: form.statut,
       });
       setModalVisible(false);
       setForm({ bienId: '', locataireNom: '', locatairePrenom: '', locataireEmail: '', locataireTelephone: '', dateArrivee: '', dateDepart: '', heureArrivee: '', heureDepart: '', statut: 'en attente' });
       fetchData();
       signalBienAdded();
-      // Signale le rafraîchissement global
-      import('../../contexts/ReservationRefreshContext').then(ctx => ctx.useReservationRefresh().signalReservationAdded());
+      // Signale le rafraîchissement global (correctement via le hook)
+      signalReservationAdded();
+      showSuccess('Réservation ajoutée avec succès !');
     } catch (e) {
       Alert.alert('Erreur', 'Impossible d\'ajouter la réservation.');
     }
@@ -121,6 +126,11 @@ function ReservationScreen() {
         onAdd={openModal}
         colors={colors}
       />
+      {successMsg ? (
+        <View style={{ backgroundColor: colors.success || '#2E7D32', padding: 10, borderRadius: 8, margin: 12 }}>
+          <Text style={{ color: '#fff', textAlign: 'center', fontWeight: 'bold' }}>{successMsg}</Text>
+        </View>
+      ) : null}
       {loading ? (
         <ActivityIndicator size="large" color={colors.primary} style={{ marginTop: 40 }} />
       ) : (
