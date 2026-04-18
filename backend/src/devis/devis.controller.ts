@@ -3,6 +3,8 @@ import { DevisService } from './devis.service';
 import { CreateDevisDto } from './create-devis.dto';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ProAccessGuard } from '../auth/pro-access.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 import { ApiTags, ApiOperation, ApiBearerAuth } from '@nestjs/swagger';
 
 import type { Response } from 'express';
@@ -33,6 +35,17 @@ export class DevisController {
   @ApiOperation({ summary: 'Lister tous les devis', description: 'Récupère la liste de tous les devis accessibles à l’utilisateur connecté.' })
   findAll() {
     return this.devisService.findAll();
+  }
+
+  /**
+   * Retourne le nombre total de devis pour le backoffice admin.
+   */
+  @Get('admin/count')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles('admin')
+  @ApiOperation({ summary: 'Compter tous les devis', description: 'Retourne le nombre total de devis présents en base.' })
+  async countAll() {
+    return { total: await this.devisService.countAll() };
   }
 
 

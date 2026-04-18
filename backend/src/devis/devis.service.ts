@@ -21,6 +21,11 @@ export class DevisService {
     return this.devisRepository.find({ relations: ['entreprise', 'proprietaire'] });
   }
 
+  // Compte le nombre total de devis en base
+  countAll() {
+    return this.devisRepository.count();
+  }
+
   // Lors de la récupération d'un devis par id, on veut aussi les données de l'entreprise et du propriétaire associées
   findOne(id: number) {
     return this.devisRepository.findOne({ where: { id }, relations: ['entreprise', 'proprietaire'] });

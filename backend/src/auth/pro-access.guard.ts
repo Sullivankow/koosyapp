@@ -25,6 +25,11 @@ export class ProAccessGuard implements CanActivate {
 			throw new UnauthorizedException('Utilisateur non authentifié');
 		}
 
+		// Le backoffice admin doit pouvoir accéder aux routes protégées sans abonnement pro.
+		if (request.user.role === 'admin') {
+			return true;
+		}
+
 		// 1) Cas standard: l'utilisateur possède un abonnement pro valide.
 		const hasSubscriptionAccess = await this.subscriptionService.hasProAccess(userId);
 		if (hasSubscriptionAccess) {
