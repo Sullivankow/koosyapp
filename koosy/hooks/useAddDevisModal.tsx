@@ -25,7 +25,8 @@ export const useAddDevisModal = (entreprises: Entreprise[]): UseAddDevisModalRes
   const open = async () => {
     try {
       const me = await getMe();
-      if (me?.abonnement === 'premium') {
+      const hasBeta = me?.betaAccessUntil && new Date(me.betaAccessUntil).getTime() >= Date.now();
+      if (me?.abonnement === 'premium' || hasBeta) {
         setVisible(true);
       } else {
         setPaywallVisible(true);
