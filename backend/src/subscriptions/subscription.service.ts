@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Subscription, SubscriptionStatus } from './subscription.entity';
 import { CreateSubscriptionDto } from './create-subscription.dto';
 import { User } from '../users/user.entity';
+import { StripeService } from './stripe.service';
 
 @Injectable()
 export class SubscriptionService {
@@ -14,6 +15,7 @@ export class SubscriptionService {
 		// Repository users pour vérifier l'existence du compte lié.
 		@InjectRepository(User)
 		private readonly userRepository: Repository<User>,
+		private readonly stripeService: StripeService,
 	) {}
 
 	// Retourne l'abonnement de l'utilisateur connecté, ou null s'il n'existe pas encore.
@@ -139,5 +141,46 @@ export class SubscriptionService {
 		const subscription = await this.subscriptionRepository.findOne({ where: { userId } });
 		if (!subscription) return false;
 		return ['trialing', 'active'].includes(subscription.status);
+	}
+
+	// Permet à un admin d'annuler l'abonnement d'un utilisateur cible.
+	async cancelSubscriptionForUser(userId: number, immediate = false): Promise<Subscription> {
+		const user = await this.userRepository.findOne({ where: { id: userId } });
+		if (!user) {
+			throw new NotFoundException('Utilisateur introuvable');
+		}
+
+		const subscription = await this.subscriptionRepository.findOne({ where: { userId } });
+		if (!subscription) {
+			throw new NotFoundException('Aucun abonnement trouvé pour cet utilisateur');
+		}
+
+		let updatedSubscription: Subscription;
+
+		if (subscription.stripeSubscriptionId) {
+			const updated = await this.stripeService.cancelSubscription(
+				subscription.stripeSubscriptionId,
+				immediate,
+			);
+			const result = this.stripeService.handleSubscriptionUpdated(updated);
+			updatedSubscription = await this.upsertFromStripeEvent({ ...result, userId });
+		} else {
+			updatedSubscription = await this.upsertFromStripeEvent({
+				userId,
+				status: 'canceled',
+				cancelAtPeriodEnd: !immediate,
+				canceledAt: new Date(),
+				metadata: {
+					...(subscription.metadata || {}),
+					adminCanceledAt: new Date().toISOString(),
+				},
+			});
+		}
+
+		// On garde le champ utilisateur cohérent avec une annulation manuelle admin.
+		user.abonnement = 'gratuit';
+		await this.userRepository.save(user);
+
+		return updatedSubscription;
 	}
 }

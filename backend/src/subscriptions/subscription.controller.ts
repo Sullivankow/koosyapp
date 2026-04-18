@@ -1,7 +1,9 @@
-import { Body, Controller, Get, Post, Request, UseGuards, BadRequestException } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, UseGuards, BadRequestException, Param } from '@nestjs/common';
 import type { RawBodyRequest } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
 import { CreateSubscriptionDto } from './create-subscription.dto';
 import { CancelSubscriptionDto } from './cancel-subscription.dto';
 import { SubscriptionService } from './subscription.service';
@@ -121,6 +123,28 @@ export class SubscriptionController {
 		// Mettre à jour localement
 		const result = this.stripeService.handleSubscriptionUpdated(updated);
 		return this.subscriptionService.upsertFromStripeEvent(result);
+	}
+
+	// Endpoint admin pour annuler l'abonnement d'un utilisateur cible.
+	@Post('admin/:userId/cancel')
+	@ApiBearerAuth()
+	@UseGuards(JwtAuthGuard, RolesGuard)
+	@Roles('admin')
+	@ApiBody({ type: CancelSubscriptionDto })
+	@ApiOperation({ summary: 'Annuler l’abonnement d’un utilisateur (admin)' })
+	async cancelSubscriptionAsAdmin(
+		@Param('userId') userId: string,
+		@Body() body: CancelSubscriptionDto = {},
+	) {
+		const userIdNumber = Number(userId);
+		if (Number.isNaN(userIdNumber)) {
+			throw new BadRequestException('Identifiant utilisateur invalide');
+		}
+
+		return this.subscriptionService.cancelSubscriptionForUser(
+			userIdNumber,
+			body.immediate ?? false,
+		);
 	}
 
 	// Webhook Stripe (non sécurisé pour le dev, sécurisé en prod)

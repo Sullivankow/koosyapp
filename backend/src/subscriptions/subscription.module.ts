@@ -5,6 +5,7 @@ import { SubscriptionController } from './subscription.controller';
 import { Subscription } from './subscription.entity';
 import { SubscriptionService } from './subscription.service';
 import { StripeService } from './stripe.service';
+import { RolesGuard } from '../auth/roles.guard';
 
 @Module({
 	// On expose les repositories Subscription et User dans ce module.
@@ -12,7 +13,7 @@ import { StripeService } from './stripe.service';
 	// Controller REST du module abonnement.
 	controllers: [SubscriptionController],
 	// Service métier du module abonnement + service Stripe.
-	providers: [SubscriptionService, StripeService],
+	providers: [SubscriptionService, StripeService, RolesGuard],
 	// Export des services pour l'utiliser ensuite dans des guards/modules métiers.
 	exports: [SubscriptionService, StripeService],
 })

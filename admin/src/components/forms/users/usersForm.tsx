@@ -14,13 +14,17 @@ interface UsersFormProps {
   formPassword: string;
   formBetaAccess: boolean;
   formError: string | null;
+  subscriptionActionError: string | null;
+  subscriptionActionSuccess: string | null;
   saving: boolean;
+  cancellingSubscription: boolean;
   onChangeNom: (value: string) => void;
   onChangePrenom: (value: string) => void;
   onChangeEmail: (value: string) => void;
   onChangeRole: (value: 'Admin' | 'Utilisateur') => void;
   onChangePassword: (value: string) => void;
   onChangeBetaAccess: (value: boolean) => void;
+  onCancelSubscription: () => void;
   onSubmit: () => void;
   onCancel: () => void;
 }
@@ -34,13 +38,17 @@ const UsersForm: React.FC<UsersFormProps> = ({
   formPassword,
   formBetaAccess,
   formError,
+  subscriptionActionError,
+  subscriptionActionSuccess,
   saving,
+  cancellingSubscription,
   onChangeNom,
   onChangePrenom,
   onChangeEmail,
   onChangeRole,
   onChangePassword,
   onChangeBetaAccess,
+  onCancelSubscription,
   onSubmit,
   onCancel,
 }) => {
@@ -161,6 +169,31 @@ const UsersForm: React.FC<UsersFormProps> = ({
                 </div>
               </div>
             </div>
+
+            {selectedUser ? (
+              <div className="rounded-xl border border-dashed border-[#CBD5E1] bg-[#F9FBFF] p-4 space-y-2">
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-[#222B45]">Abonnement utilisateur</p>
+                  <p className="text-[11px] text-[#6E7B8B]">
+                    En cas de blocage côté client, l\'admin peut annuler l\'abonnement à sa place.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={onCancelSubscription}
+                  disabled={cancellingSubscription}
+                  className="rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-xs font-medium text-[#B91C1C] hover:bg-[#FEE2E2] disabled:opacity-60 disabled:cursor-not-allowed"
+                >
+                  {cancellingSubscription ? 'Annulation en cours…' : 'Annuler l\'abonnement'}
+                </button>
+                {subscriptionActionError ? (
+                  <p className="text-xs text-[#B91C1C]">{subscriptionActionError}</p>
+                ) : null}
+                {subscriptionActionSuccess ? (
+                  <p className="text-xs text-[#166534]">{subscriptionActionSuccess}</p>
+                ) : null}
+              </div>
+            ) : null}
           </div>
         </section>
         {/* Bloc Statut & sécurité retiré pour simplifier la création dans cette première version */}

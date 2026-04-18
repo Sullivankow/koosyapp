@@ -112,8 +112,24 @@ export class StripeService {
 		subscriptionId: string,
 		immediate: boolean = false,
 	) {
+		const current = await this.getSubscription(subscriptionId);
+
+		// Stripe refuse toute mise à jour "classique" d'un abonnement déjà annulé.
+		if (current?.status === 'canceled') {
+			return current;
+		}
+
+		if (immediate) {
+			return this.stripe.subscriptions.cancel(subscriptionId);
+		}
+
+		// Annulation en fin de période: si déjà demandé, on ne fait rien.
+		if (current?.cancel_at_period_end) {
+			return current;
+		}
+
 		return this.stripe.subscriptions.update(subscriptionId, {
-			cancel_at_period_end: !immediate,
+			cancel_at_period_end: true,
 		});
 	}
 

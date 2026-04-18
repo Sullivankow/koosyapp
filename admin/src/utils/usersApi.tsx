@@ -70,7 +70,24 @@ export async function updateUser(id: number, payload: UpdateUserPayload): Promis
   });
 
   if (!res.ok) {
-    throw new Error('Erreur lors de la mise à jour de l\'utilisateur');
+    const raw = await res.text();
+    let details = '';
+    try {
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed?.message) {
+        details = Array.isArray(parsed.message)
+          ? parsed.message.join(', ')
+          : String(parsed.message);
+      }
+    } catch {
+      details = raw || '';
+    }
+    if (res.status === 401) {
+      throw new Error('Session expirée ou invalide (401). Merci de vous reconnecter au backoffice.');
+    }
+    throw new Error(
+      `Erreur lors de la mise à jour de l'utilisateur (${res.status}${details ? `: ${details}` : ''})`,
+    );
   }
 
   return res.json();
@@ -88,10 +105,97 @@ export async function deleteUser(id: number): Promise<void> {
   }
 }
 
+// Annulation admin de l'abonnement d'un utilisateur
+export async function cancelUserSubscriptionByAdmin(
+  userId: number,
+  immediate = true,
+): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/subscriptions/admin/${userId}/cancel`, {
+    method: 'POST',
+    headers: buildHeaders(),
+    body: JSON.stringify({ immediate }),
+  });
+
+  if (!res.ok) {
+    throw new Error('Erreur lors de l\'annulation de l\'abonnement utilisateur');
+  }
+
+  return res.json();
+}
+
+// Active l'accès bêta pour un utilisateur (admin)
+export async function grantUserBetaAccessByAdmin(
+  userId: number,
+  durationInDays = 30,
+): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/users/admin/${userId}/beta-access`, {
+    method: 'POST',
+    headers: buildHeaders(),
+    body: JSON.stringify({ durationInDays }),
+  });
+
+  if (!res.ok) {
+    const raw = await res.text();
+    let details = '';
+    try {
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed?.message) {
+        details = Array.isArray(parsed.message)
+          ? parsed.message.join(', ')
+          : String(parsed.message);
+      }
+    } catch {
+      details = raw || '';
+    }
+    if (res.status === 401) {
+      throw new Error('Session expirée ou invalide (401). Merci de vous reconnecter au backoffice.');
+    }
+    throw new Error(
+      `Erreur lors de l'activation de l'accès bêta (${res.status}${details ? `: ${details}` : ''})`,
+    );
+  }
+
+  return res.json();
+}
+
+// Retire l'accès bêta pour un utilisateur (admin)
+export async function revokeUserBetaAccessByAdmin(userId: number): Promise<any> {
+  const res = await fetch(`${API_BASE_URL}/users/admin/${userId}/beta-access`, {
+    method: 'DELETE',
+    headers: buildHeaders(),
+  });
+
+  if (!res.ok) {
+    const raw = await res.text();
+    let details = '';
+    try {
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (parsed?.message) {
+        details = Array.isArray(parsed.message)
+          ? parsed.message.join(', ')
+          : String(parsed.message);
+      }
+    } catch {
+      details = raw || '';
+    }
+    if (res.status === 401) {
+      throw new Error('Session expirée ou invalide (401). Merci de vous reconnecter au backoffice.');
+    }
+    throw new Error(
+      `Erreur lors de la désactivation de l'accès bêta (${res.status}${details ? `: ${details}` : ''})`,
+    );
+  }
+
+  return res.json();
+}
+
 export default {
   fetchUsersList,
   fetchUsersTotal,
   createUser,
   updateUser,
   deleteUser,
+  cancelUserSubscriptionByAdmin,
+  grantUserBetaAccessByAdmin,
+  revokeUserBetaAccessByAdmin,
 };

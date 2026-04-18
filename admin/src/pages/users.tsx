@@ -5,7 +5,15 @@ import Sidebar from '../components/sidebar';
 import ButtonCreate from '../ui/buttonCreate';
 import SelectField from '../ui/selectField';
 import FiltersSection from '../components/filters/filtersSection';
-import { fetchUsersList, createUser, updateUser, deleteUser } from '../utils/usersApi';
+import {
+  fetchUsersList,
+  createUser,
+  updateUser,
+  deleteUser,
+  cancelUserSubscriptionByAdmin,
+  grantUserBetaAccessByAdmin,
+  revokeUserBetaAccessByAdmin,
+} from '../utils/usersApi';
 import UsersForm from '../components/forms/users/usersForm';
 import type { BackendUser } from '../models/models';
 import useSidebar from '../hooks/useSidebar';
@@ -45,6 +53,9 @@ const Users: React.FC = () => {
   const [formBetaAccess, setFormBetaAccess] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
+  const [cancellingSubscription, setCancellingSubscription] = useState(false);
+  const [subscriptionActionError, setSubscriptionActionError] = useState<string | null>(null);
+  const [subscriptionActionSuccess, setSubscriptionActionSuccess] = useState<string | null>(null);
   // Liste récupérée depuis l'API backend
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(false);
@@ -178,6 +189,28 @@ const Users: React.FC = () => {
     setFormPassword('');
     setFormBetaAccess(false);
     setFormError(null);
+    setSubscriptionActionError(null);
+    setSubscriptionActionSuccess(null);
+  };
+
+  const mapUsers = (apiUsers: BackendUser[]): User[] =>
+    apiUsers.map((u: BackendUser) => ({
+      id: u.id,
+      name: `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email,
+      email: u.email,
+      role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
+      abonnement: u.abonnement,
+      status: 'Actif',
+      lastLogin: '—',
+      entrepriseName: u.entreprise?.nom ?? null,
+      betaAccessUntil: u.betaAccessUntil ?? null,
+    }));
+
+  const reloadUsers = async () => {
+    const apiUsers = await fetchUsersList();
+    const mapped = mapUsers(apiUsers ?? []);
+    setUsers(mapped);
+    return mapped;
   };
 
   const handleSubmit = async () => {
@@ -196,43 +229,73 @@ const Users: React.FC = () => {
         nom: formNom,
         prenom: formPrenom,
         role: formRole === 'Admin' ? 'admin' : 'user',
-        betaAccessUntil: formBetaAccess
-          ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
-          : null,
       } as const;
 
       if (isEdit && selectedUser) {
+        const [initialPrenom = '', initialNom = ''] = selectedUser.name.split(' ');
+        const hasGeneralChanges =
+          formEmail !== selectedUser.email ||
+          formRole !== selectedUser.role ||
+          formPrenom !== initialPrenom ||
+          formNom !== initialNom ||
+          formPassword.trim().length > 0;
+
         const payload: any = { ...basePayload };
         if (formPassword.trim()) {
           payload.password = formPassword;
         }
-        await updateUser(selectedUser.id, payload);
+
+        // On évite un PATCH inutile quand seul l'état bêta change.
+        if (hasGeneralChanges) {
+          await updateUser(selectedUser.id, payload);
+        }
+
+        // En édition admin, l'accès bêta est géré par des routes dédiées.
+        const hadBetaAccess = Boolean(selectedUser.betaAccessUntil);
+        if (formBetaAccess && !hadBetaAccess) {
+          try {
+            await grantUserBetaAccessByAdmin(selectedUser.id, 30);
+          } catch (betaError) {
+            // Fallback: on passe par PATCH si la route admin dédiée échoue.
+            await updateUser(selectedUser.id, {
+              betaAccessUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            });
+          }
+        }
+        if (!formBetaAccess && hadBetaAccess) {
+          try {
+            await revokeUserBetaAccessByAdmin(selectedUser.id);
+          } catch (betaError) {
+            // Fallback: on passe par PATCH si la route admin dédiée échoue.
+            await updateUser(selectedUser.id, {
+              betaAccessUntil: null,
+            });
+          }
+        }
       } else {
         await createUser({
           ...basePayload,
           password: formPassword,
+          betaAccessUntil: formBetaAccess
+            ? new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+            : null,
         });
       }
 
       // Recharge la liste
-      const apiUsers = await fetchUsersList();
-      const mapped: User[] = (apiUsers ?? []).map((u: BackendUser) => ({
-        id: u.id,
-        name: `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email,
-        email: u.email,
-        role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
-        abonnement: u.abonnement,
-        status: 'Actif',
-        lastLogin: '—',
-        entrepriseName: u.entreprise?.nom ?? null,
-        betaAccessUntil: u.betaAccessUntil ?? null,
-      }));
-      setUsers(mapped);
+      await reloadUsers();
 
       handleCloseDrawer();
     } catch (e) {
-      console.error('Erreur lors de la création de l\'utilisateur', e);
-      setFormError("Impossible de créer l'utilisateur.");
+      const actionLabel = selectedUser ? 'modifier' : 'créer';
+      const details =
+        typeof e === 'object' && e !== null && 'message' in e
+          ? String((e as any).message)
+          : '';
+      console.error(`Erreur lors de la ${actionLabel} de l'utilisateur`, e);
+      setFormError(
+        `Impossible de ${actionLabel} l'utilisateur${details ? ` (${details})` : '.'}`,
+      );
     } finally {
       setSaving(false);
     }
@@ -246,24 +309,40 @@ const Users: React.FC = () => {
       setLoading(true);
       setError(null);
       await deleteUser(user.id);
-      const apiUsers = await fetchUsersList();
-      const mapped: User[] = (apiUsers ?? []).map((u: BackendUser) => ({
-        id: u.id,
-        name: `${u.prenom ?? ''} ${u.nom ?? ''}`.trim() || u.email,
-        email: u.email,
-        role: u.role === 'admin' ? 'Admin' : 'Utilisateur',
-        abonnement: u.abonnement,
-        status: 'Actif',
-        lastLogin: '—',
-        entrepriseName: u.entreprise?.nom ?? null,
-        betaAccessUntil: u.betaAccessUntil ?? null,
-      }));
-      setUsers(mapped);
+      await reloadUsers();
     } catch (e) {
       console.error('Erreur lors de la suppression de l\'utilisateur', e);
       setError('Impossible de supprimer cet utilisateur.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!selectedUser) return;
+
+    const confirmed = window.confirm(
+      `Annuler l'abonnement de ${selectedUser.name} ? Cette action peut être irréversible selon Stripe.`,
+    );
+    if (!confirmed) return;
+
+    try {
+      setCancellingSubscription(true);
+      setSubscriptionActionError(null);
+      setSubscriptionActionSuccess(null);
+
+      await cancelUserSubscriptionByAdmin(selectedUser.id, true);
+      await updateUser(selectedUser.id, { abonnement: 'gratuit' });
+
+      const refreshedUsers = await reloadUsers();
+      const refreshedSelectedUser = refreshedUsers.find(u => u.id === selectedUser.id) ?? null;
+      setSelectedUser(refreshedSelectedUser);
+      setSubscriptionActionSuccess('Abonnement annulé avec succès.');
+    } catch (e) {
+      console.error('Erreur lors de l\'annulation admin de l\'abonnement', e);
+      setSubscriptionActionError("Impossible d'annuler l'abonnement pour le moment.");
+    } finally {
+      setCancellingSubscription(false);
     }
   };
 
@@ -509,13 +588,17 @@ const Users: React.FC = () => {
                 formPassword={formPassword}
                 formBetaAccess={formBetaAccess}
                 formError={formError}
+                subscriptionActionError={subscriptionActionError}
+                subscriptionActionSuccess={subscriptionActionSuccess}
                 saving={saving}
+                cancellingSubscription={cancellingSubscription}
                 onChangeNom={setFormNom}
                 onChangePrenom={setFormPrenom}
                 onChangeEmail={setFormEmail}
                 onChangeRole={(role) => setFormRole(role)}
                 onChangePassword={setFormPassword}
                 onChangeBetaAccess={setFormBetaAccess}
+                onCancelSubscription={handleCancelSubscription}
                 onSubmit={handleSubmit}
                 onCancel={handleCloseDrawer}
               />
