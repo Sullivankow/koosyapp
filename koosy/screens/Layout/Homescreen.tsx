@@ -5,6 +5,7 @@
 // Les commentaires ci-dessous expliquent le rôle des hooks, handlers et sections principales
 // pour faciliter la maintenance et la relecture du code.
 import QuickActionsGridCard from '../../components/cards/QuickActionsGridCard';
+import ConseilsDéfilants from '../../components/ConseilsDéfilants';
 import UpcomingEvents from '../../components/UpcomingEvents';
 import React, { useState, useEffect } from 'react';
 import { useSuccessMessage } from '../../hooks/useSuccessMessage';
@@ -259,6 +260,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                     </View>
                 </View>
 
+
                 {/* Actions rapides en haut */}
                 <View style={styles.topActions}>
                     <NotificationBell style={[styles.iconBtn, { backgroundColor: colors.primary }]} size={30} color={colors.surface} />
@@ -270,52 +272,56 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                     </TouchableOpacity>
                 </View>
 
-                                {/* Prochain(s) événement(s) */}
-                                <UpcomingEvents
-                                    events={events}
-                                    loading={eventsLoading}
-                                    colors={colors}
-                                    styles={styles}
-                                />
+                {/* Prochain(s) événement(s) */}
+                <UpcomingEvents
+                    events={events}
+                    loading={eventsLoading}
+                    colors={colors}
+                    styles={styles}
+                />
 
-                                {/* Résumé interactif */}
-                                <ChiffreAffaireCard
-                                    caMois={caMois}
-                                    caGlobal={caGlobal}
-                                    caAnnee={caAnnee}
-                                    caMoisN1={caMoisN1}
-                                    caJour={caJour}
-                                    caJourN1={caJourN1}
-                                    caAnneeN1={caAnneeN1}
-                                    caMoisN2={caMoisN2}
-                                    margeMois={margeMois}
-                                    margeGlobal={margeGlobal}
-                                    margeAnnee={margeAnnee}
-                                    margeMoisN1={margeMoisN1}
-                                    margeJour={margeJour}
-                                    margeJourN1={margeJourN1}
-                                    margeAnneeN1={margeAnneeN1}
-                                    margeMoisN2={margeMoisN2}
-                                />
-                                <SummaryGridCard
-                                        biensCount={biensCount}
-                                        reservationsCount={reservationsCount}
-                                        tacheCount={tacheCount}
-                                        prestationsTerminees={prestationsTerminees}
-                                />
+                {/* Résumé interactif */}
+                <ChiffreAffaireCard
+                    caMois={caMois}
+                    caGlobal={caGlobal}
+                    caAnnee={caAnnee}
+                    caMoisN1={caMoisN1}
+                    caJour={caJour}
+                    caJourN1={caJourN1}
+                    caAnneeN1={caAnneeN1}
+                    caMoisN2={caMoisN2}
+                    margeMois={margeMois}
+                    margeGlobal={margeGlobal}
+                    margeAnnee={margeAnnee}
+                    margeMoisN1={margeMoisN1}
+                    margeJour={margeJour}
+                    margeJourN1={margeJourN1}
+                    margeAnneeN1={margeAnneeN1}
+                    margeMoisN2={margeMoisN2}
+                />
+                <SummaryGridCard
+                    biensCount={biensCount}
+                    reservationsCount={reservationsCount}
+                    tacheCount={tacheCount}
+                    prestationsTerminees={prestationsTerminees}
+                />
 
-                                {/* Actions principales en grille 2x2 */}
-                                <QuickActionsGridCard
-                                    onAddBien={() => setAddBienModalVisible(true)}
-                                    onAddTache={() => navigation && navigation.navigate('TachesScreen')}
-                                    onAddReservation={() => setAddReservationModalVisible(true)}
-                                    onAddPrestation={() => setAddPrestationModalVisible(true)}
-                                    onGoToDevis={handleGoToListeDevis}
-                                    onGoToFacture={handleGoToListeFacture}
-                                    onGoToPlanning={handleGoToPlanning}
-                                    onGoToCharges={handleGoToCharges}
-                        />
+                {/* Conseils défilants juste au-dessus de la grille d'actions rapides */}
+                <ConseilsDéfilants />
+
+                {/* Actions principales en grille 2x2 */}
+                <QuickActionsGridCard
+                    onAddBien={() => setAddBienModalVisible(true)}
+                    onAddTache={() => navigation && navigation.navigate('TachesScreen')}
+                    onAddReservation={() => setAddReservationModalVisible(true)}
+                    onAddPrestation={() => setAddPrestationModalVisible(true)}
+                    onGoToDevis={handleGoToListeDevis}
+                    onGoToFacture={handleGoToListeFacture}
+                    onGoToPlanning={handleGoToPlanning}
+                    onGoToCharges={handleGoToCharges}
+                />
             </ScrollView>
+             
             {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}
         {/* Modal d'ajout de bien */}
         <AddBienModal
