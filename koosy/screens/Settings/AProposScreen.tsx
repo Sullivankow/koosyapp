@@ -20,12 +20,12 @@ const AProposScreen: React.FC = () => {
     const navigation = useNavigation<any>();
     const version = getVersion();
     return (
-        <View style={[styles.container, { backgroundColor: colors.background }]}>
-            <View style={styles.logoContainer}>
-                <FontAwesome5 name="key" size={70} color={colors.primary} />
-                <Text style={[styles.appName, { color: colors.primary }]}>Koosy</Text>
-            </View>
-            <Text style={[styles.desc, { color: colors.text }]}>Koosy simplifie la gestion locative : réservation, calendrier, notifications et sécurité, tout en un.</Text>
+        <View style={[styles.container, { backgroundColor: colors.background }]}> 
+            <View style={styles.logoContainer}> 
+                <FontAwesome5 name="key" size={70} color={colors.primary} /> 
+                <Text style={[styles.appName, { color: colors.primary }]}>Koosy</Text> 
+            </View> 
+            <Text style={[styles.desc, { color: colors.text }]}>Koosy est un outil de suivi et de gestion de prestations pensé pour les auto-entrepreneurs en conciergerie et services à domicile. Simplifiez la gestion de vos missions, clients et plannings, tout en offrant un service professionnel à vos particuliers.</Text>
             <View style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: colors.primary }]}>Version</Text>
                 <Text style={{ color: colors.text }}>{version}</Text>
@@ -44,7 +44,7 @@ const AProposScreen: React.FC = () => {
             </View>
             <View style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: colors.primary }]}>Crédits</Text>
-                <Text style={{ color: colors.text }}>Développement : SunDev Agency</Text>
+                <Text style={{ color: colors.text }}>Développement : Koosy</Text>
                 <Text style={{ color: colors.text }}>Design : Koosy Team</Text>
             </View>
             <TouchableOpacity style={[styles.feedbackBtn, { backgroundColor: colors.primary }]} onPress={() => Linking.openURL('mailto:contact@koosyapp.com?subject=Feedback KoosyApp')}>

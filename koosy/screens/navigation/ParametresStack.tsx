@@ -17,7 +17,7 @@ const ParametresStack: React.FC = () => (
         <Stack.Screen name="Profil" component={ProfilScreen} />
         <Stack.Screen name="Notifications" component={NotificationsScreen} />
         <Stack.Screen name="Securite" component={SecuriteScreen} />
-        <Stack.Screen name="APropos" component={AProposScreen} />
+        <Stack.Screen name="APropos" component={AProposScreen} options={{ title: 'À propos' }} />
         <Stack.Screen name="Confidentialite" component={ConfidentialiteScreen} />
         <Stack.Screen name="Support" component={SupportScreen} />
         <Stack.Screen name="Theme" component={ThemeScreen} />
