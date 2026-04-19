@@ -1,5 +1,5 @@
 import { BASE_URL } from '../constants/config';
-import { apiFetch } from './api';
+import { apiFetch } from './baseApi';
 import { getSession } from './session';
 
 // Fonction pour récupérer le nombre total de tâches à faire

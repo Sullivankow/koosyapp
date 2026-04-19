@@ -1,4 +1,4 @@
-import { apiFetch } from './api';
+import { apiFetch } from './baseApi';
 import type { PrestationStatus } from '../components/modals/AddPrestationModal';
 
 // Fonction pour créer une prestation

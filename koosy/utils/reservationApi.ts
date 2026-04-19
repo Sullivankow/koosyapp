@@ -1,4 +1,4 @@
-import { apiFetch } from './api';
+import { apiFetch } from './baseApi';
 
 // Fonction pour récupérer le nombre total de réservations
 export async function getReservationsCount(): Promise<{ total: number }> {

@@ -1,6 +1,6 @@
 
 import { Proprietaire } from '../models/models';
-import { apiFetch } from './api';
+import { apiFetch } from './baseApi';
 
 // Type pour le quota de propriétaires (similaire à BienQuota)
 export type ProprietaireQuota = {

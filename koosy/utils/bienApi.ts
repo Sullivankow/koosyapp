@@ -1,6 +1,6 @@
 import { Bien } from '../models/models';
 import { BASE_URL } from '../constants/config';
-import { apiFetch } from './api';
+import { apiFetch } from './baseApi';
 import { getSession } from './session';
 
 export type BienQuota = {
