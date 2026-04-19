@@ -27,6 +27,7 @@ const initialUser: Utilisateur = {
     telephone: '',
     avatar: '',
     formule: 'gratuit',
+    role: '',
 };
 
 const initialBank = {
@@ -50,9 +51,10 @@ const initialEntreprise: Omit<Entreprise, 'id'> = {
 };
 
 const ProfilScreen: React.FC = () => {
+    const [modeEdition, setModeEdition] = useState(false);
+    // ...log supprimé...
     const { colors } = useTheme();
     const appContext = useContext(AppContext);
-    const [modeEdition, setModeEdition] = useState(false);
     const [user, setUser] = useState<Utilisateur>(initialUser);
     const [editUser, setEditUser] = useState<Utilisateur>(user);
     const [bankInfo, setBankInfo] = useState(initialBank);
@@ -126,11 +128,12 @@ const ProfilScreen: React.FC = () => {
                 prenom: editUser.prenom,
                 email: editUser.email,
                 telephone: editUser.telephone,
-                avatar: editUser.avatar
+                role: editUser.role || user.role || 'user'
             };
             if (showPasswordInput && newPassword.length > 0) {
                 payload.password = newPassword;
             }
+            // ...log supprimé...
             await updateMe(payload);
             setUser(editUser);
             setModeEdition(false);
@@ -143,7 +146,15 @@ const ProfilScreen: React.FC = () => {
                 Alert.alert('Profil mis à jour', 'Vos informations ont été enregistrées.');
             }
         } catch (error) {
-            Alert.alert('Erreur', "Impossible d'enregistrer les modifications.");
+            let msg = "Impossible d'enregistrer les modifications.";
+            if (typeof error === 'object' && error !== null && 'message' in error) {
+                msg += `\n${(error as any).message}`;
+            } else if (typeof error === 'string') {
+                msg += `\n${error}`;
+            } else {
+                msg += `\n${JSON.stringify(error)}`;
+            }
+            Alert.alert('Erreur', msg);
         }
     };
 
@@ -225,7 +236,7 @@ const ProfilScreen: React.FC = () => {
                 return;
             }
             // DEBUG : log des données envoyées
-            console.log('Données envoyées à createEntreprise:', newEntreprise);
+            // ...log supprimé...
             const created = await createEntreprise(newEntreprise);
             setEntreprise(created);
             setShowEntrepriseForm(false);
@@ -256,15 +267,7 @@ const ProfilScreen: React.FC = () => {
                         ) : (
                             <MaterialCommunityIcons name="account-circle" size={80} color={colors.primary} style={{ marginBottom: 8 }} />
                         )}
-                        {modeEdition ? (
-                            <TextInput
-                                style={[styles.input, { color: colors.text, borderColor: colors.primary }]}
-                                value={editUser.avatar}
-                                onChangeText={v => setEditUser({ ...editUser, avatar: v })}
-                                placeholder="URL de l'avatar"
-                                placeholderTextColor={colors.text}
-                            />
-                        ) : null}
+                        {/* Suppression du champ URL de l'avatar en mode édition */}
                         {modeEdition ? (
                             <TextInput
                                 style={[styles.input, { color: colors.text, borderColor: colors.primary }]}

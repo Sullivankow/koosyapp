@@ -104,6 +104,7 @@ export type Utilisateur = {
   telephone?: string;
   avatar?: string; //URL ou chemin vers l'image 
   formule: 'gratuit' | 'payant';
+  role?: string;
 }
 
 export type SubscriptionStatus = 'incomplete' | 'trialing' | 'active' | 'past_due' | 'canceled' | 'unpaid';
