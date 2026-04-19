@@ -382,13 +382,20 @@ const ProfilScreen: React.FC = () => {
                             <MaterialCommunityIcons name="lock-reset" size={20} color="#000" />
                             <Text style={[styles.btnText, { color: '#000' }]}>Modifier le mot de passe</Text>
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.btnDanger, { backgroundColor: '#d32f2f' }]} onPress={() => {
-                            handleDeleteAccount();
-                        }}>
-                            <MaterialCommunityIcons name="delete" size={20} color={colors.surface} />
-                            <Text style={[styles.btnText, { color: colors.surface }]}>Supprimer mon compte</Text>
-                        </TouchableOpacity>
                     </View>
+                    {/* Lien discret pour suppression de compte */}
+                    <TouchableOpacity
+                        style={{ alignSelf: 'center', marginTop: 18, marginBottom: 4, padding: 4 }}
+                        onPress={handleDeleteAccount}
+                        activeOpacity={0.7}
+                    >
+                        <Text style={{ color: colors.textSecondary, fontSize: 13, textDecorationLine: 'underline' }}>
+                            Supprimer mon compte
+                        </Text>
+                        <Text style={{ color: colors.textSecondary, fontSize: 11, textAlign: 'center', marginTop: 2 }}>
+                            Action irréversible
+                        </Text>
+                    </TouchableOpacity>
                 </View>
                 <Modal
                     visible={showSubscriptionCard}
