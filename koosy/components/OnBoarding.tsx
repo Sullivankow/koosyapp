@@ -1,16 +1,17 @@
 import React, { useState } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions } from 'react-native';
+import { useTheme } from '../contexts/ThemeContext';
 
 const onboardingData = [
 	{
 		image: require('../assets/business.png'),
 		title: 'Gérez votre activité',
-		description: 'Centralisez la gestion de vos biens et de votre entreprise en toute simplicité.'
+		description: "Koosy centralise la gestion de vos prestations et simplifie le suivi de votre activité."
 	},
 	{
 		image: require('../assets/booking.png'),
-		title: 'Réservations simplifiées',
-		description: 'Suivez et gérez toutes vos réservations depuis une seule interface.'
+		title: 'Suivi des prestations',
+		description: 'Visualisez, organisez et suivez facilement toutes vos prestations en un seul endroit.'
 	},
 	{
 		image: require('../assets/finance.png'),
@@ -19,15 +20,16 @@ const onboardingData = [
 	},
 	{
 		image: require('../assets/invoice.png'),
-		title: 'Facturation automatisée',
+		title: 'Facturation simplifiée',
 		description: 'Créez et envoyez vos factures en quelques clics, sans effort.'
 	},
 ];
 
 const { width } = Dimensions.get('window');
 
-export default function OnBoarding({ onFinish }: { onFinish?: () => void }) {
+function OnBoarding({ onFinish }: { onFinish?: () => void }) {
 	const [page, setPage] = useState(0);
+	const { colors } = useTheme();
 
 	const handleNext = () => {
 		if (page < onboardingData.length - 1) {
@@ -48,16 +50,16 @@ export default function OnBoarding({ onFinish }: { onFinish?: () => void }) {
 			<Text style={styles.description}>{onboardingData[page].description}</Text>
 			<View style={styles.pagination}>
 				{onboardingData.map((_, idx) => (
-					<View key={idx} style={[styles.dot, page === idx && styles.activeDot]} />
+					<View key={idx} style={[styles.dot, page === idx && { backgroundColor: colors.primary }]} />
 				))}
 			</View>
 			<View style={styles.buttons}>
 				{page > 0 && (
-					<TouchableOpacity onPress={handlePrev} style={styles.button}>
+					<TouchableOpacity onPress={handlePrev} style={[styles.button, { backgroundColor: colors.primary }] }>
 						<Text style={styles.buttonText}>Précédent</Text>
 					</TouchableOpacity>
 				)}
-				<TouchableOpacity onPress={handleNext} style={styles.button}>
+				<TouchableOpacity onPress={handleNext} style={[styles.button, { backgroundColor: colors.primary }] }>
 					<Text style={styles.buttonText}>{page === onboardingData.length - 1 ? 'Commencer' : 'Suivant'}</Text>
 				</TouchableOpacity>
 			</View>
@@ -110,7 +112,7 @@ const styles = StyleSheet.create({
 		width: '100%',
 	},
 	button: {
-		backgroundColor: '#007AFF',
+		backgroundColor: '#007AFF', // sera écrasé par le style dynamique
 		paddingVertical: 10,
 		paddingHorizontal: 24,
 		borderRadius: 8,
@@ -122,3 +124,5 @@ const styles = StyleSheet.create({
 		fontSize: 16,
 	},
 });
+
+export default OnBoarding;

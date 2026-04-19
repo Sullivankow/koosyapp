@@ -17,6 +17,8 @@ import LoginScreen from './screens/Auth/LoginScreen';
 import SignupScreen from './screens/Auth/SignupScreen';
 import WelcomeScreen from './screens/Layout/WelcomeScreen';
 import React, { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import OnBoarding from './components/OnBoarding';
 import { useTheme } from './contexts/ThemeContext';
 import { getSession, clearSession } from './utils/session';
 import { View, Text, Button } from 'react-native';
@@ -38,6 +40,8 @@ import { GlobalRefreshProvider } from './contexts/GlobalRefreshContext';
 import { logoutCurrentSession } from './utils/api';
 import PlanningScreen from './screens/Layout/PlanningScreen';
 import ChargesScreen from './screens/Layout/ChargesScreen';
+ 
+
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -46,6 +50,8 @@ const HomeStack = createStackNavigator();
 // Stack imbriquée pour l'onglet "Accueil" :
 // permet de naviguer vers les écrans de devis, factures, notifications, etc.
 function HomeStackScreen({ onLogout }: { onLogout?: () => void }) {
+
+ 
   return (
     <HomeStack.Navigator screenOptions={{ headerShown: false }}>
       <HomeStack.Screen name="HomeMain">
@@ -77,32 +83,64 @@ export default function App() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [showWelcome, setShowWelcome] = useState(false);
   const [showWelcomeLogin, setShowWelcomeLogin] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
 
   useEffect(() => {
-    // Au démarrage : on regarde s'il existe une session locale,
-    // puis on valide le token en appelant getMe().
-    const timer = setTimeout(async () => {
-      const sess = await getSession();
-      if (sess?.token) {
-        try {
-          const user = await import('./utils/api').then(m => m.getMe());
-          // Sauvegarder les infos utilisateur en local si besoin
-          // await AsyncStorage.setItem('koosy_user', JSON.stringify(user));
-          setIsLoggedIn(true);
-        } catch (err) {
-          // Si erreur 401, forcer la déconnexion
-          setIsLoggedIn(false);
-          await clearSession();
-        }
+    // SplashScreen minimum 1s
+    const checkOnboarding = async () => {
+      await new Promise(res => setTimeout(res, 1000));
+      const seen = await AsyncStorage.getItem('koosy_onboarding_seen');
+      if (!seen) {
+        setShowOnboarding(true);
+        setIsLoading(false);
       } else {
-        setIsLoggedIn(false);
+        // Si l'onboarding a déjà été vu, on passe à la vérification de session
+        const sess = await getSession();
+        if (sess?.token) {
+          try {
+            const user = await import('./utils/api').then(m => m.getMe());
+            setIsLoggedIn(true);
+          } catch (err) {
+            setIsLoggedIn(false);
+            await clearSession();
+          }
+        } else {
+          setIsLoggedIn(false);
+        }
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }, 1200);
-    return () => clearTimeout(timer);
+    };
+    checkOnboarding();
   }, []);
 
   if (isLoading) return <SplashScreen />;
+  if (showOnboarding) {
+    console.log('Affichage de l\'onboarding !');
+    return (
+      <OnBoarding
+        onFinish={async () => {
+          await AsyncStorage.setItem('koosy_onboarding_seen', '1');
+          setShowOnboarding(false);
+          setIsLoading(true); // relance la vérification de session après l'onboarding
+          // relancer la vérification de session
+          const sess = await getSession();
+          if (sess?.token) {
+            try {
+              const user = await import('./utils/api').then(m => m.getMe());
+              setIsLoggedIn(true);
+            } catch (err) {
+              setIsLoggedIn(false);
+              await clearSession();
+            }
+          } else {
+            setIsLoggedIn(false);
+          }
+          setIsLoading(false);
+        }}
+      />
+    );
+  }
 
   // Fournit le contexte global
   return (
