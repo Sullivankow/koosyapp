@@ -108,7 +108,7 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
 }
 
 // Fonction d'inscription d'un utilisateur (écran SignUp)
-export function signup(data: { nom: string; prenom: string; email: string; password: string }) {
+export function signup(data: { nom: string; prenom: string; email: string; password: string; role?: string }) {
   return apiFetch('/users', {
     method: 'POST',
     body: JSON.stringify({
@@ -116,6 +116,7 @@ export function signup(data: { nom: string; prenom: string; email: string; passw
       prenom: data.prenom,
       email: data.email,
       password: data.password,
+      ...(data.role ? { role: data.role } : {}),
     }),
   });
 }

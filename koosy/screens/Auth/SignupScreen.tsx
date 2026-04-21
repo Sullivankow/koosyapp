@@ -51,10 +51,11 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
             setConfirmError("");
         }
         if (!email.trim() || !password.trim() || !isEmailValid(email) || !valid || !nom.trim() || !prenom.trim()) {
+            // ...
             return;
         }
         try {
-            await signup({ nom, prenom, email, password });
+            await signup({ nom, prenom, email, password, role: 'user' });
             await AsyncStorage.setItem('koosy_user', JSON.stringify({ prenom }));
             onSignupSuccess?.(email, password);
         } catch (err) {
