@@ -1,3 +1,4 @@
+
 import React, { useRef, useState, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Modal, Image } from 'react-native';
 import BienCard from '../../components/cards/biens/BienCard';
@@ -77,6 +78,12 @@ const BiensScreen = () => {
 };
 
 export default BiensScreen;
+
+
+
+
+
+
 
 
 
