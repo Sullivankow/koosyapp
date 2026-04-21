@@ -5,6 +5,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, Modal } from 'react-native';
 import BienCard from '../../components/cards/biens/BienCard';
+
 import StatusModal, { StatusValue } from '../../components/modals/StatusModal';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -149,11 +150,20 @@ const BiensScreen: React.FC = () => {
   // Enregistre en base les modifications d'un bien édité inline depuis la carte.
   const handleEditBienInline = async (bienModifie: Bien) => {
     try {
-      await updateBienById(bienModifie.id, bienModifie);
+      // Correction du payload pour garantir que les champs sont des chaînes
+      const payload: any = {
+        ...bienModifie,
+        proprietaireNom: bienModifie.proprio?.nom || '',
+        proprietaireEmail: bienModifie.proprio?.email || '',
+        proprietaireTelephone: bienModifie.proprio?.telephone || '',
+      };
+      const res = await updateBienById(bienModifie.id, payload);
+      console.log('Réponse updateBienById:', res);
       setSuccessMsg('Bien modifié avec succès !');
       signalBienAdded();
       setTimeout(() => setSuccessMsg(''), 1800);
-    } catch {
+    } catch (e) {
+      console.log('Erreur updateBienById:', e);
       setSuccessMsg("Erreur lors de la modification du bien");
       setTimeout(() => setSuccessMsg(''), 1800);
     }
@@ -210,6 +220,23 @@ const BiensScreen: React.FC = () => {
     } catch {}
   };
   const handlePhotoPress = (photo: any) => { setSelectedPhoto(photo); setPhotoModalVisible(true); };
+
+  // Mémoïsation du renderItem pour FlatList
+  const renderItem = React.useCallback(
+    ({ item }: { item: any }) => (
+      <BienCard
+        bien={item}
+        colors={colors}
+        onEdit={handleEditBienInline}
+        onDelete={handleSupprimerBien}
+        onStatus={openStatusModal}
+        onPhotoPress={handlePhotoPress}
+        formatDateFR={formatDateFR}
+        totalPrestationPercu={totalPerBienMap[String(item.id)] ?? 0}
+      />
+    ),
+    [colors, handleEditBienInline, handleSupprimerBien, openStatusModal, handlePhotoPress, formatDateFR, totalPerBienMap]
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
@@ -291,19 +318,11 @@ const BiensScreen: React.FC = () => {
         keyExtractor={item => item.id}
         contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
         getItemLayout={(_, index) => ({ length: 340, offset: 340 * index, index })}
-        renderItem={({ item }) => (
-          <BienCard
-            bien={item}
-            colors={colors}
-            onEdit={handleEditBienInline}
-            onDelete={handleSupprimerBien}
-            onStatus={openStatusModal}
-            onPhotoPress={handlePhotoPress}
-            formatDateFR={formatDateFR}
-            totalPrestationPercu={totalPerBienMap[String(item.id)] ?? 0}
-            // La carte n'a plus besoin de remonter les changements de statut de tâche ici
-          />
-        )}
+        renderItem={renderItem}
+        initialNumToRender={8}
+        maxToRenderPerBatch={8}
+        windowSize={11}
+        removeClippedSubviews={true}
       />
       {/* Suppression de la modale d'édition sur l'icône modifier */}
       <Modal visible={photoModalVisible} transparent animationType="fade">

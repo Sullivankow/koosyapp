@@ -29,7 +29,8 @@ interface BienCardProps {
 	formatDateFR: (dateStr?: string) => string;
 }
 
-const BienCard: React.FC<BienCardProps> = ({ bien, totalPrestationPercu, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR }) => {
+function BienCard(props: BienCardProps) {
+	const { bien, totalPrestationPercu, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR } = props;
 	const [isEditing, setIsEditing] = useState(false);
 	const [detailsModalVisible, setDetailsModalVisible] = useState(false);
 	const [editValues, setEditValues] = useState({
@@ -269,7 +270,7 @@ const BienCard: React.FC<BienCardProps> = ({ bien, totalPrestationPercu, colors,
 			</Modal>
 		</View>
 	);
-};
+}
 
-export default BienCard;
+export default React.memo(BienCard);
 

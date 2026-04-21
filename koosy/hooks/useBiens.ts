@@ -109,10 +109,12 @@ export default function useBiens(deps: unknown[] = []) {
     setLoading(true);
     setError(null);
     try {
-      await updateBien(id, payload);
+      const res = await updateBien(id, payload);
       await fetchBiens();
+      return res;
     } catch (err: any) {
       setError('Erreur lors de la mise à jour du bien');
+      throw err;
     } finally {
       setLoading(false);
     }
