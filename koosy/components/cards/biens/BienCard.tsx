@@ -1,10 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { FontAwesome5 } from '@expo/vector-icons';
 import { styles } from '../../../screens/Layout/styles/BienScreen.styles';
 import type { Bien } from '../../../models/models';
 import { Carrousel } from '../../../ui/Carrousel';
 import ButtonAction from '../../../ui/ButtonAction';
-import BienDetailsModal from '../../modals/BienDetailsModal';
 
 interface BienCardProps {
 	bien: Bien & { photos?: (string | { uri: string })[] };
@@ -41,7 +42,7 @@ const shouldReRender = (prev: Readonly<BienCardProps>, next: Readonly<BienCardPr
 function BienCard(props: BienCardProps) {
 	const { bien, totalPrestationPercu, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR } = props;
 	const [isEditing, setIsEditing] = useState(false);
-	const [detailsModalVisible, setDetailsModalVisible] = useState(false);
+	const [expanded, setExpanded] = useState(false);
 	const [editValues, setEditValues] = useState({
 		nom: bien.nom || '',
 		adresse: bien.adresse || '',
@@ -193,9 +194,9 @@ function BienCard(props: BienCardProps) {
 						<Text numberOfLines={1} style={[styles.infoValue, { color: colors.text }]}>{bien.adresse || '-'}</Text>
 					)}
 				</View>
-				<TouchableOpacity onPress={() => setDetailsModalVisible(true)} style={[styles.detailsToggle, { borderColor: colors.primary }]}> 
+				<TouchableOpacity onPress={() => setExpanded(!expanded)} style={[styles.detailsToggle, { borderColor: colors.primary }]}>
 					<Text style={{ color: colors.primary, fontSize: 12, fontWeight: '700' }}>
-						Voir détails
+						{expanded ? 'Masquer détails' : 'Voir détails'}
 					</Text>
 				</TouchableOpacity>
 			</View>
@@ -217,16 +218,99 @@ function BienCard(props: BienCardProps) {
 				/>
 			</View>
 
-			<BienDetailsModal
-				visible={detailsModalVisible}
-				onClose={() => setDetailsModalVisible(false)}
-				bien={bien}
-				localProprio={localProprio}
-				totalPrestationPercu={totalPrestationPercu}
-				colors={colors}
-				formatDateFR={formatDateFR}
-				styles={styles}
-			/>
+			{expanded && (
+				<View style={{ marginTop: 12 }}>
+					<View style={{ marginBottom: 10 }}>
+						<Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Proprietaire</Text>
+						<View style={styles.proprioBox}>
+							<View style={styles.avatarCircle}>
+								<FontAwesome5 name="user-tie" size={18} color={colors.secondary} />
+							</View>
+							<View style={{ flex: 1 }}>
+								<Text style={{ color: colors.text, fontWeight: 'bold' }}>{localProprio?.nom || 'N/A'}</Text>
+								<Text style={{ color: colors.textSecondary }}>{localProprio?.email || ''}</Text>
+								<Text style={{ color: colors.textSecondary }}>{localProprio?.telephone || ''}</Text>
+							</View>
+						</View>
+					</View>
+
+					<View style={{ marginBottom: 10 }}>
+						<Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Equipements</Text>
+						<Text style={[styles.infoValue, { color: colors.text }]}>{Array.isArray(bien.equipements) ? bien.equipements.join(', ') : (bien.equipements || '-')}</Text>
+					</View>
+
+					<View style={styles.sectionRow}>
+						<MaterialCommunityIcons name="calendar-check" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
+						<Text style={{ color: colors.text, fontWeight: 'bold' }}>Reservations :</Text>
+					</View>
+					{bien.reservations && bien.reservations.length > 0 ? (
+						<View style={{ width: '100%', flexDirection: 'column', gap: 8, marginBottom: 8 }}>
+							{[...bien.reservations].sort((a: any, b: any) => new Date(a.dateDebut ?? 0).getTime() - new Date(b.dateDebut ?? 0).getTime()).map((resa: any) => (
+								<View key={resa.id} style={{ flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.accent + '22', borderColor: colors.accent, borderWidth: 1, borderRadius: 12, padding: 8, marginBottom: 2 }}>
+									<MaterialCommunityIcons name="account" size={16} color={colors.accent} style={{ marginRight: 8, marginTop: 2 }} />
+									<View style={{ flex: 1 }}>
+										<Text style={{ color: colors.accent, fontWeight: 'bold', fontSize: 13 }}>{resa.locataire?.nom || ''} {resa.locataire?.prenom || ''}</Text>
+										{resa.locataire?.email ? <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.locataire.email}</Text> : null}
+										{resa.locataire?.telephone ? <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.locataire.telephone}</Text> : null}
+										<Text style={{ color: '#1976D2', fontSize: 12, fontWeight: 'bold', marginTop: 2 }}>{formatDateFR(resa.dateDebut)} - {formatDateFR(resa.dateFin)}</Text>
+										<Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.statut ? resa.statut.charAt(0).toUpperCase() + resa.statut.slice(1) : ''}</Text>
+									</View>
+								</View>
+							))}
+						</View>
+					) : (
+						<Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune reservation</Text>
+					)}
+
+					<View style={styles.sectionRow}>
+						<MaterialCommunityIcons name="clipboard-list" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
+						<Text style={{ color: colors.text, fontWeight: 'bold' }}>Taches :</Text>
+					</View>
+					{bien.taches && bien.taches.length > 0 ? (
+						<View style={styles.timeline}>
+							{bien.taches.map((tache: any) => (
+								<View key={tache.id} style={styles.timelineItem}>
+									<MaterialCommunityIcons name="circle" size={10} color={tache.statut === 'a faire' ? colors.error : colors.accent} style={{ marginRight: 6 }} />
+									<View style={{ flex: 1 }}>
+										<Text style={{ color: colors.text, fontWeight: '500' }}>{tache.titre || 'N/A'}</Text>
+										<Text style={{ color: colors.textSecondary, fontSize: 12 }}>{tache.statut} {tache.dateEcheance ? `- ${formatDateFR(tache.dateEcheance)}` : ''}</Text>
+									</View>
+								</View>
+							))}
+						</View>
+					) : (
+						<Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune tache</Text>
+					)}
+
+					<View style={styles.sectionRow}>
+						<MaterialCommunityIcons name="handshake" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
+						<Text style={{ color: colors.text, fontWeight: 'bold' }}>Prestations :</Text>
+					</View>
+					{bien.prestations && bien.prestations.length > 0 ? (
+						<View style={styles.timeline}>
+							{bien.prestations.map((prestation: any) => (
+								<View key={prestation.id} style={styles.timelineItem}>
+									<MaterialCommunityIcons name="circle" size={10} color={prestation.status === 'terminee' ? colors.accent : colors.error} style={{ marginRight: 6 }} />
+									<View style={{ flex: 1 }}>
+										<Text style={{ color: colors.text, fontWeight: '500' }}>{prestation.description || 'N/A'}</Text>
+										<Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+											{prestation.status} {prestation.date_prestation ? `- ${formatDateFR(prestation.date_prestation)}` : ''}
+											{typeof prestation.amount_cents === 'number' && prestation.amount_cents > 0 ? ` - ${(prestation.amount_cents / 100).toFixed(2)} EUR` : ''}
+										</Text>
+									</View>
+								</View>
+							))}
+						</View>
+					) : (
+						<Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune prestation</Text>
+					)}
+
+					<View style={{ marginTop: 10, marginBottom: 4, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 10, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary }}>
+						<Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: '700', marginBottom: 2 }}>Total percu (prestations)</Text>
+						<Text style={{ color: colors.primary, fontSize: 18, fontWeight: '800' }}>{Number(totalPrestationPercu || 0).toFixed(2)} EUR</Text>
+					</View>
+				</View>
+			)}
 		</View>
 	);
 }
