@@ -1,14 +1,10 @@
 import React, { useMemo, useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput, Modal, ScrollView } from 'react-native';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import ProprioBox from './ProprioBox';
+import { View, Text, TouchableOpacity, TextInput } from 'react-native';
 import { styles } from '../../../screens/Layout/styles/BienScreen.styles';
 import type { Bien } from '../../../models/models';
-import PrestationTimeline from './PrestationTimeline';
-import TacheTimeline from './TacheTimeline';
-import ReservationList from './ReservationList';
 import { Carrousel } from '../../../ui/Carrousel';
 import ButtonAction from '../../../ui/ButtonAction';
+import BienDetailsModal from '../../modals/BienDetailsModal';
 
 interface BienCardProps {
 	bien: Bien & { photos?: (string | { uri: string })[] };
@@ -208,67 +204,16 @@ function BienCard(props: BienCardProps) {
 				/>
 			</View>
 
-			<Modal
+			<BienDetailsModal
 				visible={detailsModalVisible}
-				transparent
-				animationType="slide"
-				onRequestClose={() => setDetailsModalVisible(false)}
-			>
-				<View style={styles.detailsModalOverlay}>
-					<View style={[styles.detailsModalCard, { backgroundColor: colors.surface }]}> 
-						<View style={styles.detailsModalHeader}>
-							<Text style={[styles.detailsModalTitle, { color: colors.text }]}>Détails du bien</Text>
-							<TouchableOpacity onPress={() => setDetailsModalVisible(false)}>
-								<MaterialCommunityIcons name="close" size={24} color={colors.text} />
-							</TouchableOpacity>
-						</View>
-
-						<ScrollView contentContainerStyle={styles.detailsModalBody}>
-							<View>
-								<Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Propriétaire</Text>
-								<ProprioBox proprio={localProprio} colors={colors} styles={styles} />
-							</View>
-
-							<View style={{ marginTop: 6 }}>
-								<Text style={[styles.infoLabel, { color: colors.textSecondary, marginTop: 4 }]}>Équipements</Text>
-								{isEditing ? (
-									<TextInput
-										style={[styles.infoValue, { color: colors.text, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.primary }]}
-										value={editValues.equipements}
-										onChangeText={v => handleChange('equipements', v)}
-										placeholder="Équipements (séparés par des virgules)"
-									/>
-								) : (
-									<Text style={[styles.infoValue, { color: colors.text }]}>{Array.isArray(bien.equipements) ? bien.equipements.join(', ') : (bien.equipements || '-')}</Text>
-								)}
-							</View>
-
-							<View style={styles.sectionRow}>
-								<MaterialCommunityIcons name="calendar-check" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
-								<Text style={{ color: colors.text, fontWeight: 'bold', marginBottom: 6 }}>Réservations :</Text>
-							</View>
-							<ReservationList reservations={bien.reservations} colors={colors} formatDateFR={formatDateFR} styles={styles} />
-
-							<View style={styles.sectionRow}>
-								<MaterialCommunityIcons name="clipboard-list" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
-								<Text style={{ color: colors.text, fontWeight: 'bold' }}>Tâches :</Text>
-							</View>
-							<TacheTimeline taches={bien.taches} colors={colors} formatDateFR={formatDateFR} styles={styles} />
-
-							<View style={styles.sectionRow}>
-								<MaterialCommunityIcons name="handshake" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
-								<Text style={{ color: colors.text, fontWeight: 'bold' }}>Prestations :</Text>
-							</View>
-							<PrestationTimeline prestations={bien.prestations} colors={colors} formatDateFR={formatDateFR} styles={styles} />
-
-							<View style={{ marginTop: 10, marginBottom: 4, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 10, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary }}>
-								<Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: '700', marginBottom: 2 }}>Total perçu (prestations)</Text>
-								<Text style={{ color: colors.primary, fontSize: 18, fontWeight: '800' }}>{Number(totalPrestationPercu || 0).toFixed(2)} €</Text>
-							</View>
-						</ScrollView>
-					</View>
-				</View>
-			</Modal>
+				onClose={() => setDetailsModalVisible(false)}
+				bien={bien}
+				localProprio={localProprio}
+				totalPrestationPercu={totalPrestationPercu}
+				colors={colors}
+				formatDateFR={formatDateFR}
+				styles={styles}
+			/>
 		</View>
 	);
 }

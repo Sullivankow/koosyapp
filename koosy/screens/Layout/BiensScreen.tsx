@@ -2,7 +2,7 @@
 // - Récupère les biens via le hook `useBiens`
 // - Gère la recherche, le tri, l'édition inline et la suppression
 // - Permet aussi de modifier le statut d'un bien (disponible / occupé)
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { View, Text, FlatList, TouchableOpacity, Image, Modal } from 'react-native';
 import BienCard from '../../components/cards/biens/BienCard';
 
@@ -55,10 +55,10 @@ const BiensScreen: React.FC = () => {
   const { biens, fetchBiens, updateBienById, deleteBienById } = useBiens([lastBienAdded, lastTacheAdded, tacheCount, prestationsTerminees]);
 
   // Recherche locale
-  const filteredBiens = biens.filter(b =>
+  const filteredBiens = useMemo(() => biens.filter(b =>
     b.nom.toLowerCase().includes(search.toLowerCase()) ||
     b.adresse.toLowerCase().includes(search.toLowerCase())
-  );
+  ), [biens, search]);
 
   // Tri via hook personnalisé
   const { sortOrder, setSortOrder, sortedBiens } = useBiensSearchSort(filteredBiens);
@@ -66,13 +66,11 @@ const BiensScreen: React.FC = () => {
   // Pagination locale (chargement progressif)
   const PAGE_SIZE = 20;
   const [page, setPage] = useState(1);
-  const paginatedBiens = sortedBiens.slice(0, page * PAGE_SIZE);
+  const paginatedBiens = useMemo(() => sortedBiens.slice(0, page * PAGE_SIZE), [sortedBiens, page]);
 
-  const handleLoadMore = () => {
-    if (paginatedBiens.length < sortedBiens.length) {
-      setPage(prev => prev + 1);
-    }
-  };
+  const handleLoadMore = useCallback(() => {
+    setPage(prev => prev + 1);
+  }, []);
 
   // Effet : si un identifiant de bien est passé en paramètre de navigation,
   // on scrolle automatiquement jusqu'à ce bien dans la liste.
@@ -136,39 +134,38 @@ const BiensScreen: React.FC = () => {
   }, [lastBienAdded]);
 
   // Indique si la limite de création est atteinte pour un compte limité (plan gratuit).
-  const isQuotaReached = Boolean(
+  const isQuotaReached = useMemo(() => Boolean(
     bienQuota?.isLimited && (bienQuota.remaining ?? 0) <= 0,
-  );
+  ), [bienQuota]);
 
   // Gère le bouton "+" : ouvre la modale d'ajout si possible, sinon affiche directement l'offre d'abonnement.
-  const handleAddBienPress = () => {
+  const handleAddBienPress = useCallback(() => {
     if (isQuotaReached) {
       setShowSubscriptionPaywall(true);
       return;
     }
     setAddBienModalVisible(true);
-  };
+  }, [isQuotaReached]);
 
-  // Formatage simple d'une date au format français (JJ/MM/AAAA)
-  const formatDateFR = (dateStr?: string) => {
+  // Callbacks memoisees pour eviter les re-renders de la FlatList
+  const formatDateFR = useCallback((dateStr?: string) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
     if (isNaN(d.getTime())) return dateStr || '';
     return d.toLocaleDateString('fr-FR');
-  };
+  }, []);
 
   // Gestion modales et callbacks
   // Enregistre en base les modifications d'un bien édité inline depuis la carte.
-  const handleEditBienInline = async (bienModifie: Bien) => {
+  const handleEditBienInline = React.useCallback(async (bienModifie: Bien) => {
     try {
-      // Correction du payload pour garantir que les champs sont des chaînes
       const payload: any = {
         ...bienModifie,
         proprietaireNom: bienModifie.proprio?.nom || '',
         proprietaireEmail: bienModifie.proprio?.email || '',
         proprietaireTelephone: bienModifie.proprio?.telephone || '',
       };
-      const res = await updateBienById(bienModifie.id, payload);
+      await updateBienById(bienModifie.id, payload);
       setSuccessMsg('Bien modifié avec succès !');
       signalBienAdded();
       setTimeout(() => setSuccessMsg(''), 1800);
@@ -177,17 +174,13 @@ const BiensScreen: React.FC = () => {
       setSuccessMsg("Erreur lors de la modification du bien");
       setTimeout(() => setSuccessMsg(''), 1800);
     }
-  };
-  // Ouvre la modale de choix de statut pour un bien donné.
-  const openStatusModal = (bien: Bien) => {
+  }, [updateBienById, signalBienAdded]);
+  const openStatusModal = React.useCallback((bien: Bien) => {
     setCurrentStatusBienId(bien.id);
-    // On ne conserve dans l'état que les statuts gérés par StatusModal
     setCurrentBienStatus(bien.statut === 'disponible' || bien.statut === 'occupé' ? bien.statut : undefined);
     setStatutModalVisible(true);
-  };
-  // Callback appelé depuis StatusModal lorsqu'un nouveau statut est sélectionné.
-  // Récupère le bien complet via l'API, prépare un payload cohérent et met à jour le statut.
-  const handleSelectStatus = async (status: StatusValue) => {
+  }, []);
+  const handleSelectStatus = React.useCallback(async (status: StatusValue) => {
     if (!currentStatusBienId) return;
     try {
       const fullBien = await (await import('../../utils/bienApi')).getBienById(currentStatusBienId);
@@ -217,19 +210,23 @@ const BiensScreen: React.FC = () => {
       setCurrentStatusBienId(null);
       setCurrentBienStatus(undefined);
     }
-  };
+  }, [currentStatusBienId, updateBienById, signalBienAdded]);
   const { signalRefresh } = useGlobalRefresh();
-  // Supprime définitivement un bien puis déclenche un rafraîchissement global.
-  const handleSupprimerBien = async (bienId: string) => {
+
+  const handleSupprimerBien = React.useCallback(async (bienId: string) => {
     try {
       await deleteBienById(bienId);
       setSuccessMsg('Bien supprimé avec succès !');
       signalBienAdded();
-      signalRefresh(); // Déclenche le rafraîchissement global
+      signalRefresh();
       setTimeout(() => setSuccessMsg(''), 2000);
     } catch {}
-  };
-  const handlePhotoPress = (photo: any) => { setSelectedPhoto(photo); setPhotoModalVisible(true); };
+  }, [deleteBienById, signalBienAdded, signalRefresh]);
+
+  const handlePhotoPress = React.useCallback((photo: any) => {
+    setSelectedPhoto(photo);
+    setPhotoModalVisible(true);
+  }, []);
 
   // Mémoïsation du renderItem pour FlatList
   const renderItem = React.useCallback(
