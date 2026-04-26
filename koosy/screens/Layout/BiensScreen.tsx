@@ -63,6 +63,17 @@ const BiensScreen: React.FC = () => {
   // Tri via hook personnalisé
   const { sortOrder, setSortOrder, sortedBiens } = useBiensSearchSort(filteredBiens);
 
+  // Pagination locale (chargement progressif)
+  const PAGE_SIZE = 20;
+  const [page, setPage] = useState(1);
+  const paginatedBiens = sortedBiens.slice(0, page * PAGE_SIZE);
+
+  const handleLoadMore = () => {
+    if (paginatedBiens.length < sortedBiens.length) {
+      setPage(prev => prev + 1);
+    }
+  };
+
   // Effet : si un identifiant de bien est passé en paramètre de navigation,
   // on scrolle automatiquement jusqu'à ce bien dans la liste.
   useEffect(() => {
@@ -158,7 +169,6 @@ const BiensScreen: React.FC = () => {
         proprietaireTelephone: bienModifie.proprio?.telephone || '',
       };
       const res = await updateBienById(bienModifie.id, payload);
-      console.log('Réponse updateBienById:', res);
       setSuccessMsg('Bien modifié avec succès !');
       signalBienAdded();
       setTimeout(() => setSuccessMsg(''), 1800);
@@ -314,8 +324,8 @@ const BiensScreen: React.FC = () => {
       </View>
       <FlatList
         ref={listRef}
-        data={sortedBiens}
-        keyExtractor={item => item.id}
+        data={paginatedBiens}
+        keyExtractor={item => String(item.id)}
         contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
         getItemLayout={(_, index) => ({ length: 340, offset: 340 * index, index })}
         renderItem={renderItem}
@@ -323,6 +333,9 @@ const BiensScreen: React.FC = () => {
         maxToRenderPerBatch={8}
         windowSize={11}
         removeClippedSubviews={true}
+        extraData={totalPerBienMap}
+        onEndReached={handleLoadMore}
+        onEndReachedThreshold={0.2}
       />
       {/* Suppression de la modale d'édition sur l'icône modifier */}
       <Modal visible={photoModalVisible} transparent animationType="fade">

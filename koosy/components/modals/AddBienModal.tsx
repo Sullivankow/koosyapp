@@ -187,27 +187,55 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 			// À ce stade, selectedProprioId est forcément défini grâce à la validation
 			const data = buildBienPayload(form, selectedProprioId as number);
 			if (mode === 'add') {
-				const bienRes = await createBien(data);
-				const id = bienRes.id;
+				let bienRes, id;
+				try {
+					bienRes = await createBien(data);
+					id = bienRes.id;
+				} catch (error) {
+					if (error instanceof ApiError && error.status === 403) {
+						setSuccessMsg(error.message || 'Quota atteint pour votre abonnement.');
+					} else {
+						setSuccessMsg("Erreur lors de l'ajout du bien");
+					}
+					setLoading(false);
+					return;
+				}
+				let warning = '';
 				if (id) {
-					const coords = await geocodeAdresse(data.adresse);
-					if (coords && (coords.lat !== undefined && coords.lng !== undefined)) {
-						await updateBien(String(id), { lat: coords.lat, lng: coords.lng });
+					try {
+						const coords = await geocodeAdresse(data.adresse);
+						if (coords && (coords.lat !== undefined && coords.lng !== undefined)) {
+							await updateBien(String(id), { lat: coords.lat, lng: coords.lng });
+						}
+					} catch {
+						// On ne prévient plus l'utilisateur si l'adresse n'est pas géocodée
 					}
 				}
 				if (id && selectedImages.length > 0) {
-					await uploadBienImages(id, selectedImages);
+					try {
+						await uploadBienImages(id, selectedImages);
+					} catch {
+						warning += ' (images non uploadées)';
+					}
 				}
-				setSuccessMsg('Bien ajouté avec succès !');
+				setSuccessMsg('Bien ajouté avec succès !' + warning);
 			} else {
-				if (!bienId) throw new Error('bienId requis pour l\'édition');
-				await updateBien(bienId, data);
-				if (selectedImages.length > 0) {
-					await uploadBienImages(Number(bienId), selectedImages);
+				try {
+					if (!bienId) throw new Error('bienId requis pour l\'édition');
+					await updateBien(bienId, data);
+					if (selectedImages.length > 0) {
+						await uploadBienImages(Number(bienId), selectedImages);
+					}
+					setSuccessMsg('Bien modifié avec succès !');
+				} catch {
+					setSuccessMsg("Erreur lors de la modification du bien");
+					setLoading(false);
+					return;
 				}
-				setSuccessMsg('Bien modifié avec succès !');
 			}
-			await refreshBiensCount();
+			try {
+				await refreshBiensCount();
+			} catch {}
 			if (mode === 'add') {
 				try {
 					setBienQuota(await getBienQuota());
@@ -226,11 +254,7 @@ const AddBienModal: React.FC<AddBienModalProps> = ({ visible, onClose, onSuccess
 				if (onSuccess) onSuccess();
 			}, 1200);
 		} catch (error) {
-			if (error instanceof ApiError && mode === 'add' && error.status === 403) {
-				setSuccessMsg(error.message || 'Quota atteint pour votre abonnement.');
-			} else {
-				setSuccessMsg(mode === 'add' ? "Erreur lors de l'ajout du bien" : "Erreur lors de la modification du bien");
-			}
+			setSuccessMsg(mode === 'add' ? "Erreur inattendue lors de l'ajout du bien" : "Erreur inattendue lors de la modification du bien");
 			setLoading(false);
 		}
 	};

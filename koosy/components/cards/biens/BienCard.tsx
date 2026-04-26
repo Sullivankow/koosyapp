@@ -41,11 +41,12 @@ function BienCard(props: BienCardProps) {
 		pieces: bien.pieces ? String(bien.pieces) : '',
 		equipements: Array.isArray(bien.equipements) ? bien.equipements.join(', ') : (bien.equipements || ''),
 	});
+	const [localProprio, setLocalProprio] = useState(bien.proprio);
 	const handleChange = (field: keyof typeof editValues, value: string) => {
 		setEditValues(prev => ({ ...prev, [field]: value }));
 	};
 
-	const [localProprio, setLocalProprio] = useState(bien.proprio);
+
 	const statutColor = useMemo(() => {
 		if (bien.statut === 'disponible') return '#15803D';
 		if (bien.statut === 'occupé') return '#B91C1C';
