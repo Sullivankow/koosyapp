@@ -10,15 +10,15 @@ import ButtonAction from '../../../ui/ButtonAction';
 // ============================================================================
 // PROPS DU COMPOSANT
 // ============================================================================
-// BienCardProps : définit les données attendues par le composant BienCard
-// - bien : le bien immobilier avec ses informations (photos, équipements, etc.)
-// - totalPrestationPercu : somme totale des prestations perçues pour ce bien
-// - colors : palette de couleurs pour le thème
+// BienCardProps : definit les donnees attendues par le composant BienCard
+// - bien : le bien immobilier avec ses informations (photos, equipements, etc.)
+// - totalPrestationPercu : somme totale des prestations percues pour ce bien
+// - colors : palette de couleurs pour le theme
 // - onEdit : callback pour sauvegarder les modifications du bien
 // - onDelete : callback pour supprimer le bien
-// - onStatus : callback pour changer le statut du bien (disponible/occupé)
+// - onStatus : callback pour changer le statut du bien (disponible/occupe)
 // - onPhotoPress : callback quand on clique sur une photo du carrousel
-// - formatDateFR : fonction pour formater les dates en français
+// - formatDateFR : fonction pour formater les dates en francais
 
 interface BienCardProps {
 	bien: Bien & { photos?: (string | { uri: string })[] };
@@ -42,21 +42,68 @@ interface BienCardProps {
 // ============================================================================
 // OPTIMISATION DE RENDU (MEMOIZATION)
 // ============================================================================
-// shouldReRender : compare les props précédentes et suivantes pour décider
-// si le composant doit se re-rendre. Évite les re-renders inutiles quand
-// les props n'ont pas changé (sauf les handlers qui sont stabilisés par le parent).
+// shouldReRender : decide si le composant doit se re-rendre.
+// PROBLEME : useTheme() recree un nouvel objet colors a chaque render,
+// donc prev.colors === next.colors (comparaison par reference) echoue toujours
+// et force un re-render. On compare maintenant les valeurs des couleurs.
 const shouldReRender = (prev: Readonly<BienCardProps>, next: Readonly<BienCardProps>) => {
-  return (
-    prev.bien === next.bien &&
-    prev.totalPrestationPercu === next.totalPrestationPercu &&
-    prev.colors === next.colors &&
-    prev.onEdit === next.onEdit &&
-    prev.onDelete === next.onDelete &&
-    prev.onStatus === next.onStatus &&
-    prev.onPhotoPress === next.onPhotoPress &&
-    prev.formatDateFR === next.formatDateFR
-  );
+  if (prev.bien !== next.bien) return false;
+  if (prev.totalPrestationPercu !== next.totalPrestationPercu) return false;
+  // Comparaison par valeur des couleurs (important : useTheme() recree un nouvel
+  // objet a chaque render, donc la comparaison par reference echouerait systematiquement)
+  const pc = prev.colors;
+  const nc = next.colors;
+  if (pc.surface !== nc.surface || pc.primary !== nc.primary || pc.secondary !== nc.secondary ||
+      pc.accent !== nc.accent || pc.error !== nc.error || pc.text !== nc.text || pc.textSecondary !== nc.textSecondary) return false;
+  if (prev.onEdit !== next.onEdit) return false;
+  if (prev.onDelete !== next.onDelete) return false;
+  if (prev.onStatus !== next.onStatus) return false;
+  if (prev.onPhotoPress !== next.onPhotoPress) return false;
+  return true;
 };
+
+// ============================================================================
+// COMPOSANTS INTERNES MEMOIZES (evitent les re-renders inutiles)
+// ============================================================================
+
+// ReservationItem : affiche une reservation dans la liste triee
+const ReservationItem = React.memo(({ resa, colors, formatDateFR }: { resa: any; colors: BienCardProps['colors']; formatDateFR: (d?: string) => string }) => (
+  <View style={{ flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.accent + '22', borderColor: colors.accent, borderWidth: 1, borderRadius: 12, padding: 8, marginBottom: 2 }}>
+    <MaterialCommunityIcons name="account" size={16} color={colors.accent} style={{ marginRight: 8, marginTop: 2 }} />
+    <View style={{ flex: 1 }}>
+      <Text style={{ color: colors.accent, fontWeight: 'bold', fontSize: 13 }}>{resa.locataire?.nom || ''} {resa.locataire?.prenom || ''}</Text>
+      {resa.locataire?.email ? <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.locataire.email}</Text> : null}
+      {resa.locataire?.telephone ? <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.locataire.telephone}</Text> : null}
+      <Text style={{ color: '#1976D2', fontSize: 12, fontWeight: 'bold', marginTop: 2 }}>{formatDateFR(resa.dateDebut)} - {formatDateFR(resa.dateFin)}</Text>
+      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.statut ? resa.statut.charAt(0).toUpperCase() + resa.statut.slice(1) : ''}</Text>
+    </View>
+  </View>
+));
+
+// TacheItem : affiche une tache dans la timeline avec cercle colore selon statut
+const TacheItem = React.memo(({ tache, colors, formatDateFR }: { tache: any; colors: BienCardProps['colors']; formatDateFR: (d?: string) => string }) => (
+  <View style={styles.timelineItem}>
+    <MaterialCommunityIcons name="circle" size={10} color={tache.statut === 'a faire' ? colors.error : colors.accent} style={{ marginRight: 6 }} />
+    <View style={{ flex: 1 }}>
+      <Text style={{ color: colors.text, fontWeight: '500' }}>{tache.titre || 'N/A'}</Text>
+      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{tache.statut} {tache.dateEcheance ? `- ${formatDateFR(tache.dateEcheance)}` : ''}</Text>
+    </View>
+  </View>
+));
+
+// PrestationItem : affiche une prestation dans la timeline avec cercle colore selon status
+const PrestationItem = React.memo(({ prestation, colors, formatDateFR }: { prestation: any; colors: BienCardProps['colors']; formatDateFR: (d?: string) => string }) => (
+  <View style={styles.timelineItem}>
+    <MaterialCommunityIcons name="circle" size={10} color={prestation.status === 'terminee' ? colors.accent : colors.error} style={{ marginRight: 6 }} />
+    <View style={{ flex: 1 }}>
+      <Text style={{ color: colors.text, fontWeight: '500' }}>{prestation.description || 'N/A'}</Text>
+      <Text style={{ color: colors.textSecondary, fontSize: 12 }}>
+        {prestation.status} {prestation.date_prestation ? `- ${formatDateFR(prestation.date_prestation)}` : ''}
+        {typeof prestation.amount_cents === 'number' && prestation.amount_cents > 0 ? ` - ${(prestation.amount_cents / 100).toFixed(2)} EUR` : ''}
+      </Text>
+    </View>
+  </View>
+));
 
 // ============================================================================
 // COMPOSANT PRINCIPAL
@@ -68,20 +115,20 @@ function BienCard(props: BienCardProps) {
 	const { bien, totalPrestationPercu, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR } = props;
 
 	// -----------------------------------------------------------------------------
-	// ETAT LOCAL : mode édition
+	// ETAT LOCAL : mode edition
 	// isEditing : vrai quand l'utilisateur est en train de modifier les infos du bien
 	// -----------------------------------------------------------------------------
 	const [isEditing, setIsEditing] = useState(false);
 
 	// -----------------------------------------------------------------------------
-	// ETAT LOCAL : expansion des détails
-	// expanded : vrai quand la section "détails" est visible (propriétaire, réservations, etc.)
+	// ETAT LOCAL : expansion des details
+	// expanded : vrai quand la section "details" est visible (proprietaire, reservations, etc.)
 	// -----------------------------------------------------------------------------
 	const [expanded, setExpanded] = useState(false);
 
 	// -----------------------------------------------------------------------------
-	// ETAT LOCAL : valeurs temporaires pour l'édition inline
-	// editValues : stocke les valeurs modifiées avant validation (nom, adresse, type, etc.)
+	// ETAT LOCAL : valeurs temporaires pour l'edition inline
+	// editValues : stocke les valeurs modifiees avant validation (nom, adresse, type, etc.)
 	// -----------------------------------------------------------------------------
 	const [editValues, setEditValues] = useState({
 		nom: bien.nom || '',
@@ -93,13 +140,13 @@ function BienCard(props: BienCardProps) {
 	});
 
 	// -----------------------------------------------------------------------------
-	// ETAT LOCAL : propriétaire local
-	// localProprio : copie locale du propriétaire pour affichage (peut être modifié sans impacter le bien)
+	// ETAT LOCAL : proprietaire local
+	// localProprio : copie locale du proprietaire pour affichage (peut etre modifie sans impacter le bien)
 	// -----------------------------------------------------------------------------
 	const [localProprio, setLocalProprio] = useState(bien.proprio);
 
 	// -----------------------------------------------------------------------------
-	// handlerChange : met à jour une valeur du formulaire d'édition
+	// handlerChange : met a jour une valeur du formulaire d'edition
 	// -----------------------------------------------------------------------------
 	const handleChange = (field: keyof typeof editValues, value: string) => {
 		setEditValues(prev => ({ ...prev, [field]: value }));
@@ -107,7 +154,7 @@ function BienCard(props: BienCardProps) {
 
 	// -----------------------------------------------------------------------------
 	// COULEURS DU STATUT (memoized)
-	// statutColor : couleur du texte selon le statut (vert=disponible, rouge=occupé, orange=autre)
+	// statutColor : couleur du texte selon le statut (vert=disponible, rouge=occupe, orange=autre)
 	// statutBg : couleur de fond du badge selon le statut
 	// -----------------------------------------------------------------------------
 	const statutColor = useMemo(() => {
@@ -123,13 +170,21 @@ function BienCard(props: BienCardProps) {
 	}, [bien.statut]);
 
 	// -----------------------------------------------------------------------------
-	// handleEditPress : gère le toggle entre mode consultation et mode édition
-	// - Si isEditing=true : valide les modifications et appelle onEdit, puis sort du mode édition
-	// - Si isEditing=false : entre en mode édition
+	// Reservations triees par date de debut (memoize pour eviter le tri a chaque render)
+	// -----------------------------------------------------------------------------
+	const sortedReservations = useMemo(() => {
+		if (!bien.reservations || bien.reservations.length === 0) return [];
+		return [...bien.reservations].sort((a: any, b: any) => new Date(a.dateDebut ?? 0).getTime() - new Date(b.dateDebut ?? 0).getTime());
+	}, [bien.reservations]);
+
+	// -----------------------------------------------------------------------------
+	// handleEditPress : gere le toggle entre mode consultation et mode edition
+	// - Si isEditing=true : valide les modifications et appelle onEdit, puis sort du mode edition
+	// - Si isEditing=false : entre en mode edition
 	// -----------------------------------------------------------------------------
 	const handleEditPress = () => {
 		if (isEditing) {
-			// Construit le payload avec les valeurs modifiées (convertit les types)
+			// Construit le payload avec les valeurs modifiees (convertit les types)
 			const payload: any = {
 				nom: editValues.nom,
 				adresse: editValues.adresse,
@@ -138,7 +193,7 @@ function BienCard(props: BienCardProps) {
 				pieces: Number(editValues.pieces),
 				equipements: editValues.equipements.split(',').map((e: string) => e.trim()).filter(Boolean),
 			};
-			// Préserve les champs non modifiables (statut, coordonnées GPS)
+			// Preserve les champs non modifiables (statut, coordonnees GPS)
 			if (bien.statut) payload.statut = bien.statut;
 			if (bien.lat) payload.lat = bien.lat;
 			if (bien.lng) payload.lng = bien.lng;
@@ -152,7 +207,7 @@ function BienCard(props: BienCardProps) {
 
 	// -----------------------------------------------------------------------------
 	// handleCancelEdit : annule les modifications en cours
-	// Réinitialise editValues avec les valeurs actuelles du bien et quitte le mode édition
+	// Reinitialise editValues avec les valeurs actuelles du bien et quitte le mode edition
 	// -----------------------------------------------------------------------------
 	const handleCancelEdit = () => {
 		setEditValues({
@@ -173,11 +228,11 @@ function BienCard(props: BienCardProps) {
 		<View style={[styles.card, { backgroundColor: colors.surface }]}>
 
 			{/* ====================================================================
-			 EN-TÊTE : Nom du bien + Date de création + Badge statut
+			 EN-TETE : Nom du bien + Date de creation + Badge statut
 			 ==================================================================== */}
 			<View style={styles.denseHeaderRow}>
 				<View style={styles.denseHeaderLeft}>
-					{/* Affichage conditionnel : TextInput si édition, Text sinon */}
+					{/* Affichage conditionnel : TextInput si edition, Text sinon */}
 					{isEditing ? (
 						<TextInput
 							style={{ fontSize: 19, fontWeight: 'bold', color: colors.primary, marginBottom: 2, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.primary }}
@@ -188,12 +243,12 @@ function BienCard(props: BienCardProps) {
 					) : (
 						<Text style={{ fontSize: 19, fontWeight: 'bold', color: colors.primary, marginBottom: 2 }}>{bien.nom || 'Sans nom'}</Text>
 					)}
-					{/* Date de création formatée en français */}
+					{/* Date de creation formatee en francais */}
 					<Text style={{ fontSize: 13, color: colors.textSecondary }}>
-						Créé le {bien.dateCreation ? formatDateFR(bien.dateCreation) : formatDateFR(new Date().toISOString().slice(0, 10))}
+						Cree le {bien.dateCreation ? formatDateFR(bien.dateCreation) : formatDateFR(new Date().toISOString().slice(0, 10))}
 					</Text>
 				</View>
-				{/* Badge cliquable pour changer le statut (désactivé en mode édition) */}
+				{/* Badge cliquable pour changer le statut (desactive en mode edition) */}
 				<TouchableOpacity
 					onPress={() => onStatus(bien)}
 					disabled={isEditing}
@@ -204,7 +259,7 @@ function BienCard(props: BienCardProps) {
 			</View>
 
 			{/* ====================================================================
-			 CARRousel DE PHOTOS
+			 CARROUSEL DE PHOTOS
 			 Affiche les photos du bien si elles existent, avec callback au clic
 			 ==================================================================== */}
 			{Array.isArray(bien.photos) && bien.photos.length > 0 && (
@@ -217,8 +272,8 @@ function BienCard(props: BienCardProps) {
 			)}
 
 			{/* ====================================================================
-			 GRILLE D'INFOS : Type | Superficie | Pièces
-			 Affichage compact sur 3 colonnes, éditable en inline
+			 GRILLE D'INFOS : Type | Superficie | Pieces
+			 Affichage compact sur 3 colonnes, editable en inline
 			 ==================================================================== */}
 			<View style={styles.infoGridDense}>
 				{/* Colonne Type */}
@@ -250,15 +305,15 @@ function BienCard(props: BienCardProps) {
 						<Text style={[styles.infoValue, { color: colors.text }]}>{bien.superficie ? bien.superficie + ' m²' : '-'}</Text>
 					)}
 				</View>
-				{/* Colonne Pièces */}
+				{/* Colonne Pieces */}
 				<View style={styles.infoCol}>
-					<Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Pièces</Text>
+					<Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Pieces</Text>
 					{isEditing ? (
 						<TextInput
 							style={[styles.infoValue, { color: colors.text, backgroundColor: colors.surface, borderBottomWidth: 1, borderColor: colors.primary }]}
 							value={editValues.pieces}
 							onChangeText={v => handleChange('pieces', v)}
-							placeholder="Nb pièces"
+							placeholder="Nb pieces"
 							keyboardType="numeric"
 						/>
 					) : (
@@ -268,7 +323,7 @@ function BienCard(props: BienCardProps) {
 			</View>
 
 			{/* ====================================================================
-			 LIGNE ADRESSE + BOUTON VOIR/MASQUER DÉTAILS
+			 LIGNE ADRESSE + BOUTON VOIR/MASQUER DETAILS
 			 ==================================================================== */}
 			<View style={styles.rowDenseBetween}>
 				<View style={{ flex: 1, marginRight: 10 }}>
@@ -284,26 +339,26 @@ function BienCard(props: BienCardProps) {
 						<Text numberOfLines={1} style={[styles.infoValue, { color: colors.text }]}>{bien.adresse || '-'}</Text>
 					)}
 				</View>
-				{/* Toggle pour afficher/masquer la section détails étendue */}
+				{/* Toggle pour afficher/masquer la section details etendue */}
 				<TouchableOpacity onPress={() => setExpanded(!expanded)} style={[styles.detailsToggle, { borderColor: colors.primary }]}>
 					<Text style={{ color: colors.primary, fontSize: 12, fontWeight: '700' }}>
-						{expanded ? 'Masquer détails' : 'Voir détails'}
+						{expanded ? 'Masquer details' : 'Voir details'}
 					</Text>
 				</TouchableOpacity>
 			</View>
 
 			{/* ====================================================================
-			 LIGNE PROPRIÉTAIRE (affichage résumé)
+			 LIGNE PROPRIETAIRE (affichage resume)
 			 ==================================================================== */}
 			<View style={{ marginTop: 8 }}>
 				<Text numberOfLines={1} style={{ color: colors.textSecondary, fontSize: 12 }}>
-					Propriétaire: {localProprio?.nom || localProprio?.email || 'Non renseigné'}
+					Proprietaire: {localProprio?.nom || localProprio?.email || 'Non renseigne'}
 				</Text>
 			</View>
 
 			{/* ====================================================================
-			 BOUTONS D'ACTIONS : Éditer / Supprimer
-			 Le composant ButtonAction gère le changement d'état (consultation <-> édition)
+			 BOUTONS D'ACTIONS : Editer / Supprimer
+			 Le composant ButtonAction gere le changement d'etat (consultation <-> edition)
 			 ==================================================================== */}
 			<View style={styles.floatingActions}>
 				<ButtonAction
@@ -317,21 +372,21 @@ function BienCard(props: BienCardProps) {
 			</View>
 
 			{/* ====================================================================
-			 SECTION DÉTAILS ÉTENDUS (affichée uniquement si expanded=true)
-			 Contient : Propriétaire complet, Équipements, Réservations, Tâches, Prestations, Total perçu
+			 SECTION DETAILS ETENDUS (affichee uniquement si expanded=true)
+			 Contient : Proprietaire complet, Equipements, Reservations, Taches, Prestations, Total percu
 			 ==================================================================== */}
 			{expanded && (
 				<View style={{ marginTop: 12 }}>
 
-					{/* ------- Bloc Propriétaire ------- */}
+					{/* ------- Bloc Proprietaire ------- */}
 					<View style={{ marginBottom: 10 }}>
 						<Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Proprietaire</Text>
 						<View style={styles.proprioBox}>
-							{/* Avatar avec icône utilisateur */}
+							{/* Avatar avec icone utilisateur */}
 							<View style={styles.avatarCircle}>
 								<FontAwesome5 name="user-tie" size={18} color={colors.secondary} />
 							</View>
-							{/* Infos du propriétaire : nom, email, téléphone */}
+							{/* Infos du proprietaire : nom, email, telephone */}
 							<View style={{ flex: 1 }}>
 								<Text style={{ color: colors.text, fontWeight: 'bold' }}>{localProprio?.nom || 'N/A'}</Text>
 								<Text style={{ color: colors.textSecondary }}>{localProprio?.email || ''}</Text>
@@ -340,56 +395,41 @@ function BienCard(props: BienCardProps) {
 						</View>
 					</View>
 
-					{/* ------- Bloc Équipements ------- */}
+					{/* ------- Bloc Equipements ------- */}
 					<View style={{ marginBottom: 10 }}>
 						<Text style={[styles.infoLabel, { color: colors.textSecondary }]}>Equipements</Text>
-						{/* Affiche la liste des équipements séparés par des virgules */}
+						{/* Affiche la liste des equipements separes par des virgules */}
 						<Text style={[styles.infoValue, { color: colors.text }]}>{Array.isArray(bien.equipements) ? bien.equipements.join(', ') : (bien.equipements || '-')}</Text>
 					</View>
 
-					{/* ------- Bloc Réservations ------- */}
-					{/* En-tête avec icône calendrier */}
+					{/* ------- Bloc Reservations ------- */}
+					{/* En-tete avec icone calendrier */}
 					<View style={styles.sectionRow}>
 						<MaterialCommunityIcons name="calendar-check" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
 						<Text style={{ color: colors.text, fontWeight: 'bold' }}>Reservations :</Text>
 					</View>
-					{/* Liste des réservations triées par date de début */}
-					{bien.reservations && bien.reservations.length > 0 ? (
+					{/* Liste des reservations triees par date de debut */}
+					{sortedReservations.length > 0 ? (
 						<View style={{ width: '100%', flexDirection: 'column', gap: 8, marginBottom: 8 }}>
-							{[...bien.reservations].sort((a: any, b: any) => new Date(a.dateDebut ?? 0).getTime() - new Date(b.dateDebut ?? 0).getTime()).map((resa: any) => (
-								<View key={resa.id} style={{ flexDirection: 'row', alignItems: 'flex-start', backgroundColor: colors.accent + '22', borderColor: colors.accent, borderWidth: 1, borderRadius: 12, padding: 8, marginBottom: 2 }}>
-									<MaterialCommunityIcons name="account" size={16} color={colors.accent} style={{ marginRight: 8, marginTop: 2 }} />
-									<View style={{ flex: 1 }}>
-										<Text style={{ color: colors.accent, fontWeight: 'bold', fontSize: 13 }}>{resa.locataire?.nom || ''} {resa.locataire?.prenom || ''}</Text>
-										{resa.locataire?.email ? <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.locataire.email}</Text> : null}
-										{resa.locataire?.telephone ? <Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.locataire.telephone}</Text> : null}
-										<Text style={{ color: '#1976D2', fontSize: 12, fontWeight: 'bold', marginTop: 2 }}>{formatDateFR(resa.dateDebut)} - {formatDateFR(resa.dateFin)}</Text>
-										<Text style={{ color: colors.textSecondary, fontSize: 12 }}>{resa.statut ? resa.statut.charAt(0).toUpperCase() + resa.statut.slice(1) : ''}</Text>
-									</View>
-								</View>
+							{sortedReservations.map((resa: any) => (
+								<ReservationItem key={resa.id} resa={resa} colors={colors} formatDateFR={formatDateFR} />
 							))}
 						</View>
 					) : (
 						<Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune reservation</Text>
 					)}
 
-					{/* ------- Bloc Tâches ------- */}
-					{/* En-tête avec icône clipboard */}
+					{/* ------- Bloc Taches ------- */}
+					{/* En-tete avec icone clipboard */}
 					<View style={styles.sectionRow}>
 						<MaterialCommunityIcons name="clipboard-list" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
 						<Text style={{ color: colors.text, fontWeight: 'bold' }}>Taches :</Text>
 					</View>
-					{/* Timeline des tâches : cercle coloré selon le statut (rouge=a faire, vert=terminé) */}
+					{/* Timeline des taches : cercle colore selon le statut (rouge=a faire, vert=termine) */}
 					{bien.taches && bien.taches.length > 0 ? (
 						<View style={styles.timeline}>
 							{bien.taches.map((tache: any) => (
-								<View key={tache.id} style={styles.timelineItem}>
-									<MaterialCommunityIcons name="circle" size={10} color={tache.statut === 'a faire' ? colors.error : colors.accent} style={{ marginRight: 6 }} />
-									<View style={{ flex: 1 }}>
-										<Text style={{ color: colors.text, fontWeight: '500' }}>{tache.titre || 'N/A'}</Text>
-										<Text style={{ color: colors.textSecondary, fontSize: 12 }}>{tache.statut} {tache.dateEcheance ? `- ${formatDateFR(tache.dateEcheance)}` : ''}</Text>
-									</View>
-								</View>
+								<TacheItem key={tache.id} tache={tache} colors={colors} formatDateFR={formatDateFR} />
 							))}
 						</View>
 					) : (
@@ -397,32 +437,23 @@ function BienCard(props: BienCardProps) {
 					)}
 
 					{/* ------- Bloc Prestations ------- */}
-					{/* En-tête avec icône handshake */}
+					{/* En-tete avec icone handshake */}
 					<View style={styles.sectionRow}>
 						<MaterialCommunityIcons name="handshake" size={16} color={colors.secondary} style={{ marginRight: 4 }} />
 						<Text style={{ color: colors.text, fontWeight: 'bold' }}>Prestations :</Text>
 					</View>
-					{/* Timeline des prestations : cercle coloré selon status (vert=terminée, rouge=en cours) */}
+					{/* Timeline des prestations : cercle colore selon status (vert=terminee, rouge=en cours) */}
 					{bien.prestations && bien.prestations.length > 0 ? (
 						<View style={styles.timeline}>
 							{bien.prestations.map((prestation: any) => (
-								<View key={prestation.id} style={styles.timelineItem}>
-									<MaterialCommunityIcons name="circle" size={10} color={prestation.status === 'terminee' ? colors.accent : colors.error} style={{ marginRight: 6 }} />
-									<View style={{ flex: 1 }}>
-										<Text style={{ color: colors.text, fontWeight: '500' }}>{prestation.description || 'N/A'}</Text>
-										<Text style={{ color: colors.textSecondary, fontSize: 12 }}>
-											{prestation.status} {prestation.date_prestation ? `- ${formatDateFR(prestation.date_prestation)}` : ''}
-											{typeof prestation.amount_cents === 'number' && prestation.amount_cents > 0 ? ` - ${(prestation.amount_cents / 100).toFixed(2)} EUR` : ''}
-										</Text>
-									</View>
-								</View>
+								<PrestationItem key={prestation.id} prestation={prestation} colors={colors} formatDateFR={formatDateFR} />
 							))}
 						</View>
 					) : (
 						<Text style={{ color: colors.textSecondary, fontStyle: 'italic' }}>Aucune prestation</Text>
 					)}
 
-					{/* ------- Bloc Total Perçu ------- */}
+					{/* ------- Bloc Total Percu ------- */}
 					{/* Somme totale des montants des prestations pour ce bien */}
 					<View style={{ marginTop: 10, marginBottom: 4, paddingVertical: 8, paddingHorizontal: 10, borderRadius: 10, backgroundColor: colors.surface, borderWidth: 1, borderColor: colors.primary }}>
 						<Text style={{ color: colors.textSecondary, fontSize: 12, fontWeight: '700', marginBottom: 2 }}>Total percu (prestations)</Text>

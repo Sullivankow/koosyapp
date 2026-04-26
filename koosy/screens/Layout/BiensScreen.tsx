@@ -52,6 +52,18 @@ const BiensScreen: React.FC = () => {
   const [showSubscriptionPaywall, setShowSubscriptionPaywall] = useState(false);
   const { colors } = useTheme();
 
+  // Stabilisation de colors via useMemo : evite de recreer renderItem a chaque render
+  // (useTheme() retourne un nouvel objet a chaque appel meme si les valeurs sont identiques)
+  const stableColors = useMemo(() => colors, [
+    colors.surface,
+    colors.primary,
+    colors.secondary,
+    colors.accent,
+    colors.error,
+    colors.text,
+    colors.textSecondary,
+  ]);
+
   // Récupération des biens (ajout de tacheCount comme dépendance)
   const { biens, fetchBiens, updateBienById, deleteBienById } = useBiens([lastBienAdded, lastTacheAdded, tacheCount, prestationsTerminees]);
 
@@ -237,7 +249,7 @@ const BiensScreen: React.FC = () => {
     ({ item }: { item: any }) => (
       <BienCard
         bien={item}
-        colors={colors}
+        colors={stableColors}
         onEdit={handleEditBienInline}
         onDelete={handleSupprimerBien}
         onStatus={openStatusModal}
@@ -246,7 +258,7 @@ const BiensScreen: React.FC = () => {
         totalPrestationPercu={totalPerBienMapRef.current[String(item.id)] ?? 0}
       />
     ),
-    [colors, handleEditBienInline, handleSupprimerBien, openStatusModal, handlePhotoPress, formatDateFR]
+    [stableColors, handleEditBienInline, handleSupprimerBien, openStatusModal, handlePhotoPress, formatDateFR]
   );
 
   return (
