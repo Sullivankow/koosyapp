@@ -25,6 +25,19 @@ interface BienCardProps {
 	formatDateFR: (dateStr?: string) => string;
 }
 
+const shouldReRender = (prev: Readonly<BienCardProps>, next: Readonly<BienCardProps>) => {
+  return (
+    prev.bien === next.bien &&
+    prev.totalPrestationPercu === next.totalPrestationPercu &&
+    prev.colors === next.colors &&
+    prev.onEdit === next.onEdit &&
+    prev.onDelete === next.onDelete &&
+    prev.onStatus === next.onStatus &&
+    prev.onPhotoPress === next.onPhotoPress &&
+    prev.formatDateFR === next.formatDateFR
+  );
+};
+
 function BienCard(props: BienCardProps) {
 	const { bien, totalPrestationPercu, colors, onEdit, onDelete, onStatus, onPhotoPress, formatDateFR } = props;
 	const [isEditing, setIsEditing] = useState(false);
@@ -218,5 +231,5 @@ function BienCard(props: BienCardProps) {
 	);
 }
 
-export default React.memo(BienCard);
+export default React.memo(BienCard, shouldReRender);
 

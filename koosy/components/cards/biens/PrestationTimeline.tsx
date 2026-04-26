@@ -44,4 +44,4 @@ const PrestationTimeline: React.FC<PrestationTimelineProps> = ({ prestations = [
   </View>
 );
 
-export default PrestationTimeline;
+export default React.memo(PrestationTimeline);

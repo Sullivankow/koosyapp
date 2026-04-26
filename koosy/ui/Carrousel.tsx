@@ -1,9 +1,11 @@
-// Carrousel horizontal d’images pour les biens.
-// Accepte différents formats de chemin (URL absolues, chemins d’uploads, URI locales)
-// et normalise tout vers une source d’image exploitable.
-import React from 'react';
-import { ScrollView, TouchableOpacity, Image } from 'react-native';
+// Carrousel horizontal d'images pour les biens.
+// Accepte differents formats de chemin (URL absolues, chemins d'uploads, URI locales)
+// et normalise tout vers une source d'image exploitable.
+import React, { useMemo } from 'react';
+import { ScrollView, TouchableOpacity, Image, Dimensions } from 'react-native';
 import { BASE_URL } from '../constants/config';
+
+const SCREEN_WIDTH = Dimensions.get('window').width;
 
 interface CarrouselProps {
   photos?: (string | { uri: string })[];
@@ -12,17 +14,24 @@ interface CarrouselProps {
   photoStyle?: any;
 }
 
-export const Carrousel: React.FC<CarrouselProps> = ({ photos = [], onPhotoPress, style, photoStyle }) => {
-  const SCREEN_WIDTH = require('react-native').Dimensions.get('window').width;
-  const normalizedPhotos = Array.isArray(photos)
-    ? photos.map((photo) => {
-        if (typeof photo === 'string') return photo;
-        if (photo && typeof photo === 'object' && typeof photo.uri === 'string') return photo.uri;
-        return '';
-      })
-    : [];
-  const validPhotos = normalizedPhotos.filter((photo): photo is string => typeof photo === 'string' && !!photo && photo.trim() !== '');
-  const displayPhotos = validPhotos.length > 0 ? validPhotos : [null];
+export const Carrousel: React.FC<CarrouselProps> = React.memo(({ photos = [], onPhotoPress, style, photoStyle }) => {
+  const normalizedPhotos = useMemo(() => {
+    return Array.isArray(photos)
+      ? photos.map((photo) => {
+          if (typeof photo === 'string') return photo;
+          if (photo && typeof photo === 'object' && typeof photo.uri === 'string') return photo.uri;
+          return '';
+        })
+      : [];
+  }, [photos]);
+
+  const validPhotos = useMemo(
+    () => normalizedPhotos.filter((photo): photo is string => typeof photo === 'string' && !!photo && photo.trim() !== ''),
+    [normalizedPhotos]
+  );
+
+  const displayPhotos = useMemo(() => (validPhotos.length > 0 ? validPhotos : [null]), [validPhotos]);
+
   return (
     <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={style}>
       {displayPhotos.map((photo, idx) => {
@@ -54,4 +63,4 @@ export const Carrousel: React.FC<CarrouselProps> = ({ photos = [], onPhotoPress,
       })}
     </ScrollView>
   );
-};
+});

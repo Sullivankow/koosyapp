@@ -47,6 +47,7 @@ const BiensScreen: React.FC = () => {
   const [editModalData, setEditModalData] = useState<{ visible: boolean; bienId?: string; initialData?: any }>({ visible: false });
   const [successMsg, setSuccessMsg] = useState('');
   const [totalPerBienMap, setTotalPerBienMap] = useState<Record<string, number>>({});
+  const totalPerBienMapRef = useRef<Record<string, number>>({});
   const [bienQuota, setBienQuota] = useState<BienQuota | null>(null);
   const [showSubscriptionPaywall, setShowSubscriptionPaywall] = useState(false);
   const { colors } = useTheme();
@@ -111,6 +112,7 @@ const BiensScreen: React.FC = () => {
         });
 
         setTotalPerBienMap(nextMap);
+        totalPerBienMapRef.current = nextMap;
       } catch {
         setTotalPerBienMap({});
       }
@@ -183,7 +185,8 @@ const BiensScreen: React.FC = () => {
   const handleSelectStatus = React.useCallback(async (status: StatusValue) => {
     if (!currentStatusBienId) return;
     try {
-      const fullBien = await (await import('../../utils/bienApi')).getBienById(currentStatusBienId);
+      const bienApi = await import('../../utils/bienApi');
+      const fullBien = await bienApi.getBienById(currentStatusBienId);
       if (!fullBien) throw new Error('Bien introuvable');
       const payload = {
         proprietaireNom: fullBien.proprietaireNom || fullBien.proprio?.nom || '',
@@ -229,6 +232,7 @@ const BiensScreen: React.FC = () => {
   }, []);
 
   // Mémoïsation du renderItem pour FlatList
+  // On utilise totalPerBienMapRef pour eviter de recrer le callback quand totalPerBienMap change.
   const renderItem = React.useCallback(
     ({ item }: { item: any }) => (
       <BienCard
@@ -239,10 +243,10 @@ const BiensScreen: React.FC = () => {
         onStatus={openStatusModal}
         onPhotoPress={handlePhotoPress}
         formatDateFR={formatDateFR}
-        totalPrestationPercu={totalPerBienMap[String(item.id)] ?? 0}
+        totalPrestationPercu={totalPerBienMapRef.current[String(item.id)] ?? 0}
       />
     ),
-    [colors, handleEditBienInline, handleSupprimerBien, openStatusModal, handlePhotoPress, formatDateFR, totalPerBienMap]
+    [colors, handleEditBienInline, handleSupprimerBien, openStatusModal, handlePhotoPress, formatDateFR]
   );
 
   return (

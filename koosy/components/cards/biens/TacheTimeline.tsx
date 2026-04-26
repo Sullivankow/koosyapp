@@ -41,4 +41,4 @@ const TacheTimeline: React.FC<TacheTimelineProps> = ({ taches = [], colors, form
   </View>
 );
 
-export default TacheTimeline;
+export default React.memo(TacheTimeline);

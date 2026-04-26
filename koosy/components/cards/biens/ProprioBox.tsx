@@ -29,4 +29,4 @@ const ProprioBox: React.FC<ProprioBoxProps> = ({ proprio, colors, styles }) => (
   </View>
 );
 
-export default ProprioBox;
+export default React.memo(ProprioBox);

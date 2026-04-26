@@ -54,4 +54,4 @@ const ButtonAction: React.FC<ButtonActionProps> = ({ isEditing, colors, onEditPr
   </View>
 );
 
-export default ButtonAction;
+export default React.memo(ButtonAction);
