@@ -345,7 +345,7 @@ const BiensScreen: React.FC = () => {
             <MaterialCommunityIcons name="close" size={32} color="#fff" />
           </TouchableOpacity>
           {selectedPhoto && (
-            <Image source={selectedPhoto} style={styles.modalPhoto} resizeMode="contain" />
+            <Image source={{ uri: selectedPhoto }} style={styles.modalPhoto} resizeMode="contain" />
           )}
         </View>
       </Modal>
