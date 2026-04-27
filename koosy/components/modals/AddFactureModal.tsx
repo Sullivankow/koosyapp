@@ -364,6 +364,7 @@ const AddFactureModal: React.FC<AddFactureModalProps> = ({ isOpen, onClose, onSu
 								onChangeText={setNumero}
 								placeholder="Numéro de la facture (optionnel)"
 								placeholderTextColor={colors.textSecondary}
+								keyboardType="numeric"
 							/>
 							{/* Dates d'émission et d'échéance */}
 							<Text style={[styles.label, { color: colors.text }]}>Date d'émission</Text>
