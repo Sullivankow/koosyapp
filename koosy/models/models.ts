@@ -213,8 +213,8 @@ export interface LigneDevis {
   id: number;
   description: string;
   quantite: number;
-  pauxTVAxUnitaireHT: number;
-  tva: number;
+  prixUnitaireHT: number;
+  tauxTVA: number;
   totalLigneHT: number;
   totalLigneTTC: number;
   devis?: Devis;

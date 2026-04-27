@@ -347,15 +347,7 @@ function BienCard(props: BienCardProps) {
 				</TouchableOpacity>
 			</View>
 
-			{/* ====================================================================
-			 LIGNE PROPRIETAIRE (affichage resume)
-			 ==================================================================== */}
-			<View style={{ marginTop: 8 }}>
-				<Text numberOfLines={1} style={{ color: colors.textSecondary, fontSize: 12 }}>
-					Proprietaire: {localProprio?.nom || localProprio?.email || 'Non renseigne'}
-				</Text>
-			</View>
-
+			
 			{/* ====================================================================
 			 BOUTONS D'ACTIONS : Editer / Supprimer
 			 Le composant ButtonAction gere le changement d'etat (consultation <-> edition)

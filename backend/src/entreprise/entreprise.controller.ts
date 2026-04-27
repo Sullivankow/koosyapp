@@ -20,9 +20,7 @@ export class EntrepriseController {
   @Post()
   @ApiOperation({ summary: 'Créer une entreprise (authentifié et la relie à l\'utilisateur connecté)' })
   async create(@Body() dto: CreateEntrepriseDto, @Request() req): Promise<Entreprise> {
-    // 1. Créer l'entreprise
     const entreprise = await this.entrepriseService.create(dto);
-    // 2. Associer l'entreprise à l'utilisateur connecté
     const user = req.user;
     if (user && user.userId) {
       await this.usersService.update(user.userId, { entreprise: entreprise.id });

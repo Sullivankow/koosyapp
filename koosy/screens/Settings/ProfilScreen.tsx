@@ -232,12 +232,27 @@ const ProfilScreen: React.FC = () => {
     const handleCreateEntreprise = async () => {
         try {
             if (!newEntreprise.nom || !newEntreprise.siret || newEntreprise.siret.length !== 14) {
-                Alert.alert('Erreur', 'Le nom et un SIRET valide (14 chiffres) sont obligatoires.');
+                Alert.alert('Erreur', 'Le SIRET doit contenir exactement 14 chiffres.');
                 return;
             }
-            // DEBUG : log des données envoyées
-            // ...log supprimé...
-            const created = await createEntreprise(newEntreprise);
+            if (!/^\d{14}$/.test(newEntreprise.siret)) {
+                Alert.alert('Erreur', 'Le SIRET doit contenir uniquement des chiffres (14 chiffres).');
+                return;
+            }
+            const data: Omit<import('../../components/cards/EntrepriseProfileCard').Entreprise, 'id'> = {
+                nom: newEntreprise.nom,
+                siret: newEntreprise.siret,
+                tva: newEntreprise.tva || undefined,
+                adresse: newEntreprise.adresse || undefined,
+                codePostal: newEntreprise.codePostal || undefined,
+                ville: newEntreprise.ville || undefined,
+                pays: newEntreprise.pays || undefined,
+                email: newEntreprise.email || undefined,
+                telephone: newEntreprise.telephone || undefined,
+                siteWeb: newEntreprise.siteWeb || undefined,
+                logo: undefined,
+            };
+            const created = await createEntreprise(data);
             setEntreprise(created);
             setShowEntrepriseForm(false);
             Alert.alert('Succès', 'Entreprise créée avec succès.');
@@ -447,8 +462,7 @@ const ProfilScreen: React.FC = () => {
                         <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Email professionnel" placeholderTextColor={colors.text} value={newEntreprise.email} onChangeText={v => setNewEntreprise({ ...newEntreprise, email: v })} keyboardType="email-address" autoCapitalize="none" />
                         <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Téléphone" placeholderTextColor={colors.text} value={newEntreprise.telephone} onChangeText={v => setNewEntreprise({ ...newEntreprise, telephone: v })} keyboardType="phone-pad" />
                         <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Site web" placeholderTextColor={colors.text} value={newEntreprise.siteWeb} onChangeText={v => setNewEntreprise({ ...newEntreprise, siteWeb: v })} autoCapitalize="none" />
-                        <TextInput style={[styles.input, { color: colors.text, borderColor: colors.primary }]} placeholder="Logo (URL)" placeholderTextColor={colors.text} value={newEntreprise.logo} onChangeText={v => setNewEntreprise({ ...newEntreprise, logo: v })} />
-                        <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary, marginTop: 12 }]} onPress={handleCreateEntreprise}>
+                                                <TouchableOpacity style={[styles.btnPrimary, { backgroundColor: colors.primary, marginTop: 12 }]} onPress={handleCreateEntreprise}>
                             <MaterialCommunityIcons name="content-save" size={20} color={colors.surface} />
                             <Text style={[styles.btnText, { color: colors.surface }]}>Enregistrer</Text>
                         </TouchableOpacity>

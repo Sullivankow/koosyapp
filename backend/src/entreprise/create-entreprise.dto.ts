@@ -14,11 +14,10 @@ export class CreateEntrepriseDto {
   @MaxLength(14)
   siret: string;
 
-  @ApiProperty({ example: '123456789' })
+  @ApiProperty({ example: '123456789', required: false })
+  @IsOptional()
   @IsString()
-  @MinLength(9)
-  @MaxLength(9)
-  siren: string;
+  siren?: string;
 
   @ApiProperty({ example: '6201Z', required: false })
   @IsOptional()
@@ -88,8 +87,6 @@ export class UpdateEntrepriseDto {
   @ApiProperty({ example: '123456789', required: false })
   @IsOptional()
   @IsString()
-  @MinLength(9)
-  @MaxLength(9)
   siren?: string;
 
   @ApiProperty({ example: 'FR12345678901', required: false })
