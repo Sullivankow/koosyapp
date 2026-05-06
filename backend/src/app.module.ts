@@ -39,7 +39,11 @@ import { ChargesModule } from './charges/charges.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
       autoLoadEntities: true,
-      synchronize: true,
+      // IMPORTANT: Désactiver 'synchronize' en production pour éviter
+      // toute modification automatique du schéma qui pourrait supprimer
+      // ou altérer des données. Utiliser les migrations TypeORM pour
+      // appliquer les changements de schéma de façon contrôlée.
+      synchronize: false,
     }),
   ScheduleModule.forRoot(),
     UsersModule,

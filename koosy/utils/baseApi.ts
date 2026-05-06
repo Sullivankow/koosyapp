@@ -14,11 +14,25 @@ export class ApiError extends Error {
 let refreshInFlight: Promise<boolean> | null = null;
 
 async function doApiFetch(endpoint: string, options: RequestInit = {}, accessToken?: string) {
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    ...options.headers,
+  // Construire des headers en respectant les headers fournis par l'appelant.
+  // Si le body est un FormData, ne PAS forcer le Content-Type (le runtime
+  // ajoutera la boundary automatiquement). Si l'appelant a déjà fourni un
+  // Content-Type, on le respecte.
+  const incomingHeaders: Record<string, string> = (options.headers && typeof options.headers === 'object') ? (options.headers as any) : {};
+  const isFormData = options.body instanceof FormData;
+
+  const headers: Record<string, string> = {
+    ...incomingHeaders,
   };
+
+  if (!('Content-Type' in headers) && !isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
   return fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
 }
 

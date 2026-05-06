@@ -19,7 +19,14 @@ async function bootstrap() {
     }
   }}));
   
-  app.useGlobalPipes(new ValidationPipe());
+  // Validation globale: supprime les propriétés non déclarées (whitelist)
+  // et rejette la requête si des propriétés inattendues sont présentes
+  // (forbidNonWhitelisted). Cela renforce la sécurité et l'intégrité
+  // des DTOs côté serveur.
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+  }));
   app.enableCors({
     // Autoriser le front mobile (8081) et le backoffice Vite (5173)
     origin: ['http://localhost:8081', 'http://localhost:5173'],

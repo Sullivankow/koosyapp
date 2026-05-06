@@ -77,12 +77,10 @@ export async function uploadBienImages(bienId: number, imageUris: string[]): Pro
       name: filename,
       type,
     } as any);
-    await fetch(`${BASE_URL}/bien-image/biens/${bienId}/images`, {
+    // Utiliser apiFetch pour gérer automatiquement le token.
+    // Ne pas définir 'Content-Type' ici : fetch / RN va l'ajouter avec la boundary.
+    await apiFetch(`/bien-image/biens/${bienId}/images`, {
       method: 'POST',
-      headers: {
-        Authorization: token ? `Bearer ${token}` : '',
-        'Content-Type': 'multipart/form-data',
-      },
       body: formData,
     });
   }

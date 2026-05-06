@@ -53,15 +53,12 @@ export async function updateTacheStatut(id: number | string, statut: string): Pr
 export async function deleteAllTachesTerminees() {
   const session = await getSession();
   const token = session?.token;
-  const response = await fetch(`${BASE_URL}/taches/terminees`, {
+  // Utiliser apiFetch pour bénéficier de la gestion de token/refresh et
+  // du traitement centralisé des erreurs.
+  await apiFetch('/taches/terminees', {
     method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    },
   });
-  if (!response.ok) {
-    throw new Error('Erreur lors de la suppression des tâches terminées');
-  }
-  return response.json();
+  // apiFetch lève une ApiError en cas d'erreur; s'il n'y a pas d'erreur
+  // on renvoie void.
+  return;
 }

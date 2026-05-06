@@ -21,11 +21,23 @@ export class ApiError extends Error {
 let refreshInFlight: Promise<boolean> | null = null;
 
 async function doApiFetch(endpoint: string, options: RequestInit = {}, accessToken?: string) {
-  const headers = {
-    'Content-Type': 'application/json',
-    ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-    ...options.headers,
+  // Comme dans baseApi: respecter les headers fournis et ne pas forcer
+  // `Content-Type` si le body est un FormData (multipart uploads).
+  const incomingHeaders: Record<string, string> = (options.headers && typeof options.headers === 'object') ? (options.headers as any) : {};
+  const isFormData = options.body instanceof FormData;
+
+  const headers: Record<string, string> = {
+    ...incomingHeaders,
   };
+
+  if (!('Content-Type' in headers) && !isFormData) {
+    headers['Content-Type'] = 'application/json';
+  }
+
+  if (accessToken) {
+    headers['Authorization'] = `Bearer ${accessToken}`;
+  }
+
   return fetch(`${BASE_URL}${endpoint}`, { ...options, headers });
 }
 
@@ -123,12 +135,16 @@ export function signup(data: { nom: string; prenom: string; email: string; passw
 
 // Fonction de connexion : renvoie typiquement { access_token, refresh_token }
 export async function login({ email, password }: { email: string; password: string }) {
+  // Appel direct à l'endpoint /auth/login — on n'utilise pas apiFetch
+  // pour la connexion initiale afin d'éviter d'envoyer un header
+  // Authorization résiduel ou d'interférer avec la logique de refresh.
   const response = await fetch(`${BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
   if (!response.ok) {
+    // Propage l'erreur pour affichage générique côté UI
     throw new Error('Identifiants invalides');
   }
   return await response.json();
