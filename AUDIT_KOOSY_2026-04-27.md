@@ -111,9 +111,9 @@ koosyapp/
 ## 5. DETTE TECHNIQUE PAR PRIORITE
 
 ### CRITIQUE
-1. **Désactiver `synchronize: true`** — Utiliser des migrations TypeORM
+1. **Désactiver `synchronize: true`** — Utiliser des migrations TypeORM //true en DEV, false en prod  OK
 2. **Externaliser `BASE_URL`** — Dans `.env` ou `app.json` extra
-3. **ValidationPipe** — Ajouter `whitelist: true, forbidNonWhitelisted: true`
+3. **ValidationPipe** — Ajouter `whitelist: true, forbidNonWhitelisted: true` OK
 
 ### HAUTE
 4. **Corriger `countReservations()`** — Ajouter filtre userId
