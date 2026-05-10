@@ -144,10 +144,15 @@ export async function login({ email, password }: { email: string; password: stri
     body: JSON.stringify({ email, password }),
   });
   if (!response.ok) {
-    // Propage l'erreur pour affichage générique côté UI
-    throw new Error('Identifiants invalides');
+    const errorBody = await response.json().catch(() => null);
+    const message = typeof errorBody?.message === 'string'
+      ? errorBody.message
+      : 'Identifiants invalides';
+    
+    throw new Error(message);
   }
-  return await response.json();
+
+  return response.json();
 }
 
 /**
