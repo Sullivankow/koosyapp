@@ -68,8 +68,8 @@ export class ReservationsController {
 @ApiResponse({ status: 200, description: 'Nombre total de réservations.' })
 @ApiResponse({ status: 401, description: 'Non authentifié.' })
 @ApiOperation({ summary: 'Compter le nombre total de réservations' })
-async getReservationsCount() {
-  return { total: await this.reservationsService.countReservations() };
+async getReservationsCount(@Req() req: any) {
+  return { total: await this.reservationsService.countReservations(req.user.userId) };
 }
 
 //Méthode pour récupérer une réservation par son ID

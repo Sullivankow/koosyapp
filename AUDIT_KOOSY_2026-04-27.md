@@ -111,12 +111,12 @@ koosyapp/
 ## 5. DETTE TECHNIQUE PAR PRIORITE
 
 ### CRITIQUE
-1. **Désactiver `synchronize: true`** — Utiliser des migrations TypeORM //true en DEV, false en prod  OK
-2. **Externaliser `BASE_URL`** — Dans `.env` ou `app.json` extra
-3. **ValidationPipe** — Ajouter `whitelist: true, forbidNonWhitelisted: true` OK
+1. **Désactiver `synchronize: true`** — Utiliser des migrations TypeORM //true en DEV, false en prod PB OK
+2. **Externaliser `BASE_URL`** — Dans `.env` ou `app.json` // à faire avant la prod PB OK
+3. **ValidationPipe** — Ajouter `whitelist: true, forbidNonWhitelisted: true` //PB OK
 
 ### HAUTE
-4. **Corriger `countReservations()`** — Ajouter filtre userId
+4. **Corriger `countReservations()`** — Ajouter filtre userId //PB OK
 5. **Fusionner les contexts** — 8+ contexts devraient être 2-3 maximum
 6. **Décomposer App.tsx** — Navigation séparée (300+ lignes)
 7. **Créer des Response DTOs** — Ne pas exposer les entities directement
