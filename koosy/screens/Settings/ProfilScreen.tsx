@@ -277,7 +277,7 @@ const ProfilScreen: React.FC = () => {
                         {(modeEdition ? editUser.avatar : user.avatar) ? (
                             <Image
                                 source={{ uri: modeEdition ? editUser.avatar : user.avatar }}
-                                style={styles.avatar}
+                                style={[styles.avatar, { borderColor: colors.primary }]}
                             />
                         ) : (
                             <MaterialCommunityIcons name="account-circle" size={80} color={colors.primary} style={{ marginBottom: 8 }} />
@@ -511,7 +511,7 @@ const styles = StyleSheet.create({
         borderRadius: 45,
         marginBottom: 10,
         borderWidth: 2,
-        borderColor: '#009688',
+        borderColor: 'rgba(0,0,0,0.08)',
     },
     nom: {
         fontSize: 22,
@@ -599,7 +599,7 @@ const styles = StyleSheet.create({
     btnPrimary: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#009688',
+        backgroundColor: '#00796B',
         padding: 12,
         borderRadius: 10,
         marginBottom: 10,

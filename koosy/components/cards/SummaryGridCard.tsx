@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
 
@@ -11,38 +11,41 @@ interface SummaryGridCardProps {
 }
 
 const SummaryGridCard: React.FC<SummaryGridCardProps> = ({ biensCount, reservationsCount, tacheCount, prestationsTerminees }) => {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
+  const brandColor = isDarkMode ? colors.secondary : (colors.primary || '#145C53');
+  const items = [
+    { label: 'Biens', value: biensCount, icon: 'building' as const, family: 'fa' },
+    { label: 'Reservations', value: reservationsCount, icon: 'calendar-check' as const, family: 'fa' },
+    { label: 'Taches', value: tacheCount, icon: 'clipboard-alert-outline' as const, family: 'mc' },
+    { label: 'Prestations', value: prestationsTerminees, icon: 'check-decagram-outline' as const, family: 'mc' },
+  ];
+
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.primary, shadowColor: colors.shadow }]}> 
+    <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.shadow }]}>
       <View style={styles.headerRow}>
-        <MaterialCommunityIcons name="view-grid" size={24} color={colors.primary} style={{ marginRight: 8 }} />
-        <Text style={[styles.title, { color: colors.primary }]}>Résumé</Text>
+        <View style={[styles.headerIcon, { backgroundColor: `${brandColor}18` }]}>
+          <MaterialCommunityIcons name="view-dashboard-outline" size={20} color={brandColor} />
+        </View>
+        <View>
+          <Text style={[styles.title, { color: colors.text }]}>Resume</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Vue rapide de votre activite</Text>
+        </View>
       </View>
-      <View style={styles.valuesGrid}>
-        <View style={styles.rowGrid}>
-          <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]}> 
-            <FontAwesome5 name="building" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
-            <Text style={[styles.labelGrid, { color: colors.surface }]}>Biens</Text>
-            <Text style={[styles.valueGrid, { color: colors.surface }]}>{biensCount}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]}> 
-            <FontAwesome5 name="calendar-check" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
-            <Text style={[styles.labelGrid, { color: colors.surface }]}>Réserv.</Text>
-            <Text style={[styles.valueGrid, { color: colors.surface }]}>{reservationsCount}</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.rowGrid}>
-          <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]}> 
-            <MaterialCommunityIcons name="alert-circle" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
-            <Text style={[styles.labelGrid, { color: colors.surface }]}>Tâches à faire</Text>
-            <Text style={[styles.valueGrid, { color: colors.surface }]}>{tacheCount}</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.valueBoxGrid, { backgroundColor: colors.primary, borderColor: colors.primary }]}> 
-            <MaterialCommunityIcons name="check-decagram" size={20} color={colors.surface} style={{ marginBottom: 2 }} />
-            <Text style={[styles.labelGrid, { color: colors.surface }]}>Prest. finies</Text>
-            <Text style={[styles.valueGrid, { color: colors.surface }]}>{prestationsTerminees}</Text>
-          </TouchableOpacity>
-        </View>
+
+      <View style={styles.grid}>
+        {items.map((item) => (
+          <View key={item.label} style={styles.metric}>
+            <View style={[styles.metricIcon, { backgroundColor: `${brandColor}12` }]}>
+              {item.family === 'fa' ? (
+                <FontAwesome5 name={item.icon as any} size={15} color={brandColor} />
+              ) : (
+                <MaterialCommunityIcons name={item.icon as any} size={18} color={brandColor} />
+              )}
+            </View>
+            <Text style={[styles.metricValue, { color: colors.text }]}>{item.value}</Text>
+            <Text style={[styles.metricLabel, { color: colors.textSecondary }]} numberOfLines={1}>{item.label}</Text>
+          </View>
+        ))}
       </View>
     </View>
   );
@@ -50,60 +53,68 @@ const SummaryGridCard: React.FC<SummaryGridCardProps> = ({ biensCount, reservati
 
 const styles = StyleSheet.create({
   card: {
-    padding: 12,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    marginVertical: 12,
-    alignItems: 'center',
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
-    width: '98%',
-    alignSelf: 'center',
+    marginHorizontal: 18,
+    marginTop: 16,
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(23,32,42,0.06)',
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 2,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: 14,
   },
-  valuesGrid: {
-    width: '100%',
-    marginTop: 12,
-  },
-  rowGrid: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 16,
-    marginBottom: 12,
-  },
-  valueBoxGrid: {
-    flex: 1,
-    alignItems: 'center',
+  headerIcon: {
+    width: 38,
+    height: 38,
     borderRadius: 14,
-    borderWidth: 1.5,
-    paddingVertical: 10,
-    paddingHorizontal: 8,
-    marginHorizontal: 2,
-    shadowOpacity: 0.10,
-    shadowRadius: 4,
-    elevation: 2,
-    minWidth: 90,
-    maxWidth: 180,
-  },
-  labelGrid: {
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 4,
-    letterSpacing: 0.2,
-  },
-  valueGrid: {
-    fontSize: 15,
-    fontWeight: 'bold',
-    letterSpacing: 0.5,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
   },
   title: {
-    fontWeight: 'bold',
-    fontSize: 16,
+    fontWeight: '900',
+    fontSize: 17,
+  },
+  subtitle: {
+    marginTop: 2,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+  },
+  metric: {
+    width: '48%',
+    borderRadius: 16,
+    padding: 12,
+    backgroundColor: '#F8FBFA',
+    borderWidth: 1,
+    borderColor: '#D9E2EC',
+  },
+  metricIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  metricValue: {
+    fontSize: 22,
+    fontWeight: '900',
+    marginBottom: 2,
+  },
+  metricLabel: {
+    fontSize: 12,
+    fontWeight: '800',
   },
 });
 

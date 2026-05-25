@@ -1,40 +1,35 @@
-// Ce fichier contient l'écran d'accueil (Dashboard) de l'application.
-// Il affiche un résumé des compteurs (biens, réservations, tâches),
-// une zone "Prochains événements" (arrivées/départs/nouvelles réservations)
-// et des actions rapides pour créer un bien, une tâche, une réservation ou une prestation.
-// Les commentaires ci-dessous expliquent le rôle des hooks, handlers et sections principales
-// pour faciliter la maintenance et la relecture du code.
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StatusBar, Text, TouchableOpacity, View } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+
 import QuickActionsGridCard from '../../components/cards/QuickActionsGridCard';
 import ConseilsDéfilants from '../../components/ConseilsDéfilants';
 import UpcomingEvents from '../../components/UpcomingEvents';
-import React, { useState, useEffect } from 'react';
-import { useSuccessMessage } from '../../hooks/useSuccessMessage';
-import { View, Text, TouchableOpacity, ScrollView } from 'react-native';
-import { clearSession } from '../../utils/session';
-import { logoutCurrentSession } from '../../utils/api';
-import { useUserInfo } from '../../hooks/useUserInfo';
-import { useTheme } from '../../contexts/ThemeContext';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import SummaryGridCard from '../../components/cards/SummaryGridCard';
-import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
+import ChiffreAffaireCard from '../../components/cards/ChiffreAffaireCard';
 import NotificationBell from '../../ui/NotificationBell';
-import { getReservationsCount } from '../../utils/reservationApi';
-import { useBienCount } from '../../contexts/BienCountContext';
-import { useTacheCount } from '../../contexts/TacheCountContext';
-import { useTache } from '../../contexts/TacheContext';
 import AddBienModal from '../../components/modals/AddBienModal';
 import AddReservationsModal from '../../components/modals/AddReservationsModal';
 import AddPrestationModal from '../../components/modals/AddPrestationModal';
-import { getBiens } from '../../utils/bienApi';
+
+import { useSuccessMessage } from '../../hooks/useSuccessMessage';
+import { useUserInfo } from '../../hooks/useUserInfo';
+import { useTheme } from '../../contexts/ThemeContext';
+import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
+import { useBienCount } from '../../contexts/BienCountContext';
+import { useTacheCount } from '../../contexts/TacheCountContext';
+import { useTache } from '../../contexts/TacheContext';
 import { useReservationForm } from '../../hooks/useReservationForm';
 import { useUpcomingEvents } from '../../hooks/useUpcomingEvents';
-import { Bien, Entreprise } from '../../models/models';
 import { useReservationRefresh } from '../../contexts/ReservationRefreshContext';
 import { useChiffreAffaire } from '../../hooks/useChiffreAffaire';
-import ChiffreAffaireCard from '../../components/cards/ChiffreAffaireCard';
 import { useAddDevisModal } from '../../hooks/useAddDevisModal';
-import { apiFetchMyEntreprise, getMe } from '../../utils/api';
 
+import { logoutCurrentSession, apiFetchMyEntreprise, getMe } from '../../utils/api';
+import { getReservationsCount } from '../../utils/reservationApi';
+import { getBiens } from '../../utils/bienApi';
+import { Bien, Entreprise } from '../../models/models';
+import { styles } from './styles/Homescreen.styles';
 
 type HomeScreenProps = {
     onLogout?: () => void;
@@ -42,46 +37,15 @@ type HomeScreenProps = {
 };
 
 const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
-    // Compteur global de tâches et fonction de rafraîchissement associée.
     const { tacheCount, refreshTacheCount } = useTacheCount();
     const { lastTacheAdded } = useTache();
-    // Theme et couleurs fournis par le contexte `ThemeContext`
     const { colors, isDarkMode, toggleTheme } = useTheme();
-    // Infos utilisateur via hook personnalisé
     const { userName } = useUserInfo();
-    // Compteur global de biens et signaux de rafraîchissement lorsque des biens sont ajoutés.
     const { biensCount, refreshBiensCount, lastBienAdded, signalBienAdded } = useBienCount();
-    // Nombre total de réservations (affiché dans le résumé)
-    const [reservationsCount, setReservationsCount] = useState(0);
-    const [addBienModalVisible, setAddBienModalVisible] = useState(false);
-    const [addReservationModalVisible, setAddReservationModalVisible] = useState(false);
-    const [addPrestationModalVisible, setAddPrestationModalVisible] = useState(false);
-    const [isBetaUser, setIsBetaUser] = useState(false);
-    const [isPremiumUser, setIsPremiumUser] = useState(false);
-    // Formulaire de réservation via hook personnalisé
-    const { successMsg, showSuccess } = useSuccessMessage();
-    // Hook formulaire de réservation rapide utilisé dans le dashboard (modale de réservation).
-    const { form: reservationForm, setForm: setReservationForm, handleAddReservation } = useReservationForm(
-        () => {
-            setAddReservationModalVisible(false);
-            refreshBiensCount();
-            signalBienAdded();
-            getReservationsCount().then((data: { total: number }) => setReservationsCount(data.total ?? 0));
-            signalReservationAdded();
-            showSuccess('Réservation ajoutée avec succès !');
-        }
-    );
-    // Liste de biens (pour alimenter la modale d'ajout de réservation)
-    const [biens, setBiens] = useState<Bien[]>([]);
-    // Liste des entreprises (pour alimenter la modale d'ajout de réservation)
-    const [entreprises, setEntreprises] = useState<Entreprise[]>([]);
-    // Événements à venir via hook personnalisé
-    // Récupère les prochains événements (réservations, échéances) affichés dans la section agenda.
-    const { events, loading: eventsLoading, refresh: refreshUpcomingEvents } = useUpcomingEvents();
-    // Message de succès temporaire via hook personnalisé
-    const { signalReservationAdded, lastReservationAdded } = useReservationRefresh();
-    // Ajout du hook pour le compteur de prestations terminées
     const { prestationsTerminees } = usePrestationsCount();
+    const { signalReservationAdded, lastReservationAdded } = useReservationRefresh();
+    const { successMsg, showSuccess } = useSuccessMessage();
+    const { events, loading: eventsLoading, refresh: refreshUpcomingEvents } = useUpcomingEvents();
     const {
         caMois,
         caGlobal,
@@ -100,32 +64,42 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
         margeAnneeN1,
         margeMoisN2,
     } = useChiffreAffaire();
-     const { modal: addDevisModal } = useAddDevisModal(entreprises);
 
-    // Effet d'initialisation :
-    // - rafraîchit les compteurs gérés par les contextes
-    // - charge la liste de biens et compte des réservations
+    const [reservationsCount, setReservationsCount] = useState(0);
+    const [addBienModalVisible, setAddBienModalVisible] = useState(false);
+    const [addReservationModalVisible, setAddReservationModalVisible] = useState(false);
+    const [addPrestationModalVisible, setAddPrestationModalVisible] = useState(false);
+    const [isBetaUser, setIsBetaUser] = useState(false);
+    const [isPremiumUser, setIsPremiumUser] = useState(false);
+    const [biens, setBiens] = useState<Bien[]>([]);
+    const [entreprises, setEntreprises] = useState<Entreprise[]>([]);
+
+    const { modal: addDevisModal } = useAddDevisModal(entreprises);
+    const { form: reservationForm, setForm: setReservationForm, handleAddReservation } = useReservationForm(
+        () => {
+            setAddReservationModalVisible(false);
+            refreshBiensCount();
+            signalBienAdded();
+            getReservationsCount().then((data: { total: number }) => setReservationsCount(data.total ?? 0));
+            signalReservationAdded();
+            showSuccess('Reservation ajoutee avec succes !');
+        }
+    );
+
     useEffect(() => {
         refreshTacheCount();
         refreshBiensCount();
 
-        // Récupère le nombre total de réservations (pour l'affichage synthétique)
         getReservationsCount()
-            .then((data: { total: number }) => {
-                setReservationsCount(data.total ?? 0);
-            })
+            .then((data: { total: number }) => setReservationsCount(data.total ?? 0))
             .catch(() => setReservationsCount(0));
 
-        // Charge les biens disponibles (utilisé par la modale d'ajout de réservation)
         getBiens().then(setBiens).catch(() => setBiens([]));
-        // Charge les entreprises (utilisé par la modale d'ajout de réservation)
         apiFetchMyEntreprise()
             .then((entreprise) => setEntreprises(entreprise ? [entreprise] : []))
             .catch(() => setEntreprises([]));
-        // Les événements sont désormais gérés par le hook useUpcomingEvents
     }, [lastTacheAdded, lastBienAdded]);
 
-    // Récupère le profil utilisateur pour afficher un badge discret si l'accès bêta est actif.
     useEffect(() => {
         const loadUserAccess = async () => {
             try {
@@ -143,50 +117,13 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
         loadUserAccess();
     }, []);
 
-    // Recharge les événements dès qu'une réservation est ajoutée.
     useEffect(() => {
         void refreshUpcomingEvents();
     }, [lastReservationAdded, refreshUpcomingEvents]);
 
-    // Les autres valeurs restent statiques pour l'instant
-
-    // Handler de déconnexion : efface la session côté client et notifie le parent
-    // Déconnecte l'utilisateur : nettoyage de la session puis éventuelle notification au parent.
     const handleLogout = async () => {
         await logoutCurrentSession();
-        if (onLogout) {
-            onLogout();
-        }
-    };
-
-
-    // Handler pour ouvrir la page ListeDevisScreen
-    // Raccourci vers l'écran de gestion des devis.
-    const handleGoToListeDevis = () => {
-        if (navigation) navigation.navigate('ListeDevisScreen');
-    };
-
-    // Handler pour ouvrir la page ListeFactureScreen
-    // Raccourci vers l'écran de gestion des factures.
-    const handleGoToListeFacture = () => {
-        if (navigation) navigation.navigate('ListeFactureScreen');
-    };
-
-    // Handler pour ouvrir la page PlanningScreen
-    // Raccourci vers le planning des prestations.
-    const handleGoToPlanning = () => {
-        if (navigation) navigation.navigate('PlanningScreen');
-    };
-
-    // Raccourci vers l'écran des charges.
-    const handleGoToCharges = () => {
-        if (navigation) navigation.navigate('ChargesScreen');
-    };
-
-    // Handler pour ouvrir la page Répertoire Propriétaire
-    // Raccourci vers le répertoire des propriétaires.
-    const handleGoToRepertoireProprietaire = () => {
-        if (navigation) navigation.navigate('RepertoireProprietaireScreen');
+        onLogout?.();
     };
 
     const userInitials = userName
@@ -198,89 +135,120 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
               .join('')
         : 'U';
 
-    const avatarBackgroundColor = isDarkMode ? colors.secondary : colors.primary;
+    // Use the theme's color palette rather than hardcoded light-mode fallbacks
+    const brandColor = colors.primary || '#145C53';
+    const dashboardBackground = colors.background || '#EEF4F2';
+    const dashboardSurface = colors.surface || '#FFFFFF';
+    const avatarBackgroundColor = colors.secondary || brandColor;
+    const arrivalsToday = events?.filter((event: any) => String(event?.type || '').toLowerCase() === 'arrival').length ?? 0;
+    const departuresToday = events?.filter((event: any) => String(event?.type || '').toLowerCase() === 'departure').length ?? 0;
+    const primaryBien = biens[0];
+    const primaryReservation = primaryBien?.reservations?.[0];
+    const primaryPropertyTitle = primaryBien?.nom || 'Aucun bien actif';
+    const primaryPropertyAddress = primaryBien?.adresse || 'Ajoutez un bien pour piloter votre activite';
+    const primaryPropertyStatus = primaryBien?.statut || 'disponible';
+    const nextReservationLabel = primaryReservation
+        ? `${primaryReservation.dateDebut || primaryReservation.dateArrivee || 'Date a confirmer'}${primaryReservation.heureArrivee ? ` - ${primaryReservation.heureArrivee}` : ''}`
+        : 'Aucune arrivee planifiee';
 
     return (
         <>
+            <StatusBar barStyle="light-content" backgroundColor={brandColor} />
             {successMsg ? (
-                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 100, backgroundColor: colors.success || '#43A047', padding: 14, alignItems: 'center' }}>
-                    <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>{successMsg}</Text>
+                <View style={[styles.successToast, { backgroundColor: colors.success || '#43A047' }]}>
+                    <Text style={styles.successToastText}>{successMsg}</Text>
                 </View>
             ) : null}
-            <ScrollView style={{ flex: 1, backgroundColor: colors.background }} contentContainerStyle={styles.container}>
-                {/* Avatar et message personnalisé */}
-                <View style={styles.avatarRow}>
-                    <View style={[styles.avatar, { backgroundColor: avatarBackgroundColor }]}> 
-                        <Text style={styles.avatarInitials}>{userInitials}</Text>
-                    </View>
-                    <View style={{ marginLeft: 12 }}>
-                        <Text style={[styles.welcome, { color: colors.primary }]}>Bonjour, {userName} 👋</Text>
-                        <View style={{ flexDirection: 'column', alignItems: 'flex-start', marginTop: 2 }}>
-                            <View style={[styles.subtitleBadge, { backgroundColor: colors.primary, marginBottom: 2 }]}> 
-                                <Text style={[styles.subtitle, { color: isDarkMode ? colors.background : colors.surface }]}>Votre tableau de bord prestataire</Text>
+
+            <ScrollView
+                style={{ flex: 1, backgroundColor: dashboardBackground }}
+                contentContainerStyle={styles.container}
+                showsVerticalScrollIndicator={false}
+            >
+                <View style={[styles.hero, { backgroundColor: brandColor }]}>
+                    <View style={styles.heroTopRow}>
+                        <View style={styles.avatarRow}>
+                            <View style={[styles.avatar, { backgroundColor: avatarBackgroundColor }]}>
+                                <Text style={styles.avatarInitials}>{userInitials}</Text>
                             </View>
-                            {isBetaUser ? (
-                                <View
-                                    style={{
-                                        alignSelf: 'flex-start',
-                                        marginTop: 0,
-                                        marginBottom: 2,
-                                        paddingHorizontal: 7,
-                                        paddingVertical: 2,
-                                        borderRadius: 999,
-                                        borderWidth: 1,
-                                        borderColor: colors.primary,
-                                        backgroundColor: colors.surface,
-                                    }}
-                                >
-                                    <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '700', letterSpacing: 0.4 }}>
-                                        BETA
-                                    </Text>
-                                </View>
-                            ) : isPremiumUser ? (
-                                <View
-                                    style={{
-                                        alignSelf: 'flex-start',
-                                        marginTop: 0,
-                                        marginBottom: 2,
-                                        paddingHorizontal: 7,
-                                        paddingVertical: 2,
-                                        borderRadius: 999,
-                                        borderWidth: 1,
-                                        borderColor: colors.primary,
-                                        backgroundColor: colors.surface,
-                                    }}
-                                >
-                                    <Text style={{ color: colors.primary, fontSize: 11, fontWeight: '700', letterSpacing: 0.4 }}>
-                                        PREMIUM
-                                    </Text>
-                                </View>
-                            ) : null}
+                            <View style={styles.heroCopy}>
+                                <Text style={styles.eyebrow}>Bonjour {userName || ''}</Text>
+                                <Text style={styles.welcome}>Tableau de bord</Text>
+                            </View>
+                        </View>
+
+                        <View style={styles.topActions}>
+                            <NotificationBell style={styles.iconBtn} size={24} color="#FFFFFF" />
+                            <TouchableOpacity style={styles.iconBtn} onPress={toggleTheme}>
+                                <MaterialCommunityIcons name={isDarkMode ? 'weather-sunny' : 'weather-night'} size={20} color="#FFFFFF" />
+                            </TouchableOpacity>
+                            <TouchableOpacity style={styles.iconBtn} onPress={handleLogout}>
+                                <MaterialCommunityIcons name="logout" size={20} color="#FFFFFF" />
+                            </TouchableOpacity>
+                        </View>
+                    </View>
+
+                    <View style={styles.accessRow}>
+                        <View style={styles.subtitleBadge}>
+                            <Text style={styles.subtitle}>Conciergerie connectee</Text>
+                        </View>
+                        {isBetaUser || isPremiumUser ? (
+                            <View style={styles.planBadge}>
+                                <Text style={[styles.planText, { color: brandColor }]}>{isBetaUser ? 'BETA' : 'PREMIUM'}</Text>
+                            </View>
+                        ) : null}
+                    </View>
+                </View>
+
+                <View style={[styles.todayCard, { backgroundColor: dashboardSurface, shadowColor: colors.shadow }]}>
+                    <View style={styles.sectionHeader}>
+                        <Text style={[styles.sectionTitle, { color: colors.text }]}>Aujourd'hui</Text>
+                        <Text style={[styles.sectionLink, { color: brandColor }]}>Pilotage</Text>
+                    </View>
+                    <View style={styles.todayGrid}>
+                        <View style={styles.todayMetric}>
+                            <Text style={[styles.todayValue, { color: brandColor }]}>{arrivalsToday}</Text>
+                            <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>Arrivees</Text>
+                        </View>
+                        <View style={styles.todayMetric}>
+                            <Text style={[styles.todayValue, { color: brandColor }]}>{departuresToday}</Text>
+                            <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>Departs</Text>
+                        </View>
+                        <View style={styles.todayMetric}>
+                            <Text style={[styles.todayValue, { color: brandColor }]}>{biensCount}</Text>
+                            <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>Biens actifs</Text>
+                        </View>
+                        <View style={styles.todayMetric}>
+                            <Text style={[styles.todayValue, { color: brandColor }]}>{tacheCount}</Text>
+                            <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>Taches</Text>
                         </View>
                     </View>
                 </View>
 
+                <UpcomingEvents events={events} loading={eventsLoading} colors={colors} styles={styles} />
 
-                {/* Actions rapides en haut */}
-                <View style={styles.topActions}>
-                    <NotificationBell style={[styles.iconBtn, { backgroundColor: colors.primary }]} size={30} color={colors.surface} />
-                    <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.primary }]} onPress={toggleTheme}>
-                        <MaterialCommunityIcons name={isDarkMode ? 'weather-sunny' : 'weather-night'} size={22} color={colors.surface} />
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.iconBtn, { backgroundColor: colors.primary }]} onPress={handleLogout}>
-                        <MaterialCommunityIcons name="logout" size={22} color={colors.surface} />
-                    </TouchableOpacity>
+                <View style={[styles.propertyCard, { backgroundColor: dashboardSurface, shadowColor: colors.shadow }]}>
+                    <View style={styles.propertyVisual}>
+                        <View style={styles.propertyHouseShape} />
+                        <View style={[styles.statusPill, { backgroundColor: `${brandColor}12`, borderColor: `${brandColor}22` }]}> 
+                            <Text style={[styles.statusPillText, { color: brandColor }]}>{String(primaryPropertyStatus)}</Text>
+                        </View>
+                    </View>
+                    <View style={styles.propertyBody}>
+                        <View style={styles.propertyTitleRow}>
+                            <View style={styles.propertyTitleCopy}>
+                                <Text style={[styles.propertyTitle, { color: colors.text }]} numberOfLines={1}>{primaryPropertyTitle}</Text>
+                                <Text style={[styles.propertyAddress, { color: colors.textSecondary }]} numberOfLines={1}>{primaryPropertyAddress}</Text>
+                            </View>
+                            <Text style={[styles.propertyRevenue, { color: brandColor }]}>{reservationsCount} resas</Text>
+                        </View>
+                        <View style={styles.nextVisitBox}>
+                            <Text style={[styles.nextVisitLabel, { color: colors.textSecondary }]}>Prochaine arrivee</Text>
+                            <Text style={[styles.nextVisitValue, { color: colors.text }]} numberOfLines={1}>{nextReservationLabel}</Text>
+                        </View>
+                    </View>
                 </View>
 
-                {/* Prochain(s) événement(s) */}
-                <UpcomingEvents
-                    events={events}
-                    loading={eventsLoading}
-                    colors={colors}
-                    styles={styles}
-                />
-
-                {/* Résumé interactif */}
                 <ChiffreAffaireCard
                     caMois={caMois}
                     caGlobal={caGlobal}
@@ -306,52 +274,42 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                     prestationsTerminees={prestationsTerminees}
                 />
 
-                {/* Conseils défilants juste au-dessus de la grille d'actions rapides */}
                 <ConseilsDéfilants />
 
-                {/* Actions principales en grille 2x2 */}
                 <QuickActionsGridCard
                     onAddBien={() => setAddBienModalVisible(true)}
                     onAddTache={() => navigation && navigation.navigate('TachesScreen')}
                     onAddReservation={() => setAddReservationModalVisible(true)}
                     onAddPrestation={() => setAddPrestationModalVisible(true)}
-                    onGoToDevis={handleGoToListeDevis}
-                    onGoToFacture={handleGoToListeFacture}
-                    onGoToPlanning={handleGoToPlanning}
-                    onGoToCharges={handleGoToCharges}
+                    onGoToDevis={() => navigation && navigation.navigate('ListeDevisScreen')}
+                    onGoToFacture={() => navigation && navigation.navigate('ListeFactureScreen')}
+                    onGoToPlanning={() => navigation && navigation.navigate('PlanningScreen')}
+                    onGoToCharges={() => navigation && navigation.navigate('ChargesScreen')}
                 />
             </ScrollView>
-             
-            {/* Modales gérées séparément (AddBien/AddTaches/AddReservations/AddPrestation) */}
-        {/* Modal d'ajout de bien */}
-        <AddBienModal
-            visible={addBienModalVisible}
-            onClose={() => setAddBienModalVisible(false)}
-            onSuccess={() => setAddBienModalVisible(false)}
-        />
-        {/* Modal d'ajout de tâche supprimée, redirection vers TachesScreen */}
-        {/* Modale d'ajout de réservation */}
-        <AddReservationsModal
-            visible={addReservationModalVisible}
-            onClose={() => setAddReservationModalVisible(false)}
-            onSave={handleAddReservation}
-            form={reservationForm}
-            setForm={setReservationForm}
-            biens={biens}
-            colors={colors}
-        />
-        {/* Modal d'ajout de prestation */}
-        <AddPrestationModal
-            visible={addPrestationModalVisible}
-            onClose={() => setAddPrestationModalVisible(false)}
-            onSuccess={() => setAddPrestationModalVisible(false)}
-        />
-                {/* Modale d'ajout de devis via hook */}
-                {addDevisModal}
+
+            <AddBienModal
+                visible={addBienModalVisible}
+                onClose={() => setAddBienModalVisible(false)}
+                onSuccess={() => setAddBienModalVisible(false)}
+            />
+            <AddReservationsModal
+                visible={addReservationModalVisible}
+                onClose={() => setAddReservationModalVisible(false)}
+                onSave={handleAddReservation}
+                form={reservationForm}
+                setForm={setReservationForm}
+                biens={biens}
+                colors={colors}
+            />
+            <AddPrestationModal
+                visible={addPrestationModalVisible}
+                onClose={() => setAddPrestationModalVisible(false)}
+                onSuccess={() => setAddPrestationModalVisible(false)}
+            />
+            {addDevisModal}
         </>
     );
 };
-
-import { styles } from './styles/Homescreen.styles';
 
 export default HomeScreen;

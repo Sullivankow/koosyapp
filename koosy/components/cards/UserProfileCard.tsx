@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 import { View, Text, Image, StyleSheet, TouchableOpacity, Modal, Alert } from 'react-native';
 import { Utilisateur, Subscription } from '../../models/models';
 import { MaterialCommunityIcons, FontAwesome } from '@expo/vector-icons';
@@ -13,6 +14,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({ user }) => {
   const [showSubscriptionCard, setShowSubscriptionCard] = useState(false);
   const [subscription, setSubscription] = useState<Subscription | null>(null);
   const { getMySubscription, loading, error } = useSubscription('');
+  const { colors } = useTheme();
   const plan = (user as any).formule ?? (user as any).abonnement ?? 'gratuit';
   const isPaidPlan = plan === 'payant' || plan === 'premium';
 
@@ -30,7 +32,7 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({ user }) => {
       <View style={{ alignItems: 'center', marginBottom: 18 }}>
         <Image
           source={user.avatar ? { uri: user.avatar } : require('../assets/house.jpg')}
-          style={styles.avatar}
+          style={[styles.avatar, { borderColor: colors.primary }]}
         />
         <Text style={styles.nom}>{user.nom}</Text>
         <Text style={styles.nom}>{user.prenom}</Text>
@@ -45,12 +47,12 @@ const UserProfileCard: React.FC<UserProfileCardProps> = ({ user }) => {
         </TouchableOpacity>
       </View>
       <View style={styles.infoRow}>
-        <MaterialCommunityIcons name="email" size={20} color="#009688" />
-        <Text style={styles.infoText}>{user.email}</Text>
+        <MaterialCommunityIcons name="email" size={20} color={colors.primary} />
+        <Text style={[styles.infoText, { color: colors.text }]}>{user.email}</Text>
       </View>
       <View style={styles.infoRow}>
-        <FontAwesome name="phone" size={20} color="#009688" />
-        <Text style={styles.infoText}>{user.telephone}</Text>
+        <FontAwesome name="phone" size={20} color={colors.primary} />
+        <Text style={[styles.infoText, { color: colors.text }]}>{user.telephone}</Text>
       </View>
 
       <Modal
@@ -93,7 +95,7 @@ const styles = StyleSheet.create({
     borderRadius: 45,
     marginBottom: 10,
     borderWidth: 2,
-    borderColor: '#009688',
+    borderColor: 'rgba(0,0,0,0.08)',
   },
   nom: {
     fontSize: 22,

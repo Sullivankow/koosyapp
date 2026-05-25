@@ -17,7 +17,7 @@ type FactureListProps = {
 	factures: Facture[];
 	colors: ThemeColors;
 	handlePreviewFacture: (item: Facture) => void;
-	handleDeleteFacture: (id: number | undefined) => void;
+	handleDeleteFacture: (id: number) => void;
 };
 
 /**
@@ -27,6 +27,7 @@ export const FactureList = memo(function FactureList({ factures, colors, handleP
 	// Boîte de dialogue de confirmation avant suppression d'une facture
 	const confirmDeleteFacture = useCallback(
 		(id: number | undefined) => {
+			if (id === undefined) return;
 			Alert.alert(
 				'Confirmation',
 				'Voulez-vous vraiment supprimer cette facture ?',

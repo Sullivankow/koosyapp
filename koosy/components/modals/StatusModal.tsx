@@ -4,6 +4,7 @@
 // - Met en surbrillance le statut actuellement sélectionné
 
 import React from 'react';
+import { useTheme } from '../../contexts/ThemeContext';
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 
 // Type des valeurs possibles de statut
@@ -29,26 +30,30 @@ const STATUS_OPTIONS: StatusOption[] = [
 ];
 
 const StatusModal: React.FC<StatusModalProps> = ({ visible, onClose, onSelect, currentStatus }) => {
+  const { colors } = useTheme();
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
         <View style={styles.modalContent}>
           <Text style={styles.title}>Choisir le statut</Text>
-          {STATUS_OPTIONS.map(option => {
-            const isSelected = currentStatus === option.value;
-            return (
-              <TouchableOpacity
-                key={option.value}
-                style={[styles.optionBtn, isSelected && styles.selected]}
-                onPress={() => {
-                  onSelect(option.value);
-                  onClose();
-                }}
-              >
-                <Text style={[styles.optionText, isSelected && styles.selectedText]}>{option.label}</Text>
-              </TouchableOpacity>
-            );
-          })}
+            {STATUS_OPTIONS.map(option => {
+              const isSelected = currentStatus === option.value;
+              return (
+                <TouchableOpacity
+                  key={option.value}
+                  style={[
+                    styles.optionBtn,
+                    isSelected && { backgroundColor: `${colors.primary}22`, borderColor: colors.primary },
+                  ]}
+                  onPress={() => {
+                    onSelect(option.value);
+                    onClose();
+                  }}
+                >
+                  <Text style={[styles.optionText, isSelected && { color: colors.primary, fontWeight: '700' }]}>{option.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
           <TouchableOpacity style={styles.cancelBtn} onPress={onClose}>
             <Text style={styles.cancelText}>Annuler</Text>
           </TouchableOpacity>
@@ -92,13 +97,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#222',
   },
-  selected: {
-    backgroundColor: '#00968822',
-  },
-  selectedText: {
-    color: '#009688',
-    fontWeight: 'bold',
-  },
+  
   cancelBtn: {
     marginTop: 10,
     paddingVertical: 8,

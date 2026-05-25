@@ -1,46 +1,29 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { useTheme } from '../../contexts/ThemeContext';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useTheme } from '../../contexts/ThemeContext';
 
 interface ChiffreAffaireCardProps {
   caMois: number;
   caGlobal: number;
   caAnnee: number;
   caMoisN1: number;
-  caJour: number; // CA du jour
-  caJourN1: number; // CA jour N-1
-  caAnneeN1: number; // CA année N-1 (YTD)
-  caMoisN2: number; // CA mois N-2
+  caJour: number;
+  caJourN1: number;
+  caAnneeN1: number;
+  caMoisN2: number;
   margeMois: number;
   margeGlobal: number;
   margeAnnee: number;
   margeMoisN1: number;
-  margeJour: number; // Marge du jour
-  margeJourN1: number; // Marge jour N-1
-  margeAnneeN1: number; // Marge année N-1 (YTD)
-  margeMoisN2: number; // Marge mois N-2
+  margeJour: number;
+  margeJourN1: number;
+  margeAnneeN1: number;
+  margeMoisN2: number;
 }
 
-  const formatSignedAmount = (value: number) => {
-    const sign = value > 0 ? '+' : '';
-    return `${sign}${value.toFixed(2)} €`;
-  };
-
-  const getMarginColors = (value: number) => {
-    if (value < 0) {
-      return {
-        backgroundColor: '#FFEBEE', // Fond rouge clair
-        borderColor: '#F44336', // Bordure rouge
-        textColor: '#C62828', // Texte rouge foncé
-      };
-    }
-    return {
-      backgroundColor: '#E8F5E9', // Fond vert clair
-      borderColor: '#4CAF50', // Bordure vert
-      textColor: '#2E7D32', // Texte vert foncé
-    };
-  };
+const formatAmount = (value: number) => `${Number(value || 0).toFixed(2)} EUR`;
+const formatSignedAmount = (value: number) => `${value > 0 ? '+' : ''}${Number(value || 0).toFixed(2)} EUR`;
 
 const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({
   caMois,
@@ -60,206 +43,167 @@ const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({
   margeAnneeN1,
   margeMoisN2,
 }) => {
-  const { colors } = useTheme();
+  const { colors, isDarkMode } = useTheme();
   const [activePeriod, setActivePeriod] = useState<'current' | 'n1'>('current');
-
-  const renderSection = (
-    revenueData: { jour: number; mois: number; annee: number; moisN1: number; global: number },
-    marginData: { jour: number; mois: number; annee: number; moisN1: number; global: number }
-  ) => (
-    <View style={styles.sectionWrapper}>
-
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Revenus</Text>
-        <View style={styles.gridContainer}>
-          <View style={[styles.smallBox, { backgroundColor: colors.primary }]}>
-            <Text style={[styles.smallLabel, { color: colors.surface }]}>Jour</Text>
-            <Text style={[styles.smallValue, { color: colors.surface }]}>{revenueData.jour.toFixed(2)} €</Text>
-          </View>
-          <View style={[styles.smallBox, { backgroundColor: colors.primary }]}>
-            <Text style={[styles.smallLabel, { color: colors.surface }]}>Mois</Text>
-            <Text style={[styles.smallValue, { color: colors.surface }]}>{revenueData.mois.toFixed(2)} €</Text>
-          </View>
-          <View style={[styles.smallBox, { backgroundColor: colors.primary }]}>
-            <Text style={[styles.smallLabel, { color: colors.surface }]}>Année</Text>
-            <Text style={[styles.smallValue, { color: colors.surface }]}>{revenueData.annee.toFixed(2)} €</Text>
-          </View>
-          <View style={[styles.smallBox, { backgroundColor: colors.primary }]}>
-            <Text style={[styles.smallLabel, { color: colors.surface }]}>Mois N-1</Text>
-            <Text style={[styles.smallValue, { color: colors.surface }]}>{revenueData.moisN1.toFixed(2)} €</Text>
-          </View>
-          <View style={[styles.smallBox, { backgroundColor: colors.primary }]}>
-            <Text style={[styles.smallLabel, { color: colors.surface }]}>Global</Text>
-            <Text style={[styles.smallValue, { color: colors.surface }]}>{revenueData.global.toFixed(2)} €</Text>
-          </View>
-        </View>
-      </View>
-
-      <View style={styles.section}>
-        <Text style={[styles.sectionTitle, { color: colors.text }]}>Marges</Text>
-        <View style={styles.gridContainer}>
-          <View style={[styles.smallBox, { backgroundColor: getMarginColors(marginData.jour).backgroundColor, borderColor: getMarginColors(marginData.jour).borderColor, borderWidth: 1 }]}>
-            <Text style={[styles.smallLabel, { color: getMarginColors(marginData.jour).textColor }]}>Jour</Text>
-            <Text style={[styles.smallValue, { color: getMarginColors(marginData.jour).textColor }]}>{formatSignedAmount(marginData.jour)}</Text>
-          </View>
-          <View style={[styles.smallBox, { backgroundColor: getMarginColors(marginData.mois).backgroundColor, borderColor: getMarginColors(marginData.mois).borderColor, borderWidth: 1 }]}>
-            <Text style={[styles.smallLabel, { color: getMarginColors(marginData.mois).textColor }]}>Mois</Text>
-            <Text style={[styles.smallValue, { color: getMarginColors(marginData.mois).textColor }]}>{formatSignedAmount(marginData.mois)}</Text>
-          </View>
-          <View style={[styles.smallBox, { backgroundColor: getMarginColors(marginData.annee).backgroundColor, borderColor: getMarginColors(marginData.annee).borderColor, borderWidth: 1 }]}>
-            <Text style={[styles.smallLabel, { color: getMarginColors(marginData.annee).textColor }]}>Année</Text>
-            <Text style={[styles.smallValue, { color: getMarginColors(marginData.annee).textColor }]}>{formatSignedAmount(marginData.annee)}</Text>
-          </View>
-          <View style={[styles.smallBox, { backgroundColor: getMarginColors(marginData.moisN1).backgroundColor, borderColor: getMarginColors(marginData.moisN1).borderColor, borderWidth: 1 }]}>
-            <Text style={[styles.smallLabel, { color: getMarginColors(marginData.moisN1).textColor }]}>Mois N-1</Text>
-            <Text style={[styles.smallValue, { color: getMarginColors(marginData.moisN1).textColor }]}>{formatSignedAmount(marginData.moisN1)}</Text>
-          </View>
-          <View style={[styles.smallBox, { backgroundColor: getMarginColors(marginData.global).backgroundColor, borderColor: getMarginColors(marginData.global).borderColor, borderWidth: 1 }]}>
-            <Text style={[styles.smallLabel, { color: getMarginColors(marginData.global).textColor }]}>Global</Text>
-            <Text style={[styles.smallValue, { color: getMarginColors(marginData.global).textColor }]}>{formatSignedAmount(marginData.global)}</Text>
-          </View>
-        </View>
-      </View>
-    </View>
-  );
-
+  const brandColor = isDarkMode ? colors.secondary : (colors.primary || '#145C53');
   const isCurrent = activePeriod === 'current';
   const revenueData = isCurrent
-    ? { jour: caJour, mois: caMois, annee: caAnnee, moisN1: caMoisN1, global: caGlobal }
-    : { jour: caJourN1, mois: caMoisN1, annee: caAnneeN1, moisN1: caMoisN2, global: caGlobal };
-
+    ? { jour: caJour, mois: caMois, annee: caAnnee, previous: caMoisN1, global: caGlobal }
+    : { jour: caJourN1, mois: caMoisN1, annee: caAnneeN1, previous: caMoisN2, global: caGlobal };
   const marginData = isCurrent
-    ? { jour: margeJour, mois: margeMois, annee: margeAnnee, moisN1: margeMoisN1, global: margeGlobal }
-    : { jour: margeJourN1, mois: margeMoisN1, annee: margeAnneeN1, moisN1: margeMoisN2, global: margeGlobal };
+    ? { jour: margeJour, mois: margeMois, annee: margeAnnee, previous: margeMoisN1, global: margeGlobal }
+    : { jour: margeJourN1, mois: margeMoisN1, annee: margeAnneeN1, previous: margeMoisN2, global: margeGlobal };
+  const monthMarginPositive = marginData.mois >= 0;
 
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.primary, shadowColor: colors.shadow }]}> 
+    <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.shadow }]}>
       <View style={styles.headerRow}>
-        <MaterialCommunityIcons name="chart-bar" size={28} color={colors.primary} style={{ marginRight: 8 }} />
-        <Text style={[styles.title, { color: colors.primary }]}>Chiffre d'affaire</Text>
+        <View>
+          <Text style={[styles.title, { color: colors.text }]}>Chiffre d'affaire</Text>
+          <Text style={[styles.subtitle, { color: colors.textSecondary }]}>Revenus et marge</Text>
+        </View>
+        <View style={[styles.headerIcon, { backgroundColor: `${brandColor}18` }]}>
+          <MaterialCommunityIcons name="chart-bar" size={22} color={brandColor} />
+        </View>
       </View>
 
       <View style={styles.tabsRow}>
         <TouchableOpacity
           onPress={() => setActivePeriod('current')}
-          style={[
-            styles.tabBtn,
-            {
-              backgroundColor: activePeriod === 'current' ? colors.primary : colors.surface,
-              borderColor: colors.primary,
-            },
-          ]}
+          style={[styles.tabBtn, { backgroundColor: isCurrent ? brandColor : '#F8FBFA', borderColor: isCurrent ? brandColor : '#D9E2EC' }]}
         >
-          <Text style={[styles.tabText, { color: activePeriod === 'current' ? colors.surface : colors.primary }]}>Actuel</Text>
+          <Text style={[styles.tabText, { color: isCurrent ? '#FFFFFF' : colors.text }]}>Actuel</Text>
         </TouchableOpacity>
-
         <TouchableOpacity
           onPress={() => setActivePeriod('n1')}
-          style={[
-            styles.tabBtn,
-            {
-              backgroundColor: activePeriod === 'n1' ? colors.primary : colors.surface,
-              borderColor: colors.primary,
-            },
-          ]}
+          style={[styles.tabBtn, { backgroundColor: !isCurrent ? brandColor : '#F8FBFA', borderColor: !isCurrent ? brandColor : '#D9E2EC' }]}
         >
-          <Text style={[styles.tabText, { color: activePeriod === 'n1' ? colors.surface : colors.primary }]}>N-1</Text>
+          <Text style={[styles.tabText, { color: !isCurrent ? '#FFFFFF' : colors.text }]}>N-1</Text>
         </TouchableOpacity>
       </View>
 
-      <Text style={[styles.periodCaption, { color: colors.text }]}>{isCurrent ? 'Période actuelle' : 'Période N-1'}</Text>
+      <View style={[styles.heroMetric, { backgroundColor: brandColor }]}>
+        <Text style={styles.heroLabel}>CA du mois</Text>
+        <Text style={styles.heroValue}>{formatAmount(revenueData.mois)}</Text>
+        <Text style={styles.heroSub}>Global: {formatAmount(revenueData.global)}</Text>
+      </View>
 
-      {renderSection(revenueData, marginData)}
+      <View style={styles.gridContainer}>
+        <View style={styles.smallBox}>
+          <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>Jour</Text>
+          <Text style={[styles.smallValue, { color: colors.text }]}>{formatAmount(revenueData.jour)}</Text>
+        </View>
+        <View style={styles.smallBox}>
+          <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>Annee</Text>
+          <Text style={[styles.smallValue, { color: colors.text }]}>{formatAmount(revenueData.annee)}</Text>
+        </View>
+          <View style={styles.smallBox}>
+            <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>Marge mois</Text>
+            <Text style={[styles.smallValue, { color: monthMarginPositive ? (colors.success || '#2E8B57') : (colors.error || '#B44B4B') }]}>{formatSignedAmount(marginData.mois)}</Text>
+          </View>
+          <View style={styles.smallBox}>
+            <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>Marge globale</Text>
+            <Text style={[styles.smallValue, { color: marginData.global >= 0 ? (colors.success || '#2E8B57') : (colors.error || '#B44B4B') }]}>{formatSignedAmount(marginData.global)}</Text>
+          </View>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    padding: 18,
-    borderRadius: 16,
-    borderWidth: 1.5,
-    marginVertical: 16,
-    alignItems: 'center',
-    shadowOpacity: 0.12,
-    shadowRadius: 8,
-    elevation: 3,
-    width: '98%',
-    alignSelf: 'center',
+    marginHorizontal: 18,
+    marginTop: 16,
+    borderRadius: 22,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(23,32,42,0.06)',
+    shadowOpacity: 0.08,
+    shadowRadius: 14,
+    shadowOffset: { width: 0, height: 8 },
+    elevation: 2,
   },
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    justifyContent: 'space-between',
+    marginBottom: 14,
   },
   title: {
-    fontWeight: 'bold',
-    fontSize: 20,
+    fontWeight: '900',
+    fontSize: 17,
   },
-  section: {
-    width: '100%',
-    marginBottom: 18,
+  subtitle: {
+    marginTop: 2,
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  headerIcon: {
+    width: 38,
+    height: 38,
+    borderRadius: 14,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   tabsRow: {
-    width: '100%',
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   tabBtn: {
     flex: 1,
     borderWidth: 1,
-    borderRadius: 10,
-    paddingVertical: 8,
+    borderRadius: 14,
+    paddingVertical: 9,
     alignItems: 'center',
   },
   tabText: {
     fontSize: 13,
-    fontWeight: '700',
+    fontWeight: '900',
   },
-  periodCaption: {
-    fontSize: 13,
-    fontWeight: '700',
-    marginBottom: 10,
-    opacity: 0.7,
-  },
-  sectionWrapper: {
-    width: '100%',
-  },
-  sectionTitle: {
-    fontSize: 14,
-    fontWeight: '800',
+  heroMetric: {
+    borderRadius: 18,
+    padding: 15,
     marginBottom: 12,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    opacity: 0.7,
+  },
+  heroLabel: {
+    color: 'rgba(255,255,255,0.74)',
+    fontSize: 12,
+    fontWeight: '800',
+    marginBottom: 4,
+  },
+  heroValue: {
+    color: '#FFFFFF',
+    fontSize: 23,
+    fontWeight: '900',
+  },
+  heroSub: {
+    color: 'rgba(255,255,255,0.82)',
+    marginTop: 5,
+    fontSize: 12,
+    fontWeight: '800',
   },
   gridContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 10,
-    justifyContent: 'space-between',
   },
   smallBox: {
     width: '48%',
-    alignItems: 'center',
-    borderRadius: 12,
+    borderRadius: 16,
+    backgroundColor: '#F8FBFA',
     borderWidth: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 8,
-    shadowOpacity: 0.08,
-    shadowRadius: 2,
-    elevation: 1,
+    borderColor: '#D9E2EC',
+    padding: 12,
   },
   smallLabel: {
     fontSize: 12,
-    fontWeight: '700',
-    marginBottom: 4,
-    opacity: 0.9,
+    fontWeight: '800',
+    marginBottom: 5,
   },
   smallValue: {
-    fontSize: 15,
-    fontWeight: '800',
+    fontSize: 14,
+    fontWeight: '900',
   },
 });
 

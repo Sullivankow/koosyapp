@@ -1,0 +1,78 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="1000" viewBox="0 0 900 1000" role="img" aria-label="Maquette visuelle mobile Koosy">
+  <rect width="900" height="1000" fill="#dfe8e5"/>
+  <rect x="255" y="52" width="390" height="844" rx="34" fill="#111827"/>
+  <rect x="265" y="62" width="370" height="824" rx="26" fill="#eef4f2"/>
+  <path d="M265 88 Q265 62 291 62 H609 Q635 62 635 88 V222 H265 Z" fill="#145c53"/>
+
+  <text x="288" y="92" font-family="Inter, Segoe UI, Arial" font-size="12" font-weight="700" fill="#f8fafc">9:41</text>
+  <text x="565" y="92" font-family="Inter, Segoe UI, Arial" font-size="12" font-weight="700" fill="#f8fafc">5G 100%</text>
+  <text x="287" y="137" font-family="Inter, Segoe UI, Arial" font-size="12" font-weight="700" fill="#b9d2cd">Bonjour Deszmond</text>
+  <text x="287" y="166" font-family="Inter, Segoe UI, Arial" font-size="25" font-weight="800" fill="#ffffff">Tableau de bord</text>
+  <rect x="574" y="121" width="42" height="42" rx="14" fill="#ffffff" opacity="0.14" stroke="#ffffff" stroke-opacity="0.22"/>
+  <text x="589" y="150" font-family="Inter, Segoe UI, Arial" font-size="24" font-weight="600" fill="#ffffff">+</text>
+
+  <rect x="283" y="190" width="334" height="172" rx="22" fill="#ffffff" stroke="#e8efec"/>
+  <text x="303" y="220" font-family="Inter, Segoe UI, Arial" font-size="12" font-weight="700" fill="#697586">Aujourd'hui</text>
+  <g font-family="Inter, Segoe UI, Arial">
+    <rect x="303" y="236" width="142" height="50" rx="16" fill="#fbfdfc" stroke="#d9e2ec"/>
+    <text x="317" y="258" font-size="22" font-weight="800" fill="#145c53">3</text>
+    <text x="317" y="276" font-size="12" font-weight="700" fill="#697586">Arrivees</text>
+    <rect x="455" y="236" width="142" height="50" rx="16" fill="#fbfdfc" stroke="#d9e2ec"/>
+    <text x="469" y="258" font-size="22" font-weight="800" fill="#145c53">2</text>
+    <text x="469" y="276" font-size="12" font-weight="700" fill="#697586">Departs</text>
+    <rect x="303" y="296" width="142" height="50" rx="16" fill="#fbfdfc" stroke="#d9e2ec"/>
+    <text x="317" y="318" font-size="18" font-weight="800" fill="#145c53">4 820 EUR</text>
+    <text x="317" y="336" font-size="12" font-weight="700" fill="#697586">CA du mois</text>
+    <rect x="455" y="296" width="142" height="50" rx="16" fill="#fbfdfc" stroke="#d9e2ec"/>
+    <text x="469" y="318" font-size="22" font-weight="800" fill="#145c53">12</text>
+    <text x="469" y="336" font-size="12" font-weight="700" fill="#697586">Taches ouvertes</text>
+  </g>
+
+  <text x="283" y="407" font-family="Inter, Segoe UI, Arial" font-size="17" font-weight="800" fill="#17202a">A faire maintenant</text>
+  <text x="568" y="407" font-family="Inter, Segoe UI, Arial" font-size="12" font-weight="800" fill="#1f7a6d">Tout voir</text>
+  <g font-family="Inter, Segoe UI, Arial">
+    <rect x="283" y="424" width="334" height="58" rx="18" fill="#ffffff" stroke="#e8efec"/>
+    <circle cx="307" cy="453" r="6" fill="#d99a3d"/>
+    <circle cx="307" cy="453" r="12" fill="#d99a3d" opacity="0.14"/>
+    <text x="328" y="448" font-size="14" font-weight="800" fill="#17202a">Menage Studio Lyon</text>
+    <text x="328" y="468" font-size="12" font-weight="650" fill="#697586">Avant 14:00 - Priorite haute</text>
+    <rect x="283" y="491" width="334" height="58" rx="18" fill="#ffffff" stroke="#e8efec"/>
+    <circle cx="307" cy="520" r="6" fill="#1f7a6d"/>
+    <circle cx="307" cy="520" r="12" fill="#1f7a6d" opacity="0.14"/>
+    <text x="328" y="515" font-size="14" font-weight="800" fill="#17202a">Check-in Appartement Paris</text>
+    <text x="328" y="535" font-size="12" font-weight="650" fill="#697586">16:00 - Marie Dupont</text>
+  </g>
+
+  <text x="283" y="594" font-family="Inter, Segoe UI, Arial" font-size="17" font-weight="800" fill="#17202a">Bien prioritaire</text>
+  <text x="587" y="594" font-family="Inter, Segoe UI, Arial" font-size="12" font-weight="800" fill="#1f7a6d">Carte</text>
+  <rect x="283" y="611" width="334" height="244" rx="22" fill="#ffffff" stroke="#e8efec"/>
+  <clipPath id="photoClip"><path d="M283 633 Q283 611 305 611 H595 Q617 611 617 633 V737 H283 Z"/></clipPath>
+  <g clip-path="url(#photoClip)">
+    <rect x="283" y="611" width="334" height="126" fill="#cfded7"/>
+    <rect x="283" y="611" width="334" height="126" fill="#145c53" opacity="0.16"/>
+    <path d="M283 704 L355 660 L413 694 L463 650 L617 736 H283 Z" fill="#9db9ad"/>
+    <rect x="386" y="642" width="115" height="80" rx="6" fill="#f6efe3"/>
+    <rect x="402" y="658" width="24" height="24" rx="3" fill="#8fb4bf"/>
+    <rect x="439" y="658" width="24" height="24" rx="3" fill="#8fb4bf"/>
+    <rect x="476" y="658" width="16" height="64" rx="3" fill="#b97745"/>
+  </g>
+  <rect x="518" y="623" width="84" height="26" rx="13" fill="#edf8f1" stroke="#d2ecdc"/>
+  <text x="532" y="641" font-family="Inter, Segoe UI, Arial" font-size="11" font-weight="900" fill="#2e8b57">Disponible</text>
+  <g font-family="Inter, Segoe UI, Arial">
+    <text x="303" y="766" font-size="17" font-weight="800" fill="#17202a">Appartement Paris Centre</text>
+    <text x="303" y="785" font-size="12" font-weight="650" fill="#697586">12 rue Exemple, Paris</text>
+    <text x="536" y="769" font-size="14" font-weight="900" fill="#145c53">1 240 EUR</text>
+    <rect x="303" y="800" width="294" height="44" rx="16" fill="#f6f9f8" stroke="#d9e2ec"/>
+    <text x="317" y="818" font-size="11" font-weight="700" fill="#697586">Prochaine arrivee</text>
+    <text x="317" y="836" font-size="13" font-weight="800" fill="#17202a">24 mai - 16:00 - Marie Dupont</text>
+  </g>
+
+  <rect x="283" y="866" width="334" height="56" rx="20" fill="#ffffff" stroke="#e8efec"/>
+  <g font-family="Inter, Segoe UI, Arial" font-size="20" font-weight="900" text-anchor="middle">
+    <text x="316" y="902" fill="#145c53">⌂</text>
+    <text x="383" y="902" fill="#8a95a3">□</text>
+    <text x="450" y="902" fill="#8a95a3">○</text>
+    <text x="517" y="902" fill="#8a95a3">≡</text>
+    <text x="584" y="902" fill="#8a95a3">⚙</text>
+  </g>
+</svg>
