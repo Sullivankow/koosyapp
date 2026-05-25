@@ -34,7 +34,7 @@ const StatusModal: React.FC<StatusModalProps> = ({ visible, onClose, onSelect, c
   return (
     <Modal visible={visible} transparent animationType="fade">
       <View style={styles.overlay}>
-        <View style={styles.modalContent}>
+        <View style={[styles.modalContent, { backgroundColor: colors.surface }]}> 
           <Text style={styles.title}>Choisir le statut</Text>
             {STATUS_OPTIONS.map(option => {
               const isSelected = currentStatus === option.value;

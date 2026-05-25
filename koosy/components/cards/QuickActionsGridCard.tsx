@@ -56,8 +56,8 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
             style={[
               styles.action,
               {
-                backgroundColor: index === 0 ? brandColor : '#F8FBFA',
-                borderColor: index === 0 ? brandColor : '#D9E2EC',
+                backgroundColor: index === 0 ? brandColor : colors.surface,
+                borderColor: index === 0 ? brandColor : colors.border,
               },
             ]}
             onPress={action.onPress}

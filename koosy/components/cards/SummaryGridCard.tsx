@@ -34,7 +34,7 @@ const SummaryGridCard: React.FC<SummaryGridCardProps> = ({ biensCount, reservati
 
       <View style={styles.grid}>
         {items.map((item) => (
-          <View key={item.label} style={styles.metric}>
+          <View key={item.label} style={[styles.metric, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
             <View style={[styles.metricIcon, { backgroundColor: `${brandColor}12` }]}>
               {item.family === 'fa' ? (
                 <FontAwesome5 name={item.icon as any} size={15} color={brandColor} />

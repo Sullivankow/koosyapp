@@ -70,15 +70,15 @@ const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({
       <View style={styles.tabsRow}>
         <TouchableOpacity
           onPress={() => setActivePeriod('current')}
-          style={[styles.tabBtn, { backgroundColor: isCurrent ? brandColor : '#F8FBFA', borderColor: isCurrent ? brandColor : '#D9E2EC' }]}
+          style={[styles.tabBtn, { backgroundColor: isCurrent ? brandColor : colors.surface, borderColor: isCurrent ? brandColor : colors.border }]}
         >
-          <Text style={[styles.tabText, { color: isCurrent ? '#FFFFFF' : colors.text }]}>Actuel</Text>
+          <Text style={[styles.tabText, { color: isCurrent ? (colors.surface || '#FFFFFF') : colors.text }]}>Actuel</Text>
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => setActivePeriod('n1')}
-          style={[styles.tabBtn, { backgroundColor: !isCurrent ? brandColor : '#F8FBFA', borderColor: !isCurrent ? brandColor : '#D9E2EC' }]}
+          style={[styles.tabBtn, { backgroundColor: !isCurrent ? brandColor : colors.surface, borderColor: !isCurrent ? brandColor : colors.border }]}
         >
-          <Text style={[styles.tabText, { color: !isCurrent ? '#FFFFFF' : colors.text }]}>N-1</Text>
+          <Text style={[styles.tabText, { color: !isCurrent ? (colors.surface || '#FFFFFF') : colors.text }]}>N-1</Text>
         </TouchableOpacity>
       </View>
 
@@ -89,19 +89,19 @@ const ChiffreAffaireCard: React.FC<ChiffreAffaireCardProps> = ({
       </View>
 
       <View style={styles.gridContainer}>
-        <View style={styles.smallBox}>
+        <View style={[styles.smallBox, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
           <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>Jour</Text>
           <Text style={[styles.smallValue, { color: colors.text }]}>{formatAmount(revenueData.jour)}</Text>
         </View>
-        <View style={styles.smallBox}>
+        <View style={[styles.smallBox, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
           <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>Annee</Text>
           <Text style={[styles.smallValue, { color: colors.text }]}>{formatAmount(revenueData.annee)}</Text>
         </View>
-          <View style={styles.smallBox}>
+        <View style={[styles.smallBox, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
             <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>Marge mois</Text>
             <Text style={[styles.smallValue, { color: monthMarginPositive ? (colors.success || '#2E8B57') : (colors.error || '#B44B4B') }]}>{formatSignedAmount(marginData.mois)}</Text>
           </View>
-          <View style={styles.smallBox}>
+        <View style={[styles.smallBox, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
             <Text style={[styles.smallLabel, { color: colors.textSecondary }]}>Marge globale</Text>
             <Text style={[styles.smallValue, { color: marginData.global >= 0 ? (colors.success || '#2E8B57') : (colors.error || '#B44B4B') }]}>{formatSignedAmount(marginData.global)}</Text>
           </View>

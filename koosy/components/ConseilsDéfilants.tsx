@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React, { useRef, useEffect, useState, useCallback, memo } from 'react';
 import { View, Text, FlatList, StyleSheet, Dimensions } from 'react-native';
+import { useTheme } from '../contexts/ThemeContext';
 
 const conseils = [
 	"Koosy centralise le suivi de vos prestations chez les particuliers : gérez vos biens, tâches, clients propriétaires, devis, factures, chiffre d'affaires, planning et réservations voyageurs en un seul outil.",
@@ -17,19 +18,20 @@ const conseils = [
 
 const ITEM_WIDTH = Dimensions.get('window').width - 40;
 
-const ConseilItem = memo(({ item }: { item: string }) => (
-	<View style={styles.item}>
-		<Text style={styles.text}>{item}</Text>
+const ConseilItem = memo(({ item, colors }: { item: string; colors: any }) => (
+	<View style={[styles.item, { backgroundColor: `${colors.primary}12`, borderColor: colors.primary }]}> 
+		<Text style={[styles.text, { color: colors.primary }]}>{item}</Text>
 	</View>
 ));
 
 export default function ConseilsDéfilants() {
+	const { colors } = useTheme();
 	const flatListRef = useRef<FlatList>(null);
 	const [index, setIndex] = useState(0);
 
 	const renderItem = useCallback(
-		({ item }: { item: string }) => <ConseilItem item={item} />,
-		[]
+		({ item }: { item: string }) => <ConseilItem item={item} colors={colors} />,
+		[colors]
 	);
 
 	const keyExtractor = useCallback((_: string, i: number) => i.toString(), []);
@@ -45,8 +47,8 @@ export default function ConseilsDéfilants() {
 	return (
 		<View style={styles.container}>
 			<View style={styles.header}>
-				<MaterialCommunityIcons name="lightbulb-on-outline" size={22} color="#059669" style={{ marginRight: 8 }} />
-				<Text style={styles.headerText}>Conseil d'utilisation</Text>
+				<MaterialCommunityIcons name="lightbulb-on-outline" size={22} color={colors.primary} style={{ marginRight: 8 }} />
+				<Text style={[styles.headerText, { color: colors.primary }]}>Conseil d'utilisation</Text>
 			</View>
 			<FlatList
 				ref={flatListRef}
@@ -79,12 +81,10 @@ const styles = StyleSheet.create({
 	headerText: {
 		fontWeight: 'bold',
 		fontSize: 16,
-		color: '#059669',
 		letterSpacing: 0.2,
 	},
 	item: {
 		width: ITEM_WIDTH,
-		backgroundColor: '#e6f9f0',
 		borderRadius: 16,
 		paddingVertical: 16,
 		paddingHorizontal: 18,
@@ -95,10 +95,8 @@ const styles = StyleSheet.create({
 		shadowRadius: 4,
 		elevation: 2,
 		borderWidth: 1,
-		borderColor: '#059669',
 	},
 	text: {
-		color: '#059669',
 		fontWeight: '600',
 		fontSize: 15,
 		textAlign: 'center',

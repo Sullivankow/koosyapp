@@ -79,7 +79,7 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, loading, colors
               const bienName = event.bien?.nom ?? event.bienNom ?? 'Bien inconnu';
 
               return (
-                <View key={`event-${index}`} style={[styles.eventRow, { backgroundColor: '#F8FBFA', borderRadius: 16, padding: 11, marginBottom: 8 }]}>
+                <View key={`event-${index}`} style={[styles.eventRow, { backgroundColor: colors.surface, borderRadius: 16, padding: 11, marginBottom: 8, borderColor: colors.border }]}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 7 }}>
                     <View style={{ flexDirection: 'row', alignItems: 'center', backgroundColor: `${meta.accent}18`, borderRadius: 999, paddingHorizontal: 9, paddingVertical: 5 }}>
                       <MaterialCommunityIcons name={meta.icon} size={14} color={meta.accent} />
@@ -94,7 +94,7 @@ const UpcomingEvents: React.FC<UpcomingEventsProps> = ({ events, loading, colors
             })}
           </ScrollView>
         ) : (
-          <View style={{ backgroundColor: '#F8FBFA', borderRadius: 16, padding: 14 }}>
+          <View style={{ backgroundColor: colors.surface, borderRadius: 16, padding: 14, borderColor: colors.border }}>
             <Text style={{ color: colors.textSecondary, fontWeight: '800' }}>Aucun evenement prevu</Text>
           </View>
         )}

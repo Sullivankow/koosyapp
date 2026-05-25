@@ -136,10 +136,11 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
         : 'U';
 
     // Use the theme's color palette rather than hardcoded light-mode fallbacks
-    const brandColor = colors.primary || '#145C53';
+    const brandColor = isDarkMode ? colors.secondary : (colors.primary || '#145C53');
     const dashboardBackground = colors.background || '#EEF4F2';
     const dashboardSurface = colors.surface || '#FFFFFF';
     const avatarBackgroundColor = colors.secondary || brandColor;
+    const contrastOnBrand = colors.surface || '#FFFFFF';
     const arrivalsToday = events?.filter((event: any) => String(event?.type || '').toLowerCase() === 'arrival').length ?? 0;
     const departuresToday = events?.filter((event: any) => String(event?.type || '').toLowerCase() === 'departure').length ?? 0;
     const primaryBien = biens[0];
@@ -153,7 +154,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
 
     return (
         <>
-            <StatusBar barStyle="light-content" backgroundColor={brandColor} />
+            <StatusBar barStyle={isDarkMode ? 'light-content' : 'dark-content'} backgroundColor={brandColor} />
             {successMsg ? (
                 <View style={[styles.successToast, { backgroundColor: colors.success || '#43A047' }]}>
                     <Text style={styles.successToastText}>{successMsg}</Text>
@@ -178,12 +179,12 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                         </View>
 
                         <View style={styles.topActions}>
-                            <NotificationBell style={styles.iconBtn} size={24} color="#FFFFFF" />
+                            <NotificationBell style={styles.iconBtn} size={24} color={contrastOnBrand} />
                             <TouchableOpacity style={styles.iconBtn} onPress={toggleTheme}>
-                                <MaterialCommunityIcons name={isDarkMode ? 'weather-sunny' : 'weather-night'} size={20} color="#FFFFFF" />
+                                <MaterialCommunityIcons name={isDarkMode ? 'weather-sunny' : 'weather-night'} size={20} color={contrastOnBrand} />
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.iconBtn} onPress={handleLogout}>
-                                <MaterialCommunityIcons name="logout" size={20} color="#FFFFFF" />
+                                <MaterialCommunityIcons name="logout" size={20} color={contrastOnBrand} />
                             </TouchableOpacity>
                         </View>
                     </View>
@@ -206,19 +207,19 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                         <Text style={[styles.sectionLink, { color: brandColor }]}>Pilotage</Text>
                     </View>
                     <View style={styles.todayGrid}>
-                        <View style={styles.todayMetric}>
+                        <View style={[styles.todayMetric, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                             <Text style={[styles.todayValue, { color: brandColor }]}>{arrivalsToday}</Text>
                             <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>Arrivees</Text>
                         </View>
-                        <View style={styles.todayMetric}>
+                        <View style={[styles.todayMetric, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                             <Text style={[styles.todayValue, { color: brandColor }]}>{departuresToday}</Text>
                             <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>Departs</Text>
                         </View>
-                        <View style={styles.todayMetric}>
+                        <View style={[styles.todayMetric, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                             <Text style={[styles.todayValue, { color: brandColor }]}>{biensCount}</Text>
                             <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>Biens actifs</Text>
                         </View>
-                        <View style={styles.todayMetric}>
+                        <View style={[styles.todayMetric, { backgroundColor: colors.surface, borderColor: colors.border }]}>
                             <Text style={[styles.todayValue, { color: brandColor }]}>{tacheCount}</Text>
                             <Text style={[styles.todayLabel, { color: colors.textSecondary }]}>Taches</Text>
                         </View>
@@ -228,8 +229,8 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                 <UpcomingEvents events={events} loading={eventsLoading} colors={colors} styles={styles} />
 
                 <View style={[styles.propertyCard, { backgroundColor: dashboardSurface, shadowColor: colors.shadow }]}>
-                    <View style={styles.propertyVisual}>
-                        <View style={styles.propertyHouseShape} />
+                    <View style={[styles.propertyVisual, { backgroundColor: colors.background }]}> 
+                        <View style={[styles.propertyHouseShape, { backgroundColor: colors.surface, borderColor: colors.border }]} />
                         <View style={[styles.statusPill, { backgroundColor: `${brandColor}12`, borderColor: `${brandColor}22` }]}> 
                             <Text style={[styles.statusPillText, { color: brandColor }]}>{String(primaryPropertyStatus)}</Text>
                         </View>
@@ -242,7 +243,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ onLogout, navigation }) => {
                             </View>
                             <Text style={[styles.propertyRevenue, { color: brandColor }]}>{reservationsCount} resas</Text>
                         </View>
-                        <View style={styles.nextVisitBox}>
+                        <View style={[styles.nextVisitBox, { backgroundColor: colors.surface, borderColor: colors.border }]}> 
                             <Text style={[styles.nextVisitLabel, { color: colors.textSecondary }]}>Prochaine arrivee</Text>
                             <Text style={[styles.nextVisitValue, { color: colors.text }]} numberOfLines={1}>{nextReservationLabel}</Text>
                         </View>
