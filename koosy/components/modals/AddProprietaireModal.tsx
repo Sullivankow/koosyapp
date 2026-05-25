@@ -110,8 +110,8 @@ const AddProprietaireModal: React.FC<AddProprietaireModalProps> = ({ visible, on
 	return (
 		<>
 			<Modal visible={visible} animationType="slide" transparent>
-				<KeyboardAvoidingView behavior="padding" style={styles.centered}>
-					<View style={[styles.modal, { backgroundColor: colors.surface, width: SCREEN_WIDTH > 500 ? 400 : '90%' }]}> 
+				<KeyboardAvoidingView behavior="padding" style={[styles.centered, { backgroundColor: colors.shadow }]}>
+					<View style={[styles.modal, { backgroundColor: colors.surface, width: SCREEN_WIDTH > 500 ? 400 : '90%', shadowColor: colors.shadow }]}> 
 						<Text style={[styles.title, { color: colors.primary }]}>Nouveau propriétaire</Text>
 						{/* Affichage du quota */}
 						<View style={{ marginBottom: 10 }}>
@@ -177,7 +177,7 @@ const AddProprietaireModal: React.FC<AddProprietaireModalProps> = ({ visible, on
 							onChangeText={v => updateField('telephone', v)}
 							keyboardType="phone-pad"
 						/>
-						{error ? <Text style={[styles.error, { color: colors.error || '#d32f2f' }]}>{error}</Text> : null}
+						{error ? <Text style={[styles.error, { color: colors.error }]}>{error}</Text> : null}
 						<View style={styles.rowBtns}>
 							<TouchableOpacity
 								style={[styles.btn, { backgroundColor: colors.primary }]}
@@ -211,17 +211,16 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: 'rgba(0,0,0,0.2)',
+		backgroundColor: 'transparent',
 	},
-	modal: {
-		borderRadius: 16,
-		padding: 24,
-		elevation: 6,
-		shadowColor: '#000',
-		shadowOpacity: 0.15,
-		shadowRadius: 12,
-		shadowOffset: { width: 0, height: 4 },
-	},
+		modal: {
+			borderRadius: 16,
+			padding: 24,
+			elevation: 6,
+			shadowOpacity: 0.15,
+			shadowRadius: 12,
+			shadowOffset: { width: 0, height: 4 },
+		},
 	title: {
 		fontSize: 22,
 		fontWeight: 'bold',

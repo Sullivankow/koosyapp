@@ -1,11 +1,13 @@
 // Répertoire des propriétaires.
 // - Charge la liste via l'API
 // - Permet la recherche, le tri et l'édition/suppression des propriétaires.
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useTheme } from '../../contexts/ThemeContext';
-import ProprietaireList from '../../components/ProprietaireList';
+// Legacy list (kept for reference): import ProprietaireList from '../../components/ProprietaireList';
+import OwnerList from '../../components/OwnerList';
 import AddProprietaireModal from '../../components/modals/AddProprietaireModal';
+import OwnerEditModal from '../../components/modals/OwnerEditModal';
 import SubscriptionPaywallModal from '../../components/modals/SubscriptionPaywallModal';
 import { getProprietaireQuota, type ProprietaireQuota } from '../../utils/proprietaireApi';
 import SearchBar from '../../ui/SearchBar';
@@ -20,13 +22,20 @@ function RepertoireProprietaireScreen() {
   const [proprietaires, setProprietaires] = useState<Proprietaire[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingOwner, setEditingOwner] = useState<Proprietaire | null>(null);
   const [showPaywall, setShowPaywall] = useState(false);
   const [proprioQuota, setProprioQuota] = useState<ProprietaireQuota | null>(null);
 
-  const fetchProprietaires = () => {
+  const fetchProprietaires = useCallback(async () => {
     setLoading(true);
-    getProprietaires().then(setProprietaires).finally(() => setLoading(false));
-  };
+    try {
+      const list = await getProprietaires();
+      setProprietaires(list);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   // Charge la liste ET le quota au chargement
   React.useEffect(() => {
@@ -40,9 +49,9 @@ function RepertoireProprietaireScreen() {
       }
     };
     loadQuota();
-  }, []);
+  }, [fetchProprietaires]);
 
-  const handleDeleteProprietaire = (id: number) => {
+  const handleDeleteProprietaire = useCallback((id: number) => {
     Alert.alert(
       'Confirmation',
       'Êtes-vous sûr de vouloir supprimer ce propriétaire ?',
@@ -56,14 +65,13 @@ function RepertoireProprietaireScreen() {
               await deleteProprietaire(id);
               fetchProprietaires();
             } catch (e) {
-              // Optionnel: afficher une erreur/toast
               console.error('Erreur suppression propriétaire', e);
             }
           },
         },
       ]
     );
-  };
+  }, [fetchProprietaires]);
 
   // Filtrage et tri local sur nom/prenom
   const filteredProprietaires = useMemo(() => {
@@ -81,34 +89,41 @@ function RepertoireProprietaireScreen() {
   }, [proprietaires, search, sortOrder]);
 
   // Gestion édition propriétaire
-  const handleEditProprietaire = async (id: number, data: Partial<Proprietaire>) => {
+  const handleEditProprietaire = useCallback(async (id: number, data: Partial<Proprietaire>) => {
     try {
       await updateProprietaire(id, data);
       fetchProprietaires();
       Alert.alert('Succès', 'Propriétaire modifié avec succès');
     } catch (e) {
-      // Optionnel: afficher une erreur/toast
       console.error('Erreur édition propriétaire', e);
     }
-  };
+  }, [fetchProprietaires]);
 
   // Gestion ouverture modale d'ajout avec vérification du quota
   // Affiche le paywall si la limite est atteinte
   const isQuotaReached = Boolean(proprioQuota?.isLimited && (proprioQuota.remaining ?? 0) <= 0);
-  const handleOpenAddModal = async () => {
+  const handleOpenAddModal = useCallback(async () => {
     if (isQuotaReached) {
       setShowPaywall(true);
       return;
     }
     setShowAddModal(true);
-  };
+  }, [isQuotaReached]);
+
+  const handleOpenEdit = useCallback((owner: Proprietaire) => {
+    setEditingOwner(owner);
+    setShowEditModal(true);
+  }, []);
 
   return (
     <View style={[styles.container, { backgroundColor: colors.background }]}> 
-      {/* Header sticky comme BiensScreen */}
-      <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}> 
-        <Text style={[styles.title, { color: colors.text }]}>Propriétaires</Text>
-        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={handleOpenAddModal}>
+      {/* Header sticky révisé */}
+      <View style={[styles.headerSticky, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}> 
+        <View>
+          <Text style={[styles.title, { color: colors.text }]}>Propriétaires</Text>
+          <Text style={{ color: colors.textSecondary, marginTop: 4 }}>{proprietaires.length} propriétaire(s)</Text>
+        </View>
+        <TouchableOpacity accessibilityLabel="Ajouter propriétaire" style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={handleOpenAddModal}>
           <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
         </TouchableOpacity>
       </View>
@@ -172,11 +187,11 @@ function RepertoireProprietaireScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Liste filtrée et triée */}
-      <ProprietaireList
+      {/* Liste filtrée et triée (nouvelle UI) */}
+      <OwnerList
         data={filteredProprietaires}
-        loading={loading}
         onDelete={handleDeleteProprietaire}
+        onOpenEdit={handleOpenEdit}
         onEdit={handleEditProprietaire}
       />
 
@@ -189,6 +204,20 @@ function RepertoireProprietaireScreen() {
           fetchProprietaires();
         }}
       />
+      <OwnerEditModal
+        visible={showEditModal}
+        owner={editingOwner}
+        onClose={() => {
+          setShowEditModal(false);
+          setEditingOwner(null);
+        }}
+        onSuccess={() => {
+          setShowEditModal(false);
+          setEditingOwner(null);
+          fetchProprietaires();
+        }}
+      />
+      {/* Floating Add Button removed — header contains the primary add action */}
       {/* Paywall modal */}
       <SubscriptionPaywallModal
         isOpen={showPaywall}
@@ -210,7 +239,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 14,
     borderBottomWidth: 1,
-    borderColor: '#eee',
+    // borderBottomColor applied from theme at render time
     zIndex: 10,
   },
   title: {

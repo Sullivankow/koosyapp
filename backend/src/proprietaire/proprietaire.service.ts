@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException, NotFoundException } from '@nestjs/common';
+import { Injectable, ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Proprietaire } from './proprietaire.entity';
@@ -51,7 +51,23 @@ export class ProprietaireService {
 		return this.proprietaireRepository.findOne({ where: { id, conciergerie: { id: userId } } });
 	}
 
-	update(id: number, dto: Partial<CreateProprietaireDto>) {
+	async update(id: number, dto: Partial<CreateProprietaireDto>, userId?: number) {
+		// Prevent empty updates which cause TypeORM UpdateValuesMissingError
+		if (!dto || Object.keys(dto).length === 0) {
+			throw new BadRequestException('Aucune donnée de mise à jour fournie');
+		}
+
+		// If userId is provided, ensure the proprietor belongs to the user's conciergerie
+		if (userId) {
+			const existing = await this.proprietaireRepository.findOne({ where: { id, conciergerie: { id: userId } } });
+			if (!existing) {
+				throw new NotFoundException('Propriétaire introuvable ou accès refusé');
+			}
+			Object.assign(existing, dto);
+			return this.proprietaireRepository.save(existing);
+		}
+
+		// Fallback: perform a direct update when no user context is given
 		return this.proprietaireRepository.update(id, dto);
 	}
 

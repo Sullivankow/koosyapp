@@ -49,11 +49,12 @@ export class ProprietaireController {
 		return this.proprietaireService.getProprietaireQuota(req.user.userId);
 	}
 
-		       @Put(':id')
-		       @ApiOperation({ summary: 'Mettre à jour un propriétaire', description: 'Met à jour un propriétaire existant.' })
-		       update(@Param('id') id: string, @Body() dto: UpdateProprietaireDto) {
-			       return this.proprietaireService.update(+id, dto);
-		       }
+	@Put(':id')
+	@UseGuards(JwtAuthGuard)
+	@ApiOperation({ summary: 'Mettre à jour un propriétaire', description: 'Met à jour un propriétaire existant.' })
+	update(@Param('id') id: string, @Body() dto: UpdateProprietaireDto, @Request() req) {
+		return this.proprietaireService.update(+id, dto, req.user.userId);
+	}
 
 	@Delete(':id')
 	@ApiOperation({ summary: 'Supprimer un propriétaire', description: 'Supprime un propriétaire par son identifiant.' })

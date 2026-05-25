@@ -15,6 +15,15 @@ const getOnColor = (hexColor: string): string => {
 	return luminance > 0.6 ? '#0F172A' : '#FFFFFF';
 };
 
+const hexToRgba = (hexColor: string, alpha: number) => {
+    const hex = (hexColor || '').replace('#', '');
+    if (hex.length !== 6) return `rgba(0,0,0,${alpha})`;
+    const r = parseInt(hex.slice(0,2), 16);
+    const g = parseInt(hex.slice(2,4), 16);
+    const b = parseInt(hex.slice(4,6), 16);
+    return `rgba(${r},${g},${b},${alpha})`;
+};
+
 interface SubscriptionPaywallModalProps {
 	isOpen: boolean;
 	onClose: () => void;
@@ -32,13 +41,23 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 	price = 14.99,
 	periodLabel = 'mois',
 }) => {
-	const { colors } = useTheme();
+	const { colors, isDarkMode } = useTheme();
 	const { loading, error, startCheckout } = useSubscription(userToken);
 	const [isProcessing, setIsProcessing] = useState(false);
 
 	const onPrimary = getOnColor(colors.primary);
-	const heroBadgeBg = onPrimary === '#0F172A' ? 'rgba(15,23,42,0.12)' : 'rgba(255,255,255,0.18)';
-	const heroSubtitleColor = onPrimary === '#0F172A' ? 'rgba(15,23,42,0.82)' : 'rgba(255,255,255,0.92)';
+	// Déterminer si la couleur primaire est claire pour choisir des overlays adaptés
+	const primaryHex = (colors.primary || '').replace('#', '');
+	let primaryIsLight = false;
+	if (primaryHex.length === 6) {
+		const r = parseInt(primaryHex.slice(0,2), 16);
+		const g = parseInt(primaryHex.slice(2,4), 16);
+		const b = parseInt(primaryHex.slice(4,6), 16);
+		const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+		primaryIsLight = luminance > 0.6;
+	}
+	const heroBadgeBg = hexToRgba(colors.surface, primaryIsLight ? 0.12 : 0.18);
+	const heroSubtitleColor = hexToRgba(colors.text, primaryIsLight ? 0.82 : 0.92);
 
 	const features = [
 		'Création illimitée de biens',
@@ -71,7 +90,7 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 	if (error) {
 		return (
 			<Modal visible={isOpen} animationType="fade" transparent onRequestClose={onClose}>
-				<View style={styles.overlay}>
+				<View style={[styles.overlay, { backgroundColor: colors.shadow }]}>
 					<View style={[styles.card, { backgroundColor: colors.surface }]}>
 						<Text style={[styles.errorText, { color: colors.text }]}>
 							Erreur: {error}
@@ -100,7 +119,7 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 						},
 					]}
 				>
-					<TouchableOpacity onPress={onClose} style={styles.closeButton}>
+					<TouchableOpacity onPress={onClose} style={[styles.closeButton, { backgroundColor: colors.surface }]}>
 						<MaterialCommunityIcons name="close" size={22} color={colors.textSecondary} />
 					</TouchableOpacity>
 
@@ -162,7 +181,7 @@ const SubscriptionPaywallModal: React.FC<SubscriptionPaywallModalProps> = ({
 const styles = StyleSheet.create({
 	overlay: {
 		flex: 1,
-		backgroundColor: 'rgba(0, 0, 0, 0.45)',
+		backgroundColor: 'transparent',
 		justifyContent: 'center',
 		alignItems: 'center',
 		paddingHorizontal: 16,
@@ -189,7 +208,7 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		alignItems: 'center',
 		justifyContent: 'center',
-		backgroundColor: 'rgba(255, 255, 255, 0.92)',
+		backgroundColor: 'transparent',
 	},
 	hero: {
 		paddingTop: 28,
