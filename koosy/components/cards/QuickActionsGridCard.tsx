@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -26,6 +26,7 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
 }) => {
   const { colors, isDarkMode } = useTheme();
   const brandColor = isDarkMode ? colors.secondary : (colors.primary || '#145C53');
+  const [pressedIndex, setPressedIndex] = useState<number | null>(null);
   const actions = [
     { label: 'Ajouter un bien', icon: 'building' as const, family: 'fa', onPress: onAddBien },
     { label: 'Mes taches', icon: 'playlist-plus' as const, family: 'mc', onPress: onAddTache },
@@ -56,21 +57,23 @@ const QuickActionsGridCard: React.FC<QuickActionsGridCardProps> = ({
             style={[
               styles.action,
               {
-                backgroundColor: index === 0 ? brandColor : colors.surface,
-                borderColor: index === 0 ? brandColor : colors.border,
+                backgroundColor: pressedIndex === index ? brandColor : colors.surface,
+                borderColor: pressedIndex === index ? brandColor : colors.border,
               },
             ]}
             onPress={action.onPress}
+            onPressIn={() => setPressedIndex(index)}
+            onPressOut={() => setPressedIndex(null)}
             activeOpacity={0.82}
           >
-            <View style={[styles.actionIcon, { backgroundColor: index === 0 ? 'rgba(255,255,255,0.16)' : `${brandColor}12` }]}>
+            <View style={[styles.actionIcon, { backgroundColor: pressedIndex === index ? 'rgba(255,255,255,0.16)' : `${brandColor}12` }]}>
               {action.family === 'fa' ? (
-                <FontAwesome5 name={action.icon as any} size={15} color={index === 0 ? (colors.surface || '#FFFFFF') : brandColor} />
+                <FontAwesome5 name={action.icon as any} size={15} color={pressedIndex === index ? (colors.surface || '#FFFFFF') : brandColor} />
               ) : (
-                <MaterialCommunityIcons name={action.icon as any} size={19} color={index === 0 ? (colors.surface || '#FFFFFF') : brandColor} />
+                <MaterialCommunityIcons name={action.icon as any} size={19} color={pressedIndex === index ? (colors.surface || '#FFFFFF') : brandColor} />
               )}
             </View>
-            <Text style={[styles.actionText, { color: index === 0 ? (colors.surface || '#FFFFFF') : colors.text }]} numberOfLines={2}>
+            <Text style={[styles.actionText, { color: pressedIndex === index ? (colors.surface || '#FFFFFF') : colors.text }]} numberOfLines={2}>
               {action.label}
             </Text>
           </TouchableOpacity>
