@@ -1,0 +1,116 @@
+<svg width="900" height="1400" viewBox="0 0 900 1400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>Koosy - Mockup refonte page propriétaires</title>
+  <desc>
+    Maquette SVG de la refonte du répertoire propriétaires. Elle conserve les fonctionnalités existantes:
+    ajout avec quota, recherche, tri, édition, suppression et consultation rapide des coordonnées.
+  </desc>
+
+  <rect width="900" height="1400" fill="#DFE7E6"/>
+  <rect x="245" y="48" width="410" height="884" rx="38" fill="#111827"/>
+  <rect x="257" y="60" width="386" height="860" rx="28" fill="#F4F7FA"/>
+
+  <clipPath id="phoneClip">
+    <rect x="257" y="60" width="386" height="860" rx="28"/>
+  </clipPath>
+
+  <g clip-path="url(#phoneClip)">
+    <rect x="257" y="60" width="386" height="860" fill="#F4F7FA"/>
+    <rect x="257" y="60" width="386" height="214" fill="#009688"/>
+
+    <text x="280" y="86" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">9:41</text>
+    <text x="583" y="86" text-anchor="end" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">5G 100%</text>
+
+    <!-- Header: reprend la logique visuelle Home/Biens avec l'action d'ajout existante. -->
+    <text x="280" y="130" fill="#FFFFFF" opacity=".76" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">Carnet propriétaires</text>
+    <text x="280" y="162" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="28" font-weight="900">Propriétaires</text>
+    <rect x="584" y="116" width="42" height="42" rx="14" fill="#FFFFFF"/>
+    <text x="605" y="146" text-anchor="middle" fill="#009688" font-family="Inter, Arial, sans-serif" font-size="26" font-weight="900">+</text>
+
+    <!-- Synthèse: uniquement basée sur les données déjà disponibles dans la page/quota. -->
+    <rect x="280" y="190" width="108" height="76" rx="16" fill="#FFFFFF" opacity=".14" stroke="#FFFFFF" stroke-opacity=".2"/>
+    <text x="294" y="224" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900">18</text>
+    <text x="294" y="246" fill="#FFFFFF" opacity=".8" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">Contacts</text>
+    <rect x="397" y="190" width="108" height="76" rx="16" fill="#FFFFFF" opacity=".14" stroke="#FFFFFF" stroke-opacity=".2"/>
+    <text x="411" y="224" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900">5</text>
+    <text x="411" y="246" fill="#FFFFFF" opacity=".8" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">Limite free</text>
+    <rect x="514" y="190" width="108" height="76" rx="16" fill="#FFFFFF" opacity=".14" stroke="#FFFFFF" stroke-opacity=".2"/>
+    <text x="528" y="224" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900">A-Z</text>
+    <text x="528" y="246" fill="#FFFFFF" opacity=".8" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">Tri actif</text>
+
+    <!-- Panneau de contrôle: remplace SearchBar générique + bouton tri par un bloc cohérent et dense. -->
+    <rect x="280" y="252" width="342" height="111" rx="22" fill="#FFFFFF" stroke="#E8EEF3"/>
+    <rect x="294" y="266" width="277" height="43" rx="14" fill="#F8FBFA" stroke="#E0E6ED"/>
+    <text x="310" y="293" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="800">⌕  Rechercher nom, email, téléphone...</text>
+    <rect x="579" y="266" width="43" height="43" rx="14" fill="#009688"/>
+    <text x="600.5" y="293" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900">↕</text>
+
+    <rect x="294" y="323" width="49" height="27" rx="13.5" fill="#E6F5F3" stroke="#BDE3DF"/>
+    <text x="318.5" y="341" text-anchor="middle" fill="#009688" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="900">Tous</text>
+    <rect x="351" y="323" width="70" height="27" rx="13.5" fill="#FFFFFF" stroke="#E0E6ED"/>
+    <text x="386" y="341" text-anchor="middle" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="900">Email</text>
+    <rect x="429" y="323" width="86" height="27" rx="13.5" fill="#FFFFFF" stroke="#E0E6ED"/>
+    <text x="472" y="341" text-anchor="middle" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="900">Téléphone</text>
+    <rect x="523" y="323" width="89" height="27" rx="13.5" fill="#FFFFFF" stroke="#E0E6ED"/>
+    <text x="567.5" y="341" text-anchor="middle" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="900">Adresse</text>
+
+    <text x="280" y="401" fill="#222B45" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900">Répertoire</text>
+    <text x="622" y="401" text-anchor="end" fill="#009688" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="900">18 résultats</text>
+
+    <!-- Carte propriétaire: remplace le doublon OwnerCard/ProprietaireItem par une carte unique possible. -->
+    <g>
+      <rect x="280" y="418" width="342" height="148" rx="22" fill="#FFFFFF" stroke="#E8EEF3"/>
+      <rect x="294" y="436" width="56" height="56" rx="18" fill="#E6F5F3" stroke="#BDE3DF"/>
+      <text x="322" y="471" text-anchor="middle" fill="#009688" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="900">MD</text>
+      <text x="364" y="455" fill="#222B45" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="900">Marie Dupont</text>
+      <text x="364" y="477" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">marie.dupont@email.fr</text>
+      <text x="364" y="497" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">06 12 34 56 78</text>
+
+      <rect x="294" y="512" width="214" height="36" rx="14" fill="#F8FBFA" stroke="#E0E6ED"/>
+      <text x="310" y="535" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">12 rue Exemple, Paris</text>
+      <rect x="517" y="512" width="36" height="36" rx="12" fill="#FFFFFF" stroke="#E0E6ED"/>
+      <text x="535" y="535" text-anchor="middle" fill="#009688" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="900">✎</text>
+      <rect x="560" y="512" width="36" height="36" rx="12" fill="#FFFFFF" stroke="#E0E6ED"/>
+      <text x="578" y="535" text-anchor="middle" fill="#E53935" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900">×</text>
+    </g>
+
+    <g>
+      <rect x="280" y="580" width="342" height="148" rx="22" fill="#FFFFFF" stroke="#E8EEF3"/>
+      <rect x="294" y="598" width="56" height="56" rx="18" fill="#FFF0EA" stroke="#FFD5C5"/>
+      <text x="322" y="633" text-anchor="middle" fill="#FF7043" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="900">AL</text>
+      <text x="364" y="617" fill="#222B45" font-family="Inter, Arial, sans-serif" font-size="17" font-weight="900">Antoine Leroy</text>
+      <text x="364" y="639" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">antoine.leroy@email.fr</text>
+      <text x="364" y="659" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">07 45 98 21 10</text>
+
+      <rect x="294" y="674" width="214" height="36" rx="14" fill="#F8FBFA" stroke="#E0E6ED"/>
+      <text x="310" y="697" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="12" font-weight="800">8 allée des Pins, Bordeaux</text>
+      <rect x="517" y="674" width="36" height="36" rx="12" fill="#FFFFFF" stroke="#E0E6ED"/>
+      <text x="535" y="697" text-anchor="middle" fill="#009688" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="900">✎</text>
+      <rect x="560" y="674" width="36" height="36" rx="12" fill="#FFFFFF" stroke="#E0E6ED"/>
+      <text x="578" y="697" text-anchor="middle" fill="#E53935" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900">×</text>
+    </g>
+
+    <!-- Carte quota: affichée seulement si la limite est atteinte, comme dans l'écran actuel. -->
+    <rect x="280" y="742" width="342" height="86" rx="18" fill="#FFF2EC" stroke="#FFD5C5"/>
+    <rect x="294" y="766" width="38" height="38" rx="14" fill="#FFE2D7"/>
+    <text x="313" y="791" text-anchor="middle" fill="#FF7043" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="900">♛</text>
+    <text x="346" y="777" fill="#222B45" font-family="Inter, Arial, sans-serif" font-size="13" font-weight="900">Limite gratuite atteinte</text>
+    <text x="346" y="798" fill="#6E7B8B" font-family="Inter, Arial, sans-serif" font-size="11" font-weight="800">Bloc conditionnel: 5/5 propriétaires utilisés.</text>
+    <rect x="576" y="769" width="32" height="32" rx="11" fill="#009688"/>
+    <text x="592" y="790" text-anchor="middle" fill="#FFFFFF" font-family="Inter, Arial, sans-serif" font-size="16" font-weight="900">›</text>
+
+    <rect x="275" y="846" width="350" height="58" rx="20" fill="#FFFFFF" stroke="#E8EEF3"/>
+    <text x="307" y="882" fill="#8A95A3" font-family="Inter, Arial, sans-serif" font-size="22">⌂</text>
+    <text x="380" y="882" fill="#8A95A3" font-family="Inter, Arial, sans-serif" font-size="22">▦</text>
+    <text x="449" y="883" fill="#8A95A3" font-family="Inter, Arial, sans-serif" font-size="23">＋</text>
+    <text x="519" y="882" fill="#009688" font-family="Inter, Arial, sans-serif" font-size="22" font-weight="900">☷</text>
+    <text x="588" y="882" fill="#8A95A3" font-family="Inter, Arial, sans-serif" font-size="22">⚙</text>
+  </g>
+
+  <rect x="135" y="1010" width="630" height="278" rx="24" fill="#FFFFFF" stroke="#CAD6DD"/>
+  <text x="175" y="1065" fill="#145C53" font-family="Inter, Arial, sans-serif" font-size="24" font-weight="900">Intention de refonte</text>
+  <text x="175" y="1110" fill="#222B45" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800">• Garder ajout, édition, suppression, recherche, tri et quota premium</text>
+  <text x="175" y="1146" fill="#222B45" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800">• Fusionner OwnerCard / ProprietaireList en une carte unique mémoïsée</text>
+  <text x="175" y="1182" fill="#222B45" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800">• Mettre la recherche et le tri dans le header de FlatList</text>
+  <text x="175" y="1218" fill="#222B45" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800">• Éviter les données non renvoyées par le backend actuel</text>
+  <text x="175" y="1254" fill="#222B45" font-family="Inter, Arial, sans-serif" font-size="18" font-weight="800">• Préparer une implémentation légère avec callbacks stables</text>
+</svg>
