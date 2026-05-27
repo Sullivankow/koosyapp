@@ -1,92 +1,143 @@
-// Écran listant tous les biens de l'utilisateur.
-// - Récupère les biens via le hook `useBiens`
-// - Gère la recherche, le tri, l'édition inline et la suppression
-// - Permet aussi de modifier le statut d'un bien (disponible / occupé)
+// Ecran listant tous les biens de l'utilisateur.
+// La refonte garde les fonctionnalites existantes :
+// ajout, recherche, tri, filtre local, edition inline, suppression, statut, zoom photo et quota premium.
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { View, Text, FlatList, TouchableOpacity, Image, Modal } from 'react-native';
-import BienCard from '../../components/cards/biens/BienCard';
-
-import StatusModal, { StatusValue } from '../../components/modals/StatusModal';
-import { useTheme } from '../../contexts/ThemeContext';
-
-import { Bien } from '../../models/models';
-import useBiens from '../../hooks/useBiens';
-import useBiensSearchSort from '../../hooks/useBiensSearchSort';
-import AddBienModal from '../../components/modals/AddBienModal';
-import SearchBar from '../../ui/SearchBar';
+import { View, Text, FlatList, TouchableOpacity, Image, Modal, TextInput, ActivityIndicator } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from '@react-navigation/native';
+
+import BienCard from '../../components/cards/biens/BienCard';
+import StatusModal, { StatusValue } from '../../components/modals/StatusModal';
+import AddBienModal from '../../components/modals/AddBienModal';
+import SubscriptionPaywallModal from '../../components/modals/SubscriptionPaywallModal';
 import SuccesMessage from '../../components/SuccesMessage';
+
+import { useTheme } from '../../contexts/ThemeContext';
 import { useBienCount } from '../../contexts/BienCountContext';
 import { useTache } from '../../contexts/TacheContext';
 import { useTacheCount } from '../../contexts/TacheCountContext';
 import { usePrestationsCount } from '../../contexts/PrestationsCountContext';
-import { useNavigation, useRoute } from '@react-navigation/native';
 import { useGlobalRefresh } from '../../contexts/GlobalRefreshContext';
+import useBiens from '../../hooks/useBiens';
+import useBiensSearchSort from '../../hooks/useBiensSearchSort';
+
+import { Bien } from '../../models/models';
 import { styles } from './styles/BienScreen.styles';
 import { getChiffreAffaire } from '../../utils/prestationsApi';
 import { getBienQuota } from '../../utils/bienApi';
 import type { BienQuota } from '../../utils/bienApi';
-import SubscriptionPaywallModal from '../../components/modals/SubscriptionPaywallModal';
+
+type BienStatusFilter = 'tous' | StatusValue | 'avec_reservation';
+
+const PAGE_SIZE = 20;
 
 const BiensScreen: React.FC = () => {
   const route: any = useRoute();
   const navigation: any = useNavigation();
   const focusBienId = route?.params?.focusBienId as string | undefined;
   const listRef = useRef<any>(null);
+
+  const { colors } = useTheme();
   const { lastBienAdded, signalBienAdded } = useBienCount();
   const { lastTacheAdded } = useTache();
   const { tacheCount } = useTacheCount();
   const { prestationsTerminees } = usePrestationsCount();
+  const { signalRefresh } = useGlobalRefresh();
+
   const [statutModalVisible, setStatutModalVisible] = useState(false);
   const [currentStatusBienId, setCurrentStatusBienId] = useState<string | null>(null);
   const [currentBienStatus, setCurrentBienStatus] = useState<StatusValue | undefined>(undefined);
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState<BienStatusFilter>('tous');
+  const [page, setPage] = useState(1);
   const [addBienModalVisible, setAddBienModalVisible] = useState(false);
   const [photoModalVisible, setPhotoModalVisible] = useState(false);
   const [selectedPhoto, setSelectedPhoto] = useState<any>(null);
-  const [editModalData, setEditModalData] = useState<{ visible: boolean; bienId?: string; initialData?: any }>({ visible: false });
   const [successMsg, setSuccessMsg] = useState('');
   const [totalPerBienMap, setTotalPerBienMap] = useState<Record<string, number>>({});
   const totalPerBienMapRef = useRef<Record<string, number>>({});
   const [bienQuota, setBienQuota] = useState<BienQuota | null>(null);
   const [showSubscriptionPaywall, setShowSubscriptionPaywall] = useState(false);
-  const { colors } = useTheme();
 
-  // Stabilisation de colors via useMemo : evite de recreer renderItem a chaque render
-  // (useTheme() retourne un nouvel objet a chaque appel meme si les valeurs sont identiques)
+  // Stabilise la palette transmise aux cartes pour limiter les re-renders de FlatList.
   const stableColors = useMemo(() => colors, [
+    colors.background,
     colors.surface,
     colors.primary,
     colors.secondary,
     colors.accent,
     colors.error,
+    colors.success,
     colors.text,
     colors.textSecondary,
+    colors.border,
+    colors.shadow,
   ]);
 
-  // Récupération des biens (ajout de tacheCount comme dépendance)
-  const { biens, fetchBiens, updateBienById, deleteBienById } = useBiens([lastBienAdded, lastTacheAdded, tacheCount, prestationsTerminees]);
+  // Charge la liste complete des biens avec les relations deja exposees par le backend.
+  const { biens, fetchBiens, updateBienById, deleteBienById, loading } = useBiens([
+    lastBienAdded,
+    lastTacheAdded,
+    tacheCount,
+    prestationsTerminees,
+  ]);
 
-  // Recherche locale
-  const filteredBiens = useMemo(() => biens.filter(b =>
-    b.nom.toLowerCase().includes(search.toLowerCase()) ||
-    b.adresse.toLowerCase().includes(search.toLowerCase())
-  ), [biens, search]);
+  // Filtrage local : evite de solliciter le backend a chaque frappe dans la recherche.
+  const filteredBiens = useMemo(() => {
+    const normalizedSearch = search.trim().toLowerCase();
 
-  // Tri via hook personnalisé
+    return biens.filter((bien) => {
+      const matchesSearch =
+        !normalizedSearch ||
+        String(bien.nom || '').toLowerCase().includes(normalizedSearch) ||
+        String(bien.adresse || '').toLowerCase().includes(normalizedSearch) ||
+        String(bien.type || '').toLowerCase().includes(normalizedSearch) ||
+        String(bien.proprio?.nom || '').toLowerCase().includes(normalizedSearch);
+
+      const matchesStatus =
+        statusFilter === 'tous' ||
+        (statusFilter === 'avec_reservation'
+          ? Boolean(bien.reservations && bien.reservations.length > 0)
+          : bien.statut === statusFilter);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [biens, search, statusFilter]);
+
   const { sortOrder, setSortOrder, sortedBiens } = useBiensSearchSort(filteredBiens);
-
-  // Pagination locale (chargement progressif)
-  const PAGE_SIZE = 20;
-  const [page, setPage] = useState(1);
   const paginatedBiens = useMemo(() => sortedBiens.slice(0, page * PAGE_SIZE), [sortedBiens, page]);
 
-  const handleLoadMore = useCallback(() => {
-    setPage(prev => prev + 1);
-  }, []);
+  // Stats du portefeuille affichees dans le hero, recalculees uniquement quand la liste change.
+  const biensStats = useMemo(() => {
+    return biens.reduce(
+      (acc, bien) => {
+        acc.total += 1;
+        if (bien.statut === 'disponible') acc.disponibles += 1;
+        if (bien.statut === 'occupé') acc.occupes += 1;
+        if (bien.statut === 'travaux') acc.travaux += 1;
+        return acc;
+      },
+      { total: 0, disponibles: 0, occupes: 0, travaux: 0 }
+    );
+  }, [biens]);
 
-  // Effet : si un identifiant de bien est passé en paramètre de navigation,
-  // on scrolle automatiquement jusqu'à ce bien dans la liste.
+  const isQuotaReached = useMemo(() => Boolean(
+    bienQuota?.isLimited && (bienQuota.remaining ?? 0) <= 0,
+  ), [bienQuota]);
+
+  const handleLoadMore = useCallback(() => {
+    setPage((prev) => {
+      const nextSize = prev * PAGE_SIZE;
+      return nextSize >= sortedBiens.length ? prev : prev + 1;
+    });
+  }, [sortedBiens.length]);
+
+  // Quand l'utilisateur change les criteres, on repart du debut de la pagination locale.
+  useEffect(() => {
+    setPage(1);
+  }, [search, statusFilter, sortOrder]);
+
+  // Si l'ecran est ouvert avec focusBienId, on scrolle vers le bien cible apres le tri.
   useEffect(() => {
     if (focusBienId && sortedBiens.length > 0 && listRef.current) {
       const index = sortedBiens.findIndex((b: any) => b.id === focusBienId);
@@ -94,21 +145,18 @@ const BiensScreen: React.FC = () => {
         setTimeout(() => {
           try {
             listRef.current.scrollToIndex({ index, animated: true, viewPosition: 0.4 });
-          } catch (err) {
+          } catch {
             try {
-              const CARD_HEIGHT = 340;
-              const offset = CARD_HEIGHT * index;
-              listRef.current.scrollToOffset({ offset, animated: true });
+              listRef.current.scrollToOffset({ offset: 320 * index, animated: true });
             } catch {}
           }
         }, 300);
       }
       navigation.setParams({ focusBienId: undefined });
     }
-  }, [focusBienId, sortedBiens]);
+  }, [focusBienId, navigation, sortedBiens]);
 
-  // Charge les totaux historiques des prestations terminées par bien.
-  // Un seul appel API agrégé, puis mapping bienId -> total_euros.
+  // Charge les totaux historiques des prestations terminees par bien via l'endpoint agrege.
   useEffect(() => {
     const loadTotalsPerBien = async () => {
       try {
@@ -127,13 +175,14 @@ const BiensScreen: React.FC = () => {
         totalPerBienMapRef.current = nextMap;
       } catch {
         setTotalPerBienMap({});
+        totalPerBienMapRef.current = {};
       }
     };
 
     loadTotalsPerBien();
   }, [prestationsTerminees, lastBienAdded]);
 
-  // Charge le quota de créations de biens pour savoir si l'utilisateur gratuit a atteint sa limite.
+  // Recupere le quota pour conserver le comportement premium/gratuit existant.
   useEffect(() => {
     const loadBienQuota = async () => {
       try {
@@ -147,12 +196,6 @@ const BiensScreen: React.FC = () => {
     loadBienQuota();
   }, [lastBienAdded]);
 
-  // Indique si la limite de création est atteinte pour un compte limité (plan gratuit).
-  const isQuotaReached = useMemo(() => Boolean(
-    bienQuota?.isLimited && (bienQuota.remaining ?? 0) <= 0,
-  ), [bienQuota]);
-
-  // Gère le bouton "+" : ouvre la modale d'ajout si possible, sinon affiche directement l'offre d'abonnement.
   const handleAddBienPress = useCallback(() => {
     if (isQuotaReached) {
       setShowSubscriptionPaywall(true);
@@ -161,7 +204,6 @@ const BiensScreen: React.FC = () => {
     setAddBienModalVisible(true);
   }, [isQuotaReached]);
 
-  // Callbacks memoisees pour eviter les re-renders de la FlatList
   const formatDateFR = useCallback((dateStr?: string) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -169,9 +211,8 @@ const BiensScreen: React.FC = () => {
     return d.toLocaleDateString('fr-FR');
   }, []);
 
-  // Gestion modales et callbacks
-  // Enregistre en base les modifications d'un bien édité inline depuis la carte.
-  const handleEditBienInline = React.useCallback(async (bienModifie: Bien) => {
+  // Sauvegarde l'edition inline d'une carte en gardant le payload attendu par le DTO backend.
+  const handleEditBienInline = useCallback(async (bienModifie: Bien) => {
     try {
       const payload: any = {
         ...bienModifie,
@@ -180,21 +221,24 @@ const BiensScreen: React.FC = () => {
         proprietaireTelephone: bienModifie.proprio?.telephone || '',
       };
       await updateBienById(bienModifie.id, payload);
-      setSuccessMsg('Bien modifié avec succès !');
+      setSuccessMsg('Bien modifie avec succes !');
       signalBienAdded();
       setTimeout(() => setSuccessMsg(''), 1800);
     } catch (e) {
       console.log('Erreur updateBienById:', e);
-      setSuccessMsg("Erreur lors de la modification du bien");
+      setSuccessMsg('Erreur lors de la modification du bien');
       setTimeout(() => setSuccessMsg(''), 1800);
     }
-  }, [updateBienById, signalBienAdded]);
-  const openStatusModal = React.useCallback((bien: Bien) => {
+  }, [signalBienAdded, updateBienById]);
+
+  const openStatusModal = useCallback((bien: Bien) => {
     setCurrentStatusBienId(bien.id);
     setCurrentBienStatus(bien.statut === 'disponible' || bien.statut === 'occupé' ? bien.statut : undefined);
     setStatutModalVisible(true);
   }, []);
-  const handleSelectStatus = React.useCallback(async (status: StatusValue) => {
+
+  // Changement de statut : recharge le bien complet pour ne pas perdre les champs requis au PATCH.
+  const handleSelectStatus = useCallback(async (status: StatusValue) => {
     if (!currentStatusBienId) return;
     try {
       const bienApi = await import('../../utils/bienApi');
@@ -209,14 +253,16 @@ const BiensScreen: React.FC = () => {
         type: fullBien.type || '',
         superficie: Number(fullBien.superficie) || 0,
         pieces: Number(fullBien.pieces) || 0,
-        equipements: Array.isArray(fullBien.equipements) ? fullBien.equipements : (fullBien.equipements ? String(fullBien.equipements).split(',').map((s: string) => s.trim()) : []),
+        equipements: Array.isArray(fullBien.equipements)
+          ? fullBien.equipements
+          : (fullBien.equipements ? String(fullBien.equipements).split(',').map((s: string) => s.trim()) : []),
         photos: fullBien.photos || fullBien.images || [],
         statut: status,
         lat: fullBien.lat,
         lng: fullBien.lng,
       } as any;
       await updateBienById(currentStatusBienId, payload);
-      setSuccessMsg('Statut mis à jour');
+      setSuccessMsg('Statut mis a jour');
       signalBienAdded();
       setTimeout(() => setSuccessMsg(''), 1800);
     } catch {}
@@ -225,28 +271,45 @@ const BiensScreen: React.FC = () => {
       setCurrentStatusBienId(null);
       setCurrentBienStatus(undefined);
     }
-  }, [currentStatusBienId, updateBienById, signalBienAdded]);
-  const { signalRefresh } = useGlobalRefresh();
+  }, [currentStatusBienId, signalBienAdded, updateBienById]);
 
-  const handleSupprimerBien = React.useCallback(async (bienId: string) => {
+  const handleSupprimerBien = useCallback(async (bienId: string) => {
     try {
       await deleteBienById(bienId);
-      setSuccessMsg('Bien supprimé avec succès !');
+      setSuccessMsg('Bien supprime avec succes !');
       signalBienAdded();
       signalRefresh();
       setTimeout(() => setSuccessMsg(''), 2000);
     } catch {}
   }, [deleteBienById, signalBienAdded, signalRefresh]);
 
-  const handlePhotoPress = React.useCallback((photo: any) => {
+  const handlePhotoPress = useCallback((photo: any) => {
     setSelectedPhoto(photo);
     setPhotoModalVisible(true);
   }, []);
 
-  // Mémoïsation du renderItem pour FlatList
-  // On utilise totalPerBienMapRef pour eviter de recrer le callback quand totalPerBienMap change.
-  const renderItem = React.useCallback(
-    ({ item }: { item: any }) => (
+  const renderFilterChip = useCallback((label: string, value: BienStatusFilter) => {
+    const isActive = statusFilter === value;
+
+    return (
+      <TouchableOpacity
+        key={value}
+        onPress={() => setStatusFilter(value)}
+        style={[
+          styles.filterChip,
+          {
+            backgroundColor: isActive ? `${colors.primary}16` : colors.surface,
+            borderColor: isActive ? `${colors.primary}44` : colors.border,
+          },
+        ]}
+      >
+        <Text style={[styles.filterChipText, { color: isActive ? colors.primary : colors.textSecondary }]}>{label}</Text>
+      </TouchableOpacity>
+    );
+  }, [colors.border, colors.primary, colors.surface, colors.textSecondary, statusFilter]);
+
+  const renderItem = useCallback(
+    ({ item }: { item: Bien }) => (
       <BienCard
         bien={item}
         colors={stableColors}
@@ -258,109 +321,184 @@ const BiensScreen: React.FC = () => {
         totalPrestationPercu={totalPerBienMapRef.current[String(item.id)] ?? 0}
       />
     ),
-    [stableColors, handleEditBienInline, handleSupprimerBien, openStatusModal, handlePhotoPress, formatDateFR]
+    [formatDateFR, handleEditBienInline, handlePhotoPress, handleSupprimerBien, openStatusModal, stableColors]
   );
 
+  // Header memoise pour que la FlatList conserve des cartes stables pendant les interactions.
+  const listHeader = useMemo(() => (
+    <View>
+      <View style={[styles.hero, { backgroundColor: colors.primary }]}>
+        <View style={styles.heroTopRow}>
+          <View>
+            <Text style={styles.heroEyebrow}>Portefeuille immobilier</Text>
+            <Text style={styles.heroTitle}>Mes biens</Text>
+          </View>
+          <TouchableOpacity style={[styles.heroAddBtn, { backgroundColor: colors.surface }]} onPress={handleAddBienPress}>
+            <MaterialCommunityIcons name="plus" size={24} color={colors.primary} />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.statsGrid}>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{biensStats.total}</Text>
+            <Text style={styles.statLabel}>Biens actifs</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{biensStats.disponibles}</Text>
+            <Text style={styles.statLabel}>Disponibles</Text>
+          </View>
+          <View style={styles.statCard}>
+            <Text style={styles.statValue}>{biensStats.occupes}</Text>
+            <Text style={styles.statLabel}>Occupes</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={[styles.controlPanel, { backgroundColor: colors.surface, borderColor: colors.border, shadowColor: colors.shadow }]}>
+        <View style={styles.searchRow}>
+          <View style={[styles.searchBox, { backgroundColor: colors.background, borderColor: colors.border }]}>
+            <MaterialCommunityIcons name="magnify" size={20} color={colors.textSecondary} />
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder="Rechercher un bien, une adresse..."
+              placeholderTextColor={colors.textSecondary}
+              style={[styles.searchInput, { color: colors.text }]}
+              returnKeyType="search"
+            />
+          </View>
+
+          <TouchableOpacity
+            style={[styles.sortButton, { backgroundColor: colors.primary }]}
+            onPress={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+          >
+            <MaterialCommunityIcons
+              name={sortOrder === 'asc' ? 'sort-calendar-ascending' : 'sort-calendar-descending'}
+              size={21}
+              color={colors.surface}
+            />
+          </TouchableOpacity>
+        </View>
+
+        <View style={styles.filtersRow}>
+          {renderFilterChip('Tous', 'tous')}
+          {renderFilterChip('Disponibles', 'disponible')}
+          {renderFilterChip('Occupes', 'occupé')}
+          {renderFilterChip('Avec resa', 'avec_reservation')}
+        </View>
+      </View>
+
+      {isQuotaReached ? (
+        <View style={[styles.upgradeCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={[styles.upgradeIcon, { backgroundColor: `${colors.secondary}18` }]}>
+            <MaterialCommunityIcons name="crown" size={19} color={colors.secondary} />
+          </View>
+          <View style={styles.upgradeCopy}>
+            <Text style={[styles.upgradeTitle, { color: colors.text }]}>
+              Limite atteinte: {bienQuota?.used ?? 5}/{bienQuota?.limit ?? 5} creations utilisees
+            </Text>
+            <Text style={[styles.upgradeText, { color: colors.textSecondary }]}>
+              Passez au premium pour continuer a creer des biens sans limite.
+            </Text>
+          </View>
+          <TouchableOpacity style={[styles.upgradeButton, { backgroundColor: colors.primary }]} onPress={() => setShowSubscriptionPaywall(true)}>
+            <MaterialCommunityIcons name="arrow-right" size={18} color={colors.surface} />
+          </TouchableOpacity>
+        </View>
+      ) : null}
+
+      <View style={styles.listTitleRow}>
+        <Text style={[styles.listTitle, { color: colors.text }]}>A superviser</Text>
+        <Text style={[styles.listMeta, { color: colors.primary }]}>{paginatedBiens.length}/{sortedBiens.length}</Text>
+      </View>
+    </View>
+  ), [
+    bienQuota?.limit,
+    bienQuota?.used,
+    biensStats.disponibles,
+    biensStats.occupes,
+    biensStats.total,
+    colors.background,
+    colors.border,
+    colors.primary,
+    colors.secondary,
+    colors.shadow,
+    colors.surface,
+    colors.text,
+    colors.textSecondary,
+    handleAddBienPress,
+    isQuotaReached,
+    paginatedBiens.length,
+    renderFilterChip,
+    search,
+    sortOrder,
+    sortedBiens.length,
+    setSortOrder,
+  ]);
+
   return (
-    <View style={[styles.container, { backgroundColor: colors.background }]}> 
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <SuccesMessage message={successMsg} />
-      {addBienModalVisible && !editModalData.visible && (
+
+      {addBienModalVisible ? (
         <AddBienModal
           visible={addBienModalVisible}
           onClose={() => setAddBienModalVisible(false)}
-          onSuccess={() => { fetchBiens(); signalBienAdded(); }}
-        />
-      )}
-      <StatusModal visible={statutModalVisible} onClose={() => setStatutModalVisible(false)} onSelect={handleSelectStatus} currentStatus={currentBienStatus} />
-      <View style={[styles.headerSticky, { backgroundColor: colors.surface }]}> 
-        <Text style={[styles.title, { color: colors.text }]}>Mes biens</Text>
-        <TouchableOpacity style={[styles.addBtn, { backgroundColor: colors.primary }]} onPress={handleAddBienPress}>
-          <MaterialCommunityIcons name="plus" size={22} color={colors.surface} />
-        </TouchableOpacity>
-      </View>
-      {/* Affiche une carte d'upgrade uniquement quand l'utilisateur gratuit a atteint la limite de créations. */}
-      {isQuotaReached && (
-        <View
-          style={{
-            marginHorizontal: 16,
-            marginTop: 12,
-            marginBottom: 2,
-            padding: 12,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: colors.border,
-            backgroundColor: colors.surface,
+          onSuccess={() => {
+            fetchBiens();
+            signalBienAdded();
+            setAddBienModalVisible(false);
           }}
-        >
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-            <MaterialCommunityIcons name="crown" size={18} color={colors.primary} />
-            <Text style={{ marginLeft: 8, fontWeight: '700', color: colors.text }}>
-              Limite atteinte: {bienQuota?.used ?? 5}/{bienQuota?.limit ?? 5} créations utilisées
-            </Text>
-          </View>
-          <Text style={{ color: colors.textSecondary, marginBottom: 10 }}>
-            Passez au plan premium pour continuer à créer des biens sans limite.
-          </Text>
-          <TouchableOpacity
-            style={{
-              alignSelf: 'flex-start',
-              paddingHorizontal: 12,
-              paddingVertical: 8,
-              borderRadius: 8,
-              backgroundColor: colors.primary,
-            }}
-            onPress={() => setShowSubscriptionPaywall(true)}
-          >
-            <Text style={{ color: colors.surface, fontWeight: '700' }}>Voir l’abonnement</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      <View style={{ flexDirection: 'row', alignItems: 'center', marginHorizontal: 16, marginBottom: 8, marginTop: 18 }}>
-        <View style={{ flex: 1 }}>
-          <SearchBar
-            value={search}
-            onChangeText={setSearch}
-            placeholder="Rechercher un bien..."
-            style={{ backgroundColor: 'transparent' }}
-          />
-        </View>
-        <TouchableOpacity
-          style={{ marginLeft: 8, padding: 8, backgroundColor: colors.primary, borderRadius: 8 }}
-          onPress={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-        >
-          <MaterialCommunityIcons
-            name={sortOrder === 'asc' ? 'arrow-up' : 'arrow-down'}
-            size={24}
-            color={colors.surface}
-          />
-        </TouchableOpacity>
-      </View>
+        />
+      ) : null}
+
+      <StatusModal
+        visible={statutModalVisible}
+        onClose={() => setStatutModalVisible(false)}
+        onSelect={handleSelectStatus}
+        currentStatus={currentBienStatus}
+      />
+
       <FlatList
         ref={listRef}
         data={paginatedBiens}
-        keyExtractor={item => String(item.id)}
-        contentContainerStyle={{ paddingBottom: 30, paddingTop: 10 }}
-        getItemLayout={(_, index) => ({ length: 340, offset: 340 * index, index })}
+        keyExtractor={(item) => String(item.id)}
+        contentContainerStyle={styles.listContent}
+        ListHeaderComponent={listHeader}
+        ListEmptyComponent={!loading ? (
+          <View style={[styles.emptyState, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <MaterialCommunityIcons name="home-search-outline" size={30} color={colors.primary} />
+            <Text style={[styles.emptyTitle, { color: colors.text }]}>Aucun bien trouve</Text>
+            <Text style={[styles.emptyText, { color: colors.textSecondary }]}>Essayez une autre recherche ou un autre filtre.</Text>
+          </View>
+        ) : null}
+        ListFooterComponent={loading ? (
+          <View style={styles.loadingFooter}>
+            <ActivityIndicator color={colors.primary} />
+          </View>
+        ) : null}
         renderItem={renderItem}
         initialNumToRender={8}
-        maxToRenderPerBatch={8}
-        windowSize={11}
+        maxToRenderPerBatch={6}
+        updateCellsBatchingPeriod={50}
+        windowSize={7}
         removeClippedSubviews={true}
         extraData={totalPerBienMap}
         onEndReached={handleLoadMore}
         onEndReachedThreshold={0.2}
       />
-      {/* Suppression de la modale d'édition sur l'icône modifier */}
+
       <Modal visible={photoModalVisible} transparent animationType="fade">
         <View style={styles.modalOverlay}>
           <TouchableOpacity style={styles.closeBtn} onPress={() => setPhotoModalVisible(false)}>
             <MaterialCommunityIcons name="close" size={32} color="#fff" />
           </TouchableOpacity>
-          {selectedPhoto && (
+          {selectedPhoto ? (
             <Image source={{ uri: selectedPhoto }} style={styles.modalPhoto} resizeMode="contain" />
-          )}
+          ) : null}
         </View>
       </Modal>
+
       <SubscriptionPaywallModal
         isOpen={showSubscriptionPaywall}
         onClose={() => setShowSubscriptionPaywall(false)}
@@ -371,16 +509,3 @@ const BiensScreen: React.FC = () => {
 };
 
 export default BiensScreen;
-
-
-
-
-
-
-
-
-
-
-
-
-

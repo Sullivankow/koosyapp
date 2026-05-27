@@ -105,7 +105,7 @@ export default function useBiens(deps: unknown[] = []) {
   }, deps);
 
   // Mise à jour d'un bien
-  const updateBienById = async (id: string, payload: any) => {
+  const updateBienById = useCallback(async (id: string, payload: any) => {
     setLoading(true);
     setError(null);
     try {
@@ -118,10 +118,10 @@ export default function useBiens(deps: unknown[] = []) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchBiens]);
 
   // Suppression d'un bien
-  const deleteBienById = async (id: string) => {
+  const deleteBienById = useCallback(async (id: string) => {
     setLoading(true);
     setError(null);
     try {
@@ -132,7 +132,7 @@ export default function useBiens(deps: unknown[] = []) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [fetchBiens]);
 
   return {
     biens,
