@@ -29,6 +29,14 @@ import type { BienQuota } from '../../utils/bienApi';
 
 type BienStatusFilter = 'tous' | StatusValue | 'avec_reservation';
 
+/**
+ * BiensScreen
+ *
+ * Affiche la liste paginée des biens, propose recherche/tri/filtre local,
+ * édition inline, changement de statut et visualisation des photos.
+ * Les callbacks exposés (onEdit/onDelete/onStatus) sont memoisés pour limiter
+ * les rerenders des cartes.
+ */
 const PAGE_SIZE = 20;
 
 const BiensScreen: React.FC = () => {
@@ -204,6 +212,10 @@ const BiensScreen: React.FC = () => {
     setAddBienModalVisible(true);
   }, [isQuotaReached]);
 
+  /**
+   * formatDateFR - renvoie une date formatée pour l'affichage FR.
+   * Gère les valeurs invalides en renvoyant une chaîne vide ou la valeur d'origine.
+   */
   const formatDateFR = useCallback((dateStr?: string) => {
     if (!dateStr) return '';
     const d = new Date(dateStr);
@@ -212,6 +224,10 @@ const BiensScreen: React.FC = () => {
   }, []);
 
   // Sauvegarde l'edition inline d'une carte en gardant le payload attendu par le DTO backend.
+  /**
+   * handleEditBienInline - sauvegarde une modification inline d'un bien.
+   * Construit le payload attendu par l'API et déclenche un signal de refresh.
+   */
   const handleEditBienInline = useCallback(async (bienModifie: Bien) => {
     try {
       const payload: any = {
@@ -225,7 +241,8 @@ const BiensScreen: React.FC = () => {
       signalBienAdded();
       setTimeout(() => setSuccessMsg(''), 1800);
     } catch (e) {
-      console.log('Erreur updateBienById:', e);
+      // Logguer en WARN pour conserver un feedback en dev sans casser l'app.
+      console.warn('Erreur updateBienById:', e);
       setSuccessMsg('Erreur lors de la modification du bien');
       setTimeout(() => setSuccessMsg(''), 1800);
     }
@@ -238,6 +255,10 @@ const BiensScreen: React.FC = () => {
   }, []);
 
   // Changement de statut : recharge le bien complet pour ne pas perdre les champs requis au PATCH.
+  /**
+   * handleSelectStatus - met à jour le statut d'un bien en récupérant
+   * d'abord l'entité complète côté API pour préserver les champs requis.
+   */
   const handleSelectStatus = useCallback(async (status: StatusValue) => {
     if (!currentStatusBienId) return;
     try {
@@ -273,6 +294,9 @@ const BiensScreen: React.FC = () => {
     }
   }, [currentStatusBienId, signalBienAdded, updateBienById]);
 
+  /**
+   * handleSupprimerBien - supprime un bien et signale le rafraîchissement global.
+   */
   const handleSupprimerBien = useCallback(async (bienId: string) => {
     try {
       await deleteBienById(bienId);
@@ -283,11 +307,17 @@ const BiensScreen: React.FC = () => {
     } catch {}
   }, [deleteBienById, signalBienAdded, signalRefresh]);
 
+  /**
+   * handlePhotoPress - ouvre la modal d'affichage d'une photo.
+   */
   const handlePhotoPress = useCallback((photo: any) => {
     setSelectedPhoto(photo);
     setPhotoModalVisible(true);
   }, []);
 
+  /**
+   * renderFilterChip - rend un bouton filtre pour le panneau de contrôle.
+   */
   const renderFilterChip = useCallback((label: string, value: BienStatusFilter) => {
     const isActive = statusFilter === value;
 
@@ -308,6 +338,10 @@ const BiensScreen: React.FC = () => {
     );
   }, [colors.border, colors.primary, colors.surface, colors.textSecondary, statusFilter]);
 
+  /**
+   * renderItem - wrapper stable utilisé par FlatList pour rendre chaque carte.
+   * Les callbacks sont memoisés pour préserver l'identité et limiter les re-renders.
+   */
   const renderItem = useCallback(
     ({ item }: { item: Bien }) => (
       <BienCard

@@ -31,18 +31,18 @@ interface BienCardProps {
   formatDateFR: (dateStr?: string) => string;
 }
 
-// Evite de redessiner une carte si ses donnees utiles et ses callbacks n'ont pas change.
-const shouldReRender = (prev: Readonly<BienCardProps>, next: Readonly<BienCardProps>) => {
-  if (prev.bien !== next.bien) return false;
-  if (prev.totalPrestationPercu !== next.totalPrestationPercu) return false;
-  if (prev.onEdit !== next.onEdit) return false;
-  if (prev.onDelete !== next.onDelete) return false;
-  if (prev.onStatus !== next.onStatus) return false;
-  if (prev.onPhotoPress !== next.onPhotoPress) return false;
-
+/**
+ * arePropsEqual: comparaison fine des props utilisée par React.memo.
+ * Retourne true si les props sont strictement égales et que la carte
+ * peut être ignorée lors du re-rendering. Cette implémentation compare
+ * les références des objets (performant) et les valeurs de la palette
+ * de couleurs pour éviter des rerenders inutilement fréquents.
+ */
+const arePropsEqual = (prev: Readonly<BienCardProps>, next: Readonly<BienCardProps>) => {
   const pc = prev.colors;
   const nc = next.colors;
-  return pc.background === nc.background &&
+  const colorsEqual =
+    pc.background === nc.background &&
     pc.surface === nc.surface &&
     pc.primary === nc.primary &&
     pc.secondary === nc.secondary &&
@@ -53,6 +53,16 @@ const shouldReRender = (prev: Readonly<BienCardProps>, next: Readonly<BienCardPr
     pc.textSecondary === nc.textSecondary &&
     pc.border === nc.border &&
     pc.shadow === nc.shadow;
+
+  return (
+    prev.bien === next.bien &&
+    prev.totalPrestationPercu === next.totalPrestationPercu &&
+    prev.onEdit === next.onEdit &&
+    prev.onDelete === next.onDelete &&
+    prev.onStatus === next.onStatus &&
+    prev.onPhotoPress === next.onPhotoPress &&
+    colorsEqual
+  );
 };
 
 const ReservationItem = React.memo(({ resa, colors, formatDateFR }: { resa: any; colors: BienCardProps['colors']; formatDateFR: (d?: string) => string }) => (
@@ -404,4 +414,4 @@ function BienCard(props: BienCardProps) {
   );
 }
 
-export default React.memo(BienCard, shouldReRender);
+export default React.memo(BienCard, arePropsEqual);

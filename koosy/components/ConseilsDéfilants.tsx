@@ -37,12 +37,17 @@ export default function ConseilsDéfilants() {
 	const keyExtractor = useCallback((_: string, i: number) => i.toString(), []);
 
 	useEffect(() => {
+		// Utiliser la mise à jour fonctionnelle pour éviter de capturer une valeur
+		// stale de `index` et scroller vers l'index calculé.
 		const timer = setInterval(() => {
-			setIndex((prev) => (prev + 1) % conseils.length);
-			flatListRef.current?.scrollToIndex({ index: (index + 1) % conseils.length, animated: true });
+			setIndex((prev) => {
+				const next = (prev + 1) % conseils.length;
+				flatListRef.current?.scrollToIndex({ index: next, animated: true });
+				return next;
+			});
 		}, 5000);
 		return () => clearInterval(timer);
-	}, [index]);
+	}, []);
 
 	return (
 		<View style={styles.container}>

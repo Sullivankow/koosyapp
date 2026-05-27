@@ -116,7 +116,8 @@ export default function App() {
 
   if (isLoading) return <SplashScreen />;
   if (showOnboarding) {
-    console.log('Affichage de l\'onboarding !');
+    // Debug: onboarding affiché (ne pas spammer la console en prod)
+    console.debug('Affichage de l\'onboarding');
     return (
       <OnBoarding
         onFinish={async () => {

@@ -3,14 +3,20 @@ import { getBiens, updateBien, deleteBien, getImageUrl } from '../utils/bienApi'
 import type { Bien } from '../models/models';
 
 /**
- * Hook personnalisé pour gérer la liste des biens et les opérations associées
+ * useBiens hook
+ *
+ * Hook personnalisé pour gérer la liste des biens et les opérations associées.
  * Fournit :
- * - biens : liste des biens
- * - fetchBiens : fonction pour rafraîchir la liste
- * - updateBienById : fonction pour mettre à jour un bien
- * - deleteBienById : fonction pour supprimer un bien
- * - loading : booléen de chargement
- * - error : message d'erreur éventuel
+ * - `biens` : liste des biens
+ * - `fetchBiens` : fonction pour rafraîchir la liste
+ * - `updateBienById` : fonction pour mettre à jour un bien
+ * - `deleteBienById` : fonction pour supprimer un bien
+ * - `loading` : booléen de chargement
+ * - `error` : message d'erreur éventuel
+ *
+ * @param deps - tableau de dépendances : lorsque ces valeurs changent, le hook rafraîchit la liste des biens.
+ *               Exemple : [lastBienAdded, lastTacheAdded, tacheCount]
+ * @returns {Object} - { biens, fetchBiens, updateBienById, deleteBienById, loading, error, setBiens }
  */
 export default function useBiens(deps: unknown[] = []) {
   const [biens, setBiens] = useState<Bien[]>([]);
