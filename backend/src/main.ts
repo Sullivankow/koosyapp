@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import * as express from 'express';
-import { join } from 'path';
+import { join } from 'node:path';
 import helmet from 'helmet';
 
 async function bootstrap() {

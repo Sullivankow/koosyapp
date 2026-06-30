@@ -30,7 +30,7 @@ import { ReservationRefreshProvider } from './contexts/ReservationRefreshContext
 import { NotificationCountProvider } from './contexts/NotificationCountContext';
 import { ChiffreAffaireRefreshProvider } from './contexts/ChiffreAffaireRefreshContext';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
-import ParametresStack from './screens/Navigation/ParametresStack';
+import ParametresStack from './screens/navigation/ParametresStack';
 import NotificationScreen from './screens/Layout/NotificationScreen';
 import { PrestationsCountProvider } from './contexts/PrestationsCountContext';
 import { AppContext } from './contexts/AppContext';
@@ -290,4 +290,3 @@ export default function App() {
     </AppContext.Provider>
   );
 }
-

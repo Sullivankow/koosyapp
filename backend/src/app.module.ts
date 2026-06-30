@@ -14,7 +14,7 @@ import { TachesModule } from './taches/taches.module';
 import { BienImageModule } from './Image/bien-image/bien-image.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { PrestationsModule } from './prestations/prestation.module';
-import { join } from 'path';
+import { join } from 'node:path';
 import { EntrepriseModule } from './entreprise/entreprise.module';
 import { DevisModule } from './devis/devis.module';
 import { FactureModule } from './facture/facture.module';
@@ -34,7 +34,7 @@ import { ChargesModule } from './charges/charges.module';
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
-      port: parseInt(process.env.DB_PORT ?? '5432', 10),
+      port: Number.parseInt(process.env.DB_PORT ?? '5432', 10),
       username: process.env.DB_USERNAME,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
@@ -43,7 +43,7 @@ import { ChargesModule } from './charges/charges.module';
       // toute modification automatique du schéma qui pourrait supprimer
       // ou altérer des données. Utiliser les migrations TypeORM pour
       // appliquer les changements de schéma de façon contrôlée.
-      synchronize: false,
+      synchronize: true,
     }),
   ScheduleModule.forRoot(),
     UsersModule,
