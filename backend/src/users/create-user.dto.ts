@@ -1,4 +1,4 @@
-import { IsDateString, IsEmail, IsOptional, IsString, MinLength, MaxLength, ValidateIf } from 'class-validator';
+import { IsDateString, IsEmail, IsIn, IsOptional, IsString, MinLength, ValidateIf } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 
@@ -23,13 +23,20 @@ export class CreateUserDto {
   prenom: string;
 
   @ApiProperty({ example: 'admin', required: false, enum: ['user', 'admin'] })
+  @IsOptional()
   @IsString()
+  @IsIn(['user', 'admin'])
   role?: 'user' | 'admin';
 
-  @ApiProperty({ example: 'premium', required: false })
+  @ApiProperty({ example: 'premium', required: false, enum: ['gratuit', 'premium'] })
+  @IsOptional()
+  @IsString()
+  @IsIn(['gratuit', 'premium'])
   abonnement?: 'gratuit' | 'premium';
    
   @ApiProperty({ example: '0601020304', required: false })
+  @IsOptional()
+  @IsString()
   telephone?: string;
 
   @ApiProperty({ example: '2026-05-06T00:00:00.000Z', required: false, description: 'Date de fin d’accès bêta' })
@@ -41,6 +48,7 @@ export class CreateUserDto {
 //DTO pour mettre à jour un utilisateur, tous les champs sont optionnels
 export class UpdateUserDto {
   @ApiProperty({ example: 'test@example.com' })
+  @IsOptional()
   @IsEmail()
   email?: string;
 
@@ -51,21 +59,30 @@ export class UpdateUserDto {
   password?: string;
 
   @ApiProperty({ example: 'Dupont' })
+  @IsOptional()
   @IsString()
   nom?: string;
 
   @ApiProperty({ example: 'Jean' })
+  @IsOptional()
   @IsString()
   prenom?: string;
 
   @ApiProperty({ example: 'admin', required: false, enum: ['user', 'admin'] })
+  @IsOptional()
   @IsString()
+  @IsIn(['user', 'admin'])
   role?: 'user' | 'admin';
 
-  @ApiProperty({ example: 'premium', required: false })
+  @ApiProperty({ example: 'premium', required: false, enum: ['gratuit', 'premium'] })
+  @IsOptional()
+  @IsString()
+  @IsIn(['gratuit', 'premium'])
   abonnement?: 'gratuit' | 'premium';
 
   @ApiProperty({ example: '0601020304', required: false })
+  @IsOptional()
+  @IsString()
   telephone?: string;
 
   @ApiProperty({ example: '2026-05-06T00:00:00.000Z', required: false, description: 'Date de fin d’accès bêta' })

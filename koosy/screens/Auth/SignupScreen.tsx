@@ -22,6 +22,8 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
     const [prenom, setPrenom] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [confirmError, setConfirmError] = useState('');
+    const [formError, setFormError] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
     const { colors } = useTheme();
 
     // Validation email (format classique)
@@ -37,7 +39,21 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
         /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).{8,}$/.test(val);
 
     const handleSignup = async () => {
+        if (isSubmitting) {
+            return;
+        }
+
+        setFormError('');
         let valid = true;
+
+        if (!nom.trim() || !prenom.trim() || !email.trim() || !password.trim() || !confirmPassword.trim()) {
+            setFormError('Tous les champs sont obligatoires.');
+            valid = false;
+        } else if (!isEmailValid(email)) {
+            setFormError("Le format de l'email est invalide.");
+            valid = false;
+        }
+
         if (!isPasswordStrong(password)) {
             setPasswordError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, un chiffre et un caractère spécial.");
             valid = false;
@@ -51,22 +67,28 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
             setConfirmError("");
         }
         if (!email.trim() || !password.trim() || !isEmailValid(email) || !valid || !nom.trim() || !prenom.trim()) {
-            // ...
             return;
         }
+
+        setIsSubmitting(true);
         try {
             await signup({ nom, prenom, email, password, role: 'user' });
             await AsyncStorage.setItem('koosy_user', JSON.stringify({ prenom }));
             onSignupSuccess?.(email, password);
         } catch (err) {
             const errorMsg = err instanceof Error ? err.message : String(err);
-            setPasswordError("Erreur lors de l'inscription : " + errorMsg);
+            setFormError("Erreur lors de l'inscription : " + errorMsg);
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     return (
         <View style={[styles.container, { backgroundColor: colors.background }]}>
             <Text style={[styles.title, { color: colors.primary }]}>Inscription</Text>
+            {formError ? (
+                <Text style={styles.errorText}>{formError}</Text>
+            ) : null}
             {/* NOM */}
             <TextInput
                 style={[styles.input, { backgroundColor: colors.surface, color: colors.text, borderColor: colors.border }]}
@@ -202,10 +224,10 @@ const SignupScreen: React.FC<SignupScreenProps> = ({ onSignupSuccess, onBack }) 
                 ) : null}
             </View>
             <Button
-                title="S'inscrire"
+                title={isSubmitting ? 'Inscription...' : "S'inscrire"}
                 onPress={handleSignup}
                 color={colors.primary}
-                disabled={!email.trim() || !password.trim() || !isEmailValid(email) || !isPasswordStrong(password) || password !== confirmPassword || !nom.trim() || !prenom.trim()}
+                disabled={isSubmitting}
             />
             <Button title="Retour" onPress={onBack} color={colors.secondary} />
         </View>
@@ -236,6 +258,12 @@ const styles = StyleSheet.create({
         // backgroundColor: colors.surface, // Utilisé dans le composant
         // borderColor: colors.border, // Utilisé dans le composant
         // color: colors.text, // Utilisé dans le composant
+    },
+    errorText: {
+        alignSelf: 'flex-start',
+        color: 'red',
+        fontSize: 13,
+        marginBottom: 10,
     },
 });
 

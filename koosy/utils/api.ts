@@ -107,6 +107,8 @@ export async function apiFetch(endpoint: string, options: RequestInit = {}) {
       const parsed = errorText ? JSON.parse(errorText) : null;
       if (parsed && typeof parsed.message === 'string') {
         message = parsed.message;
+      } else if (parsed && Array.isArray(parsed.message)) {
+        message = parsed.message.join('\n');
       }
     } catch {
       // Si le body n'est pas du JSON, on garde le texte brut.
@@ -510,4 +512,3 @@ export {
   updateProprietaire,
   deleteProprietaire,
 } from './proprietaireApi';
-

@@ -147,8 +147,8 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ onLogin, onSignup, onForgotPa
             </View>
 
             <View style={styles.linksContainer}>
-                <TouchableOpacity onPress={onSignup}>
-                    <Text style={[styles.link, { color: colors.primary }]}>Pas encore inscrit ?</Text>
+                <TouchableOpacity onPress={onSignup} hitSlop={{ top: 10, right: 20, bottom: 10, left: 20 }}>
+                    <Text style={[styles.link, { color: colors.primary }]}>Créer un compte</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={onForgotPassword}>
                     <Text style={[styles.link, { color: colors.primary }]}>Mot de passe oublié ?</Text>

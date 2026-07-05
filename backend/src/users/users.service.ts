@@ -1,12 +1,11 @@
 
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
 import { PushTokensService } from './push-tokens/push-tokens.service';
 import { CreateUserDto } from './create-user.dto';
 import * as bcrypt from 'bcrypt';
-import { NotFoundException } from '@nestjs/common';
 import { UpdateUserDto } from './create-user.dto'; 
 
 @Injectable()
@@ -17,14 +16,22 @@ export class UsersService {
     private pushTokensService: PushTokensService,
   ) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
+  async create(createUserDto: CreateUserDto): Promise<Omit<User, 'password'>> {
+    const existingUser = await this.usersRepository.findOne({ where: { email: createUserDto.email } });
+    if (existingUser) {
+      throw new ConflictException('Un compte existe déjà avec cet email');
+    }
+
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
     const user = this.usersRepository.create({
       ...createUserDto,
       password: hashedPassword,
       betaAccessUntil: createUserDto.betaAccessUntil ? new Date(createUserDto.betaAccessUntil) : null,
     });
-    return this.usersRepository.save(user);
+    const savedUser = await this.usersRepository.save(user);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password, ...safeUser } = savedUser;
+    return safeUser;
   }
 
   // Méthode pour récupérer tous les utilisateurs

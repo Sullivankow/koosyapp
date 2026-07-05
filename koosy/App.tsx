@@ -20,7 +20,7 @@ import React, { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import OnBoarding from './components/OnBoarding';
 import { useTheme } from './contexts/ThemeContext';
-import { getSession, clearSession } from './utils/session';
+import { getSession, clearSession, saveSession } from './utils/session';
 import { View, Text, Button } from 'react-native';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { BienCountProvider } from './contexts/BienCountContext';
@@ -37,7 +37,7 @@ import { AppContext } from './contexts/AppContext';
 import ListeDevisScreen from './screens/Layout/ListeDevisScreen';
 import ListeFactureScreen from './screens/Layout/ListeFactureScreen';
 import { GlobalRefreshProvider } from './contexts/GlobalRefreshContext';
-import { logoutCurrentSession } from './utils/api';
+import { login, logoutCurrentSession } from './utils/api';
 import PlanningScreen from './screens/Layout/PlanningScreen';
 import ChargesScreen from './screens/Layout/ChargesScreen';
  
@@ -163,7 +163,22 @@ export default function App() {
                           <WelcomeScreen onFinish={() => { setShowWelcomeLogin(false); setIsLoggedIn(true); }} />
                         ) : showSignup ? (
                           <SignupScreen
-                            onSignupSuccess={async () => {
+                            onSignupSuccess={async (email?: string, password?: string) => {
+                              if (email && password) {
+                                try {
+                                  const res = await login({ email, password });
+                                  if (res.access_token) {
+                                    await saveSession(email, res.access_token, res.refresh_token);
+                                  }
+                                  setShowSignup(false);
+                                  setShowWelcome(true);
+                                  setShowWelcomeLogin(false);
+                                  return;
+                                } catch {
+                                  // Le compte est créé, mais on laisse l'utilisateur se connecter manuellement.
+                                }
+                              }
+
                               setShowSignup(false);
                               setShowWelcome(false);
                               setShowWelcomeLogin(false);
